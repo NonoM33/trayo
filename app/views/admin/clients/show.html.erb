@@ -67,6 +67,18 @@
     <div class="card">
       <h2>Client: <%= @client.email %></h2>
       
+      <% if @client.mt5_api_token.present? %>
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #2196F3;">
+          <div style="font-weight: 600; color: #1976D2; margin-bottom: 8px;">🔑 MT5 API Token</div>
+          <div style="font-family: monospace; font-size: 14px; color: #333; word-break: break-all; background: white; padding: 10px; border-radius: 4px;">
+            <%= @client.mt5_api_token %>
+          </div>
+          <div style="font-size: 12px; color: #666; margin-top: 8px;">
+            ℹ️ This token must be configured in the MT5 script (TrayoSync.mq5) for account synchronization
+          </div>
+        </div>
+      <% end %>
+      
       <div class="info-grid">
         <div class="info-item">
           <div class="info-label">Commission Rate</div>
