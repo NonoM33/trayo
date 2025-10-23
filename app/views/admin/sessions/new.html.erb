@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Trayo Login</title>
+  <title>Trayo Connexion</title>
   <%= stylesheet_link_tag "admin" %>
   <style>
     body {
@@ -164,8 +164,8 @@
   <div class="login-wrapper">
     <div class="login-header">
       <div class="login-logo">T</div>
-      <h1 class="login-title">Welcome to Trayo</h1>
-      <p class="login-subtitle">Sign in to your account</p>
+      <h1 class="login-title">Bienvenue sur Trayo</h1>
+      <p class="login-subtitle">Connectez-vous à votre compte</p>
     </div>
     
     <div class="login-card">
@@ -176,15 +176,15 @@
       <%= form_with url: admin_login_path, method: :post do |f| %>
         <div class="form-group">
           <%= label_tag :email, "Email" %>
-          <%= email_field_tag :email, nil, required: true, placeholder: "you@example.com" %>
+          <%= email_field_tag :email, nil, required: true, placeholder: "vous@exemple.com" %>
         </div>
 
         <div class="form-group">
-          <%= label_tag :password, "Password" %>
+          <%= label_tag :password, "Mot de passe" %>
           <%= password_field_tag :password, nil, required: true, placeholder: "••••••••" %>
         </div>
 
-        <%= submit_tag "Sign In", class: "login-btn" %>
+        <%= submit_tag "Se Connecter", class: "login-btn" %>
       <% end %>
     </div>
   </div>

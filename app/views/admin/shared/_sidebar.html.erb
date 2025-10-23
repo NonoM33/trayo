@@ -1,17 +1,17 @@
 <div class="sidebar" id="mainSidebar">
   <div class="sidebar-header">
     <div class="sidebar-logo">
-      <div class="sidebar-logo-icon" onclick="toggleSidebarCollapse()" style="cursor: pointer;" title="Toggle sidebar">T</div>
+      <div class="sidebar-logo-icon" onclick="toggleSidebarCollapse()" style="cursor: pointer;" title="Réduire/Agrandir la barre latérale">T</div>
       <span><%= current_user.is_admin? ? 'Trayo Admin' : 'Trayo' %></span>
     </div>
-    <button class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" id="sidebarToggleBtn" title="Collapse sidebar">
+    <button class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" id="sidebarToggleBtn" title="Réduire la barre latérale">
       ←
     </button>
   </div>
   
   <nav class="sidebar-nav">
     <div class="sidebar-section">
-      <div class="sidebar-section-title">Main</div>
+      <div class="sidebar-section-title">Principal</div>
       <ul class="sidebar-menu">
         <% if current_user.is_admin? %>
           <li class="sidebar-menu-item">

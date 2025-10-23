@@ -25,11 +25,11 @@
       <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
       <% if current_user.is_admin? %>
-        <%= link_to "← Back to Clients", admin_clients_path, class: "back-link", style: "margin: 0;" %>
+        <%= link_to "← Retour aux Clients", admin_clients_path, class: "back-link", style: "margin: 0;" %>
       <% else %>
-        <h1 style="margin: 0;">My Profile</h1>
+        <h1 style="margin: 0;">Mon Profil</h1>
       <% end %>
-      <%= link_to "✏️ Edit #{current_user.is_admin? ? 'User Profile' : 'My Profile'}", edit_admin_client_path(@client), class: "btn btn-primary" %>
+      <%= link_to "✏️ Modifier #{current_user.is_admin? ? 'le Profil Utilisateur' : 'Mon Profil'}", edit_admin_client_path(@client), class: "btn btn-primary" %>
     </div>
 
     <% if flash[:notice] %>
@@ -40,94 +40,94 @@
     <% end %>
 
     <div class="card">
-      <h2><%= current_user.is_admin? ? "Client: #{@client.email}" : "Personal Information" %></h2>
+      <h2><%= current_user.is_admin? ? "Client : #{@client.email}" : "Informations Personnelles" %></h2>
       
       <% if @client.mt5_api_token.present? %>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #2196F3;">
-          <div style="font-weight: 600; color: #1976D2; margin-bottom: 8px;">🔑 MT5 API Token</div>
+          <div style="font-weight: 600; color: #1976D2; margin-bottom: 8px;">🔑 Token API MT5</div>
           <div style="font-family: monospace; font-size: 14px; color: #333; word-break: break-all; background: white; padding: 10px; border-radius: 4px;">
             <%= @client.mt5_api_token %>
           </div>
           <div style="font-size: 12px; color: #666; margin-top: 8px;">
-            ℹ️ This token must be configured in the MT5 script (TrayoSync.mq5) for account synchronization
+            ℹ️ Ce token doit être configuré dans le script MT5 (TrayoSync.mq5) pour la synchronisation du compte
           </div>
         </div>
       <% end %>
       
       <div class="info-grid">
         <div class="info-item">
-          <div class="info-label">Commission Rate</div>
+          <div class="info-label">Taux de Commission</div>
           <div class="info-value"><%= number_to_percentage(@client.commission_rate, precision: 1) %></div>
         </div>
         <div class="info-item">
-          <div class="info-label">Total Gains</div>
-          <div class="info-value positive"><%= number_to_currency(@client.total_profits, unit: "$") %></div>
+          <div class="info-label">Gains Totaux</div>
+          <div class="info-value positive"><%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %></div>
         </div>
         <div class="info-item">
-          <div class="info-label">Commissionable Gains</div>
-          <div class="info-value positive"><%= number_to_currency(@client.total_commissionable_gains, unit: "$") %></div>
+          <div class="info-label">Gains Commissionnables</div>
+          <div class="info-value positive"><%= number_to_currency(@client.total_commissionable_gains, unit: "€", format: "%n %u") %></div>
         </div>
         <div class="info-item">
           <div class="info-label">Commission Due</div>
           <div class="info-value <%= @client.total_commission_due > 0 ? 'negative' : '' %>">
-            <%= number_to_currency(@client.total_commission_due, unit: "$") %>
+            <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %>
           </div>
         </div>
         <div class="info-item">
-          <div class="info-label">Credits Applied</div>
-          <div class="info-value positive"><%= number_to_currency(@client.total_credits, unit: "$") %></div>
+          <div class="info-label">Crédits Appliqués</div>
+          <div class="info-value positive"><%= number_to_currency(@client.total_credits, unit: "€", format: "%n %u") %></div>
         </div>
         <div class="info-item">
           <% if @client.balance_due > 0 %>
-            <div class="info-label">Balance to Pay</div>
+            <div class="info-label">Solde à Payer</div>
             <div class="info-value negative">
-              <%= number_to_currency(@client.balance_due, unit: "$") %>
+              <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
             </div>
           <% elsif @client.balance_due < 0 %>
-            <div class="info-label">Credit Balance</div>
+            <div class="info-label">Solde Créditeur</div>
             <div class="info-value positive">
-              <%= number_to_currency(@client.balance_due.abs, unit: "$") %>
+              <%= number_to_currency(@client.balance_due.abs, unit: "€", format: "%n %u") %>
             </div>
           <% else %>
-            <div class="info-label">Balance to Pay</div>
+            <div class="info-label">Solde à Payer</div>
             <div class="info-value" style="color: #4CAF50;">
-              $0.00 ✓
+              0 € ✓
             </div>
           <% end %>
         </div>
         <div class="info-item">
-          <div class="info-label">Payment History</div>
+          <div class="info-label">Historique Paiements</div>
           <div class="info-value" style="font-size: 16px; color: #666;">
-            <%= number_to_currency(@client.total_validated_payments, unit: "$") %> paid
+            <%= number_to_currency(@client.total_validated_payments, unit: "€", format: "%n %u") %> payés
           </div>
         </div>
       </div>
 
-      <h3>Update Commission Rate</h3>
+      <h3>Mettre à Jour le Taux de Commission</h3>
       <%= form_with model: @client, url: admin_client_path(@client), method: :patch do |f| %>
         <div class="form-group">
-          <%= f.label :commission_rate, "Commission Rate (%)" %>
+          <%= f.label :commission_rate, "Taux de Commission (%)" %>
           <%= f.number_field :commission_rate, step: 0.01, min: 0, max: 100 %>
         </div>
-        <%= f.submit "Update Rate", class: "btn" %>
+        <%= f.submit "Mettre à Jour", class: "btn" %>
       <% end %>
     </div>
 
     <div class="card">
-      <h2>MT5 Accounts</h2>
+      <h2>Comptes MT5</h2>
       <% if @mt5_accounts.any? %>
         <table>
           <thead>
             <tr>
-              <th>MT5 ID</th>
-              <th>Account Name</th>
-              <th>Initial Balance</th>
-              <th>Current Balance</th>
-              <th>Net Gains</th>
+              <th>ID MT5</th>
+              <th>Nom du Compte</th>
+              <th>Balance Initiale</th>
+              <th>Balance Actuelle</th>
+              <th>Gains Nets</th>
               <th>High Watermark</th>
-              <th>Withdrawals</th>
-              <th>Adjusted WM</th>
-              <th>Commissionable</th>
+              <th>Retraits</th>
+              <th>WM Ajusté</th>
+              <th>Commissionnable</th>
               <% if current_user.is_admin? %>
                 <th>Actions</th>
               <% end %>
@@ -138,19 +138,19 @@
               <tr>
                 <td><%= account.mt5_id %></td>
                 <td><%= account.account_name %></td>
-                <td><%= number_to_currency(account.initial_balance, unit: "$") %></td>
-                <td><%= number_to_currency(account.balance, unit: "$") %></td>
+                <td><%= number_to_currency(account.initial_balance, unit: "€", format: "%n %u") %></td>
+                <td><%= number_to_currency(account.balance, unit: "€", format: "%n %u") %></td>
                 <td class="<%= account.net_gains > 0 ? 'positive' : 'negative' %>">
-                  <%= number_to_currency(account.net_gains, unit: "$") %>
+                  <%= number_to_currency(account.net_gains, unit: "€", format: "%n %u") %>
                 </td>
-                <td><%= number_to_currency(account.high_watermark, unit: "$") %></td>
-                <td><%= number_to_currency(account.total_withdrawals, unit: "$") %></td>
-                <td><%= number_to_currency(account.adjusted_watermark, unit: "$") %></td>
-                <td class="positive"><%= number_to_currency(account.commissionable_gains, unit: "$") %></td>
+                <td><%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %></td>
+                <td><%= number_to_currency(account.total_withdrawals, unit: "€", format: "%n %u") %></td>
+                <td><%= number_to_currency(account.adjusted_watermark, unit: "€", format: "%n %u") %></td>
+                <td class="positive"><%= number_to_currency(account.commissionable_gains, unit: "€", format: "%n %u") %></td>
                 <% if current_user.is_admin? %>
                   <td>
                     <button onclick="document.getElementById('edit-account-<%= account.id %>').style.display='block'" class="btn-validate" style="font-size: 12px; padding: 6px 12px;">
-                      Edit
+                      Modifier
                     </button>
                   </td>
                 <% end %>
@@ -161,30 +161,30 @@
                   <%= form_with model: account, url: admin_mt5_account_path(account), method: :patch do |f| %>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                       <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">Initial Balance ($)</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">Balance Initiale (€)</label>
                         <%= f.number_field :initial_balance, step: 0.01, style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" %>
                         <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                          Starting capital for this account
+                          Capital de départ pour ce compte
                         </div>
                       </div>
                       <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">High Watermark ($)</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">High Watermark (€)</label>
                         <%= f.number_field :high_watermark, step: 0.01, style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" %>
                         <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                          Current: <%= number_to_currency(account.high_watermark, unit: "$") %>
+                          Actuel : <%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %>
                         </div>
                       </div>
                     </div>
                     <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 4px; font-size: 13px; color: #1976D2;">
-                      <strong>Current Calculation:</strong><br>
-                      Net Gains = Balance (<%= number_to_currency(account.balance, unit: "$") %>) - Initial (<%= number_to_currency(account.initial_balance, unit: "$") %>) = <%= number_to_currency(account.net_gains, unit: "$") %><br>
-                      Adjusted WM = High WM (<%= number_to_currency(account.high_watermark, unit: "$") %>) - Withdrawals (<%= number_to_currency(account.total_withdrawals, unit: "$") %>) = <%= number_to_currency(account.adjusted_watermark, unit: "$") %><br>
-                      Commissionable = Balance (<%= number_to_currency(account.balance, unit: "$") %>) - Adjusted WM (<%= number_to_currency(account.adjusted_watermark, unit: "$") %>) = <%= number_to_currency(account.commissionable_gains, unit: "$") %>
+                      <strong>Calcul Actuel :</strong><br>
+                      Gains Nets = Balance (<%= number_to_currency(account.balance, unit: "€", format: "%n %u") %>) - Initial (<%= number_to_currency(account.initial_balance, unit: "€", format: "%n %u") %>) = <%= number_to_currency(account.net_gains, unit: "€", format: "%n %u") %><br>
+                      WM Ajusté = High WM (<%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %>) - Retraits (<%= number_to_currency(account.total_withdrawals, unit: "€", format: "%n %u") %>) = <%= number_to_currency(account.adjusted_watermark, unit: "€", format: "%n %u") %><br>
+                      Commissionnable = Balance (<%= number_to_currency(account.balance, unit: "€", format: "%n %u") %>) - WM Ajusté (<%= number_to_currency(account.adjusted_watermark, unit: "€", format: "%n %u") %>) = <%= number_to_currency(account.commissionable_gains, unit: "€", format: "%n %u") %>
                     </div>
                     <div style="margin-top: 15px;">
-                      <%= f.submit "Update", class: "btn", style: "padding: 10px 20px;" %>
+                      <%= f.submit "Mettre à Jour", class: "btn", style: "padding: 10px 20px;" %>
                       <button type="button" onclick="document.getElementById('edit-account-<%= account.id %>').style.display='none'" class="btn" style="background: #999; padding: 10px 20px;">
-                        Cancel
+                        Annuler
                       </button>
                     </div>
                   <% end %>
@@ -195,51 +195,51 @@
           </tbody>
         </table>
       <% else %>
-        <p style="color: #999;">No MT5 accounts yet</p>
+        <p style="color: #999;">Aucun compte MT5 pour le moment</p>
       <% end %>
     </div>
 
     <% if current_user.is_admin? %>
     <div class="two-col">
       <div class="card">
-        <h2>Add Payment</h2>
+        <h2>Ajouter un Paiement</h2>
         
         <% if @client.balance_due > 0 %>
           <div style="background: #fff3cd; padding: 12px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
-            <div style="font-weight: 600; color: #856404; margin-bottom: 5px;">💰 Balance to Pay</div>
+            <div style="font-weight: 600; color: #856404; margin-bottom: 5px;">💰 Solde à Payer</div>
             <div style="font-size: 24px; font-weight: 700; color: #856404;">
-              <%= number_to_currency(@client.balance_due, unit: "$") %>
+              <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
             </div>
             <div style="font-size: 12px; color: #856404; margin-top: 5px;">
-              Commission: <%= number_to_currency(@client.total_commission_due, unit: "$") %> | 
-              Credits: -<%= number_to_currency(@client.total_credits, unit: "$") %>
+              Commission : <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %> | 
+              Crédits : -<%= number_to_currency(@client.total_credits, unit: "€", format: "%n %u") %>
             </div>
           </div>
         <% elsif @client.balance_due < 0 %>
           <div style="background: #d4edda; padding: 12px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #28a745;">
-            <div style="font-weight: 600; color: #155724; margin-bottom: 5px;">💚 Credit Balance</div>
+            <div style="font-weight: 600; color: #155724; margin-bottom: 5px;">💚 Solde Créditeur</div>
             <div style="font-size: 24px; font-weight: 700; color: #155724;">
-              <%= number_to_currency(@client.balance_due.abs, unit: "$") %>
+              <%= number_to_currency(@client.balance_due.abs, unit: "€", format: "%n %u") %>
             </div>
             <div style="font-size: 12px; color: #155724; margin-top: 5px;">
-              Client has a credit that will be applied to future commissions
+              Le client a un crédit qui sera appliqué aux futures commissions
             </div>
           </div>
         <% else %>
           <div style="background: #d4edda; padding: 12px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #28a745;">
-            <div style="font-weight: 600; color: #155724; margin-bottom: 5px;">✓ Fully Paid</div>
+            <div style="font-weight: 600; color: #155724; margin-bottom: 5px;">✓ Entièrement Payé</div>
             <div style="font-size: 18px; color: #155724;">
-              No outstanding balance
+              Aucun solde restant
             </div>
           </div>
         <% end %>
 
         <% if @mt5_accounts.any? %>
           <div style="background: #e3f2fd; padding: 12px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #2196F3;">
-            <div style="font-weight: 600; color: #1976D2; margin-bottom: 5px;">📊 Watermarks by Account</div>
+            <div style="font-weight: 600; color: #1976D2; margin-bottom: 5px;">📊 Watermarks par Compte</div>
             <% @mt5_accounts.each do |account| %>
               <div style="font-size: 13px; color: #1976D2; margin-top: 3px;">
-                • <%= account.account_name %> (<%= account.mt5_id %>): WM = <%= number_to_currency(account.high_watermark, unit: "$") %>
+                • <%= account.account_name %> (<%= account.mt5_id %>) : WM = <%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %>
               </div>
             <% end %>
           </div>
@@ -249,62 +249,62 @@
           <%= f.hidden_field :user_id, value: @client.id %>
           
           <div class="form-group">
-            <%= f.label :amount, "Amount ($)" %>
-            <%= f.number_field :amount, step: 0.01, min: 0, required: true, value: @client.balance_due > 0 ? @client.balance_due : nil, placeholder: "Enter amount" %>
-            <div class="help-text">Pre-filled with current balance due</div>
+            <%= f.label :amount, "Montant (€)" %>
+            <%= f.number_field :amount, step: 0.01, min: 0, required: true, value: @client.balance_due > 0 ? @client.balance_due : nil, placeholder: "Entrer le montant" %>
+            <div class="help-text">Pré-rempli avec le solde actuel dû</div>
           </div>
 
           <div class="form-group">
-            <%= f.label :payment_method, "Payment Method" %>
+            <%= f.label :payment_method, "Méthode de Paiement" %>
             <%= f.select :payment_method, 
                 options_for_select([
-                  ['Bank Transfer', 'bank_transfer'],
-                  ['Cash', 'cash'],
+                  ['Virement Bancaire', 'bank_transfer'],
+                  ['Espèces', 'cash'],
                   ['PayPal', 'paypal'],
-                  ['Credit Card', 'credit_card'],
-                  ['Check', 'check'],
-                  ['Other', 'other']
+                  ['Carte de Crédit', 'credit_card'],
+                  ['Chèque', 'check'],
+                  ['Autre', 'other']
                 ]), 
-                { prompt: 'Select payment method' },
+                { prompt: 'Sélectionner la méthode' },
                 { style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" } 
             %>
           </div>
 
           <div class="form-group">
-            <%= f.label :payment_date, "Payment Date" %>
+            <%= f.label :payment_date, "Date de Paiement" %>
             <%= f.date_field :payment_date, value: Date.today, required: true %>
           </div>
 
           <div class="form-group">
-            <%= f.label :reference, "Reference / Transaction ID" %>
-            <%= f.text_field :reference, placeholder: "e.g., WIRE123456" %>
+            <%= f.label :reference, "Référence / ID Transaction" %>
+            <%= f.text_field :reference, placeholder: "ex. VIREMENT123456" %>
           </div>
 
           <div class="form-group">
             <%= f.label :notes, "Notes" %>
-            <%= f.text_area :notes, placeholder: "Additional information..." %>
+            <%= f.text_area :notes, placeholder: "Informations supplémentaires..." %>
           </div>
 
-          <%= f.submit "Create Payment", class: "btn" %>
+          <%= f.submit "Créer le Paiement", class: "btn" %>
         <% end %>
       </div>
 
       <div class="card">
-        <h2>Add Credit</h2>
+        <h2>Ajouter un Crédit</h2>
         <%= form_with model: [:admin, Credit.new], method: :post do |f| %>
           <%= f.hidden_field :user_id, value: @client.id %>
           
           <div class="form-group">
-            <%= f.label :amount, "Amount ($)" %>
+            <%= f.label :amount, "Montant (€)" %>
             <%= f.number_field :amount, step: 0.01, min: 0, required: true %>
           </div>
 
           <div class="form-group">
-            <%= f.label :reason, "Reason" %>
+            <%= f.label :reason, "Raison" %>
             <%= f.text_area :reason %>
           </div>
 
-          <%= f.submit "Create Credit", class: "btn" %>
+          <%= f.submit "Créer le Crédit", class: "btn" %>
         <% end %>
       </div>
     </div>
@@ -312,27 +312,27 @@
 
     <div class="card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0;">Payments History</h2>
+        <h2 style="margin: 0;">Historique des Paiements</h2>
         <% if current_user.is_admin? %>
           <button onclick="toggleDeleteMode()" id="lockButton" class="btn" style="background: #666; padding: 8px 16px; font-size: 14px;">
-            🔒 Unlock Delete Mode
+            🔒 Déverrouiller Mode Suppression
           </button>
         <% end %>
       </div>
       <div id="deleteModeWarning" style="display: none; background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 15px; border-radius: 4px;">
-        <strong style="color: #856404;">⚠️ Delete Mode Active</strong>
-        <p style="color: #856404; margin: 5px 0 0 0; font-size: 13px;">You can now delete payments. Click the lock again to disable this mode.</p>
+        <strong style="color: #856404;">⚠️ Mode Suppression Actif</strong>
+        <p style="color: #856404; margin: 5px 0 0 0; font-size: 13px;">Vous pouvez maintenant supprimer des paiements. Cliquez à nouveau sur le verrou pour désactiver ce mode.</p>
       </div>
       <% if @payments.any? %>
         <table>
           <thead>
             <tr>
               <th>Date</th>
-              <th>Amount</th>
-              <th>Method</th>
-              <th>Reference</th>
-              <th>Watermarks at Validation</th>
-              <th>Status</th>
+              <th>Montant</th>
+              <th>Méthode</th>
+              <th>Référence</th>
+              <th>Watermarks à Validation</th>
+              <th>Statut</th>
               <th>Notes</th>
               <% if current_user.is_admin? %>
                 <th>Actions</th>
@@ -343,7 +343,7 @@
             <% @payments.each do |payment| %>
               <tr>
                 <td><%= payment.payment_date.strftime("%Y-%m-%d") %></td>
-                <td><%= number_to_currency(payment.amount, unit: "$") %></td>
+                <td><%= number_to_currency(payment.amount, unit: "€", format: "%n %u") %></td>
                 <td><%= payment.payment_method_label %></td>
                 <td><%= payment.reference %></td>
                 <td>
@@ -351,12 +351,12 @@
                     <% payment.watermark_data.each do |mt5_id, data| %>
                       <div style="font-size: 12px; margin-bottom: 3px;">
                         <strong><%= data["account_name"] %></strong> (<%= mt5_id %>)<br>
-                        WM: <%= number_to_currency(data["watermark"], unit: "$") %> → <%= number_to_currency(data["balance"], unit: "$") %><br>
-                        <span style="color: #4CAF50;">Commissionable: <%= number_to_currency(data["commissionable"], unit: "$") %></span>
+                        WM : <%= number_to_currency(data["watermark"], unit: "€", format: "%n %u") %> → <%= number_to_currency(data["balance"], unit: "€", format: "%n %u") %><br>
+                        <span style="color: #4CAF50;">Commissionnable : <%= number_to_currency(data["commissionable"], unit: "€", format: "%n %u") %></span>
                       </div>
                     <% end %>
                   <% elsif payment.status == "validated" %>
-                    <span style="color: #999; font-size: 12px;">No data</span>
+                    <span style="color: #999; font-size: 12px;">Pas de données</span>
                   <% else %>
                     <span style="color: #999; font-size: 12px;">-</span>
                   <% end %>
@@ -366,10 +366,10 @@
                 <% if current_user.is_admin? %>
                   <td>
                     <% if payment.status == "pending" %>
-                      <%= button_to "Validate", admin_payment_path(payment, action_type: "validate"), method: :patch, class: "btn btn-validate" %>
-                      <%= button_to "Reject", admin_payment_path(payment, action_type: "reject"), method: :patch, class: "btn btn-reject" %>
+                      <%= button_to "Valider", admin_payment_path(payment, action_type: "validate"), method: :patch, class: "btn btn-validate" %>
+                      <%= button_to "Rejeter", admin_payment_path(payment, action_type: "reject"), method: :patch, class: "btn btn-reject" %>
                     <% end %>
-                    <%= button_to "Delete", admin_payment_path(payment), method: :delete, data: { turbo_confirm: "Are you sure you want to delete this payment? This action cannot be undone." }, class: "btn btn-danger delete-btn", style: "display: none; padding: 6px 12px; font-size: 12px;" %>
+                    <%= button_to "Supprimer", admin_payment_path(payment), method: :delete, data: { turbo_confirm: "Êtes-vous sûr de vouloir supprimer ce paiement ? Cette action ne peut pas être annulée." }, class: "btn btn-danger delete-btn", style: "display: none; padding: 6px 12px; font-size: 12px;" %>
                   </td>
                 <% end %>
               </tr>
@@ -387,12 +387,12 @@
             const deleteButtons = document.querySelectorAll('.delete-btn');
             
             if (deleteModeActive) {
-              lockButton.innerHTML = '🔓 Lock Delete Mode';
+              lockButton.innerHTML = '🔓 Verrouiller Mode Suppression';
               lockButton.style.background = '#f44336';
               warning.style.display = 'block';
               deleteButtons.forEach(btn => btn.style.display = 'inline-block');
             } else {
-              lockButton.innerHTML = '🔒 Unlock Delete Mode';
+              lockButton.innerHTML = '🔒 Déverrouiller Mode Suppression';
               lockButton.style.background = '#666';
               warning.style.display = 'none';
               deleteButtons.forEach(btn => btn.style.display = 'none');
@@ -400,19 +400,19 @@
           }
         </script>
       <% else %>
-        <p style="color: #999;">No payments yet</p>
+        <p style="color: #999;">Aucun paiement pour le moment</p>
       <% end %>
     </div>
 
     <div class="card">
-      <h2>Credits History</h2>
+      <h2>Historique des Crédits</h2>
       <% if @credits.any? %>
         <table>
           <thead>
             <tr>
               <th>Date</th>
-              <th>Amount</th>
-              <th>Reason</th>
+              <th>Montant</th>
+              <th>Raison</th>
               <% if current_user.is_admin? %>
                 <th>Actions</th>
               <% end %>
@@ -421,12 +421,12 @@
           <tbody>
             <% @credits.each do |credit| %>
               <tr>
-                <td><%= credit.created_at.strftime("%Y-%m-%d") %></td>
-                <td><%= number_to_currency(credit.amount, unit: "$") %></td>
+                <td><%= credit.created_at.strftime("%d/%m/%Y") %></td>
+                <td><%= number_to_currency(credit.amount, unit: "€", format: "%n %u") %></td>
                 <td><%= credit.reason %></td>
                 <% if current_user.is_admin? %>
                   <td>
-                    <%= button_to "Delete", admin_credit_path(credit), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "btn btn-danger" %>
+                    <%= button_to "Supprimer", admin_credit_path(credit), method: :delete, data: { turbo_confirm: "Êtes-vous sûr ?" }, class: "btn btn-danger" %>
                   </td>
                 <% end %>
               </tr>
@@ -434,7 +434,7 @@
           </tbody>
         </table>
       <% else %>
-        <p style="color: #999;">No credits yet</p>
+        <p style="color: #999;">Aucun crédit pour le moment</p>
       <% end %>
       </div>
     </div>
