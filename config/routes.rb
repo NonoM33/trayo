@@ -10,7 +10,7 @@ Rails.application.routes.draw do
 
     resources :clients, only: [:index, :new, :create, :show, :update, :destroy]
     resources :payments, only: [:index, :create, :update, :destroy]
-    resources :credits, only: [:create, :destroy]
+    resources :credits, only: [:index, :create, :destroy]
     resources :mt5_accounts, only: [:update]
   end
 

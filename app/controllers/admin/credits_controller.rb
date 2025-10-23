@@ -1,5 +1,9 @@
 module Admin
   class CreditsController < BaseController
+    def index
+      @credits = Credit.includes(:user).order(created_at: :desc)
+    end
+
     def create
       @credit = Credit.new(credit_params)
       if @credit.save
