@@ -23,81 +23,63 @@
           <li class="sidebar-menu-item">
             <%= link_to admin_payments_path, class: "sidebar-menu-link #{request.path == admin_payments_path ? 'active' : ''}" do %>
               <span class="sidebar-menu-icon">💰</span>
-              <span>Payments</span>
+              <span>Paiements</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_credits_path, class: "sidebar-menu-link #{request.path == admin_credits_path ? 'active' : ''}" do %>
               <span class="sidebar-menu-icon">🎫</span>
-              <span>Credits</span>
+              <span>Crédits</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_bonus_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus') ? 'active' : ''}" do %>
               <span class="sidebar-menu-icon">🎁</span>
-              <span>Bonus Deposits</span>
+              <span>Dépôts Bonus</span>
             <% end %>
           </li>
         <% else %>
           <li class="sidebar-menu-item">
             <%= link_to admin_dashboard_path, class: "sidebar-menu-link #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
               <span class="sidebar-menu-icon">📊</span>
-              <span>Dashboard</span>
+              <span>Tableau de Bord</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_client_path(current_user), class: "sidebar-menu-link #{request.path == admin_client_path(current_user) ? 'active' : ''}" do %>
               <span class="sidebar-menu-icon">👤</span>
-              <span>My Profile</span>
+              <span>Mon Profil</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_shop_index_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/shop') ? 'active' : ''}" do %>
               <span class="sidebar-menu-icon">🛒</span>
-              <span>Shop</span>
+              <span>Boutique</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_bonus_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus') ? 'active' : ''}" do %>
               <span class="sidebar-menu-icon">🎁</span>
-              <span>Bonus Program</span>
+              <span>Programme Bonus</span>
             <% end %>
           </li>
         <% end %>
       </ul>
     </div>
-    
-    <div class="sidebar-section">
-      <div class="sidebar-section-title">Settings</div>
-      <ul class="sidebar-menu">
-        <li class="sidebar-menu-item">
-          <a href="#" class="sidebar-menu-link">
-            <span class="sidebar-menu-icon">⚙️</span>
-            <span>Configuration</span>
-          </a>
-        </li>
-        <li class="sidebar-menu-item">
-          <button class="sidebar-menu-link" onclick="toggleTheme()" style="width: 100%; background: none; border: none; cursor: pointer;">
-            <span class="sidebar-menu-icon theme-icon" id="sidebarThemeIcon">🌙</span>
-            <span>Theme</span>
-          </button>
-        </li>
-      </ul>
-    </div>
   </nav>
   
-  <div class="sidebar-footer">
-    <div class="sidebar-user">
-      <div class="sidebar-user-avatar">
-        <%= current_user.email[0].upcase %>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="toggleTheme()" title="Changer le thème">
+        <div class="sidebar-user-avatar">
+          <%= current_user.email[0].upcase %>
+        </div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name"><%= current_user.first_name || current_user.email.split('@').first %></div>
+          <div class="sidebar-user-role"><%= current_user.is_admin? ? 'Administrateur' : 'Client' %></div>
+        </div>
       </div>
-      <div class="sidebar-user-info">
-        <div class="sidebar-user-name"><%= current_user.first_name || current_user.email.split('@').first %></div>
-        <div class="sidebar-user-role"><%= current_user.is_admin? ? 'Administrator' : 'Client' %></div>
-      </div>
+      <%= link_to "Déconnexion", admin_logout_path, data: { turbo_method: :delete }, style: "display: block; text-align: center; margin-top: 8px; color: var(--text-muted); font-size: 12px; text-decoration: none; transition: color 0.2s;" %>
     </div>
-    <%= link_to "Logout", admin_logout_path, data: { turbo_method: :delete }, style: "display: block; text-align: center; margin-top: 8px; color: var(--text-muted); font-size: 12px; text-decoration: none;" %>
-  </div>
 </div>
 
 <script>
@@ -107,44 +89,12 @@
         const isCollapsed = sidebar.classList.toggle('collapsed');
         
         toggleBtn.textContent = isCollapsed ? '→' : '←';
-        toggleBtn.title = isCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
+        toggleBtn.title = isCollapsed ? 'Agrandir la barre latérale' : 'Réduire la barre latérale';
         
         localStorage.setItem('sidebarCollapsed', isCollapsed ? 'true' : 'false');
         document.documentElement.classList.toggle('sidebar-collapsed-init', isCollapsed);
       }
   
-  // Update sidebar theme icon
-  function updateSidebarThemeIcon() {
-    const sidebarIcon = document.getElementById('sidebarThemeIcon');
-    if (sidebarIcon) {
-      if (document.body.classList.contains('dark-mode')) {
-        sidebarIcon.textContent = '☀️';
-      } else {
-        sidebarIcon.textContent = '🌙';
-      }
-    }
-  }
-  
-  // Override toggleTheme to update both icons
-  const originalToggleTheme = window.toggleTheme;
-  window.toggleTheme = function() {
-    const body = document.body;
-    const navIcon = document.getElementById('themeIcon');
-    
-    if (body.classList.contains('dark-mode')) {
-      body.classList.remove('dark-mode');
-      if (navIcon) navIcon.textContent = '🌙';
-      localStorage.setItem('theme', 'light');
-    } else {
-      body.classList.add('dark-mode');
-      if (navIcon) navIcon.textContent = '☀️';
-      localStorage.setItem('theme', 'dark');
-    }
-    
-    updateSidebarThemeIcon();
-  };
-  
-      // Initialize immediately
       (function() {
         const sidebar = document.getElementById('mainSidebar');
         const toggleBtn = document.getElementById('sidebarToggleBtn');
@@ -153,10 +103,8 @@
         if (isCollapsed && sidebar && toggleBtn) {
           sidebar.classList.add('collapsed');
           toggleBtn.textContent = '→';
-          toggleBtn.title = 'Expand sidebar';
+          toggleBtn.title = 'Agrandir la barre latérale';
         }
-        
-        updateSidebarThemeIcon();
       })();
 </script>
 

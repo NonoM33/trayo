@@ -1,56 +1,56 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Dashboard - Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-</head>
-<body>
-  <% @page_title = "Dashboard" %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
+<%= render 'admin/shared/sidebar' %>
+
+<div class="main-content">
+  <%= render 'admin/shared/navbar' %>
       
       <div class="container">
         <div class="card">
-          <h2>📊 Portfolio Overview</h2>
+          <h2>📊 Vue d'Ensemble du Portefeuille</h2>
           
           <div class="info-grid">
             <div class="info-item">
-              <div class="info-label">Total Balance</div>
+              <div class="info-label">Balance Totale</div>
               <div class="info-value positive">
-                <%= number_to_currency(@client.mt5_accounts.sum(:balance), unit: "$") %>
+                <%= number_to_currency(@client.mt5_accounts.sum(:balance), unit: "€", format: "%n %u") %>
               </div>
             </div>
             
             <div class="info-item">
-              <div class="info-label">Total Gains</div>
+              <div class="info-label">Gains Totaux</div>
               <div class="info-value <%= @client.total_profits > 0 ? 'positive' : 'negative' %>">
-                <%= number_to_currency(@client.total_profits, unit: "$") %>
+                <%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %>
               </div>
             </div>
             
             <div class="info-item">
               <div class="info-label">Commission Due</div>
               <div class="info-value">
-                <%= number_to_currency(@client.total_commission_due, unit: "$") %>
+                <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %>
               </div>
             </div>
             
             <div class="info-item">
-              <div class="info-label">Balance Due</div>
+              <div class="info-label">Solde à Payer</div>
               <div class="info-value <%= @client.balance_due > 0 ? 'negative' : 'positive' %>">
-                <%= number_to_currency(@client.balance_due, unit: "$") %>
+                <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
               </div>
             </div>
           </div>
         </div>
         
         <div class="card">
-          <h2>📈 Performance & Projection</h2>
+          <h2>📈 Profits Mensuels & Projection</h2>
+          
+          <div class="two-col" style="margin-bottom: 24px;">
+            <div class="info-box info-box-info">
+              <div class="info-box-title">📊 Performance Historique</div>
+              <p style="margin: 0;">Vos profits réels des 12 derniers mois</p>
+            </div>
+            <div class="info-box info-box-success">
+              <div class="info-box-title">🎯 Projection (6 mois)</div>
+              <p style="margin: 0;">Basée sur votre moyenne mensuelle: <strong><%= number_to_currency((@projection_data.last[:balance] - current_user.mt5_accounts.sum(:balance)) / 6, unit: "€", format: "%n %u") %>/mois</strong></p>
+            </div>
+          </div>
           
           <div style="position: relative; height: 400px;">
             <canvas id="portfolioChart"></canvas>
@@ -59,13 +59,13 @@
         
         <div class="two-col">
           <div class="card">
-            <h2>💼 MT5 Accounts</h2>
+            <h2>💼 Comptes MT5</h2>
             
             <% if @mt5_accounts.any? %>
               <table>
                 <thead>
                   <tr>
-                    <th>Account</th>
+                    <th>Compte</th>
                     <th>Balance</th>
                     <th>Gains</th>
                   </tr>
@@ -74,21 +74,21 @@
                   <% @mt5_accounts.each do |account| %>
                     <tr>
                       <td><%= account.account_name %></td>
-                      <td class="positive"><%= number_to_currency(account.balance, unit: "$") %></td>
+                      <td class="positive"><%= number_to_currency(account.balance, unit: "€", format: "%n %u") %></td>
                       <td class="<%= account.net_gains > 0 ? 'positive' : 'negative' %>">
-                        <%= number_to_currency(account.net_gains, unit: "$") %>
+                        <%= number_to_currency(account.net_gains, unit: "€", format: "%n %u") %>
                       </td>
                     </tr>
                   <% end %>
                 </tbody>
               </table>
             <% else %>
-              <p style="text-align: center; color: var(--text-muted); padding: 40px;">No MT5 accounts yet</p>
+              <p style="text-align: center; color: var(--text-muted); padding: 40px;">Aucun compte MT5</p>
             <% end %>
           </div>
           
           <div class="card">
-            <h2>📊 Recent Activity</h2>
+            <h2>📊 Activité Récente</h2>
             
             <% recent_trades = @client.trades.order(close_time: :desc).limit(5) %>
             <% if recent_trades.any? %>
@@ -96,98 +96,217 @@
                 <thead>
                   <tr>
                     <th>Date</th>
-                    <th>Symbol</th>
+                    <th>Symbole</th>
                     <th>Profit</th>
                   </tr>
                 </thead>
                 <tbody>
                   <% recent_trades.each do |trade| %>
                     <tr>
-                      <td><%= trade.close_time&.strftime("%Y-%m-%d") || "Open" %></td>
+                      <td><%= trade.close_time&.strftime("%d/%m/%Y") || "Ouvert" %></td>
                       <td><%= trade.symbol %></td>
                       <td class="<%= trade.profit > 0 ? 'positive' : 'negative' %>">
-                        <%= number_to_currency(trade.profit, unit: "$") %>
+                        <%= number_to_currency(trade.profit, unit: "€", format: "%n %u") %>
                       </td>
                     </tr>
                   <% end %>
                 </tbody>
               </table>
             <% else %>
-              <p style="text-align: center; color: var(--text-muted); padding: 40px;">No recent trades</p>
+              <p style="text-align: center; color: var(--text-muted); padding: 40px;">Aucune transaction récente</p>
             <% end %>
           </div>
         </div>
-      </div>
-    </div>
   </div>
-  
-  <script>
-    const ctx = document.getElementById('portfolioChart');
-    
-    const monthlyData = <%= raw @monthly_profits.map { |m| { x: m[:month], y: m[:profit] } }.to_json %>;
-    const projectionData = <%= raw @projection_data.map { |p| { x: p[:month], y: p[:balance] } }.to_json %>;
-    
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        datasets: [
-          {
-            label: 'Historical Performance',
-            data: monthlyData,
-            borderColor: '#22c55e',
-            backgroundColor: 'rgba(34, 197, 94, 0.1)',
-            fill: true,
-            tension: 0.4
-          },
-          {
-            label: 'Projected Balance',
-            data: projectionData,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            borderDash: [5, 5],
-            fill: false,
-            tension: 0.4
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-          intersect: false,
-          mode: 'index'
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" data-turbo-track="reload"></script>
+  <script data-turbo-track="reload">
+    function initializeChart() {
+      const ctx = document.getElementById('portfolioChart');
+      if (!ctx) return;
+      
+      if (window.portfolioChartInstance) {
+        window.portfolioChartInstance.destroy();
+      }
+      
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      const textColor = isDarkMode ? '#e2e8f0' : '#1e293b';
+      const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+      
+      const historicalData = <%= raw @monthly_profits.to_json %>;
+      const projectionData = <%= raw @projection_data.to_json %>;
+      const currentBalance = <%= current_user.mt5_accounts.sum(:balance) %>;
+      
+      const historicalLabels = historicalData.map(d => d.month);
+      const projectionLabels = projectionData.map(d => d.month);
+      const allLabels = [...historicalLabels, ...projectionLabels];
+      
+      const historicalProfits = historicalData.map(d => d.profit);
+      
+      const projectionProfits = new Array(historicalData.length).fill(null);
+      projectionData.forEach((d, i) => {
+        projectionProfits.push(d.balance);
+      });
+      
+      projectionProfits[historicalData.length] = currentBalance;
+      
+      window.portfolioChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: allLabels,
+          datasets: [
+            {
+              type: 'bar',
+              label: 'Profits Mensuels',
+              data: [...historicalProfits, ...new Array(projectionData.length).fill(null)],
+              backgroundColor: historicalProfits.map(p => p >= 0 ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'),
+              borderColor: historicalProfits.map(p => p >= 0 ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)'),
+              borderWidth: 1,
+              borderRadius: 8,
+              yAxisID: 'y',
+              order: 2
+            },
+            {
+              type: 'line',
+              label: 'Balance Projetée',
+              data: projectionProfits,
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              borderWidth: 4,
+              borderDash: [10, 5],
+              fill: false,
+              tension: 0.4,
+              pointRadius: 6,
+              pointHoverRadius: 8,
+              pointBackgroundColor: '#3b82f6',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 3,
+              yAxisID: 'y1',
+              order: 1
+            }
+          ]
         },
-        plugins: {
-          legend: {
-            display: true,
-            position: 'top'
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            intersect: false,
+            mode: 'index'
           },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                let label = context.dataset.label || '';
-                if (label) {
-                  label += ': ';
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                color: textColor,
+                font: {
+                  size: 14,
+                  weight: '600'
+                },
+                padding: 15,
+                usePointStyle: true
+              }
+            },
+            tooltip: {
+              backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+              titleColor: textColor,
+              bodyColor: textColor,
+              borderColor: isDarkMode ? '#475569' : '#cbd5e1',
+              borderWidth: 1,
+              padding: 12,
+              displayColors: true,
+              callbacks: {
+                label: function(context) {
+                  if (context.parsed.y === null) return '';
+                  let label = context.dataset.label || '';
+                  if (label) {
+                    label += ': ';
+                  }
+                  const value = context.parsed.y;
+                  const formattedValue = Math.abs(value).toLocaleString('fr-FR', { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                  }) + ' €';
+                  label += value >= 0 ? formattedValue : '-' + formattedValue;
+                  return label;
                 }
-                label += '$' + context.parsed.y.toFixed(2);
-                return label;
               }
             }
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: false,
-            ticks: {
-              callback: function(value) {
-                return '$' + value.toFixed(0);
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: textColor,
+                font: {
+                  size: 11
+                },
+                maxRotation: 45,
+                minRotation: 45
+              }
+            },
+            y: {
+              type: 'linear',
+              position: 'left',
+              beginAtZero: true,
+              grid: {
+                color: gridColor,
+                drawBorder: false
+              },
+              ticks: {
+                color: textColor,
+                font: {
+                  size: 12
+                },
+                callback: function(value) {
+                  return value.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €';
+                }
+              },
+              title: {
+                display: true,
+                text: 'Profits Mensuels',
+                color: textColor,
+                font: {
+                  size: 12,
+                  weight: '600'
+                }
+              }
+            },
+            y1: {
+              type: 'linear',
+              position: 'right',
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: textColor,
+                font: {
+                  size: 12
+                },
+                callback: function(value) {
+                  return value.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €';
+                }
+              },
+              title: {
+                display: true,
+                text: 'Balance Projetée',
+                color: textColor,
+                font: {
+                  size: 12,
+                  weight: '600'
+                }
               }
             }
           }
         }
-      }
-    });
+      });
+    }
+    
+    document.addEventListener('DOMContentLoaded', initializeChart);
+    document.addEventListener('turbo:load', initializeChart);
+    document.addEventListener('turbo:render', initializeChart);
   </script>
-</body>
-</html>
 

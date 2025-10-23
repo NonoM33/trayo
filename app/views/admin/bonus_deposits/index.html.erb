@@ -42,7 +42,7 @@
               
               <div style="text-align: center; padding: 20px; background: var(--bg-hover); border-radius: 8px;">
                 <div style="font-size: 36px; font-weight: 700; color: var(--color-accent);">
-                  <%= number_to_currency(current_user.total_credits, unit: "$") %>
+                  <%= number_to_currency(current_user.total_credits, unit: "€", format: "%n %u") %>
                 </div>
                 <div style="font-size: 14px; color: var(--text-muted); margin-top: 8px;">Your Total Credits</div>
               </div>
@@ -115,9 +115,9 @@
                       <td><%= link_to deposit.user.email, admin_client_path(deposit.user), style: "color: var(--color-accent); text-decoration: none;" %></td>
                     <% end %>
                     <td><%= deposit.created_at.strftime("%Y-%m-%d %H:%M") %></td>
-                    <td class="positive"><%= number_to_currency(deposit.amount, unit: "$") %></td>
+                    <td class="positive"><%= number_to_currency(deposit.amount, unit: "€", format: "%n %u") %></td>
                     <td class="positive"><%= number_to_percentage(deposit.bonus_percentage, precision: 0) %></td>
-                    <td class="positive"><strong><%= number_to_currency(deposit.total_credit, unit: "$") %></strong></td>
+                    <td class="positive"><strong><%= number_to_currency(deposit.total_credit, unit: "€", format: "%n %u") %></strong></td>
                     <td>
                       <span class="status-<%= deposit.status %>">
                         <%= deposit.status.upcase %>

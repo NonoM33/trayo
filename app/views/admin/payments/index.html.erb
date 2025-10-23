@@ -45,7 +45,7 @@
                     <td>
                       <%= link_to payment.user.email, admin_client_path(payment.user), style: "color: var(--color-accent); text-decoration: none;" %>
                     </td>
-                    <td class="positive"><%= number_to_currency(payment.amount, unit: "$") %></td>
+                    <td class="positive"><%= number_to_currency(payment.amount, unit: "€", format: "%n %u") %></td>
                     <td><%= payment.payment_method_label %></td>
                     <td><%= payment.reference || "—" %></td>
                     <td>
@@ -89,7 +89,7 @@
             <div class="info-item">
               <div class="info-label">Total Amount</div>
               <div class="info-value positive">
-                <%= @payments ? number_to_currency(@payments.sum(&:amount), unit: "$") : "$0.00" %>
+                <%= @payments ? number_to_currency(@payments.sum(&:amount), unit: "€", format: "%n %u") : "$0.00" %>
               </div>
             </div>
           </div>

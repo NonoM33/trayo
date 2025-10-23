@@ -16,34 +16,42 @@ module Admin
     private
 
     def calculate_monthly_profits
-      trades = current_user.trades.where('close_time >= ?', 12.months.ago)
-                          .group_by { |t| t.close_time.beginning_of_month }
+      trades_by_month = current_user.trades
+                                    .where('close_time >= ?', 12.months.ago)
+                                    .group_by { |t| t.close_time.beginning_of_month }
       
       (0..11).map do |i|
         month = i.months.ago.beginning_of_month
+        month_profit = trades_by_month[month]&.sum(&:profit) || 0
         {
           month: month.strftime('%b %Y'),
-          profit: trades[month]&.sum(&:profit) || 0
+          profit: month_profit.round(2)
         }
       end.reverse
     end
 
     def calculate_projection
-      return [] if current_user.trades.empty?
-      
-      last_6_months_avg = current_user.trades
-                                      .where('close_time >= ?', 6.months.ago)
-                                      .average(:profit)
-                                      .to_f
-      
       current_balance = current_user.mt5_accounts.sum(:balance)
       
-      (0..5).map do |i|
+      recent_trades = current_user.trades.where('close_time >= ?', 6.months.ago)
+      
+      if recent_trades.empty?
+        monthly_avg_profit = 50.0
+      else
+        total_profit = recent_trades.sum(:profit)
+        months_with_trades = recent_trades.group_by { |t| t.close_time.beginning_of_month }.count
+        months_with_trades = [months_with_trades, 1].max
+        monthly_avg_profit = total_profit / months_with_trades
+      end
+      
+      running_balance = current_balance
+      
+      (1..6).map do |i|
         month = i.months.from_now.beginning_of_month
-        projected_balance = current_balance + (last_6_months_avg * i * 30)
+        running_balance += monthly_avg_profit
         {
           month: month.strftime('%b %Y'),
-          balance: projected_balance
+          balance: running_balance.round(2)
         }
       end
     end
