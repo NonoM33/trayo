@@ -317,21 +317,22 @@ Le client a un crédit de 50$ (solde négatif).
 ## 👥 Gestion des Rôles
 
 Le système utilise un système simple avec un flag booléen `is_admin` :
+
 - **`is_admin: false`** → Client (utilisateur normal avec commissions)
 - **`is_admin: true`** → Administrator (accès back office)
 
 **Permissions par rôle :**
 
-| Fonctionnalité | Client | Admin |
-|----------------|--------|-------|
-| Accès API | ✅ | ✅ |
-| Sync MT5 | ✅ | ❌ |
-| Suivi commissions | ✅ | ❌ |
-| Accès back office | ❌ | ✅ |
-| Créer utilisateurs | ❌ | ✅ |
-| Gérer règlements | ❌ | ✅ |
-| Gérer avoirs | ❌ | ✅ |
-| Supprimer utilisateurs | ❌ | ✅ |
+| Fonctionnalité         | Client | Admin |
+| ---------------------- | ------ | ----- |
+| Accès API              | ✅     | ✅    |
+| Sync MT5               | ✅     | ❌    |
+| Suivi commissions      | ✅     | ❌    |
+| Accès back office      | ❌     | ✅    |
+| Créer utilisateurs     | ❌     | ✅    |
+| Gérer règlements       | ❌     | ✅    |
+| Gérer avoirs           | ❌     | ✅    |
+| Supprimer utilisateurs | ❌     | ✅    |
 
 ## 📝 Routes Admin
 
