@@ -24,7 +24,7 @@
               <div class="info-box-title">🎉 Bonus Actuel : <%= number_to_percentage(@current_bonus_rate, precision: 1) %></div>
               <p style="margin: 8px 0 0 0;">
                 <strong><%= @current_period.name %></strong><br>
-                Valide jusqu'au <%= @current_period.end_date.strftime("%d %B %Y") %>. Déposez maintenant pour obtenir un bonus instantané de <%= number_to_percentage(@current_bonus_rate, precision: 1) %> !
+                Valide jusqu'au <%= l(@current_period.end_date, format: :long) %>. Déposez maintenant pour obtenir un bonus instantané de <%= number_to_percentage(@current_bonus_rate, precision: 1) %> !
               </p>
             </div>
           <% else %>
