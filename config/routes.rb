@@ -1,6 +1,18 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
+  root "admin/sessions#new"
+
+  namespace :admin do
+    get "login", to: "sessions#new"
+    post "login", to: "sessions#create"
+    delete "logout", to: "sessions#destroy"
+
+    resources :clients, only: [:index, :new, :create, :show, :update, :destroy]
+    resources :payments, only: [:index, :create, :update]
+    resources :credits, only: [:create, :destroy]
+  end
+
   namespace :api do
     namespace :v1 do
       post "register", to: "authentication#register"
