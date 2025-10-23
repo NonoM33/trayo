@@ -1,0 +1,111 @@
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">T</div>
+      <span>Trayo Admin</span>
+    </div>
+  </div>
+  
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Main</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-menu-item">
+          <%= link_to admin_clients_path, class: "sidebar-menu-link #{request.path == admin_clients_path ? 'active' : ''}" do %>
+            <span class="sidebar-menu-icon">👥</span>
+            <span>Clients</span>
+          <% end %>
+        </li>
+        <li class="sidebar-menu-item">
+          <%= link_to admin_payments_path, class: "sidebar-menu-link #{request.path == admin_payments_path ? 'active' : ''}" do %>
+            <span class="sidebar-menu-icon">💰</span>
+            <span>Payments</span>
+          <% end %>
+        </li>
+        <li class="sidebar-menu-item">
+          <%= link_to admin_credits_path, class: "sidebar-menu-link #{request.path == admin_credits_path ? 'active' : ''}" do %>
+            <span class="sidebar-menu-icon">🎫</span>
+            <span>Credits</span>
+          <% end %>
+        </li>
+      </ul>
+    </div>
+    
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Settings</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-menu-item">
+          <a href="#" class="sidebar-menu-link">
+            <span class="sidebar-menu-icon">⚙️</span>
+            <span>Configuration</span>
+          </a>
+        </li>
+        <li class="sidebar-menu-item">
+          <button class="sidebar-menu-link" onclick="toggleTheme()" style="width: 100%; background: none; border: none; cursor: pointer;">
+            <span class="sidebar-menu-icon theme-icon" id="sidebarThemeIcon">🌙</span>
+            <span>Theme</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">
+        <%= current_user.email[0].upcase %>
+      </div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name"><%= current_user.email.split('@').first %></div>
+        <div class="sidebar-user-role">Administrator</div>
+      </div>
+    </div>
+    <%= link_to "Logout", admin_logout_path, data: { turbo_method: :delete }, style: "display: block; text-align: center; margin-top: 8px; color: var(--text-muted); font-size: 12px; text-decoration: none;" %>
+  </div>
+</div>
+
+<button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('open');
+  }
+  
+  // Update sidebar theme icon
+  function updateSidebarThemeIcon() {
+    const sidebarIcon = document.getElementById('sidebarThemeIcon');
+    if (sidebarIcon) {
+      if (document.body.classList.contains('dark-mode')) {
+        sidebarIcon.textContent = '☀️';
+      } else {
+        sidebarIcon.textContent = '🌙';
+      }
+    }
+  }
+  
+  // Override toggleTheme to update both icons
+  const originalToggleTheme = window.toggleTheme;
+  window.toggleTheme = function() {
+    const body = document.body;
+    const navIcon = document.getElementById('themeIcon');
+    
+    if (body.classList.contains('dark-mode')) {
+      body.classList.remove('dark-mode');
+      if (navIcon) navIcon.textContent = '🌙';
+      localStorage.setItem('theme', 'light');
+    } else {
+      body.classList.add('dark-mode');
+      if (navIcon) navIcon.textContent = '☀️';
+      localStorage.setItem('theme', 'dark');
+    }
+    
+    updateSidebarThemeIcon();
+  };
+  
+  // Initialize on load
+  document.addEventListener('DOMContentLoaded', function() {
+    updateSidebarThemeIcon();
+  });
+</script>
+

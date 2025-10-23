@@ -4,6 +4,7 @@
   <title>Client Details - Admin Trayo</title>
   <%= stylesheet_link_tag "admin" %>
   <style>
+    .container { max-width: 1600px; }
     .alert { padding: 15px; margin-bottom: 20px; background: #f44336; color: white; border-radius: 4px; }
     .status-pending { color: #ff9800; font-weight: 600; }
     .status-validated { color: #4CAF50; font-weight: 600; }
@@ -13,9 +14,15 @@
   </style>
 </head>
 <body>
-  <%= render 'admin/shared/navbar' %>
-
-  <div class="container">
+  <% @page_title = "Client Details" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
     <%= link_to "← Back to Clients", admin_clients_path, class: "back-link" %>
 
     <% if flash[:notice] %>
@@ -404,6 +411,7 @@
       <% else %>
         <p style="color: #999;">No credits yet</p>
       <% end %>
+      </div>
     </div>
   </div>
 </body>
