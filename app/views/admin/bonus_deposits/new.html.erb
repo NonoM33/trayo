@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>New Bonus Deposit - Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "New Bonus Deposit" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container" style="max-width: 800px;">
+        <%= link_to "← Back to Bonus Program", admin_bonus_deposits_path, class: "back-link" %>
+        
+        <div class="card">
+          <h2>💰 Make a Bonus Deposit</h2>
+          
+          <div class="info-box info-box-success" style="margin-bottom: 24px;">
+            <div class="info-box-title">🎉 Current Bonus Rate: <%= number_to_percentage(@current_bonus_rate, precision: 0) %></div>
+            <p style="margin: 8px 0 0 0;">
+              Valid for <%= Date.current.strftime("%B %Y") %>. Deposit now to get an instant <%= @current_bonus_rate %>% bonus on your deposit!
+            </p>
+          </div>
+          
+          <%= form_with model: @bonus_deposit, url: admin_bonus_deposits_path, method: :post, local: true do |f| %>
+            <% if @bonus_deposit.errors.any? %>
+              <div class="error-messages">
+                <h3>Errors:</h3>
+                <ul>
+                  <% @bonus_deposit.errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+            
+            <div class="form-group">
+              <%= f.label :amount, "Deposit Amount ($)" %>
+              <%= f.number_field :amount, step: 0.01, min: 100, required: true, placeholder: "1000.00" %>
+              <div class="help-text">Minimum deposit: $100</div>
+            </div>
+            
+            <div style="background: var(--bg-hover); padding: 20px; border-radius: 8px; margin: 24px 0;">
+              <h3 style="margin: 0 0 16px 0; font-size: 16px;">Calculation Preview</h3>
+              <div style="display: grid; gap: 12px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Your deposit:</span>
+                  <strong id="depositAmount">$0.00</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; color: var(--color-success);">
+                  <span>Bonus (<%= @current_bonus_rate %>%):</span>
+                  <strong id="bonusAmount">$0.00</strong>
+                </div>
+                <div style="border-top: 2px solid var(--border-color); padding-top: 12px; display: flex; justify-content: space-between; font-size: 18px;">
+                  <span>Total credits you'll receive:</span>
+                  <strong style="color: var(--color-accent);" id="totalCredit">$0.00</strong>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <%= f.label :notes, "Notes (optional)" %>
+              <%= f.text_area :notes, rows: 3, placeholder: "Any additional information..." %>
+            </div>
+            
+            <div class="info-box info-box-warning">
+              <div class="info-box-title">⚠️ Important</div>
+              <p style="margin: 8px 0 0 0;">
+                Your deposit will be pending until validated by an administrator. 
+                Once validated, the total credits (deposit + bonus) will be added to your account.
+              </p>
+            </div>
+            
+            <%= f.submit "Submit Bonus Deposit Request", class: "btn btn-success", style: "margin-top: 24px;" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const amountInput = document.querySelector('input[name="bonus_deposit[amount]"]');
+    const bonusRate = <%= @current_bonus_rate %>;
+    
+    function updateCalculation() {
+      const amount = parseFloat(amountInput.value) || 0;
+      const bonus = amount * (bonusRate / 100);
+      const total = amount + bonus;
+      
+      document.getElementById('depositAmount').textContent = '$' + amount.toFixed(2);
+      document.getElementById('bonusAmount').textContent = '$' + bonus.toFixed(2);
+      document.getElementById('totalCredit').textContent = '$' + total.toFixed(2);
+    }
+    
+    amountInput.addEventListener('input', updateCalculation);
+    updateCalculation();
+  </script>
+</body>
+</html>
+

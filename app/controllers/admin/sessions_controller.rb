@@ -10,7 +10,7 @@ module Admin
         if user.is_admin?
           redirect_to admin_clients_path, notice: "Welcome back, #{user.first_name || 'Admin'}!"
         else
-          redirect_to admin_client_path(user), notice: "Welcome back, #{user.first_name || user.email}!"
+          redirect_to admin_dashboard_path, notice: "Welcome back, #{user.first_name || user.email}!"
         end
       else
         flash.now[:alert] = "Invalid credentials"

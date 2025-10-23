@@ -29,11 +29,35 @@
               <span>Credits</span>
             <% end %>
           </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_bonus_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus') ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">🎁</span>
+              <span>Bonus Deposits</span>
+            <% end %>
+          </li>
         <% else %>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_dashboard_path, class: "sidebar-menu-link #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">📊</span>
+              <span>Dashboard</span>
+            <% end %>
+          </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_client_path(current_user), class: "sidebar-menu-link #{request.path == admin_client_path(current_user) ? 'active' : ''}" do %>
               <span class="sidebar-menu-icon">👤</span>
               <span>My Profile</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_shop_index_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/shop') ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">🛒</span>
+              <span>Shop</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_bonus_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus') ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">🎁</span>
+              <span>Bonus Program</span>
             <% end %>
           </li>
         <% end %>

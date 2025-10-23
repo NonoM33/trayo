@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard - Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <% @page_title = "Dashboard" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <div class="card">
+          <h2>📊 Portfolio Overview</h2>
+          
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Total Balance</div>
+              <div class="info-value positive">
+                <%= number_to_currency(@client.mt5_accounts.sum(:balance), unit: "$") %>
+              </div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Total Gains</div>
+              <div class="info-value <%= @client.total_profits > 0 ? 'positive' : 'negative' %>">
+                <%= number_to_currency(@client.total_profits, unit: "$") %>
+              </div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Commission Due</div>
+              <div class="info-value">
+                <%= number_to_currency(@client.total_commission_due, unit: "$") %>
+              </div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Balance Due</div>
+              <div class="info-value <%= @client.balance_due > 0 ? 'negative' : 'positive' %>">
+                <%= number_to_currency(@client.balance_due, unit: "$") %>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h2>📈 Performance & Projection</h2>
+          
+          <div style="position: relative; height: 400px;">
+            <canvas id="portfolioChart"></canvas>
+          </div>
+        </div>
+        
+        <div class="two-col">
+          <div class="card">
+            <h2>💼 MT5 Accounts</h2>
+            
+            <% if @mt5_accounts.any? %>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Account</th>
+                    <th>Balance</th>
+                    <th>Gains</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @mt5_accounts.each do |account| %>
+                    <tr>
+                      <td><%= account.account_name %></td>
+                      <td class="positive"><%= number_to_currency(account.balance, unit: "$") %></td>
+                      <td class="<%= account.net_gains > 0 ? 'positive' : 'negative' %>">
+                        <%= number_to_currency(account.net_gains, unit: "$") %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            <% else %>
+              <p style="text-align: center; color: var(--text-muted); padding: 40px;">No MT5 accounts yet</p>
+            <% end %>
+          </div>
+          
+          <div class="card">
+            <h2>📊 Recent Activity</h2>
+            
+            <% recent_trades = @client.trades.order(close_time: :desc).limit(5) %>
+            <% if recent_trades.any? %>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Symbol</th>
+                    <th>Profit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% recent_trades.each do |trade| %>
+                    <tr>
+                      <td><%= trade.close_time&.strftime("%Y-%m-%d") || "Open" %></td>
+                      <td><%= trade.symbol %></td>
+                      <td class="<%= trade.profit > 0 ? 'positive' : 'negative' %>">
+                        <%= number_to_currency(trade.profit, unit: "$") %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            <% else %>
+              <p style="text-align: center; color: var(--text-muted); padding: 40px;">No recent trades</p>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const ctx = document.getElementById('portfolioChart');
+    
+    const monthlyData = <%= raw @monthly_profits.map { |m| { x: m[:month], y: m[:profit] } }.to_json %>;
+    const projectionData = <%= raw @projection_data.map { |p| { x: p[:month], y: p[:balance] } }.to_json %>;
+    
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [
+          {
+            label: 'Historical Performance',
+            data: monthlyData,
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+            fill: true,
+            tension: 0.4
+          },
+          {
+            label: 'Projected Balance',
+            data: projectionData,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                label += '$' + context.parsed.y.toFixed(2);
+                return label;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            ticks: {
+              callback: function(value) {
+                return '$' + value.toFixed(0);
+              }
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+
