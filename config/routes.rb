@@ -11,6 +11,7 @@ Rails.application.routes.draw do
     resources :clients, only: [:index, :new, :create, :show, :update, :destroy]
     resources :payments, only: [:index, :create, :update]
     resources :credits, only: [:create, :destroy]
+    resources :mt5_accounts, only: [:update]
   end
 
   namespace :api do
