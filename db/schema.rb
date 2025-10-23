@@ -10,9 +10,37 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_23_000013) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_23_000015) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "bonus_deposits", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.decimal "amount", precision: 15, scale: 2, null: false
+    t.decimal "bonus_percentage", precision: 5, scale: 2, null: false
+    t.decimal "bonus_amount", precision: 15, scale: 2, null: false
+    t.decimal "total_credit", precision: 15, scale: 2, null: false
+    t.string "status", default: "pending", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["status"], name: "index_bonus_deposits_on_status"
+    t.index ["user_id", "created_at"], name: "index_bonus_deposits_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_bonus_deposits_on_user_id"
+  end
+
+  create_table "bot_purchases", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "trading_bot_id", null: false
+    t.decimal "price_paid", precision: 15, scale: 2, null: false
+    t.string "status", default: "active", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["status"], name: "index_bot_purchases_on_status"
+    t.index ["trading_bot_id"], name: "index_bot_purchases_on_trading_bot_id"
+    t.index ["user_id", "trading_bot_id"], name: "index_bot_purchases_on_user_id_and_trading_bot_id"
+    t.index ["user_id"], name: "index_bot_purchases_on_user_id"
+  end
 
   create_table "credits", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -78,6 +106,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000013) do
     t.index ["open_time"], name: "index_trades_on_open_time"
   end
 
+  create_table "trading_bots", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.decimal "price", precision: 15, scale: 2, null: false
+    t.string "status", default: "active", null: false
+    t.string "bot_type"
+    t.json "features"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["status"], name: "index_trading_bots_on_status"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
     t.string "password_digest", null: false
@@ -103,6 +143,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000013) do
     t.index ["withdrawal_date"], name: "index_withdrawals_on_withdrawal_date"
   end
 
+  add_foreign_key "bonus_deposits", "users"
+  add_foreign_key "bot_purchases", "trading_bots"
+  add_foreign_key "bot_purchases", "users"
   add_foreign_key "credits", "users"
   add_foreign_key "mt5_accounts", "users"
   add_foreign_key "payments", "users"

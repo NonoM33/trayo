@@ -8,6 +8,8 @@ Rails.application.routes.draw do
     post "login", to: "sessions#create"
     delete "logout", to: "sessions#destroy"
 
+    get "dashboard", to: "dashboard#index"
+
     resources :clients, only: [:index, :new, :create, :show, :edit, :update, :destroy] do
       member do
         post :reset_password
@@ -17,6 +19,19 @@ Rails.application.routes.draw do
     resources :payments, only: [:index, :create, :update, :destroy]
     resources :credits, only: [:index, :create, :destroy]
     resources :mt5_accounts, only: [:update]
+    
+    resources :bonus_deposits, only: [:index, :new, :create], path: 'bonus' do
+      member do
+        post :validate_deposit
+        post :reject_deposit
+      end
+    end
+    
+    resources :shop, only: [:index] do
+      member do
+        post :purchase
+      end
+    end
   end
 
   namespace :api do
