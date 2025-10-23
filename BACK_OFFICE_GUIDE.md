@@ -399,13 +399,15 @@ Solde dû = 0$
 
 ### Design
 
-- Interface simple et épurée
+- Interface moderne et épurée
+- **Dark Mode** disponible (toggle lune/soleil dans la navbar)
 - CSS intégré (pas de dépendances)
 - Responsive (fonctionne sur mobile/tablette)
 - Couleurs :
-  - Vert (#4CAF50) : Gains, actions positives
-  - Rouge (#f44336) : Solde dû, suppressions
-  - Bleu (#2196F3) : Actions secondaires (validation)
+  - Bleu (#0d6efd) : Actions primaires
+  - Vert (#198754) : Gains, succès
+  - Rouge (#dc3545) : Solde dû, suppressions
+- Préférence de thème sauvegardée dans le navigateur
 
 ### Navigation
 
