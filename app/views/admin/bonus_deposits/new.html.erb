@@ -49,43 +49,43 @@
             <% end %>
             
             <div class="form-group">
-              <%= f.label :amount, "Deposit Amount ($)" %>
+              <%= f.label :amount, "Montant du Dépôt (€)" %>
               <%= f.number_field :amount, step: 0.01, min: 100, required: true, placeholder: "1000.00" %>
-              <div class="help-text">Minimum deposit: $100</div>
+              <div class="help-text">Dépôt minimum : 100 €</div>
             </div>
             
             <div style="background: var(--bg-hover); padding: 20px; border-radius: 8px; margin: 24px 0;">
-              <h3 style="margin: 0 0 16px 0; font-size: 16px;">Calculation Preview</h3>
+              <h3 style="margin: 0 0 16px 0; font-size: 16px;">Aperçu du Calcul</h3>
               <div style="display: grid; gap: 12px;">
                 <div style="display: flex; justify-content: space-between;">
-                  <span>Your deposit:</span>
-                  <strong id="depositAmount">$0.00</strong>
+                  <span>Votre dépôt :</span>
+                  <strong id="depositAmount">0,00 €</strong>
                 </div>
                 <div style="display: flex; justify-content: space-between; color: var(--color-success);">
-                  <span>Bonus (<%= @current_bonus_rate %>%):</span>
-                  <strong id="bonusAmount">$0.00</strong>
+                  <span>Bonus (<%= number_to_percentage(@current_bonus_rate || 0, precision: 1) %>) :</span>
+                  <strong id="bonusAmount">0,00 €</strong>
                 </div>
                 <div style="border-top: 2px solid var(--border-color); padding-top: 12px; display: flex; justify-content: space-between; font-size: 18px;">
-                  <span>Total credits you'll receive:</span>
-                  <strong style="color: var(--color-accent);" id="totalCredit">$0.00</strong>
+                  <span>Total crédits que vous recevrez :</span>
+                  <strong style="color: var(--color-accent);" id="totalCredit">0,00 €</strong>
                 </div>
               </div>
             </div>
             
             <div class="form-group">
-              <%= f.label :notes, "Notes (optional)" %>
-              <%= f.text_area :notes, rows: 3, placeholder: "Any additional information..." %>
+              <%= f.label :notes, "Notes (optionnel)" %>
+              <%= f.text_area :notes, rows: 3, placeholder: "Informations supplémentaires..." %>
             </div>
             
             <div class="info-box info-box-warning">
               <div class="info-box-title">⚠️ Important</div>
               <p style="margin: 8px 0 0 0;">
-                Your deposit will be pending until validated by an administrator. 
-                Once validated, the total credits (deposit + bonus) will be added to your account.
+                Votre dépôt restera en attente jusqu'à validation par un administrateur. 
+                Une fois validé, le total des crédits (dépôt + bonus) sera ajouté à votre compte.
               </p>
             </div>
             
-            <%= f.submit "Submit Bonus Deposit Request", class: "btn btn-success", style: "margin-top: 24px;" %>
+            <%= f.submit "Soumettre la Demande de Dépôt Bonus", class: "btn btn-success", style: "margin-top: 24px;" %>
           <% end %>
         </div>
       </div>
@@ -94,16 +94,20 @@
   
   <script>
     const amountInput = document.querySelector('input[name="bonus_deposit[amount]"]');
-    const bonusRate = <%= @current_bonus_rate %>;
+    const bonusRate = <%= @current_bonus_rate || 0 %>;
+    
+    function formatEuro(amount) {
+      return amount.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' €';
+    }
     
     function updateCalculation() {
       const amount = parseFloat(amountInput.value) || 0;
       const bonus = amount * (bonusRate / 100);
       const total = amount + bonus;
       
-      document.getElementById('depositAmount').textContent = '$' + amount.toFixed(2);
-      document.getElementById('bonusAmount').textContent = '$' + bonus.toFixed(2);
-      document.getElementById('totalCredit').textContent = '$' + total.toFixed(2);
+      document.getElementById('depositAmount').textContent = formatEuro(amount);
+      document.getElementById('bonusAmount').textContent = formatEuro(bonus);
+      document.getElementById('totalCredit').textContent = formatEuro(total);
     }
     
     amountInput.addEventListener('input', updateCalculation);

@@ -23,73 +23,100 @@
         
         <% unless current_user.is_admin? %>
           <div class="card">
-            <h2>🎁 Bonus Pre-Financing Program</h2>
+            <h2>🎁 Programme de Bonus</h2>
             
             <div class="info-box info-box-info">
-              <div class="info-box-title">💡 How it works</div>
+              <div class="info-box-title">💡 Comment ça marche</div>
               <p style="margin: 12px 0 0 0;">
-                Pre-finance the platform by depositing funds and receive an <strong>instant bonus</strong> on top of your deposit! 
-                Your total credit can be used to pay commissions or purchase trading bots.
+                Pré-financez la plateforme en déposant des fonds et recevez un <strong>bonus instantané</strong> sur votre dépôt ! 
+                Votre crédit total peut être utilisé pour payer des commissions ou acheter des bots de trading.
               </p>
             </div>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 24px 0;">
               <div style="text-align: center; padding: 20px; background: var(--bg-hover); border-radius: 8px;">
-                <div style="font-size: 36px; font-weight: 700; color: var(--color-success);"><%= @current_bonus_rate %>%</div>
-                <div style="font-size: 14px; color: var(--text-muted); margin-top: 8px;">Current Bonus Rate</div>
-                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;"><%= Date.current.strftime("%B %Y") %></div>
+                <% if @current_bonus_rate && @current_bonus_rate > 0 %>
+                  <div style="font-size: 36px; font-weight: 700; color: var(--color-success);"><%= number_to_percentage(@current_bonus_rate, precision: 1) %></div>
+                  <div style="font-size: 14px; color: var(--text-muted); margin-top: 8px;">Taux de Bonus Actuel</div>
+                  <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;"><%= Date.current.strftime("%B %Y") %></div>
+                <% else %>
+                  <div style="font-size: 24px; font-weight: 700; color: var(--text-muted);">Aucun Bonus Actif</div>
+                  <div style="font-size: 14px; color: var(--text-muted); margin-top: 8px;">Pas de période de bonus active</div>
+                  <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;"><%= Date.current.strftime("%B %Y") %></div>
+                <% end %>
               </div>
               
               <div style="text-align: center; padding: 20px; background: var(--bg-hover); border-radius: 8px;">
                 <div style="font-size: 36px; font-weight: 700; color: var(--color-accent);">
-                  <%= number_to_currency(current_user.total_credits, unit: "€", format: "%n %u") %>
+                  <%= number_to_currency(current_user.total_credits, precision: 2) %>
                 </div>
-                <div style="font-size: 14px; color: var(--text-muted); margin-top: 8px;">Your Total Credits</div>
+                <div style="font-size: 14px; color: var(--text-muted); margin-top: 8px;">Vos Crédits Totaux</div>
               </div>
             </div>
             
-            <%= link_to "💰 Make a Bonus Deposit", new_admin_bonus_deposit_path, class: "btn btn-success", style: "display: inline-block; margin-top: 8px;" %>
+            <% if @current_bonus_rate && @current_bonus_rate > 0 %>
+              <%= link_to "💰 Faire un Dépôt Bonus", new_admin_bonus_deposit_path, class: "btn btn-success", style: "display: inline-block; margin-top: 8px;" %>
+            <% else %>
+              <div class="info-box info-box-warning" style="margin-top: 16px;">
+                <div class="info-box-title">⚠️ Aucune Période de Bonus Active</div>
+                <p style="margin: 8px 0 0 0;">
+                  Il n'y a actuellement aucune période de bonus active. Veuillez contacter un administrateur pour plus d'informations.
+                </p>
+              </div>
+            <% end %>
           </div>
           
+          <% if @bonus_periods&.any? %>
+            <div class="card">
+              <h2>📊 Calendrier des Bonus</h2>
+              
+              <table>
+                <thead>
+                  <tr>
+                    <th>Période</th>
+                    <th>Taux de Bonus</th>
+                    <th>Exemple</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @bonus_periods.each do |period| %>
+                    <tr>
+                      <td>
+                        <strong><%= period.name || "Période sans nom" %></strong><br>
+                        <small style="color: var(--text-muted);"><%= period.start_date.strftime("%d %B %Y") %> - <%= period.end_date.strftime("%d %B %Y") %></small>
+                      </td>
+                      <td class="positive"><%= number_to_percentage(period.bonus_percentage, precision: 0) %></td>
+                      <td>1 000 € → <%= number_to_currency((1000 * (1 + period.bonus_percentage / 100)), precision: 0) %> crédits</td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% end %>
+        <% end %>
+        
+        <% if current_user.is_admin? %>
           <div class="card">
-            <h2>📊 Bonus Rate Schedule</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+              <div>
+                <h2 style="margin: 0;">⚙️ Configuration du Programme Bonus</h2>
+                <p style="margin: 8px 0 0 0; color: var(--text-muted);">Gérer les périodes et taux de bonus</p>
+              </div>
+              <%= link_to "📅 Gérer les Périodes Bonus", admin_bonus_periods_path, class: "btn btn-success" %>
+            </div>
             
-            <table>
-              <thead>
-                <tr>
-                  <th>Period</th>
-                  <th>Bonus Rate</th>
-                  <th>Example</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>December - February</td>
-                  <td class="positive">25%</td>
-                  <td>$1,000 → $1,250 credits</td>
-                </tr>
-                <tr>
-                  <td>March - May</td>
-                  <td class="positive">20%</td>
-                  <td>$1,000 → $1,200 credits</td>
-                </tr>
-                <tr>
-                  <td>June - August</td>
-                  <td class="positive">15%</td>
-                  <td>$1,000 → $1,150 credits</td>
-                </tr>
-                <tr>
-                  <td>September - November</td>
-                  <td class="positive">10%</td>
-                  <td>$1,000 → $1,100 credits</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="info-box info-box-info">
+              <div class="info-box-title">💡 Comment ça marche</div>
+              <p style="margin: 8px 0 0 0;">
+                Créez des périodes de bonus avec des taux personnalisés et des plages de dates. Le système applique automatiquement la période active actuelle aux nouveaux dépôts.
+                Cliquez sur "Gérer les Périodes Bonus" pour configurer les taux.
+              </p>
+            </div>
           </div>
         <% end %>
         
         <div class="card">
-          <h2>📋 <%= current_user.is_admin? ? 'All Bonus Deposits' : 'Your Bonus Deposits' %></h2>
+          <h2>📋 <%= current_user.is_admin? ? 'Tous les Dépôts Bonus' : 'Vos Dépôts Bonus' %></h2>
           
           <% if @bonus_deposits.any? %>
             <table>
@@ -99,10 +126,10 @@
                     <th>Client</th>
                   <% end %>
                   <th>Date</th>
-                  <th>Amount</th>
+                  <th>Montant</th>
                   <th>Bonus</th>
-                  <th>Total Credit</th>
-                  <th>Status</th>
+                  <th>Crédit Total</th>
+                  <th>Statut</th>
                   <% if current_user.is_admin? %>
                     <th>Actions</th>
                   <% end %>
@@ -114,10 +141,10 @@
                     <% if current_user.is_admin? %>
                       <td><%= link_to deposit.user.email, admin_client_path(deposit.user), style: "color: var(--color-accent); text-decoration: none;" %></td>
                     <% end %>
-                    <td><%= deposit.created_at.strftime("%Y-%m-%d %H:%M") %></td>
-                    <td class="positive"><%= number_to_currency(deposit.amount, unit: "€", format: "%n %u") %></td>
+                    <td><%= deposit.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+                    <td class="positive"><%= number_to_currency(deposit.amount, precision: 2) %></td>
                     <td class="positive"><%= number_to_percentage(deposit.bonus_percentage, precision: 0) %></td>
-                    <td class="positive"><strong><%= number_to_currency(deposit.total_credit, unit: "€", format: "%n %u") %></strong></td>
+                    <td class="positive"><strong><%= number_to_currency(deposit.total_credit, precision: 2) %></strong></td>
                     <td>
                       <span class="status-<%= deposit.status %>">
                         <%= deposit.status.upcase %>
@@ -127,8 +154,8 @@
                       <td>
                         <div class="action-buttons">
                           <% if deposit.status == "pending" %>
-                            <%= button_to "Validate", validate_deposit_admin_bonus_deposit_path(deposit), method: :post, class: "btn btn-success btn-sm" %>
-                            <%= button_to "Reject", reject_deposit_admin_bonus_deposit_path(deposit), method: :post, class: "btn btn-danger btn-sm" %>
+                            <%= button_to "Valider", validate_deposit_admin_bonus_deposit_path(deposit), method: :post, class: "btn btn-success btn-sm" %>
+                            <%= button_to "Rejeter", reject_deposit_admin_bonus_deposit_path(deposit), method: :post, class: "btn btn-danger btn-sm" %>
                           <% end %>
                         </div>
                       </td>
@@ -138,7 +165,7 @@
               </tbody>
             </table>
           <% else %>
-            <p style="text-align: center; color: var(--text-muted); padding: 40px;">No bonus deposits yet</p>
+            <p style="text-align: center; color: var(--text-muted); padding: 40px;">Aucun dépôt bonus pour le moment</p>
           <% end %>
         </div>
       </div>

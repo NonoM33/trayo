@@ -6,12 +6,14 @@ module Admin
       else
         @bonus_deposits = current_user.bonus_deposits.order(created_at: :desc)
         @current_bonus_rate = calculate_current_bonus_rate
+        @bonus_periods = BonusPeriod.active.order(start_date: :desc)
       end
     end
 
     def new
       @bonus_deposit = current_user.bonus_deposits.build
       @current_bonus_rate = calculate_current_bonus_rate
+      @current_period = BonusPeriod.current.first
     end
 
     def create
@@ -47,17 +49,7 @@ module Admin
     end
 
     def calculate_current_bonus_rate
-      current_month = Time.current.month
-      case current_month
-      when 12, 1, 2
-        25.0
-      when 3, 4, 5
-        20.0
-      when 6, 7, 8
-        15.0
-      else
-        10.0
-      end
+      BonusPeriod.current_bonus_percentage
     end
   end
 end

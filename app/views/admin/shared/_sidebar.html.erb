@@ -39,9 +39,15 @@
             <% end %>
           </li>
           <li class="sidebar-menu-item">
-            <%= link_to admin_bonus_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus') ? 'active' : ''}" do %>
+            <%= link_to admin_bonus_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus_deposit') ? 'active' : ''}" do %>
               <span class="sidebar-menu-icon">🎁</span>
               <span>Dépôts Bonus</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_bonus_periods_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus_period') ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">📅</span>
+              <span>Périodes Bonus</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">

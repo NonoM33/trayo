@@ -6,7 +6,7 @@
 #property version   "1.00"
 #property strict
 
-input string API_URL = "http://localhost:3000/api/v1/mt5/sync";
+input string API_URL = "https://trayo.onrender.com/api/v1/mt5/sync";
 input string API_KEY = "mt5_secret_key_change_in_production";
 input string MT5_API_TOKEN = "your_mt5_api_token_here";
 input int REFRESH_INTERVAL = 300;
