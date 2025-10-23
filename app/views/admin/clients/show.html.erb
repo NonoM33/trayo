@@ -297,6 +297,62 @@
     <% end %>
 
     <% if current_user.is_admin? %>
+    <div class="card">
+      <h2>🖥️ VPS</h2>
+      
+      <% if @client.vps.any? %>
+        <table style="margin-bottom: 24px;">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Emplacement</th>
+              <th>IP</th>
+              <th>Statut</th>
+              <th>Prix/mois</th>
+              <th>Commandé</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @client.vps.each do |vps| %>
+              <tr>
+                <td><strong><%= vps.name %></strong></td>
+                <td><%= vps.server_location || '-' %></td>
+                <td><code style="background: var(--bg-hover); padding: 4px 8px; border-radius: 4px;"><%= vps.ip_address || 'En attente' %></code></td>
+                <td>
+                  <span style="background: <%= vps.status_color %>; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700;">
+                    <%= vps.status_icon %> <%= vps.status_label %>
+                  </span>
+                </td>
+                <td><%= number_to_currency(vps.monthly_price, unit: "€", format: "%n %u") %></td>
+                <td><%= vps.ordered_at&.strftime("%d/%m/%Y") || '-' %></td>
+                <td>
+                  <div class="action-buttons">
+                    <%= link_to "👁️", admin_vp_path(vps), class: "btn btn-primary btn-sm", title: "Voir" %>
+                    <%= link_to "✏️", edit_admin_vp_path(vps), class: "btn btn-sm", style: "background: #FF9800;", title: "Modifier" %>
+                    <%= button_to "🗑️", admin_vp_path(vps), method: :delete,
+                        data: { turbo_confirm: "Supprimer ce VPS ?" },
+                        class: "btn btn-danger btn-sm", title: "Supprimer" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p style="text-align: center; color: var(--text-muted); padding: 20px;">
+          Aucun VPS pour ce client
+        </p>
+      <% end %>
+      
+      <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
+        <h3 style="margin-bottom: 16px;">Créer un Nouveau VPS</h3>
+        <%= link_to "➕ Créer un VPS pour ce Client", new_admin_vp_path(user_id: @client.id), class: "btn btn-success" %>
+      </div>
+    </div>
+    <% end %>
+
+    <% if current_user.is_admin? %>
     <div class="two-col">
       <div class="card">
         <h2>Ajouter un Paiement</h2>

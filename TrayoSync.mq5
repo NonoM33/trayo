@@ -162,6 +162,8 @@ string GetTradesJSON()
             double swap = HistoryDealGetDouble(ticket, DEAL_SWAP);
             datetime deal_time = (datetime)HistoryDealGetInteger(ticket, DEAL_TIME);
             long position_id = HistoryDealGetInteger(ticket, DEAL_POSITION_ID);
+            long magic_number = HistoryDealGetInteger(ticket, DEAL_MAGIC);
+            string comment = HistoryDealGetString(ticket, DEAL_COMMENT);
             
             string type_str = (deal_type == DEAL_TYPE_BUY) ? "buy" : "sell";
             
@@ -173,7 +175,7 @@ string GetTradesJSON()
             if(count > 0) trades += ",";
             
             trades += StringFormat(
-               "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"status\":\"closed\"}",
+               "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"closed\"}",
                position_id,
                symbol,
                type_str,
@@ -184,7 +186,9 @@ string GetTradesJSON()
                commission,
                swap,
                time_iso,
-               time_iso
+               time_iso,
+               magic_number,
+               comment
             );
             
             count++;

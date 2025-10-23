@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_23_000018) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_23_000020) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -43,6 +43,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000018) do
     t.integer "trades_count", default: 0
     t.datetime "started_at"
     t.datetime "stopped_at"
+    t.integer "magic_number"
+    t.index ["magic_number"], name: "index_bot_purchases_on_magic_number"
     t.index ["status"], name: "index_bot_purchases_on_status"
     t.index ["trading_bot_id"], name: "index_bot_purchases_on_trading_bot_id"
     t.index ["user_id", "trading_bot_id"], name: "index_bot_purchases_on_user_id_and_trading_bot_id"
@@ -107,7 +109,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000018) do
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "comment"
+    t.integer "magic_number"
     t.index ["close_time"], name: "index_trades_on_close_time"
+    t.index ["comment"], name: "index_trades_on_comment"
+    t.index ["magic_number"], name: "index_trades_on_magic_number"
     t.index ["mt5_account_id", "trade_id"], name: "index_trades_on_mt5_account_id_and_trade_id", unique: true
     t.index ["mt5_account_id"], name: "index_trades_on_mt5_account_id"
     t.index ["open_time"], name: "index_trades_on_open_time"
@@ -131,6 +137,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000018) do
     t.string "risk_level", default: "medium"
     t.string "image_url"
     t.boolean "is_active", default: true
+    t.string "symbol"
+    t.integer "magic_number_prefix"
     t.index ["status"], name: "index_trading_bots_on_status"
   end
 
@@ -147,6 +155,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000018) do
     t.string "phone"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["mt5_api_token"], name: "index_users_on_mt5_api_token", unique: true
+  end
+
+  create_table "vps", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name", null: false
+    t.string "ip_address"
+    t.string "server_location"
+    t.string "status", default: "ordered"
+    t.decimal "monthly_price", precision: 10, scale: 2, default: "0.0"
+    t.text "access_credentials"
+    t.text "notes"
+    t.datetime "ordered_at"
+    t.datetime "configured_at"
+    t.datetime "ready_at"
+    t.datetime "activated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["status"], name: "index_vps_on_status"
+    t.index ["user_id"], name: "index_vps_on_user_id"
   end
 
   create_table "withdrawals", force: :cascade do |t|
@@ -166,5 +193,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000018) do
   add_foreign_key "mt5_accounts", "users"
   add_foreign_key "payments", "users"
   add_foreign_key "trades", "mt5_accounts"
+  add_foreign_key "vps", "users"
   add_foreign_key "withdrawals", "mt5_accounts"
 end

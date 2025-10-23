@@ -8,6 +8,7 @@ class TradingBot < ApplicationRecord
   validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :status, presence: true, inclusion: { in: %w[active inactive] }
   validates :risk_level, inclusion: { in: RISK_LEVELS }, allow_nil: true
+  validates :magic_number_prefix, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
 
   scope :active, -> { where(status: "active") }
   scope :available, -> { where(is_active: true) }

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>VPS - Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "Gestion VPS" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <% if flash[:notice] %>
+          <div class="notice"><%= flash[:notice] %></div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert"><%= flash[:alert] %></div>
+        <% end %>
+
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; border: none; padding: 0;">🖥️ <%= current_user.is_admin? ? 'Gestion VPS' : 'Mes VPS' %></h2>
+            <% if current_user.is_admin? %>
+              <%= link_to "➕ Nouveau VPS", new_admin_vp_path, class: "btn btn-success" %>
+            <% end %>
+          </div>
+          
+          <% if @vps_list.any? %>
+            <table>
+              <thead>
+                <tr>
+                  <% if current_user.is_admin? %>
+                    <th>Client</th>
+                  <% end %>
+                  <th>Nom</th>
+                  <th>Emplacement</th>
+                  <th>IP</th>
+                  <th>Statut</th>
+                  <th>Prix Mensuel</th>
+                  <th>Commandé le</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @vps_list.each do |vps| %>
+                  <tr>
+                    <% if current_user.is_admin? %>
+                      <td>
+                        <%= link_to vps.user.email, admin_client_path(vps.user) %>
+                      </td>
+                    <% end %>
+                    <td><strong><%= vps.name %></strong></td>
+                    <td><%= vps.server_location || '-' %></td>
+                    <td><code style="background: var(--bg-hover); padding: 4px 8px; border-radius: 4px;"><%= vps.ip_address || 'En attente' %></code></td>
+                    <td>
+                      <span style="background: <%= vps.status_color %>; color: white; padding: 6px 14px; border-radius: 16px; font-size: 12px; font-weight: 700;">
+                        <%= vps.status_icon %> <%= vps.status_label %>
+                      </span>
+                    </td>
+                    <td><%= number_to_currency(vps.monthly_price, unit: "€", format: "%n %u") %></td>
+                    <td><%= vps.ordered_at&.strftime("%d/%m/%Y") || '-' %></td>
+                    <td>
+                      <div class="action-buttons">
+                        <%= link_to "Voir", admin_vp_path(vps), class: "btn btn-primary btn-sm" %>
+                        <% if current_user.is_admin? %>
+                          <%= link_to "Modifier", edit_admin_vp_path(vps), class: "btn btn-sm", style: "background: #FF9800;" %>
+                          <%= button_to "Supprimer", admin_vp_path(vps), method: :delete,
+                              data: { turbo_confirm: "Supprimer ce VPS ?" },
+                              class: "btn btn-danger btn-sm" %>
+                        <% end %>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          <% else %>
+            <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+              <div style="font-size: 48px; margin-bottom: 16px;">🖥️</div>
+              <h3 style="margin: 0 0 8px 0;">Aucun VPS pour le moment</h3>
+              <% if current_user.is_admin? %>
+                <p style="margin: 0 0 24px 0;">Créez un VPS pour vos clients</p>
+                <%= link_to "➕ Créer un VPS", new_admin_vp_path, class: "btn btn-success" %>
+              <% else %>
+                <p style="margin: 0;">Contactez l'administrateur pour commander un VPS</p>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

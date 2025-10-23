@@ -23,7 +23,9 @@ class Trade < ApplicationRecord
       swap: trade_data[:swap],
       open_time: trade_data[:open_time],
       close_time: trade_data[:close_time],
-      status: trade_data[:status]
+      status: trade_data[:status],
+      magic_number: trade_data[:magic_number],
+      comment: trade_data[:comment]
     )
 
     trade.save!

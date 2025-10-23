@@ -44,6 +44,12 @@
               <span>Dépôts Bonus</span>
             <% end %>
           </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_vps_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/vps') ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">🖥️</span>
+              <span>VPS</span>
+            <% end %>
+          </li>
         <% else %>
           <li class="sidebar-menu-item">
             <%= link_to admin_dashboard_path, class: "sidebar-menu-link #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
@@ -73,6 +79,12 @@
             <%= link_to admin_bonus_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus') ? 'active' : ''}" do %>
               <span class="sidebar-menu-icon">🎁</span>
               <span>Programme Bonus</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_vps_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/vps') ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">🖥️</span>
+              <span>Mes VPS</span>
             <% end %>
           </li>
         <% end %>

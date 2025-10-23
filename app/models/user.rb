@@ -8,6 +8,7 @@ class User < ApplicationRecord
   has_many :bonus_deposits, dependent: :destroy
   has_many :bot_purchases, dependent: :destroy
   has_many :trading_bots, through: :bot_purchases
+  has_many :vps, class_name: 'Vps', dependent: :destroy
 
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, length: { minimum: 6 }, if: -> { new_record? || !password.nil? }

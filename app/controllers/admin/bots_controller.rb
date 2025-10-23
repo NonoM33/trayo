@@ -76,7 +76,7 @@ module Admin
         :name, :description, :price, :status, :image_url,
         :projection_monthly_min, :projection_monthly_max, :projection_yearly,
         :win_rate, :max_drawdown_limit, :strategy_description,
-        :risk_level, :is_active, features: []
+        :risk_level, :is_active, :symbol, :magic_number_prefix, features: []
       )
     end
   end

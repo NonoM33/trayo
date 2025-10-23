@@ -47,6 +47,12 @@ Rails.application.routes.draw do
         post :toggle_status
       end
     end
+    
+    resources :vps, path: 'vps' do
+      member do
+        post :update_status
+      end
+    end
   end
 
   namespace :api do

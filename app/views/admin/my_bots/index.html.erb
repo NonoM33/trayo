@@ -195,16 +195,27 @@
                   </div>
                 </div>
                 
-                <div class="bot-controls">
-                  <%= button_to toggle_status_admin_my_bot_path(purchase), method: :post, 
-                      class: "toggle-btn #{purchase.is_running? ? 'toggle-btn-stop' : 'toggle-btn-start'}" do %>
-                    <% if purchase.is_running? %>
-                      ⏸️ Arrêter le Bot
-                    <% else %>
-                      ▶️ Démarrer le Bot
+                <% if current_user.is_admin? %>
+                  <div class="bot-controls">
+                    <%= button_to toggle_status_admin_my_bot_path(purchase), method: :post, 
+                        class: "toggle-btn #{purchase.is_running? ? 'toggle-btn-stop' : 'toggle-btn-start'}" do %>
+                      <% if purchase.is_running? %>
+                        ⏸️ Arrêter le Bot
+                      <% else %>
+                        ▶️ Démarrer le Bot
+                      <% end %>
                     <% end %>
-                  <% end %>
-                </div>
+                  </div>
+                <% else %>
+                  <div style="text-align: right;">
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+                      Gestion du bot
+                    </div>
+                    <div style="font-size: 12px; padding: 8px 16px; background: var(--bg-hover); border-radius: 8px;">
+                      Contactez l'admin pour activer/désactiver
+                    </div>
+                  </div>
+                <% end %>
               </div>
               
               <div class="bot-stats-grid">

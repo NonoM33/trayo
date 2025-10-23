@@ -11,6 +11,29 @@ class BotPurchase < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
 
   after_create :initialize_tracking
+  
+  def associated_trades
+    return Trade.none unless magic_number
+    
+    Trade.joins(mt5_account: :user)
+         .where(users: { id: user_id })
+         .where(magic_number: magic_number)
+  end
+  
+  def sync_performance_from_trades
+    trades = associated_trades
+    return unless trades.any?
+    
+    self.total_profit = trades.sum(:profit)
+    self.trades_count = trades.count
+    
+    current_balance = user.mt5_accounts.sum(:balance)
+    peak_balance = user.mt5_accounts.maximum(:balance) || current_balance
+    self.current_drawdown = [peak_balance - current_balance, 0].max
+    self.max_drawdown_recorded = [max_drawdown_recorded, current_drawdown].compact.max
+    
+    save
+  end
 
   def start!
     update(
@@ -84,13 +107,21 @@ class BotPurchase < ApplicationRecord
   private
 
   def initialize_tracking
+    self.magic_number = generate_magic_number if magic_number.nil?
+    
     update_columns(
+      magic_number: magic_number,
       is_running: false,
       current_drawdown: 0,
       max_drawdown_recorded: 0,
       total_profit: 0,
       trades_count: 0
     )
+  end
+  
+  def generate_magic_number
+    base = trading_bot.magic_number_prefix || (trading_bot.id * 1000)
+    base + user_id
   end
 end
 

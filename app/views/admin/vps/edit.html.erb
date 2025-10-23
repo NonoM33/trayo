@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Modifier VPS - Admin Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "Modifier le VPS" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container" style="max-width: 1200px;">
+        <%= link_to "← Retour aux VPS", admin_vps_path, class: "back-link" %>
+        
+        <h1>✏️ Modifier <%= @vps.name %></h1>
+        
+        <%= render 'form', vps: @vps, clients: @clients %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

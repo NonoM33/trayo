@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= @vps.name %> - VPS Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = @vps.name %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <%= link_to "← Retour aux VPS", admin_vps_path, class: "back-link" %>
+        
+        <% if flash[:notice] %>
+          <div class="notice"><%= flash[:notice] %></div>
+        <% end %>
+
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <div>
+              <h2 style="margin: 0 0 8px 0;">🖥️ <%= @vps.name %></h2>
+              <span style="background: <%= @vps.status_color %>; color: white; padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 700;">
+                <%= @vps.status_icon %> <%= @vps.status_label %>
+              </span>
+            </div>
+            <% if current_user.is_admin? %>
+              <div style="display: flex; gap: 12px;">
+                <%= link_to "✏️ Modifier", edit_admin_vp_path(@vps), class: "btn btn-primary" %>
+                <%= button_to "🗑️ Supprimer", admin_vp_path(@vps), method: :delete,
+                    data: { turbo_confirm: "Supprimer ce VPS ?" }, class: "btn btn-danger" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <h3>📋 Informations</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">Client</div>
+                <div class="info-value">
+                  <% if current_user.is_admin? %>
+                    <%= link_to @vps.user.email, admin_client_path(@vps.user), style: "color: var(--color-accent); text-decoration: none; font-weight: 600;" %>
+                  <% else %>
+                    <%= @vps.user.email %>
+                  <% end %>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Emplacement</div>
+                <div class="info-value"><%= @vps.server_location || 'Non défini' %></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Adresse IP</div>
+                <div class="info-value">
+                  <code style="background: var(--bg-hover); padding: 4px 12px; border-radius: 6px; font-size: 14px;">
+                    <%= @vps.ip_address || 'En attente d\'attribution' %>
+                  </code>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Prix Mensuel</div>
+                <div class="info-value positive">
+                  <%= number_to_currency(@vps.monthly_price, unit: "€", format: "%n %u") %>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>📅 Dates Clés</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">Commandé</div>
+                <div class="info-value"><%= @vps.ordered_at&.strftime("%d/%m/%Y à %H:%M") || '-' %></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Configuré</div>
+                <div class="info-value"><%= @vps.configured_at&.strftime("%d/%m/%Y à %H:%M") || '-' %></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Prêt</div>
+                <div class="info-value"><%= @vps.ready_at&.strftime("%d/%m/%Y à %H:%M") || '-' %></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Activé</div>
+                <div class="info-value"><%= @vps.activated_at&.strftime("%d/%m/%Y à %H:%M") || '-' %></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <% if current_user.is_admin? && @vps.access_credentials.present? %>
+          <div class="card">
+            <h3>🔑 Identifiants d'Accès</h3>
+            <div style="background: var(--bg-hover); padding: 16px; border-radius: 8px; font-family: monospace; white-space: pre-wrap;">
+              <%= @vps.access_credentials %>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @vps.notes.present? %>
+          <div class="card">
+            <h3>📝 Notes</h3>
+            <p style="white-space: pre-wrap;"><%= @vps.notes %></p>
+          </div>
+        <% end %>
+
+        <% if current_user.is_admin? %>
+          <div class="card">
+            <h3>⚡ Actions Rapides</h3>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Changez le statut du VPS selon l'avancement</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+              <%= button_to update_status_admin_vp_path(@vps, new_status: 'ordered'), method: :post,
+                  class: "btn", 
+                  style: "background: #FF9800; #{@vps.status == 'ordered' ? 'opacity: 0.5;' : ''}" do %>
+                🛒 Marquer Commandé
+              <% end %>
+              
+              <%= button_to update_status_admin_vp_path(@vps, new_status: 'configuring'), method: :post,
+                  class: "btn",
+                  style: "background: #2196F3; #{@vps.status == 'configuring' ? 'opacity: 0.5;' : ''}" do %>
+                ⚙️ Marquer En Configuration
+              <% end %>
+              
+              <%= button_to update_status_admin_vp_path(@vps, new_status: 'ready'), method: :post,
+                  class: "btn",
+                  style: "background: #4CAF50; #{@vps.status == 'ready' ? 'opacity: 0.5;' : ''}" do %>
+                ✅ Marquer Prêt
+              <% end %>
+              
+              <%= button_to update_status_admin_vp_path(@vps, new_status: 'active'), method: :post,
+                  class: "btn",
+                  style: "background: #00C853; #{@vps.status == 'active' ? 'opacity: 0.5;' : ''}" do %>
+                🟢 Marquer Actif
+              <% end %>
+              
+              <%= button_to update_status_admin_vp_path(@vps, new_status: 'suspended'), method: :post,
+                  class: "btn",
+                  data: { turbo_confirm: "Suspendre ce VPS ?" },
+                  style: "background: #F44336;" do %>
+                ⏸️ Suspendre
+              <% end %>
+              
+              <%= button_to update_status_admin_vp_path(@vps, new_status: 'cancelled'), method: :post,
+                  class: "btn",
+                  data: { turbo_confirm: "Annuler ce VPS ? Cette action est définitive." },
+                  style: "background: #999;" do %>
+                🔴 Annuler
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

@@ -27,6 +27,8 @@ module Api
         )
 
         sync_trades(mt5_account, sync_params[:trades]) if sync_params[:trades].present?
+        
+        sync_bot_performances(mt5_account.user)
 
         render json: {
           message: "Data synchronized successfully",
@@ -74,7 +76,9 @@ module Api
             :swap,
             :open_time,
             :close_time,
-            :status
+            :status,
+            :magic_number,
+            :comment
           ]
         )
       end
@@ -104,6 +108,12 @@ module Api
             amount: balance_decrease,
             withdrawal_date: Time.current
           )
+        end
+      end
+      
+      def sync_bot_performances(user)
+        user.bot_purchases.each do |purchase|
+          purchase.sync_performance_from_trades
         end
       end
     end

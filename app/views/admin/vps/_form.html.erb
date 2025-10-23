@@ -1,0 +1,82 @@
+<%= form_with model: vps, url: vps.new_record? ? admin_vps_path : admin_vp_path(vps), method: vps.new_record? ? :post : :patch, local: true do |f| %>
+  <% if vps.errors.any? %>
+    <div class="error-messages" style="background: #f44336; color: white; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+      <strong><%= pluralize(vps.errors.count, "erreur") %> :</strong>
+      <ul style="margin: 10px 0 0 20px;">
+        <% vps.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="card">
+    <h3>📋 Informations du VPS</h3>
+    
+    <div class="two-col">
+      <div class="form-group">
+        <%= f.label :user_id, "Client *" %>
+        <%= f.select :user_id,
+            clients.map { |c| [c.email, c.id] },
+            { prompt: 'Sélectionner un client...' },
+            { required: true, class: "form-control", style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" } %>
+      </div>
+      
+      <div class="form-group">
+        <%= f.label :name, "Nom du VPS *" %>
+        <%= f.text_field :name, required: true, placeholder: "Ex: VPS Trading Pro" %>
+      </div>
+    </div>
+    
+    <div class="two-col">
+      <div class="form-group">
+        <%= f.label :server_location, "Emplacement Serveur" %>
+        <%= f.text_field :server_location, placeholder: "Ex: Paris, France" %>
+        <div class="help-text">Localisation du serveur VPS</div>
+      </div>
+      
+      <div class="form-group">
+        <%= f.label :ip_address, "Adresse IP" %>
+        <%= f.text_field :ip_address, placeholder: "Ex: 192.168.1.100" %>
+        <div class="help-text">IP du VPS (laisser vide si pas encore attribuée)</div>
+      </div>
+    </div>
+    
+    <div class="two-col">
+      <div class="form-group">
+        <%= f.label :monthly_price, "Prix Mensuel (€)" %>
+        <%= f.number_field :monthly_price, step: 0.01, min: 0, placeholder: "29.99" %>
+      </div>
+      
+      <div class="form-group">
+        <%= f.label :status, "Statut *" %>
+        <%= f.select :status,
+            Vps::STATUSES.map { |k, v| [v, k] },
+            {},
+            { required: true, class: "form-control", style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔑 Accès & Configuration</h3>
+    
+    <div class="form-group">
+      <%= f.label :access_credentials, "Identifiants d'Accès" %>
+      <%= f.text_area :access_credentials, rows: 6, placeholder: "Username: admin\nPassword: ********\nPort SSH: 22\nAutres infos..." %>
+      <div class="help-text">Identifiants et informations d'accès au VPS</div>
+    </div>
+    
+    <div class="form-group">
+      <%= f.label :notes, "Notes" %>
+      <%= f.text_area :notes, rows: 4, placeholder: "Notes internes, historique de configuration, etc." %>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 12px; margin-top: 24px;">
+    <%= f.submit vps.new_record? ? "🚀 Créer le VPS" : "💾 Enregistrer les Modifications", 
+        class: "btn btn-success" %>
+    <%= link_to "Annuler", admin_vps_path, class: "btn", style: "background: #999;" %>
+  </div>
+<% end %>
+
