@@ -334,7 +334,9 @@
               <th>Watermarks at Validation</th>
               <th>Status</th>
               <th>Notes</th>
-              <th>Actions</th>
+              <% if current_user.is_admin? %>
+                <th>Actions</th>
+              <% end %>
             </tr>
           </thead>
           <tbody>
@@ -361,13 +363,15 @@
                 </td>
                 <td class="status-<%= payment.status %>"><%= payment.status.upcase %></td>
                 <td><%= payment.notes %></td>
-                <td>
-                  <% if payment.status == "pending" %>
-                    <%= button_to "Validate", admin_payment_path(payment, action_type: "validate"), method: :patch, class: "btn btn-validate" %>
-                    <%= button_to "Reject", admin_payment_path(payment, action_type: "reject"), method: :patch, class: "btn btn-reject" %>
-                  <% end %>
-                  <%= button_to "Delete", admin_payment_path(payment), method: :delete, data: { turbo_confirm: "Are you sure you want to delete this payment? This action cannot be undone." }, class: "btn btn-danger delete-btn", style: "display: none; padding: 6px 12px; font-size: 12px;" %>
-                </td>
+                <% if current_user.is_admin? %>
+                  <td>
+                    <% if payment.status == "pending" %>
+                      <%= button_to "Validate", admin_payment_path(payment, action_type: "validate"), method: :patch, class: "btn btn-validate" %>
+                      <%= button_to "Reject", admin_payment_path(payment, action_type: "reject"), method: :patch, class: "btn btn-reject" %>
+                    <% end %>
+                    <%= button_to "Delete", admin_payment_path(payment), method: :delete, data: { turbo_confirm: "Are you sure you want to delete this payment? This action cannot be undone." }, class: "btn btn-danger delete-btn", style: "display: none; padding: 6px 12px; font-size: 12px;" %>
+                  </td>
+                <% end %>
               </tr>
             <% end %>
           </tbody>
@@ -409,7 +413,9 @@
               <th>Date</th>
               <th>Amount</th>
               <th>Reason</th>
-              <th>Actions</th>
+              <% if current_user.is_admin? %>
+                <th>Actions</th>
+              <% end %>
             </tr>
           </thead>
           <tbody>
@@ -418,9 +424,11 @@
                 <td><%= credit.created_at.strftime("%Y-%m-%d") %></td>
                 <td><%= number_to_currency(credit.amount, unit: "$") %></td>
                 <td><%= credit.reason %></td>
-                <td>
-                  <%= button_to "Delete", admin_credit_path(credit), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "btn btn-danger" %>
-                </td>
+                <% if current_user.is_admin? %>
+                  <td>
+                    <%= button_to "Delete", admin_credit_path(credit), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "btn btn-danger" %>
+                  </td>
+                <% end %>
               </tr>
             <% end %>
           </tbody>
