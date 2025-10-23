@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Credits - Admin Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "Credits Management" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <% if flash[:notice] %>
+          <div class="notice"><%= flash[:notice] %></div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert"><%= flash[:alert] %></div>
+        <% end %>
+        
+        <div class="card">
+          <h2>All Credits</h2>
+          
+          <% if @credits && @credits.any? %>
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Client</th>
+                  <th>Amount</th>
+                  <th>Reason</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @credits.each do |credit| %>
+                  <tr>
+                    <td><%= credit.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+                    <td>
+                      <%= link_to credit.user.email, admin_client_path(credit.user), style: "color: var(--color-accent); text-decoration: none;" %>
+                    </td>
+                    <td class="positive"><%= number_to_currency(credit.amount, unit: "$") %></td>
+                    <td><%= credit.reason || "—" %></td>
+                    <td>
+                      <%= link_to "View Client", admin_client_path(credit.user), class: "btn btn-primary btn-sm" %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          <% else %>
+            <p style="color: var(--text-muted); text-align: center; padding: 40px;">No credits yet</p>
+          <% end %>
+        </div>
+        
+        <div class="card">
+          <h2>Credit Statistics</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Total Credits</div>
+              <div class="info-value"><%= @credits ? @credits.count : 0 %></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Total Amount</div>
+              <div class="info-value positive">
+                <%= @credits ? number_to_currency(@credits.sum(&:amount), unit: "$") : "$0.00" %>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Average Credit</div>
+              <div class="info-value">
+                <%= @credits && @credits.any? ? number_to_currency(@credits.sum(&:amount) / @credits.count, unit: "$") : "$0.00" %>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Active Clients</div>
+              <div class="info-value">
+                <%= @credits ? @credits.map(&:user_id).uniq.count : 0 %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

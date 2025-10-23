@@ -5,9 +5,15 @@
   <%= stylesheet_link_tag "admin" %>
 </head>
 <body>
-  <%= render 'admin/shared/navbar' %>
-
-  <div class="container">
+  <% @page_title = "Clients Management" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
     <% if flash[:notice] %>
       <div class="notice"><%= flash[:notice] %></div>
     <% end %>
