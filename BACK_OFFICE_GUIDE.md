@@ -22,10 +22,20 @@
 **Formule de calcul :**
 
 ```
+Net Gains = Balance Actuelle - Capital Initial
 Watermark Ajusté = High Watermark - Total des Retraits
-Gains Commissionnables = Gains Totaux - Watermark Ajusté
+Gains Commissionnables = Balance Actuelle - Watermark Ajusté (si positif)
 Commission Due = Gains Commissionnables × Taux de Commission
 ```
+
+**Note importante :** Le High Watermark représente le plus haut niveau de **balance** atteint.
+
+- Pour un nouveau compte, le watermark = capital initial
+- Quand la balance monte, le watermark monte automatiquement lors du sync MT5
+- **Quand un paiement est validé**, le watermark est mis à jour à la balance actuelle
+- Quand un retrait est effectué, le watermark ajusté diminue
+- On ne paie des commissions que sur les gains au-delà du watermark
+- Une fois un paiement validé, les gains commissionnables = 0 jusqu'aux prochains gains
 
 ### 3. Gestion des Règlements
 
@@ -51,22 +61,35 @@ Commission Due = Gains Commissionnables × Taux de Commission
 
 ### 6. Calcul du Solde Dû
 
+**Formule correcte :**
+
 ```
-Solde Dû = Commission Due - Règlements Validés - Avoirs
+Solde Dû = Commission Due - Avoirs
 ```
+
+**Important :** Les règlements validés ne sont PAS soustraits du solde dû car le **watermark gère déjà cela**.
+
+**Explication :**
+
+- Le watermark représente le niveau de balance jusqu'auquel on a déjà payé des commissions
+- Quand on valide un paiement, on met à jour le watermark = balance actuelle
+- Les gains commissionnables deviennent 0 (car balance = watermark)
+- Donc la commission due = 0
+- Les paiements validés sont juste un **historique** de ce qui a été payé
+- Seuls les **avoirs (credits)** sont soustraits car ce sont des réductions futures
 
 ## 🗄️ Structure de la Base de Données
 
 ### Nouvelles Tables
 
-- **payments** : Règlements clients (montant, date, statut, référence, notes)
+- **payments** : Règlements clients (montant, date, statut, référence, notes, payment_method)
 - **credits** : Avoirs clients (montant, motif)
 - **withdrawals** : Retraits MT5 (montant, date)
 
 ### Champs Ajoutés
 
 - **users** : `commission_rate` (%), `is_admin` (boolean)
-- **mt5_accounts** : `high_watermark`, `total_withdrawals`
+- **mt5_accounts** : `high_watermark`, `total_withdrawals`, `initial_balance`
 
 ## 🚀 Installation
 
@@ -172,24 +195,32 @@ En haut de la page, le **MT5 API Token** du client est affiché dans un encadré
 
 Table avec tous les comptes MT5 du client :
 
-- Balance actuelle
-- Profits totaux
-- High Watermark
-- Total des retraits
-- Watermark ajusté
-- Gains commissionnables
-- **Bouton "Edit WM"** pour modifier manuellement le watermark
+- **Initial Balance** : Capital de départ (modifiable)
+- **Current Balance** : Balance actuelle synchro MT5
+- **Net Gains** : Gains nets = Balance actuelle - Capital initial (vert si positif, rouge si négatif)
+- **High Watermark** : Plus haut niveau de gains historique
+- **Withdrawals** : Total des retraits effectués
+- **Adjusted WM** : Watermark ajusté = High WM - Retraits
+- **Commissionable** : Gains commissionnables = Net Gains - Adjusted WM
+- **Bouton "Edit"** pour modifier capital initial et watermark
 
-**Modifier le Watermark Manuellement :**
+**Modifier les Paramètres du Compte :**
 
-1. Cliquer sur "Edit WM" dans la colonne Actions
-2. Un formulaire apparaît sous la ligne du compte
-3. Saisir la nouvelle valeur du High Watermark
-4. Voir le watermark actuel et ajusté en dessous du champ
-5. Cliquer sur "Update" pour sauvegarder ou "Cancel" pour annuler
-6. Les gains commissionnables sont recalculés automatiquement
+1. Cliquer sur "Edit" dans la colonne Actions
+2. Un formulaire apparaît sous la ligne du compte avec 2 champs :
+   - **Initial Balance** : Le capital de départ du compte
+   - **High Watermark** : Le niveau de gains historique maximum
+3. Un encadré bleu affiche les calculs en temps réel
+4. Cliquer sur "Update" pour sauvegarder ou "Cancel" pour annuler
+5. Tous les calculs sont recalculés automatiquement
 
-**Cas d'usage :**
+**Cas d'usage Capital Initial :**
+
+- Définir le montant de départ pour un nouveau compte
+- Corriger le capital initial mal défini
+- Ajuster après un dépôt initial manqué
+
+**Cas d'usage Watermark :**
 
 - Corriger une erreur de calcul
 - Arrangement spécial avec un client
@@ -198,12 +229,29 @@ Table avec tous les comptes MT5 du client :
 
 #### Ajouter un Règlement
 
-1. Saisir le montant
-2. Sélectionner la date
-3. Ajouter une référence (optionnel)
-4. Ajouter des notes (optionnel)
-5. Cliquer sur "Create Payment"
-6. Le règlement est créé avec le statut "Pending"
+Le formulaire affiche automatiquement :
+
+- **Encadré jaune** : Solde dû actuel avec détail (commission, payé, avoirs)
+- **Encadré bleu** : Liste des watermarks de tous les comptes MT5 (pour référence)
+
+**Étapes :**
+
+1. Le montant est **pré-rempli** avec le solde dû actuel (modifiable)
+2. Sélectionner le **mode de règlement** : Bank Transfer, Cash, PayPal, Credit Card, Check, Other
+3. La date est pré-remplie avec aujourd'hui (modifiable)
+4. Ajouter une référence/numéro de transaction (optionnel)
+5. Ajouter des notes (optionnel)
+6. Cliquer sur "Create Payment"
+7. Le règlement est créé avec le statut "Pending"
+
+**Modes de règlement disponibles :**
+
+- Bank Transfer (virement bancaire)
+- Cash (espèces)
+- PayPal
+- Credit Card (carte bancaire)
+- Check (chèque)
+- Other (autre)
 
 #### Valider/Rejeter un Règlement
 
@@ -211,6 +259,36 @@ Table avec tous les comptes MT5 du client :
 2. Cliquer sur "Validate" pour valider
 3. Ou "Reject" pour rejeter
 4. Seuls les règlements validés impactent le solde dû
+
+**Que se passe-t-il lors de la validation ?**
+
+1. Un **snapshot des watermarks** est enregistré pour traçabilité
+2. Les **watermarks de tous les comptes MT5** sont mis à jour à leur balance actuelle
+3. Le règlement est marqué "Validated"
+4. Les gains commissionnables retombent à 0 (car le watermark = balance actuelle)
+5. Le client devra générer de nouveaux gains pour des commissions futures
+
+**Colonne "Watermarks at Validation"** dans l'historique :
+
+- Affiche pour chaque compte MT5 au moment de la validation :
+  - Nom du compte et MT5 ID
+  - Watermark avant → Watermark après (nouvelle balance)
+  - Gains commissionnables qui ont été payés
+
+Ceci permet de **tracer exactement** sur quels gains le paiement a été effectué.
+
+#### Supprimer un Règlement (Mode Protégé)
+
+Pour éviter les suppressions accidentelles, la suppression nécessite d'activer un mode spécial :
+
+1. Cliquer sur le bouton **"🔒 Unlock Delete Mode"** en haut à droite de l'historique
+2. Le bouton devient **"🔓 Lock Delete Mode"** (rouge)
+3. Un **warning jaune** apparaît : "⚠️ Delete Mode Active"
+4. Les boutons **"Delete"** (rouges) apparaissent sur chaque ligne
+5. Cliquer sur "Delete" puis confirmer la suppression
+6. Pour quitter le mode, re-cliquer sur le cadenas
+
+**Attention :** La suppression est définitive et ne peut pas être annulée !
 
 #### Créer un Avoir
 
@@ -254,15 +332,44 @@ Lors de chaque sync MT5 (`POST /api/v1/mt5/sync`) :
 
 ## 📊 Exemples de Calcul
 
-### Exemple 1 : Client sans retrait
+### Exemple 1 : Nouveau compte avec gains
 
 ```
-Gains totaux : 5000$
-High Watermark : 3000$
+Capital initial : 1700$
+Balance actuelle : 1837.62$
+Net Gains : 1837.62$ - 1700$ = 137.62$
+High Watermark : 1700$ (niveau initial)
 Total retraits : 0$
 
-Watermark ajusté = 3000$ - 0$ = 3000$
-Gains commissionnables = 5000$ - 3000$ = 2000$
+Watermark ajusté = 1700$ - 0$ = 1700$
+Gains commissionnables = 1837.62$ - 1700$ = 137.62$
+Commission (25%) = 137.62$ × 25% = 34.41$
+Avoirs = 0$
+
+Solde dû = 34.41$ - 0$ = 34.41$
+
+---
+
+Après validation du paiement de 34.41$ :
+High Watermark mis à jour : 1837.62$
+Gains commissionnables = 1837.62$ - 1837.62$ = 0$
+Commission due = 0$ × 25% = 0$
+Solde dû = 0$ - 0$ = 0$ ✓
+
+Historique paiements : 34.41$ (pour traçabilité)
+```
+
+### Exemple 2 : Compte avec gains importants
+
+```
+Capital initial : 10000$
+Balance actuelle : 15000$
+Net Gains : 15000$ - 10000$ = 5000$
+High Watermark : 13000$ (plus haut atteint précédemment)
+Total retraits : 0$
+
+Watermark ajusté = 13000$ - 0$ = 13000$
+Gains commissionnables = 15000$ - 13000$ = 2000$
 Commission (20%) = 2000$ × 20% = 400$
 Règlements validés = 0$
 Avoirs = 0$
@@ -270,39 +377,23 @@ Avoirs = 0$
 Solde dû = 400$ - 0$ - 0$ = 400$
 ```
 
-### Exemple 2 : Client avec retrait
+### Exemple 3 : Client avec retrait
 
 ```
-Gains totaux : 5000$
-High Watermark : 3000$
+Capital initial : 10000$
+Balance actuelle : 14000$ (après retrait de 1000$)
+Net Gains : 14000$ - 10000$ = 4000$
+High Watermark : 15000$ (avant retrait)
 Total retraits : 1000$
 
-Watermark ajusté = 3000$ - 1000$ = 2000$
-Gains commissionnables = 5000$ - 2000$ = 3000$
-Commission (20%) = 3000$ × 20% = 600$
-Règlements validés = 200$
-Avoirs = 50$
+Watermark ajusté = 15000$ - 1000$ = 14000$
+Gains commissionnables = 14000$ - 14000$ = 0$
+Commission (20%) = 0$ × 20% = 0$
 
-Solde dû = 600$ - 200$ - 50$ = 350$
+Solde dû = 0$
 ```
 
-### Exemple 3 : Client avec avoir
-
-```
-Gains totaux : 2000$
-High Watermark : 1000$
-Total retraits : 0$
-
-Watermark ajusté = 1000$
-Gains commissionnables = 2000$ - 1000$ = 1000$
-Commission (20%) = 1000$ × 20% = 200$
-Règlements validés = 150$
-Avoirs = 100$ (geste commercial)
-
-Solde dû = 200$ - 150$ - 100$ = -50$
-```
-
-Le client a un crédit de 50$ (solde négatif).
+**Note :** Après le retrait, le watermark ajusté = balance actuelle, donc pas de nouveaux gains commissionnables. Le client devra dépasser 14000$ pour générer de nouvelles commissions.
 
 ## 🎨 Interface
 

@@ -17,11 +17,11 @@ class User < ApplicationRecord
   scope :admins, -> { where(is_admin: true) }
 
   def total_profits
-    mt5_accounts.sum { |account| account.total_profits }
+    mt5_accounts.reload.sum { |account| account.net_gains }
   end
 
   def total_commissionable_gains
-    mt5_accounts.sum { |account| account.commissionable_gains }
+    mt5_accounts.reload.sum { |account| account.commissionable_gains }
   end
 
   def total_commission_due
@@ -38,7 +38,11 @@ class User < ApplicationRecord
   end
 
   def balance_due
-    (total_commission_due - total_validated_payments - total_credits).round(2)
+    (total_commission_due - total_credits).round(2)
+  end
+
+  def pending_payments_total
+    payments.pending.sum(:amount)
   end
 
   private

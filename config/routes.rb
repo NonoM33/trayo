@@ -9,7 +9,7 @@ Rails.application.routes.draw do
     delete "logout", to: "sessions#destroy"
 
     resources :clients, only: [:index, :new, :create, :show, :update, :destroy]
-    resources :payments, only: [:index, :create, :update]
+    resources :payments, only: [:index, :create, :update, :destroy]
     resources :credits, only: [:create, :destroy]
     resources :mt5_accounts, only: [:update]
   end

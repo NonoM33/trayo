@@ -30,10 +30,17 @@ module Admin
       end
     end
 
+    def destroy
+      @payment = Payment.find(params[:id])
+      user = @payment.user
+      @payment.destroy
+      redirect_to admin_client_path(user), notice: "Payment deleted successfully"
+    end
+
     private
 
     def payment_params
-      params.require(:payment).permit(:user_id, :amount, :payment_date, :reference, :notes)
+      params.require(:payment).permit(:user_id, :amount, :payment_date, :reference, :notes, :payment_method)
     end
   end
 end

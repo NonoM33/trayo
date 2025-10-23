@@ -40,6 +40,7 @@ mt5_account = Mt5Account.create!(
   mt5_id: "12345678",
   account_name: "Demo Account",
   balance: 10000.0,
+  initial_balance: 10000.0,
   high_watermark: 0.0,
   total_withdrawals: 0.0
 )

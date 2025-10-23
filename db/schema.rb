@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_23_000009) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_23_000012) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -34,6 +34,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000009) do
     t.datetime "updated_at", null: false
     t.decimal "high_watermark", precision: 15, scale: 2, default: "0.0"
     t.decimal "total_withdrawals", precision: 15, scale: 2, default: "0.0"
+    t.decimal "initial_balance", precision: 15, scale: 2, default: "0.0"
     t.index ["mt5_id"], name: "index_mt5_accounts_on_mt5_id", unique: true
     t.index ["user_id", "mt5_id"], name: "index_mt5_accounts_on_user_id_and_mt5_id", unique: true
     t.index ["user_id"], name: "index_mt5_accounts_on_user_id"
@@ -48,6 +49,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000009) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "payment_method"
+    t.text "watermark_snapshot"
     t.index ["payment_date"], name: "index_payments_on_payment_date"
     t.index ["status"], name: "index_payments_on_status"
     t.index ["user_id"], name: "index_payments_on_user_id"

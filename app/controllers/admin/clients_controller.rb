@@ -20,7 +20,8 @@ module Admin
 
     def show
       @client = User.find(params[:id])
-      @mt5_accounts = @client.mt5_accounts.includes(:trades, :withdrawals)
+      @client.reload
+      @mt5_accounts = @client.mt5_accounts.reload.includes(:trades, :withdrawals)
       @payments = @client.payments.recent
       @credits = @client.credits.recent
     end

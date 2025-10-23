@@ -70,8 +70,14 @@
               <td class="<%= client.total_commission_due > 0 ? 'positive' : '' %>">
                 <%= number_to_currency(client.total_commission_due, unit: "$") %>
               </td>
-              <td class="<%= client.balance_due > 0 ? 'negative' : 'positive' %>">
-                <%= number_to_currency(client.balance_due, unit: "$") %>
+              <td>
+                <% if client.balance_due > 0 %>
+                  <span class="negative"><%= number_to_currency(client.balance_due, unit: "$") %></span>
+                <% elsif client.balance_due < 0 %>
+                  <span class="positive">Credit: <%= number_to_currency(client.balance_due.abs, unit: "$") %></span>
+                <% else %>
+                  <span style="color: #666;">$0.00</span>
+                <% end %>
               </td>
               <td>
                 <%= link_to "View", admin_client_path(client), class: "btn-view" %>

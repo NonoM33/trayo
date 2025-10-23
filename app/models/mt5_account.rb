@@ -8,6 +8,7 @@ class Mt5Account < ApplicationRecord
   validates :balance, presence: true, numericality: true
 
   after_update :check_and_update_watermark
+  after_save :clear_user_cache
 
   def update_from_mt5_data(data)
     update!(
@@ -21,24 +22,31 @@ class Mt5Account < ApplicationRecord
     trades.where("profit > ?", 0).sum(:profit)
   end
 
+  def net_gains
+    (balance - initial_balance).round(2)
+  end
+
   def adjusted_watermark
     high_watermark - total_withdrawals
   end
 
   def commissionable_gains
-    gains = total_profits - adjusted_watermark
-    gains > 0 ? gains : 0
+    gains = balance - adjusted_watermark
+    gains > 0 ? gains.round(2) : 0
   end
 
   def recalculate_watermark!
-    current_profits = total_profits
-    if current_profits > high_watermark
-      update!(high_watermark: current_profits)
+    if balance > high_watermark
+      update!(high_watermark: balance)
     end
   end
 
   def check_and_update_watermark
     recalculate_watermark! if saved_change_to_balance?
+  end
+
+  def clear_user_cache
+    user.reload if user.present?
   end
 
   def recent_trades(limit = 20)
