@@ -47,13 +47,7 @@
   </style>
 </head>
 <body>
-  <div class="navbar">
-    <h1>Trayo Admin</h1>
-    <div>
-      <span style="margin-right: 20px; color: #333;">Admin: <%= current_user.email %></span>
-      <%= link_to "Logout", admin_logout_path, data: { turbo_method: :delete } %>
-    </div>
-  </div>
+  <%= render 'admin/shared/navbar' %>
 
   <div class="container">
     <%= link_to "← Back to Clients", admin_clients_path, class: "back-link" %>

@@ -1,0 +1,41 @@
+<div class="navbar">
+  <h1>Trayo Admin</h1>
+  <div class="navbar-right">
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+      <span class="theme-icon" id="themeIcon">🌙</span>
+    </button>
+    <% if current_user %>
+      <span class="navbar-user">Admin: <%= current_user.email %></span>
+      <%= link_to "Logout", admin_logout_path, data: { turbo_method: :delete } %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    
+    if (body.classList.contains('dark-mode')) {
+      body.classList.remove('dark-mode');
+      icon.textContent = '🌙';
+      localStorage.setItem('theme', 'light');
+    } else {
+      body.classList.add('dark-mode');
+      icon.textContent = '☀️';
+      localStorage.setItem('theme', 'dark');
+    }
+  }
+  
+  // Load saved theme on page load
+  (function() {
+    const savedTheme = localStorage.getItem('theme');
+    const icon = document.getElementById('themeIcon');
+    
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      if (icon) icon.textContent = '☀️';
+    }
+  })();
+</script>
+
