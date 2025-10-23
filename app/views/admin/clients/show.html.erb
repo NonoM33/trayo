@@ -136,6 +136,7 @@
               <th>Total Withdrawals</th>
               <th>Adjusted WM</th>
               <th>Commissionable</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -149,6 +150,33 @@
                 <td><%= number_to_currency(account.total_withdrawals, unit: "$") %></td>
                 <td><%= number_to_currency(account.adjusted_watermark, unit: "$") %></td>
                 <td class="positive"><%= number_to_currency(account.commissionable_gains, unit: "$") %></td>
+                <td>
+                  <button onclick="document.getElementById('edit-wm-<%= account.id %>').style.display='block'" class="btn-validate" style="font-size: 12px; padding: 6px 12px;">
+                    Edit WM
+                  </button>
+                </td>
+              </tr>
+              <tr id="edit-wm-<%= account.id %>" style="display: none; background: #f9f9f9;">
+                <td colspan="9" style="padding: 20px;">
+                  <%= form_with model: account, url: admin_mt5_account_path(account), method: :patch do |f| %>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                      <div style="flex: 1;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">New High Watermark ($)</label>
+                        <%= f.number_field :high_watermark, step: 0.01, style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" %>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                          Current: <%= number_to_currency(account.high_watermark, unit: "$") %> | 
+                          Adjusted: <%= number_to_currency(account.adjusted_watermark, unit: "$") %>
+                        </div>
+                      </div>
+                      <div>
+                        <%= f.submit "Update", class: "btn", style: "padding: 10px 20px; margin-top: 20px;" %>
+                        <button type="button" onclick="document.getElementById('edit-wm-<%= account.id %>').style.display='none'" class="btn" style="background: #999; padding: 10px 20px; margin-top: 20px;">
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  <% end %>
+                </td>
               </tr>
             <% end %>
           </tbody>
