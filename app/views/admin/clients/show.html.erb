@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Client Details - Admin Trayo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; }
+    .navbar { background: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .navbar h1 { color: #333; font-size: 24px; }
+    .navbar a { color: #666; text-decoration: none; padding: 8px 15px; }
+    .navbar a:hover { color: #4CAF50; }
+    .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+    .back-link { display: inline-block; margin-bottom: 20px; color: #4CAF50; text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+    .card { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 30px; margin-bottom: 20px; }
+    h2 { margin-bottom: 20px; color: #333; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; }
+    h3 { margin-bottom: 15px; margin-top: 25px; color: #555; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
+    .info-item { padding: 15px; background: #f9f9f9; border-radius: 4px; }
+    .info-label { font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
+    .info-value { font-size: 24px; font-weight: 600; color: #333; }
+    .positive { color: #4CAF50; }
+    .negative { color: #f44336; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+    th { background: #f9f9f9; color: #666; font-weight: 600; font-size: 13px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; color: #555; font-weight: 500; font-size: 14px; }
+    input[type="number"], input[type="date"], input[type="text"], textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+    textarea { min-height: 80px; font-family: inherit; }
+    .btn { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    .btn:hover { background: #45a049; }
+    .btn-danger { background: #f44336; }
+    .btn-danger:hover { background: #da190b; }
+    .btn-validate { background: #2196F3; padding: 6px 12px; font-size: 12px; }
+    .btn-validate:hover { background: #0b7dda; }
+    .btn-reject { background: #f44336; padding: 6px 12px; font-size: 12px; }
+    .btn-reject:hover { background: #da190b; }
+    .notice { padding: 15px; margin-bottom: 20px; background: #4CAF50; color: white; border-radius: 4px; }
+    .alert { padding: 15px; margin-bottom: 20px; background: #f44336; color: white; border-radius: 4px; }
+    .status-pending { color: #ff9800; font-weight: 600; }
+    .status-validated { color: #4CAF50; font-weight: 600; }
+    .status-rejected { color: #f44336; font-weight: 600; }
+    .form-inline { display: inline; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>Trayo Admin</h1>
+    <div>
+      <span style="margin-right: 20px; color: #333;">Admin: <%= current_user.email %></span>
+      <%= link_to "Logout", admin_logout_path, data: { turbo_method: :delete } %>
+    </div>
+  </div>
+
+  <div class="container">
+    <%= link_to "← Back to Clients", admin_clients_path, class: "back-link" %>
+
+    <% if flash[:notice] %>
+      <div class="notice"><%= flash[:notice] %></div>
+    <% end %>
+    <% if flash[:alert] %>
+      <div class="alert"><%= flash[:alert] %></div>
+    <% end %>
+
+    <div class="card">
+      <h2>Client: <%= @client.email %></h2>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">Commission Rate</div>
+          <div class="info-value"><%= number_to_percentage(@client.commission_rate, precision: 1) %></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Total Gains</div>
+          <div class="info-value positive"><%= number_to_currency(@client.total_profits, unit: "$") %></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Commissionable Gains</div>
+          <div class="info-value positive"><%= number_to_currency(@client.total_commissionable_gains, unit: "$") %></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Commission Due</div>
+          <div class="info-value positive"><%= number_to_currency(@client.total_commission_due, unit: "$") %></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Validated Payments</div>
+          <div class="info-value"><%= number_to_currency(@client.total_validated_payments, unit: "$") %></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Total Credits</div>
+          <div class="info-value"><%= number_to_currency(@client.total_credits, unit: "$") %></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Balance Due</div>
+          <div class="info-value <%= @client.balance_due > 0 ? 'negative' : 'positive' %>">
+            <%= number_to_currency(@client.balance_due, unit: "$") %>
+          </div>
+        </div>
+      </div>
+
+      <h3>Update Commission Rate</h3>
+      <%= form_with model: @client, url: admin_client_path(@client), method: :patch do |f| %>
+        <div class="form-group">
+          <%= f.label :commission_rate, "Commission Rate (%)" %>
+          <%= f.number_field :commission_rate, step: 0.01, min: 0, max: 100 %>
+        </div>
+        <%= f.submit "Update Rate", class: "btn" %>
+      <% end %>
+    </div>
+
+    <div class="card">
+      <h2>MT5 Accounts</h2>
+      <% if @mt5_accounts.any? %>
+        <table>
+          <thead>
+            <tr>
+              <th>MT5 ID</th>
+              <th>Account Name</th>
+              <th>Balance</th>
+              <th>Total Profits</th>
+              <th>High Watermark</th>
+              <th>Total Withdrawals</th>
+              <th>Adjusted WM</th>
+              <th>Commissionable</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @mt5_accounts.each do |account| %>
+              <tr>
+                <td><%= account.mt5_id %></td>
+                <td><%= account.account_name %></td>
+                <td><%= number_to_currency(account.balance, unit: "$") %></td>
+                <td class="positive"><%= number_to_currency(account.total_profits, unit: "$") %></td>
+                <td><%= number_to_currency(account.high_watermark, unit: "$") %></td>
+                <td><%= number_to_currency(account.total_withdrawals, unit: "$") %></td>
+                <td><%= number_to_currency(account.adjusted_watermark, unit: "$") %></td>
+                <td class="positive"><%= number_to_currency(account.commissionable_gains, unit: "$") %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p style="color: #999;">No MT5 accounts yet</p>
+      <% end %>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h2>Add Payment</h2>
+        <%= form_with model: [:admin, Payment.new], method: :post do |f| %>
+          <%= f.hidden_field :user_id, value: @client.id %>
+          
+          <div class="form-group">
+            <%= f.label :amount, "Amount ($)" %>
+            <%= f.number_field :amount, step: 0.01, min: 0, required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :payment_date, "Payment Date" %>
+            <%= f.date_field :payment_date, value: Date.today, required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :reference, "Reference" %>
+            <%= f.text_field :reference %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :notes, "Notes" %>
+            <%= f.text_area :notes %>
+          </div>
+
+          <%= f.submit "Create Payment", class: "btn" %>
+        <% end %>
+      </div>
+
+      <div class="card">
+        <h2>Add Credit</h2>
+        <%= form_with model: [:admin, Credit.new], method: :post do |f| %>
+          <%= f.hidden_field :user_id, value: @client.id %>
+          
+          <div class="form-group">
+            <%= f.label :amount, "Amount ($)" %>
+            <%= f.number_field :amount, step: 0.01, min: 0, required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :reason, "Reason" %>
+            <%= f.text_area :reason %>
+          </div>
+
+          <%= f.submit "Create Credit", class: "btn" %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Payments History</h2>
+      <% if @payments.any? %>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Reference</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @payments.each do |payment| %>
+              <tr>
+                <td><%= payment.payment_date.strftime("%Y-%m-%d") %></td>
+                <td><%= number_to_currency(payment.amount, unit: "$") %></td>
+                <td><%= payment.reference %></td>
+                <td class="status-<%= payment.status %>"><%= payment.status.upcase %></td>
+                <td><%= payment.notes %></td>
+                <td>
+                  <% if payment.status == "pending" %>
+                    <%= button_to "Validate", admin_payment_path(payment, action_type: "validate"), method: :patch, class: "btn btn-validate" %>
+                    <%= button_to "Reject", admin_payment_path(payment, action_type: "reject"), method: :patch, class: "btn btn-reject" %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p style="color: #999;">No payments yet</p>
+      <% end %>
+    </div>
+
+    <div class="card">
+      <h2>Credits History</h2>
+      <% if @credits.any? %>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Reason</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @credits.each do |credit| %>
+              <tr>
+                <td><%= credit.created_at.strftime("%Y-%m-%d") %></td>
+                <td><%= number_to_currency(credit.amount, unit: "$") %></td>
+                <td><%= credit.reason %></td>
+                <td>
+                  <%= button_to "Delete", admin_credit_path(credit), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "btn btn-danger" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p style="color: #999;">No credits yet</p>
+      <% end %>
+    </div>
+  </div>
+</body>
+</html>
+

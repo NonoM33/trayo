@@ -1,10 +1,13 @@
 class Mt5Account < ApplicationRecord
   belongs_to :user
   has_many :trades, dependent: :destroy
+  has_many :withdrawals, dependent: :destroy
 
   validates :mt5_id, presence: true, uniqueness: true
   validates :account_name, presence: true
   validates :balance, presence: true, numericality: true
+
+  after_update :check_and_update_watermark
 
   def update_from_mt5_data(data)
     update!(
@@ -12,6 +15,30 @@ class Mt5Account < ApplicationRecord
       balance: data[:balance],
       last_sync_at: Time.current
     )
+  end
+
+  def total_profits
+    trades.where("profit > ?", 0).sum(:profit)
+  end
+
+  def adjusted_watermark
+    high_watermark - total_withdrawals
+  end
+
+  def commissionable_gains
+    gains = total_profits - adjusted_watermark
+    gains > 0 ? gains : 0
+  end
+
+  def recalculate_watermark!
+    current_profits = total_profits
+    if current_profits > high_watermark
+      update!(high_watermark: current_profits)
+    end
+  end
+
+  def check_and_update_watermark
+    recalculate_watermark! if saved_change_to_balance?
   end
 
   def recent_trades(limit = 20)
