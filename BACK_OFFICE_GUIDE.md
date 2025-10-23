@@ -178,6 +178,23 @@ Table avec tous les comptes MT5 du client :
 - Total des retraits
 - Watermark ajusté
 - Gains commissionnables
+- **Bouton "Edit WM"** pour modifier manuellement le watermark
+
+**Modifier le Watermark Manuellement :**
+
+1. Cliquer sur "Edit WM" dans la colonne Actions
+2. Un formulaire apparaît sous la ligne du compte
+3. Saisir la nouvelle valeur du High Watermark
+4. Voir le watermark actuel et ajusté en dessous du champ
+5. Cliquer sur "Update" pour sauvegarder ou "Cancel" pour annuler
+6. Les gains commissionnables sont recalculés automatiquement
+
+**Cas d'usage :**
+
+- Corriger une erreur de calcul
+- Arrangement spécial avec un client
+- Réinitialisation suite à un incident
+- Ajustement suite à un changement de conditions
 
 #### Ajouter un Règlement
 
@@ -340,16 +357,17 @@ Le système utilise un système simple avec un flag booléen `is_admin` :
 GET    /admin/login              # Page de connexion
 POST   /admin/login              # Connexion
 DELETE /admin/logout             # Déconnexion
-GET    /admin/clients            # Liste des clients et admins
-GET    /admin/clients/new        # Formulaire création utilisateur
-POST   /admin/clients            # Créer utilisateur (client ou admin)
-GET    /admin/clients/:id        # Détail client
-PATCH  /admin/clients/:id        # Modifier taux commission
-DELETE /admin/clients/:id        # Supprimer utilisateur
-POST   /admin/payments           # Créer règlement
-PATCH  /admin/payments/:id       # Valider/Rejeter règlement
-POST   /admin/credits            # Créer avoir
-DELETE /admin/credits/:id        # Supprimer avoir
+GET    /admin/clients              # Liste des clients et admins
+GET    /admin/clients/new          # Formulaire création utilisateur
+POST   /admin/clients              # Créer utilisateur (client ou admin)
+GET    /admin/clients/:id          # Détail client
+PATCH  /admin/clients/:id          # Modifier taux commission
+DELETE /admin/clients/:id          # Supprimer utilisateur
+POST   /admin/payments             # Créer règlement
+PATCH  /admin/payments/:id         # Valider/Rejeter règlement
+POST   /admin/credits              # Créer avoir
+DELETE /admin/credits/:id          # Supprimer avoir
+PATCH  /admin/mt5_accounts/:id     # Modifier watermark d'un compte MT5
 ```
 
 ## 🧪 Tests
