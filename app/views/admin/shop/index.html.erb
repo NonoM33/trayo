@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Shop - Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "Trading Bots Shop" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <% if flash[:notice] %>
+          <div class="notice"><%= flash[:notice] %></div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert"><%= flash[:alert] %></div>
+        <% end %>
+        
+        <% unless current_user.is_admin? %>
+          <div class="card">
+            <h2>💳 Your Credits</h2>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">Available Credits</div>
+                <div class="info-value positive">
+                  <%= number_to_currency(current_user.total_credits, unit: "$") %>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Bots Owned</div>
+                <div class="info-value">
+                  <%= @my_bots.count %>
+                </div>
+              </div>
+            </div>
+            
+            <% if @my_bots.any? %>
+              <h3 style="margin-top: 24px;">Your Bots</h3>
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; margin-top: 16px;">
+                <% @my_bots.each do |purchase| %>
+                  <div style="border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; background: var(--bg-hover);">
+                    <div style="font-weight: 600; margin-bottom: 8px;">✅ <%= purchase.trading_bot.name %></div>
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                      Purchased: <%= purchase.created_at.strftime("%Y-%m-%d") %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+        
+        <div class="card">
+          <h2>🤖 Available Trading Bots</h2>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-top: 24px;">
+            <% @trading_bots.each do |bot| %>
+              <div style="border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; background: var(--bg-card); transition: all 0.2s;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                  <div style="width: 50px; height: 50px; border-radius: 10px; background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%); display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                    🤖
+                  </div>
+                  <div>
+                    <div style="font-size: 18px; font-weight: 700; color: var(--text-primary);"><%= bot.name %></div>
+                    <div style="font-size: 12px; color: var(--text-muted);"><%= bot.bot_type %></div>
+                  </div>
+                </div>
+                
+                <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px; min-height: 60px;">
+                  <%= bot.description %>
+                </p>
+                
+                <div style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 16px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: var(--color-accent);">
+                      <%= number_to_currency(bot.price, unit: "$") %>
+                    </div>
+                    
+                    <% unless current_user.is_admin? %>
+                      <% if current_user.bot_purchases.exists?(trading_bot_id: bot.id, status: "active") %>
+                        <span style="padding: 8px 16px; background: var(--bg-success-box); color: var(--text-success); border-radius: 6px; font-size: 13px; font-weight: 600;">
+                          ✓ Owned
+                        </span>
+                      <% else %>
+                        <%= button_to "Purchase", purchase_admin_shop_path(bot), method: :post, class: "btn btn-primary btn-sm", data: { confirm: "Purchase #{bot.name} for #{number_to_currency(bot.price, unit: '$')}?" } %>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+          
+          <% if @trading_bots.empty? %>
+            <p style="text-align: center; color: var(--text-muted); padding: 60px 20px;">
+              No trading bots available at the moment
+            </p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
