@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>New Bonus Deposit - Trayo</title>
+  <title>Nouveau Dépôt Bonus - Trayo</title>
   <%= stylesheet_link_tag "admin" %>
 </head>
 <body>
-  <% @page_title = "New Bonus Deposit" %>
+  <% @page_title = "Nouveau Dépôt Bonus" %>
   
   <div class="app-layout">
     <%= render 'admin/shared/sidebar' %>
@@ -14,22 +14,32 @@
       <%= render 'admin/shared/navbar' %>
       
       <div class="container" style="max-width: 800px;">
-        <%= link_to "← Back to Bonus Program", admin_bonus_deposits_path, class: "back-link" %>
+        <%= link_to "← Retour au Programme Bonus", admin_bonus_deposits_path, class: "back-link" %>
         
         <div class="card">
-          <h2>💰 Make a Bonus Deposit</h2>
+          <h2>💰 Faire un Dépôt Bonus</h2>
           
-          <div class="info-box info-box-success" style="margin-bottom: 24px;">
-            <div class="info-box-title">🎉 Current Bonus Rate: <%= number_to_percentage(@current_bonus_rate, precision: 0) %></div>
-            <p style="margin: 8px 0 0 0;">
-              Valid for <%= Date.current.strftime("%B %Y") %>. Deposit now to get an instant <%= @current_bonus_rate %>% bonus on your deposit!
-            </p>
-          </div>
+          <% if @current_period && @current_bonus_rate && @current_bonus_rate > 0 %>
+            <div class="info-box info-box-success" style="margin-bottom: 24px;">
+              <div class="info-box-title">🎉 Bonus Actuel : <%= number_to_percentage(@current_bonus_rate, precision: 1) %></div>
+              <p style="margin: 8px 0 0 0;">
+                <strong><%= @current_period.name %></strong><br>
+                Valide jusqu'au <%= @current_period.end_date.strftime("%d %B %Y") %>. Déposez maintenant pour obtenir un bonus instantané de <%= number_to_percentage(@current_bonus_rate, precision: 1) %> !
+              </p>
+            </div>
+          <% else %>
+            <div class="info-box info-box-warning" style="margin-bottom: 24px;">
+              <div class="info-box-title">⚠️ Aucune Période de Bonus Active</div>
+              <p style="margin: 8px 0 0 0;">
+                Il n'y a actuellement aucune période de bonus active. Votre dépôt sera traité sans bonus.
+              </p>
+            </div>
+          <% end %>
           
           <%= form_with model: @bonus_deposit, url: admin_bonus_deposits_path, method: :post, local: true do |f| %>
             <% if @bonus_deposit.errors.any? %>
               <div class="error-messages">
-                <h3>Errors:</h3>
+                <h3>Erreurs :</h3>
                 <ul>
                   <% @bonus_deposit.errors.full_messages.each do |message| %>
                     <li><%= message %></li>

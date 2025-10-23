@@ -29,6 +29,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000020) do
     t.index ["user_id"], name: "index_bonus_deposits_on_user_id"
   end
 
+  create_table "bonus_periods", force: :cascade do |t|
+    t.decimal "bonus_percentage", precision: 5, scale: 2, null: false
+    t.date "start_date", null: false
+    t.date "end_date", null: false
+    t.boolean "active", default: true, null: false
+    t.string "name"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_bonus_periods_on_active"
+    t.index ["end_date"], name: "index_bonus_periods_on_end_date"
+    t.index ["start_date"], name: "index_bonus_periods_on_start_date"
+  end
+
   create_table "bot_purchases", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "trading_bot_id", null: false

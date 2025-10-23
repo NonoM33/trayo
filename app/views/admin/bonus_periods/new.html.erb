@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>New Bonus Period - Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "New Bonus Period" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container" style="max-width: 800px;">
+        <%= link_to "← Back to Bonus Periods", admin_bonus_periods_path, class: "back-link" %>
+        
+        <div class="card">
+          <h2>🎁 Create New Bonus Period</h2>
+          
+          <%= render 'form', bonus_period: @bonus_period %>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

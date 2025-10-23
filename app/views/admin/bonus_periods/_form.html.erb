@@ -1,0 +1,63 @@
+<%= form_with model: bonus_period, url: bonus_period.persisted? ? admin_bonus_period_path(bonus_period) : admin_bonus_periods_path, method: bonus_period.persisted? ? :patch : :post, local: true do |f| %>
+  <% if bonus_period.errors.any? %>
+    <div class="error-messages">
+      <h3>Errors:</h3>
+      <ul>
+        <% bonus_period.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  
+  <div class="form-group">
+    <%= f.label :name, "Period Name" %>
+    <%= f.text_field :name, placeholder: "e.g., Winter Promotion 2025", required: true %>
+    <div class="help-text">Give this bonus period a descriptive name</div>
+  </div>
+  
+  <div class="form-group">
+    <%= f.label :description, "Description (optional)" %>
+    <%= f.text_area :description, rows: 3, placeholder: "Additional details about this bonus period..." %>
+  </div>
+  
+  <div class="form-group">
+    <%= f.label :bonus_percentage, "Bonus Percentage (%)" %>
+    <%= f.number_field :bonus_percentage, step: 0.01, min: 0, max: 100, required: true, placeholder: "e.g., 25.00" %>
+    <div class="help-text">The bonus percentage that will be applied to deposits (0-100%)</div>
+  </div>
+  
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+    <div class="form-group">
+      <%= f.label :start_date, "Start Date" %>
+      <%= f.date_field :start_date, required: true %>
+      <div class="help-text">First day this bonus is active</div>
+    </div>
+    
+    <div class="form-group">
+      <%= f.label :end_date, "End Date" %>
+      <%= f.date_field :end_date, required: true %>
+      <div class="help-text">Last day this bonus is active</div>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+      <%= f.check_box :active %>
+      <span>Active</span>
+    </label>
+    <div class="help-text">Only active periods can be used for bonus calculations</div>
+  </div>
+  
+  <div class="info-box info-box-info">
+    <div class="info-box-title">💡 Important Notes</div>
+    <ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.8;">
+      <li>Only one active bonus period can cover any specific date</li>
+      <li>The system will automatically use the current active period for new deposits</li>
+      <li>If multiple periods overlap, you'll need to deactivate one of them</li>
+    </ul>
+  </div>
+  
+  <%= f.submit bonus_period.persisted? ? "Update Bonus Period" : "Create Bonus Period", class: "btn btn-success", style: "margin-top: 24px;" %>
+<% end %>
+

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bonus Periods Management - Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "Bonus Periods Management" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <% if flash[:notice] %>
+          <div class="notice"><%= flash[:notice] %></div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert"><%= flash[:alert] %></div>
+        <% end %>
+        
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2>🎁 Bonus Periods Management</h2>
+            <%= link_to "➕ Create New Bonus Period", new_admin_bonus_period_path, class: "btn btn-success" %>
+          </div>
+          
+          <% if @current_period %>
+            <div class="info-box info-box-success">
+              <div class="info-box-title">✅ Current Active Bonus Period</div>
+              <div style="margin-top: 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <div>
+                  <strong><%= @current_period.name || "Unnamed Period" %></strong><br>
+                  <span style="color: var(--text-muted);">Bonus: <%= number_to_percentage(@current_period.bonus_percentage, precision: 1) %></span>
+                </div>
+                <div>
+                  <strong>Period:</strong><br>
+                  <%= @current_period.start_date.strftime("%B %d, %Y") %> - <%= @current_period.end_date.strftime("%B %d, %Y") %>
+                </div>
+              </div>
+            </div>
+          <% else %>
+            <div class="info-box info-box-warning">
+              <div class="info-box-title">⚠️ No Active Bonus Period</div>
+              <p style="margin: 8px 0 0 0;">There is currently no active bonus period. Create one to enable the bonus program.</p>
+            </div>
+          <% end %>
+          
+          <% if @bonus_periods.any? %>
+            <table style="margin-top: 24px;">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Bonus %</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @bonus_periods.each do |period| %>
+                  <tr>
+                    <td>
+                      <strong><%= period.name || "Unnamed" %></strong>
+                      <% if period.description.present? %>
+                        <br><small style="color: var(--text-muted);"><%= truncate(period.description, length: 50) %></small>
+                      <% end %>
+                    </td>
+                    <td class="positive"><strong><%= number_to_percentage(period.bonus_percentage, precision: 1) %></strong></td>
+                    <td><%= period.start_date.strftime("%Y-%m-%d") %></td>
+                    <td><%= period.end_date.strftime("%Y-%m-%d") %></td>
+                    <td>
+                      <% if period.current? %>
+                        <span class="status-validated">CURRENT</span>
+                      <% elsif period.active %>
+                        <% if period.start_date > Date.current %>
+                          <span class="status-pending">UPCOMING</span>
+                        <% else %>
+                          <span style="background: #666; color: white; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">EXPIRED</span>
+                        <% end %>
+                      <% else %>
+                        <span class="status-rejected">INACTIVE</span>
+                      <% end %>
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        <%= link_to "Edit", edit_admin_bonus_period_path(period), class: "btn btn-primary btn-sm" %>
+                        <%= button_to period.active ? "Deactivate" : "Activate", 
+                                      toggle_active_admin_bonus_period_path(period), 
+                                      method: :post, 
+                                      class: period.active ? "btn btn-warning btn-sm" : "btn btn-success btn-sm" %>
+                        <%= button_to "Delete", admin_bonus_period_path(period), 
+                                      method: :delete, 
+                                      data: { confirm: "Are you sure you want to delete this bonus period?" },
+                                      class: "btn btn-danger btn-sm" %>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          <% else %>
+            <p style="text-align: center; color: var(--text-muted); padding: 40px;">No bonus periods configured yet</p>
+          <% end %>
+        </div>
+        
+        <div class="card">
+          <h3>💡 Quick Guide</h3>
+          <ul style="margin: 12px 0; padding-left: 20px; line-height: 1.8;">
+            <li><strong>Active periods</strong> can be used for bonus calculations</li>
+            <li><strong>Only one period</strong> can be active for any given date range</li>
+            <li>The system automatically selects the <strong>current active period</strong> based on today's date</li>
+            <li>You can <strong>deactivate</strong> a period without deleting it</li>
+            <li>Users will see the current bonus rate when making deposits</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

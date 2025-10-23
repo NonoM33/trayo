@@ -27,6 +27,12 @@ Rails.application.routes.draw do
       end
     end
     
+    resources :bonus_periods do
+      member do
+        post :toggle_active
+      end
+    end
+    
     resources :bots do
       member do
         delete :remove_from_user
