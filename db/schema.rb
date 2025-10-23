@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_23_000015) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_23_000018) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -36,6 +36,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000015) do
     t.string "status", default: "active", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_running", default: false
+    t.decimal "current_drawdown", precision: 10, scale: 2, default: "0.0"
+    t.decimal "max_drawdown_recorded", precision: 10, scale: 2, default: "0.0"
+    t.decimal "total_profit", precision: 10, scale: 2, default: "0.0"
+    t.integer "trades_count", default: 0
+    t.datetime "started_at"
+    t.datetime "stopped_at"
     t.index ["status"], name: "index_bot_purchases_on_status"
     t.index ["trading_bot_id"], name: "index_bot_purchases_on_trading_bot_id"
     t.index ["user_id", "trading_bot_id"], name: "index_bot_purchases_on_user_id_and_trading_bot_id"
@@ -115,6 +122,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000015) do
     t.json "features"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "projection_monthly_min", precision: 10, scale: 2, default: "0.0"
+    t.decimal "projection_monthly_max", precision: 10, scale: 2, default: "0.0"
+    t.decimal "projection_yearly", precision: 10, scale: 2, default: "0.0"
+    t.decimal "win_rate", precision: 5, scale: 2, default: "0.0"
+    t.decimal "max_drawdown_limit", precision: 10, scale: 2, default: "0.0"
+    t.text "strategy_description"
+    t.string "risk_level", default: "medium"
+    t.string "image_url"
+    t.boolean "is_active", default: true
     t.index ["status"], name: "index_trading_bots_on_status"
   end
 

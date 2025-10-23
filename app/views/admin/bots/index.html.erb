@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gestion des Bots - Admin Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "Gestion des Bots de Trading" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <% if flash[:notice] %>
+          <div class="notice"><%= flash[:notice] %></div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert"><%= flash[:alert] %></div>
+        <% end %>
+
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; border: none; padding: 0;">🤖 Bots de Trading</h2>
+            <%= link_to "➕ Nouveau Bot", new_admin_bot_path, class: "btn btn-success" %>
+          </div>
+          
+          <% if @bots.any? %>
+            <table>
+              <thead>
+                <tr>
+                  <th>Nom</th>
+                  <th>Prix</th>
+                  <th>Niveau de Risque</th>
+                  <th>Projection Mensuelle</th>
+                  <th>Taux de Réussite</th>
+                  <th>Statut</th>
+                  <th>Disponible</th>
+                  <th>Utilisateurs Actifs</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @bots.each do |bot| %>
+                  <tr>
+                    <td><strong><%= bot.name %></strong></td>
+                    <td><%= bot.formatted_price %></td>
+                    <td>
+                      <span style="background: <%= bot.risk_badge_color %>; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                        <%= bot.risk_label %>
+                      </span>
+                    </td>
+                    <td>
+                      <%= number_to_currency(bot.projection_monthly_min, unit: "€", format: "%n %u") %> - 
+                      <%= number_to_currency(bot.projection_monthly_max, unit: "€", format: "%n %u") %>
+                    </td>
+                    <td class="positive"><%= number_to_percentage(bot.win_rate, precision: 1) %></td>
+                    <td>
+                      <% if bot.status == 'active' %>
+                        <span style="color: #4CAF50;">✓ Actif</span>
+                      <% else %>
+                        <span style="color: #999;">○ Inactif</span>
+                      <% end %>
+                    </td>
+                    <td>
+                      <% if bot.is_active? %>
+                        <span style="color: #4CAF50;">🟢 Oui</span>
+                      <% else %>
+                        <span style="color: #F44336;">🔴 Non</span>
+                      <% end %>
+                    </td>
+                    <td style="text-align: center;"><%= bot.active_users_count %></td>
+                    <td>
+                      <div class="action-buttons">
+                        <%= link_to "Voir", admin_bot_path(bot), class: "btn btn-primary btn-sm" %>
+                        <%= link_to "Modifier", edit_admin_bot_path(bot), class: "btn btn-sm", style: "background: #FF9800;" %>
+                        <%= button_to "Supprimer", admin_bot_path(bot), method: :delete, 
+                            data: { turbo_confirm: "Supprimer ce bot ?" }, 
+                            class: "btn btn-danger btn-sm" %>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          <% else %>
+            <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+              <div style="font-size: 48px; margin-bottom: 16px;">🤖</div>
+              <h3 style="margin: 0 0 8px 0;">Aucun bot pour le moment</h3>
+              <p style="margin: 0 0 24px 0;">Créez votre premier bot de trading</p>
+              <%= link_to "➕ Créer un Bot", new_admin_bot_path, class: "btn btn-success" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

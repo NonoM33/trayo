@@ -1,0 +1,152 @@
+<%= form_with model: bot, url: bot.new_record? ? admin_bots_path : admin_bot_path(bot), method: bot.new_record? ? :post : :patch, local: true do |f| %>
+  <% if bot.errors.any? %>
+    <div class="error-messages" style="background: #f44336; color: white; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+      <strong><%= pluralize(bot.errors.count, "erreur") %> :</strong>
+      <ul style="margin: 10px 0 0 20px;">
+        <% bot.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="card">
+    <h3>📝 Informations Générales</h3>
+    
+    <div class="two-col">
+      <div class="form-group">
+        <%= f.label :name, "Nom du Bot *" %>
+        <%= f.text_field :name, required: true, placeholder: "Ex: Alpha Trader Pro" %>
+      </div>
+      
+      <div class="form-group">
+        <%= f.label :price, "Prix (€) *" %>
+        <%= f.number_field :price, step: 0.01, min: 0, required: true, placeholder: "499.00" %>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <%= f.label :description, "Description Courte" %>
+      <%= f.text_area :description, rows: 3, placeholder: "Une description attrayante du bot..." %>
+    </div>
+    
+    <div class="two-col">
+      <div class="form-group">
+        <%= f.label :image_url, "URL de l'Image" %>
+        <%= f.text_field :image_url, placeholder: "https://..." %>
+        <div class="help-text">Lien vers une image représentant le bot</div>
+      </div>
+      
+      <div class="form-group">
+        <%= f.label :status, "Statut *" %>
+        <%= f.select :status, [['Actif', 'active'], ['Inactif', 'inactive']], {}, 
+            { class: "form-control", style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" } %>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <%= f.check_box :is_active, style: "width: auto; margin: 0;" %>
+        <span>Disponible à la vente dans la boutique</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📊 Projections & Performance</h3>
+    
+    <div class="two-col">
+      <div class="form-group">
+        <%= f.label :projection_monthly_min, "Gain Mensuel Minimum (€)" %>
+        <%= f.number_field :projection_monthly_min, step: 0.01, min: 0, placeholder: "500" %>
+        <div class="help-text">Projection la plus conservatrice</div>
+      </div>
+      
+      <div class="form-group">
+        <%= f.label :projection_monthly_max, "Gain Mensuel Maximum (€)" %>
+        <%= f.number_field :projection_monthly_max, step: 0.01, min: 0, placeholder: "1500" %>
+        <div class="help-text">Projection optimiste</div>
+      </div>
+    </div>
+    
+    <div class="two-col">
+      <div class="form-group">
+        <%= f.label :projection_yearly, "Gain Annuel Projeté (€)" %>
+        <%= f.number_field :projection_yearly, step: 0.01, min: 0, placeholder: "12000" %>
+      </div>
+      
+      <div class="form-group">
+        <%= f.label :win_rate, "Taux de Réussite (%)" %>
+        <%= f.number_field :win_rate, step: 0.01, min: 0, max: 100, placeholder: "75.5" %>
+        <div class="help-text">Pourcentage de trades gagnants</div>
+      </div>
+    </div>
+    
+    <div class="two-col">
+      <div class="form-group">
+        <%= f.label :risk_level, "Niveau de Risque" %>
+        <%= f.select :risk_level, [
+          ['Risque Faible', 'low'],
+          ['Risque Modéré', 'medium'],
+          ['Risque Élevé', 'high']
+        ], { include_blank: 'Sélectionner...' }, 
+        { class: "form-control", style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" } %>
+      </div>
+      
+      <div class="form-group">
+        <%= f.label :max_drawdown_limit, "Drawdown Maximum Autorisé (€)" %>
+        <%= f.number_field :max_drawdown_limit, step: 0.01, min: 0, placeholder: "500" %>
+        <div class="help-text">Limite de perte avant arrêt automatique</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🎯 Stratégie & Fonctionnalités</h3>
+    
+    <div class="form-group">
+      <%= f.label :strategy_description, "Description de la Stratégie" %>
+      <%= f.text_area :strategy_description, rows: 6, placeholder: "Expliquez comment fonctionne ce bot, sa stratégie de trading, ses avantages..." %>
+      <div class="help-text">Description détaillée pour la page de vente</div>
+    </div>
+    
+    <div class="form-group">
+      <%= f.label :features, "Caractéristiques Clés" %>
+      <div id="features-container">
+        <% (bot.features_list + [""]).each_with_index do |feature, index| %>
+          <div class="feature-input" style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <input type="text" name="trading_bot[features][]" value="<%= feature %>" 
+                   placeholder="Ex: Trading automatique 24/7" 
+                   style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm">✕</button>
+          </div>
+        <% end %>
+      </div>
+      <button type="button" onclick="addFeature()" class="btn" style="background: #4CAF50; margin-top: 10px;">
+        ➕ Ajouter une Fonctionnalité
+      </button>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 12px; margin-top: 24px;">
+    <%= f.submit bot.new_record? ? "🚀 Créer le Bot" : "💾 Enregistrer les Modifications", 
+        class: "btn btn-success" %>
+    <%= link_to "Annuler", admin_bots_path, class: "btn", style: "background: #999;" %>
+  </div>
+<% end %>
+
+<script>
+  function addFeature() {
+    const container = document.getElementById('features-container');
+    const div = document.createElement('div');
+    div.className = 'feature-input';
+    div.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px;';
+    div.innerHTML = `
+      <input type="text" name="trading_bot[features][]" placeholder="Ex: Stop-loss automatique" 
+             style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+      <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm">✕</button>
+    `;
+    container.appendChild(div);
+  }
+</script>
+

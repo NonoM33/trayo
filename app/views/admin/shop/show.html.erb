@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= @bot.name %> - Boutique Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+  <style>
+    .hero-section {
+      background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
+      border-radius: 20px;
+      padding: 60px 40px;
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 300px;
+      height: 300px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+    }
+    
+    .hero-icon {
+      font-size: 100px;
+      margin-bottom: 24px;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    .hero-title {
+      font-size: 48px;
+      font-weight: 800;
+      margin: 0 0 16px 0;
+    }
+    
+    .hero-tagline {
+      font-size: 22px;
+      opacity: 0.95;
+      margin: 0 0 32px 0;
+    }
+    
+    .hero-price {
+      font-size: 56px;
+      font-weight: 900;
+      margin: 24px 0;
+    }
+    
+    .cta-button {
+      display: inline-block;
+      padding: 20px 48px;
+      font-size: 20px;
+      font-weight: 700;
+      background: white;
+      color: var(--color-accent);
+      border-radius: 16px;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .cta-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin: 40px 0;
+    }
+    
+    .stat-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    
+    .stat-card:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-4px);
+    }
+    
+    .stat-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+    
+    .stat-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--color-success);
+      margin: 8px 0;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .calculator-card {
+      background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+      border-radius: 20px;
+      padding: 32px;
+      margin: 40px 0;
+    }
+    
+    .dark-mode .calculator-card {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+    }
+    
+    .calculator-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    
+    .calculator-input {
+      margin-bottom: 24px;
+    }
+    
+    .calculator-input label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .calculator-slider {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--border-color);
+      outline: none;
+      -webkit-appearance: none;
+    }
+    
+    .calculator-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      cursor: pointer;
+    }
+    
+    .calculator-results {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+    }
+    
+    .calculator-result {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .dark-mode .calculator-result {
+      background: var(--bg-card);
+    }
+    
+    .calculator-result-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    
+    .calculator-result-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--color-success);
+    }
+    
+    .features-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: var(--bg-hover);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    
+    .feature-item:hover {
+      background: var(--color-accent);
+      color: white;
+      transform: translateX(8px);
+    }
+    
+    .feature-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <% @page_title = @bot.name %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container" style="max-width: 1200px;">
+        <%= link_to "← Retour à la Boutique", admin_shop_index_path, class: "back-link" %>
+        
+        <% if flash[:notice] %>
+          <div class="notice"><%= flash[:notice] %></div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert"><%= flash[:alert] %></div>
+        <% end %>
+
+        <div class="hero-section">
+          <div class="hero-icon">
+            <% if @bot.image_url.present? %>
+              <img src="<%= @bot.image_url %>" alt="<%= @bot.name %>" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+            <% else %>
+              🤖
+            <% end %>
+          </div>
+          
+          <h1 class="hero-title"><%= @bot.name %></h1>
+          <p class="hero-tagline"><%= @bot.marketing_tagline %></p>
+          
+          <div style="display: inline-block; padding: 8px 20px; background: rgba(255, 255, 255, 0.2); border-radius: 20px; margin-bottom: 16px;">
+            <strong><%= @bot.risk_label %></strong>
+          </div>
+          
+          <div class="hero-price"><%= @bot.formatted_price %></div>
+          
+          <% if @already_owned %>
+            <%= link_to admin_my_bots_path, class: "cta-button", style: "background: #4CAF50; color: white;" do %>
+              ✓ Déjà Possédé - Voir Mes Bots
+            <% end %>
+          <% else %>
+            <%= button_to "🚀 Acheter Maintenant", purchase_admin_shop_path(@bot),
+                class: "cta-button", style: "border: none; cursor: pointer;" %>
+          <% end %>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-value">
+              <%= number_to_currency(@bot.projection_monthly_min, unit: "€", format: "%n %u", precision: 0) %> - 
+              <%= number_to_currency(@bot.projection_monthly_max, unit: "€", format: "%n %u", precision: 0) %>
+            </div>
+            <div class="stat-label">Gain Mensuel</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-value"><%= number_to_percentage(@bot.win_rate, precision: 0) %></div>
+            <div class="stat-label">Taux de Réussite</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value">
+              <%= number_to_currency(@bot.projection_yearly, unit: "€", format: "%n %u", precision: 0) %>
+            </div>
+            <div class="stat-label">Gain Annuel</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">🛡️</div>
+            <div class="stat-value">
+              <%= number_to_currency(@bot.max_drawdown_limit, unit: "€", format: "%n %u", precision: 0) %>
+            </div>
+            <div class="stat-label">Drawdown Max</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📊 Projection Interactive</h2>
+          <div style="position: relative; height: 400px; margin: 24px 0;">
+            <canvas id="projectionChart"></canvas>
+          </div>
+        </div>
+
+        <div class="calculator-card">
+          <h3 class="calculator-title">💡 Vos Gains Potentiels avec <%= @bot.name %></h3>
+          
+          <% user_capital = current_user.mt5_accounts.sum(:balance).to_f %>
+          <% user_capital = 10000 if user_capital < 1000 %>
+          
+          <div style="background: rgba(59, 130, 246, 0.1); padding: 16px; border-radius: 12px; margin-bottom: 24px; border-left: 4px solid var(--color-accent);">
+            <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">💰 Votre Capital Actuel</div>
+            <div style="font-size: 32px; font-weight: 800; color: var(--color-accent);">
+              <%= number_to_currency(user_capital, unit: "€", format: "%n %u", precision: 0) %>
+            </div>
+            <% if current_user.mt5_accounts.any? %>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                Calculé depuis <%= current_user.mt5_accounts.count %> <%= current_user.mt5_accounts.count == 1 ? 'compte MT5' : 'comptes MT5' %>
+              </div>
+            <% end %>
+          </div>
+          
+          <div class="calculator-input">
+            <label for="capitalInput">
+              Ajustez Votre Capital : <strong><span id="capitalDisplay"><%= user_capital.to_i %></span> €</strong>
+            </label>
+            <input type="range" id="capitalInput" class="calculator-slider" 
+                   min="1000" max="<%= [user_capital * 2, 100000].max.to_i %>" step="1000" value="<%= user_capital.to_i %>">
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+              Bougez le curseur pour simuler avec un capital différent
+            </div>
+          </div>
+          
+          <div class="calculator-results">
+            <div class="calculator-result">
+              <div class="calculator-result-label">Dans 1 Mois</div>
+              <div class="calculator-result-value" id="gain1Month">-</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                Balance: <span id="balance1Month">-</span>
+              </div>
+            </div>
+            <div class="calculator-result">
+              <div class="calculator-result-label">Dans 6 Mois</div>
+              <div class="calculator-result-value" id="gain6Months">-</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                Balance: <span id="balance6Months">-</span>
+              </div>
+            </div>
+            <div class="calculator-result">
+              <div class="calculator-result-label">Dans 1 An</div>
+              <div class="calculator-result-value" id="gain1Year">-</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                Balance: <span id="balance1Year">-</span>
+              </div>
+            </div>
+          </div>
+          
+          <div style="margin-top: 24px; padding: 16px; background: rgba(16, 185, 129, 0.1); border-radius: 12px; text-align: center;">
+            <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">💎 ROI Estimé sur 1 An</div>
+            <div style="font-size: 36px; font-weight: 900; color: var(--color-success);" id="roiDisplay">-</div>
+          </div>
+        </div>
+
+        <% if @bot.strategy_description.present? %>
+          <div class="card">
+            <h2>🎯 Stratégie de Trading</h2>
+            <p style="white-space: pre-wrap; line-height: 1.8; font-size: 16px;"><%= @bot.strategy_description %></p>
+          </div>
+        <% end %>
+
+        <% if @bot.features_list.any? %>
+          <div class="card">
+            <h2>✨ Caractéristiques Clés</h2>
+            <ul class="features-list">
+              <% @bot.features_list.each do |feature| %>
+                <li class="feature-item">
+                  <span class="feature-icon">✓</span>
+                  <span style="font-size: 16px; font-weight: 500;"><%= feature %></span>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <% if @bot.active_users_count > 0 %>
+          <div class="card" style="background: linear-gradient(135deg, #e0f2fe, #dbeafe); border: 2px solid #3b82f6;">
+            <h3 style="margin: 0 0 12px 0; color: #1e40af;">👥 Preuve Sociale</h3>
+            <p style="margin: 0; font-size: 18px; font-weight: 600; color: #1e40af;">
+              <strong><%= @bot.active_users_count %></strong> <%= @bot.active_users_count == 1 ? 'trader utilise' : 'traders utilisent' %> déjà ce bot avec succès !
+            </p>
+          </div>
+        <% end %>
+
+        <div class="card" style="background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover)); text-align: center; padding: 48px;">
+          <h2 style="color: white; margin: 0 0 24px 0; font-size: 32px;">Prêt à Automatiser Vos Trades ?</h2>
+          <% if @already_owned %>
+            <%= link_to admin_my_bots_path, 
+                class: "cta-button", 
+                style: "background: #4CAF50; color: white; font-size: 18px; padding: 16px 40px;" do %>
+              ✓ Aller à Mes Bots
+            <% end %>
+          <% else %>
+            <%= button_to "🚀 Acheter #{@bot.name} Maintenant", 
+                purchase_admin_shop_path(@bot),
+                class: "cta-button", 
+                style: "border: none; cursor: pointer; font-size: 18px; padding: 16px 40px;" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" data-turbo-track="reload"></script>
+  <script data-turbo-track="reload">
+    const monthlyAvg = <%= @bot.projected_monthly_average %>;
+    const monthlyMin = <%= @bot.projection_monthly_min %>;
+    const monthlyMax = <%= @bot.projection_monthly_max %>;
+    const userCapital = <%= current_user.mt5_accounts.sum(:balance).to_f > 1000 ? current_user.mt5_accounts.sum(:balance).to_f : 10000 %>;
+    
+    function initializeProjectionChart() {
+      const ctx = document.getElementById('projectionChart');
+      if (!ctx) return;
+      
+      if (window.projectionChartInstance) {
+        window.projectionChartInstance.destroy();
+      }
+      
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      const textColor = isDarkMode ? '#e2e8f0' : '#1e293b';
+      const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+      
+      const labels = [];
+      const withoutBot = [];
+      const withBotMin = [];
+      const withBotMax = [];
+      
+      for (let i = 0; i <= 12; i++) {
+        labels.push(`Mois ${i}`);
+        withoutBot.push(userCapital);
+        withBotMin.push(userCapital + (monthlyMin * i));
+        withBotMax.push(userCapital + (monthlyMax * i));
+      }
+      
+      window.projectionChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Sans Bot',
+              data: withoutBot,
+              borderColor: '#94a3b8',
+              backgroundColor: 'rgba(148, 163, 184, 0.1)',
+              borderWidth: 2,
+              borderDash: [5, 5],
+              pointRadius: 0,
+              tension: 0
+            },
+            {
+              label: 'Avec Bot (Min)',
+              data: withBotMin,
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              borderWidth: 3,
+              fill: '+1',
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              tension: 0.4
+            },
+            {
+              label: 'Avec Bot (Max)',
+              data: withBotMax,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.2)',
+              borderWidth: 3,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            intersect: false,
+            mode: 'index'
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                color: textColor,
+                font: { size: 14, weight: '600' },
+                padding: 15,
+                usePointStyle: true
+              }
+            },
+            tooltip: {
+              backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+              titleColor: textColor,
+              bodyColor: textColor,
+              borderColor: isDarkMode ? '#475569' : '#cbd5e1',
+              borderWidth: 1,
+              padding: 12,
+              callbacks: {
+                label: function(context) {
+                  const value = context.parsed.y;
+                  return context.dataset.label + ': ' + value.toLocaleString('fr-FR', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                  }) + ' €';
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: textColor, font: { size: 11 } }
+            },
+            y: {
+              beginAtZero: false,
+              grid: { color: gridColor, drawBorder: false },
+              ticks: {
+                color: textColor,
+                font: { size: 12 },
+                callback: function(value) {
+                  return value.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    function updateCalculator() {
+      const capital = parseInt(document.getElementById('capitalInput').value);
+      document.getElementById('capitalDisplay').textContent = capital.toLocaleString('fr-FR');
+      
+      const gain1Month = monthlyAvg;
+      const gain6Months = monthlyAvg * 6;
+      const gain1Year = monthlyAvg * 12;
+      
+      const balance1Month = capital + gain1Month;
+      const balance6Months = capital + gain6Months;
+      const balance1Year = capital + gain1Year;
+      
+      document.getElementById('gain1Month').textContent = '+' + gain1Month.toLocaleString('fr-FR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }) + ' €';
+      
+      document.getElementById('gain6Months').textContent = '+' + gain6Months.toLocaleString('fr-FR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }) + ' €';
+      
+      document.getElementById('gain1Year').textContent = '+' + gain1Year.toLocaleString('fr-FR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }) + ' €';
+      
+      document.getElementById('balance1Month').textContent = balance1Month.toLocaleString('fr-FR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }) + ' €';
+      
+      document.getElementById('balance6Months').textContent = balance6Months.toLocaleString('fr-FR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }) + ' €';
+      
+      document.getElementById('balance1Year').textContent = balance1Year.toLocaleString('fr-FR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }) + ' €';
+      
+      const roi = ((gain1Year / capital) * 100);
+      document.getElementById('roiDisplay').textContent = '+' + roi.toLocaleString('fr-FR', {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1
+      }) + '%';
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeProjectionChart();
+      updateCalculator();
+      document.getElementById('capitalInput').addEventListener('input', updateCalculator);
+    });
+    
+    document.addEventListener('turbo:load', function() {
+      initializeProjectionChart();
+      updateCalculator();
+      document.getElementById('capitalInput').addEventListener('input', updateCalculator);
+    });
+  </script>
+</body>
+</html>
+

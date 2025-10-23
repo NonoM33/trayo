@@ -1,46 +1,34 @@
 module Admin
   class ShopController < BaseController
     def index
-      if current_user.is_admin?
-        @trading_bots = TradingBot.all.order(:name)
-      else
-        @trading_bots = TradingBot.active.order(:name)
-        @my_bots = current_user.bot_purchases.includes(:trading_bot).active
-      end
+      @bots = TradingBot.available.where(status: 'active').order(:name)
+      @my_bot_ids = current_user.bot_purchases.where(status: 'active').pluck(:trading_bot_id)
+    end
+
+    def show
+      @bot = TradingBot.find(params[:id])
+      @already_owned = current_user.bot_purchases.exists?(trading_bot_id: @bot.id, status: 'active')
     end
 
     def purchase
       @bot = TradingBot.find(params[:id])
       
       if current_user.bot_purchases.exists?(trading_bot_id: @bot.id, status: "active")
-        redirect_to admin_shop_index_path, alert: "You already own this bot"
+        redirect_to admin_shop_index_path, alert: "Vous possédez déjà ce bot"
         return
       end
 
-      if current_user.total_credits >= @bot.price
-        ActiveRecord::Base.transaction do
-          current_user.bot_purchases.create!(
-            trading_bot: @bot,
-            price_paid: @bot.price,
-            status: "active"
-          )
-          
-          current_user.credits.create!(
-            amount: -@bot.price,
-            reason: "Purchase: #{@bot.name}"
-          )
-        end
-        
-        redirect_to admin_shop_index_path, notice: "Bot purchased successfully!"
+      purchase = current_user.bot_purchases.create(
+        trading_bot: @bot,
+        price_paid: @bot.price,
+        status: "active"
+      )
+      
+      if purchase.persisted?
+        redirect_to admin_my_bots_path, notice: "🎉 Bot acheté avec succès ! Vous pouvez maintenant l'activer."
       else
-        redirect_to admin_shop_index_path, alert: "Insufficient credits. You need #{number_to_currency(@bot.price - current_user.total_credits, unit: '$')} more."
+        redirect_to admin_shop_path(@bot), alert: "Erreur lors de l'achat du bot"
       end
-    end
-
-    private
-
-    def number_to_currency(value, options = {})
-      ActionController::Base.helpers.number_to_currency(value, options)
     end
   end
 end

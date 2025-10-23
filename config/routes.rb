@@ -27,9 +27,24 @@ Rails.application.routes.draw do
       end
     end
     
-    resources :shop, only: [:index] do
+    resources :bots do
+      member do
+        delete :remove_from_user
+      end
+      collection do
+        post :assign_to_user
+      end
+    end
+    
+    resources :shop, only: [:index, :show] do
       member do
         post :purchase
+      end
+    end
+    
+    resources :my_bots, only: [:index, :show] do
+      member do
+        post :toggle_status
       end
     end
   end
@@ -44,6 +59,10 @@ Rails.application.routes.draw do
       get "accounts/balance", to: "accounts#balance"
       get "accounts/trades", to: "accounts#recent_trades"
       get "accounts/projection", to: "accounts#projection"
+      
+      get "bots", to: "bots#list"
+      get "bots/:purchase_id/status", to: "bots#status"
+      post "bots/:purchase_id/performance", to: "bots#update_performance"
       
       get "users", to: "users#index"
       get "users/me", to: "users#me"

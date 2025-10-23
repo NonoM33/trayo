@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Modifier Bot - Admin Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "Modifier le Bot" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container" style="max-width: 1200px;">
+        <%= link_to "← Retour aux Bots", admin_bots_path, class: "back-link" %>
+        
+        <h1>✏️ Modifier <%= @bot.name %></h1>
+        
+        <%= render 'form', bot: @bot %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
