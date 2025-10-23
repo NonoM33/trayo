@@ -2,7 +2,7 @@
   <div class="sidebar-header">
     <div class="sidebar-logo">
       <div class="sidebar-logo-icon">T</div>
-      <span>Trayo Admin</span>
+      <span><%= current_user.is_admin? ? 'Trayo Admin' : 'Trayo' %></span>
     </div>
   </div>
   
