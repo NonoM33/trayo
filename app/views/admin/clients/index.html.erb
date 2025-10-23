@@ -41,9 +41,9 @@
     <% end %>
 
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-        <h2 style="margin: 0;">Clients List</h2>
-        <%= link_to "➕ New User", new_admin_client_path, class: "btn-view" %>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; border: none; padding: 0;">Clients List</h2>
+        <%= link_to "➕ New User", new_admin_client_path, class: "btn btn-success" %>
       </div>
       
       <table>
@@ -80,8 +80,10 @@
                 <% end %>
               </td>
               <td>
-                <%= link_to "View", admin_client_path(client), class: "btn-view" %>
-                <%= button_to "Delete", admin_client_path(client), method: :delete, data: { turbo_confirm: "Delete this user?" }, class: "btn-view", style: "background: #f44336; display: inline-block; margin-left: 5px;" %>
+                <div class="action-buttons">
+                  <%= link_to "View", admin_client_path(client), class: "btn btn-sm" %>
+                  <%= button_to "Delete", admin_client_path(client), method: :delete, data: { turbo_confirm: "Delete this user?" }, class: "btn btn-danger btn-sm" %>
+                </div>
               </td>
             </tr>
           <% end %>
@@ -109,9 +111,9 @@
               <td><%= admin.created_at.strftime("%Y-%m-%d") %></td>
               <td>
                 <% if admin.id != current_user.id %>
-                  <%= button_to "Delete", admin_client_path(admin), method: :delete, data: { turbo_confirm: "Delete this admin?" }, class: "btn-view", style: "background: #f44336;" %>
+                  <%= button_to "Delete", admin_client_path(admin), method: :delete, data: { turbo_confirm: "Delete this admin?" }, class: "btn btn-danger btn-sm" %>
                 <% else %>
-                  <span style="color: #999;">Current User</span>
+                  <span class="text-muted">Current User</span>
                 <% end %>
               </td>
             </tr>
