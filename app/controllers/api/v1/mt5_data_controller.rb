@@ -16,9 +16,14 @@ module Api
           mt5_account.user = user
         end
 
+        old_balance = mt5_account.balance
+        new_balance = sync_params[:balance].to_f
+
+        detect_withdrawal(mt5_account, old_balance, new_balance)
+
         mt5_account.update_from_mt5_data(
           account_name: sync_params[:account_name],
-          balance: sync_params[:balance]
+          balance: new_balance
         )
 
         sync_trades(mt5_account, sync_params[:trades]) if sync_params[:trades].present?
@@ -30,7 +35,9 @@ module Api
             mt5_id: mt5_account.mt5_id,
             account_name: mt5_account.account_name,
             balance: mt5_account.balance,
-            last_sync_at: mt5_account.last_sync_at
+            last_sync_at: mt5_account.last_sync_at,
+            high_watermark: mt5_account.high_watermark,
+            total_withdrawals: mt5_account.total_withdrawals
           },
           trades_synced: sync_params[:trades]&.count || 0
         }, status: :ok
@@ -75,6 +82,28 @@ module Api
       def sync_trades(mt5_account, trades_data)
         trades_data.each do |trade_data|
           Trade.create_or_update_from_mt5(mt5_account, trade_data.to_h.symbolize_keys)
+        end
+      end
+
+      def detect_withdrawal(mt5_account, old_balance, new_balance)
+        return if mt5_account.new_record?
+        return if old_balance >= new_balance
+
+        balance_decrease = old_balance - new_balance
+        return if balance_decrease <= 0
+
+        recent_losses = mt5_account.trades
+          .where("close_time >= ?", 1.hour.ago)
+          .where("profit < ?", 0)
+          .sum(:profit)
+          .abs
+
+        if balance_decrease > (recent_losses + 10)
+          Withdrawal.create!(
+            mt5_account: mt5_account,
+            amount: balance_decrease,
+            withdrawal_date: Time.current
+          )
         end
       end
     end
