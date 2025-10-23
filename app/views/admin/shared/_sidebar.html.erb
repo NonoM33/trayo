@@ -1,9 +1,12 @@
-<div class="sidebar" id="sidebar">
+<div class="sidebar" id="mainSidebar">
   <div class="sidebar-header">
     <div class="sidebar-logo">
-      <div class="sidebar-logo-icon">T</div>
+      <div class="sidebar-logo-icon" onclick="toggleSidebarCollapse()" style="cursor: pointer;" title="Toggle sidebar">T</div>
       <span><%= current_user.is_admin? ? 'Trayo Admin' : 'Trayo' %></span>
     </div>
+    <button class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" id="sidebarToggleBtn" title="Collapse sidebar">
+      ←
+    </button>
   </div>
   
   <nav class="sidebar-nav">
@@ -97,13 +100,18 @@
   </div>
 </div>
 
-<button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
-
 <script>
-  function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('open');
-  }
+      function toggleSidebarCollapse() {
+        const sidebar = document.getElementById('mainSidebar');
+        const toggleBtn = document.getElementById('sidebarToggleBtn');
+        const isCollapsed = sidebar.classList.toggle('collapsed');
+        
+        toggleBtn.textContent = isCollapsed ? '→' : '←';
+        toggleBtn.title = isCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
+        
+        localStorage.setItem('sidebarCollapsed', isCollapsed ? 'true' : 'false');
+        document.documentElement.classList.toggle('sidebar-collapsed-init', isCollapsed);
+      }
   
   // Update sidebar theme icon
   function updateSidebarThemeIcon() {
@@ -136,9 +144,19 @@
     updateSidebarThemeIcon();
   };
   
-  // Initialize on load
-  document.addEventListener('DOMContentLoaded', function() {
-    updateSidebarThemeIcon();
-  });
+      // Initialize immediately
+      (function() {
+        const sidebar = document.getElementById('mainSidebar');
+        const toggleBtn = document.getElementById('sidebarToggleBtn');
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        
+        if (isCollapsed && sidebar && toggleBtn) {
+          sidebar.classList.add('collapsed');
+          toggleBtn.textContent = '→';
+          toggleBtn.title = 'Expand sidebar';
+        }
+        
+        updateSidebarThemeIcon();
+      })();
 </script>
 
