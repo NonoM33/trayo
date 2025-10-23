@@ -123,6 +123,7 @@ http://localhost:3000/admin/login
 3. Cliquer sur **"Create User"**
 
 **Rôles disponibles :**
+
 - **Client** : Utilisateur avec suivi de commissions, accès API, sync MT5
 - **Administrator** : Accès complet au back office, gestion des clients
 
@@ -140,6 +141,22 @@ http://localhost:3000/admin/login
 4. **Section Administrators** - Liste des admins avec possibilité de suppression
 
 ### Page Détail Client
+
+#### Token MT5 API
+
+En haut de la page, le **MT5 API Token** du client est affiché dans un encadré bleu :
+
+- Token complet en police monospace (facile à copier)
+- Ce token doit être configuré dans le script MT5 `TrayoSync.mq5`
+- Le token est généré automatiquement à la création du client
+- Il est unique par client et permet d'associer les comptes MT5 au bon utilisateur
+
+**Comment utiliser le token :**
+
+1. Copier le token depuis le back office
+2. Ouvrir le script `TrayoSync.mq5` dans MetaEditor
+3. Remplacer la valeur de `MT5_API_TOKEN` par le token copié
+4. Compiler et attacher le script au compte MT5 du client
 
 #### Informations Générales
 
