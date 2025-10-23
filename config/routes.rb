@@ -8,7 +8,12 @@ Rails.application.routes.draw do
     post "login", to: "sessions#create"
     delete "logout", to: "sessions#destroy"
 
-    resources :clients, only: [:index, :new, :create, :show, :update, :destroy]
+    resources :clients, only: [:index, :new, :create, :show, :edit, :update, :destroy] do
+      member do
+        post :reset_password
+        post :regenerate_token
+      end
+    end
     resources :payments, only: [:index, :create, :update, :destroy]
     resources :credits, only: [:index, :create, :destroy]
     resources :mt5_accounts, only: [:update]

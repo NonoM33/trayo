@@ -1,5 +1,7 @@
 module Admin
   class PaymentsController < BaseController
+    before_action :require_admin
+    
     def index
       @payments = Payment.includes(:user).order(payment_date: :desc)
     end

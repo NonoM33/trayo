@@ -10,24 +10,33 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Main</div>
       <ul class="sidebar-menu">
-        <li class="sidebar-menu-item">
-          <%= link_to admin_clients_path, class: "sidebar-menu-link #{request.path == admin_clients_path ? 'active' : ''}" do %>
-            <span class="sidebar-menu-icon">👥</span>
-            <span>Clients</span>
-          <% end %>
-        </li>
-        <li class="sidebar-menu-item">
-          <%= link_to admin_payments_path, class: "sidebar-menu-link #{request.path == admin_payments_path ? 'active' : ''}" do %>
-            <span class="sidebar-menu-icon">💰</span>
-            <span>Payments</span>
-          <% end %>
-        </li>
-        <li class="sidebar-menu-item">
-          <%= link_to admin_credits_path, class: "sidebar-menu-link #{request.path == admin_credits_path ? 'active' : ''}" do %>
-            <span class="sidebar-menu-icon">🎫</span>
-            <span>Credits</span>
-          <% end %>
-        </li>
+        <% if current_user.is_admin? %>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_clients_path, class: "sidebar-menu-link #{request.path == admin_clients_path ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">👥</span>
+              <span>Clients</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_payments_path, class: "sidebar-menu-link #{request.path == admin_payments_path ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">💰</span>
+              <span>Payments</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_credits_path, class: "sidebar-menu-link #{request.path == admin_credits_path ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">🎫</span>
+              <span>Credits</span>
+            <% end %>
+          </li>
+        <% else %>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_client_path(current_user), class: "sidebar-menu-link #{request.path == admin_client_path(current_user) ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">👤</span>
+              <span>My Profile</span>
+            <% end %>
+          </li>
+        <% end %>
       </ul>
     </div>
     
@@ -56,8 +65,8 @@
         <%= current_user.email[0].upcase %>
       </div>
       <div class="sidebar-user-info">
-        <div class="sidebar-user-name"><%= current_user.email.split('@').first %></div>
-        <div class="sidebar-user-role">Administrator</div>
+        <div class="sidebar-user-name"><%= current_user.first_name || current_user.email.split('@').first %></div>
+        <div class="sidebar-user-role"><%= current_user.is_admin? ? 'Administrator' : 'Client' %></div>
       </div>
     </div>
     <%= link_to "Logout", admin_logout_path, data: { turbo_method: :delete }, style: "display: block; text-align: center; margin-top: 8px; color: var(--text-muted); font-size: 12px; text-decoration: none;" %>

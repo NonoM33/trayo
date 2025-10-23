@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_23_000012) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_23_000013) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -88,6 +88,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000012) do
     t.string "mt5_api_token"
     t.decimal "commission_rate", precision: 5, scale: 2, default: "0.0"
     t.boolean "is_admin", default: false
+    t.string "phone"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["mt5_api_token"], name: "index_users_on_mt5_api_token", unique: true
   end

@@ -1,12 +1,18 @@
 module Admin
   class BaseController < ApplicationController
-    before_action :require_admin
+    before_action :require_login
 
     private
 
+    def require_login
+      unless current_user
+        redirect_to admin_login_path, alert: "Please login to continue"
+      end
+    end
+
     def require_admin
       unless current_user&.is_admin?
-        redirect_to root_path, alert: "Access denied"
+        redirect_to admin_client_path(current_user), alert: "Access denied. Admin privileges required."
       end
     end
 

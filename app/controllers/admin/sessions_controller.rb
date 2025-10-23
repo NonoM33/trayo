@@ -5,11 +5,15 @@ module Admin
 
     def create
       user = User.find_by(email: params[:email])
-      if user&.authenticate(params[:password]) && user.is_admin?
+      if user&.authenticate(params[:password])
         session[:user_id] = user.id
-        redirect_to admin_clients_path, notice: "Logged in successfully"
+        if user.is_admin?
+          redirect_to admin_clients_path, notice: "Welcome back, #{user.first_name || 'Admin'}!"
+        else
+          redirect_to admin_client_path(user), notice: "Welcome back, #{user.first_name || user.email}!"
+        end
       else
-        flash.now[:alert] = "Invalid credentials or not an admin"
+        flash.now[:alert] = "Invalid credentials"
         render :new, status: :unprocessable_entity
       end
     end

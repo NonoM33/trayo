@@ -1,5 +1,7 @@
 module Admin
   class CreditsController < BaseController
+    before_action :require_admin
+    
     def index
       @credits = Credit.includes(:user).order(created_at: :desc)
     end

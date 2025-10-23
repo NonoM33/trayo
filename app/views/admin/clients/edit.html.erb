@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit User - Admin Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "Edit User Profile" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container" style="max-width: 900px;">
+        <%= link_to "← Back to Client", admin_client_path(@client), class: "back-link" %>
+        
+        <% if flash[:notice] %>
+          <div class="notice"><%= flash[:notice] %></div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert"><%= flash[:alert] %></div>
+        <% end %>
+        
+        <div class="card">
+          <h2>👤 User Information</h2>
+          
+          <%= form_with model: @client, url: admin_client_path(@client), method: :patch, local: true do |f| %>
+            <div class="two-col">
+              <div class="form-group">
+                <%= f.label :first_name, "First Name" %>
+                <%= f.text_field :first_name, placeholder: "John" %>
+              </div>
+              
+              <div class="form-group">
+                <%= f.label :last_name, "Last Name" %>
+                <%= f.text_field :last_name, placeholder: "Doe" %>
+              </div>
+            </div>
+            
+            <div class="two-col">
+              <div class="form-group">
+                <%= f.label :email, "Email Address" %>
+                <%= f.email_field :email, required: true, placeholder: "user@example.com" %>
+                <div class="help-text">⚠️ Changing email will require the user to login with the new email</div>
+              </div>
+              
+              <div class="form-group">
+                <%= f.label :phone, "Phone Number" %>
+                <%= f.text_field :phone, placeholder: "+33 6 12 34 56 78" %>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <%= f.label :commission_rate, "Commission Rate (%)" %>
+              <%= f.number_field :commission_rate, step: 0.1, min: 0, max: 100 %>
+              <div class="help-text">Current: <%= number_to_percentage(@client.commission_rate, precision: 1) %></div>
+            </div>
+            
+            <div class="form-group">
+              <label>
+                <%= f.check_box :is_admin %>
+                Administrator Account
+              </label>
+              <div class="help-text">⚠️ Admin users have full access to the back office</div>
+            </div>
+            
+            <%= f.submit "💾 Save Changes", class: "btn btn-success" %>
+          <% end %>
+        </div>
+        
+        <div class="card">
+          <h2>🔐 Password Management</h2>
+          
+          <%= form_with url: reset_password_admin_client_path(@client), method: :post, local: true do |f| %>
+            <div class="info-box info-box-warning" style="margin-bottom: 20px;">
+              <div class="info-box-title">⚠️ Password Reset</div>
+              <p style="margin: 0;">A new temporary password will be generated and sent to the user's email address.</p>
+            </div>
+            
+            <div class="form-group">
+              <%= f.label :new_password, "Or set a custom password" %>
+              <%= f.password_field :new_password, placeholder: "Leave empty for auto-generated password" %>
+              <div class="help-text">Must be at least 6 characters. If empty, a random password will be generated.</div>
+            </div>
+            
+            <div class="form-group">
+              <label>
+                <%= f.check_box :send_email, checked: true %>
+                Send password reset email to user
+              </label>
+            </div>
+            
+            <%= f.submit "🔄 Reset Password", class: "btn btn-warning", data: { confirm: "Are you sure you want to reset this user's password?" } %>
+          <% end %>
+        </div>
+        
+        <div class="card">
+          <h2>🔑 API Token</h2>
+          
+          <div class="info-box info-box-info">
+            <div class="info-box-title">MT5 API Token</div>
+            <div style="font-family: monospace; font-size: 13px; word-break: break-all; margin: 10px 0;">
+              <%= @client.mt5_api_token || "Not generated yet" %>
+            </div>
+          </div>
+          
+          <%= form_with url: regenerate_token_admin_client_path(@client), method: :post, local: true do |f| %>
+            <%= f.submit "🔄 Regenerate API Token", class: "btn btn-primary", data: { confirm: "This will invalidate the current token. The MT5 script will need to be updated. Continue?" } %>
+          <% end %>
+        </div>
+        
+        <div class="card">
+          <h2>🗑️ Danger Zone</h2>
+          
+          <div class="info-box-warning" style="margin-bottom: 20px;">
+            <div class="info-box-title">⚠️ Delete User Account</div>
+            <p style="margin: 0;">This action cannot be undone. All associated MT5 accounts, trades, payments, and credits will be permanently deleted.</p>
+          </div>
+          
+          <%= button_to "🗑️ Delete User Account", admin_client_path(@client), method: :delete, class: "btn btn-danger", data: { confirm: "Are you ABSOLUTELY sure? Type DELETE to confirm.\n\nThis will permanently delete:\n- User account\n- All MT5 accounts\n- All trades\n- All payments\n- All credits\n\nThis action CANNOT be undone!" } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
