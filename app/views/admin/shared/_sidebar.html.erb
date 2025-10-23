@@ -21,6 +21,12 @@
             <% end %>
           </li>
           <li class="sidebar-menu-item">
+            <%= link_to admin_bots_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bots') ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">🤖</span>
+              <span>Bots Trading</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
             <%= link_to admin_payments_path, class: "sidebar-menu-link #{request.path == admin_payments_path ? 'active' : ''}" do %>
               <span class="sidebar-menu-icon">💰</span>
               <span>Paiements</span>
@@ -55,6 +61,12 @@
             <%= link_to admin_shop_index_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/shop') ? 'active' : ''}" do %>
               <span class="sidebar-menu-icon">🛒</span>
               <span>Boutique</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_my_bots_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/my_bots') ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">🤖</span>
+              <span>Mes Bots</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">

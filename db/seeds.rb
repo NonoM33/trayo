@@ -82,36 +82,64 @@ end
 puts "Checking trading bots..."
 bots_data = [
   {
-    name: "Scalper Pro",
-    description: "High-frequency scalping bot optimized for EUR/USD. Makes 20-50 trades per day with tight stop losses.",
-    price: 299.99,
-    bot_type: "Scalper",
+    name: "Alpha Trader Pro",
+    description: "Bot de scalping haute fréquence optimisé pour EUR/USD",
+    price: 499.00,
     status: "active",
-    features: { featured: true, risk_level: "Medium", timeframe: "M1-M5" }
+    is_active: true,
+    risk_level: "medium",
+    projection_monthly_min: 500.00,
+    projection_monthly_max: 1500.00,
+    projection_yearly: 12000.00,
+    win_rate: 75.5,
+    max_drawdown_limit: 500.00,
+    strategy_description: "Alpha Trader Pro utilise des algorithmes avancés de machine learning pour détecter les opportunités de scalping sur EUR/USD. Le bot effectue 30-80 trades par jour avec un stop-loss serré de 5 pips et un take-profit dynamique.\n\nStratégie basée sur l'analyse de microstructure de marché et l'identification de zones de liquidité. Performance optimale durant les sessions de Londres et New York.",
+    features: ["Trading automatique 24/7", "Stop-loss automatique", "Gestion dynamique du risque", "Analyse en temps réel", "Notifications par email"]
   },
   {
-    name: "Trend Master",
-    description: "Long-term trend following strategy. Works on multiple currency pairs with advanced trend detection.",
-    price: 499.99,
-    bot_type: "Trend Following",
+    name: "Trend Master Elite",
+    description: "Suiveur de tendance long terme pour tous les marchés",
+    price: 899.00,
     status: "active",
-    features: { featured: true, risk_level: "Low", timeframe: "H1-H4" }
+    is_active: true,
+    risk_level: "low",
+    projection_monthly_min: 800.00,
+    projection_monthly_max: 2000.00,
+    projection_yearly: 18000.00,
+    win_rate: 82.3,
+    max_drawdown_limit: 800.00,
+    strategy_description: "Trend Master Elite identifie et suit les tendances majeures sur plusieurs paires de devises. Utilise des moyennes mobiles exponentielles combinées à l'ADX et des filtres de volatilité.\n\nLe bot entre en position uniquement lors de tendances confirmées et utilise un trailing stop progressif pour maximiser les gains. Idéal pour les comptes de 5000€ et plus.",
+    features: ["Multi-paires de devises", "Trailing stop intelligent", "Filtres de volatilité avancés", "Ratio risque/rendement 1:3", "Backtesting sur 10 ans"]
   },
   {
-    name: "Grid Trader Elite",
-    description: "Advanced grid trading system with dynamic lot sizing and risk management. Perfect for ranging markets.",
-    price: 399.99,
-    bot_type: "Grid Trading",
+    name: "Grid Master Pro",
+    description: "Système de grille adaptatif pour marchés en range",
+    price: 699.00,
     status: "active",
-    features: { featured: false, risk_level: "Medium-High", timeframe: "H1" }
+    is_active: true,
+    risk_level: "medium",
+    projection_monthly_min: 600.00,
+    projection_monthly_max: 1800.00,
+    projection_yearly: 14400.00,
+    win_rate: 88.7,
+    max_drawdown_limit: 1000.00,
+    strategy_description: "Grid Master Pro place des ordres d'achat et de vente à intervalles réguliers autour du prix actuel. Chaque grille est adaptative en fonction de la volatilité du marché.\n\nParfait pour les marchés en consolidation. Le système ajuste automatiquement la taille des lots et les niveaux de grille selon les conditions de marché. Sécurité maximale avec stop-loss global.",
+    features: ["Grille adaptative", "Gestion automatique des lots", "Stop-loss global", "Optimisé pour marchés range", "Tableau de bord détaillé"]
   },
   {
-    name: "News Hunter",
-    description: "Automated news trading bot that reacts to economic announcements with millisecond precision.",
-    price: 599.99,
-    bot_type: "News Trading",
+    name: "News Hunter X",
+    description: "Expert en trading de nouvelles économiques",
+    price: 1299.00,
     status: "active",
-    features: { featured: true, risk_level: "High", timeframe: "M1" }
+    is_active: true,
+    risk_level: "high",
+    projection_monthly_min: 1000.00,
+    projection_monthly_max: 3500.00,
+    projection_yearly: 30000.00,
+    win_rate: 71.2,
+    max_drawdown_limit: 1500.00,
+    strategy_description: "News Hunter X analyse et trade automatiquement les annonces économiques majeures (NFP, CPI, Fed, BCE, etc). Execution en quelques millisecondes avec serveurs VPS optimisés.\n\nLe bot positionne des ordres pending avant l'annonce et les déclenche selon la déviation par rapport aux prévisions. Stratégie agressive mais très rentable pour traders expérimentés.",
+    features: ["Réaction en millisecondes", "Calendrier économique intégré", "Positions pré-calculées", "Risk management avancé", "Support VPS recommandé"]
   }
 ]
 
