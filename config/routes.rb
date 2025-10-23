@@ -11,6 +11,10 @@ Rails.application.routes.draw do
       get "accounts/balance", to: "accounts#balance"
       get "accounts/trades", to: "accounts#recent_trades"
       get "accounts/projection", to: "accounts#projection"
+      
+      get "users", to: "users#index"
+      get "users/me", to: "users#me"
+      delete "users/:id", to: "users#destroy"
     end
   end
 end
