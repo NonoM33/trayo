@@ -77,6 +77,11 @@
       touch-action: pan-y;
     }
   }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 </style>
 
 <%= render 'admin/shared/sidebar' %>
@@ -142,7 +147,13 @@
           </div>
           
           <div class="chart-container">
-            <canvas id="portfolioChart"></canvas>
+            <div id="chart-loading" style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);">
+              <div style="text-align: center;">
+                <div style="width: 40px; height: 40px; border: 3px solid var(--border-color); border-top: 3px solid var(--color-accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
+                <p style="margin: 0;">Chargement du graphique...</p>
+              </div>
+            </div>
+            <canvas id="portfolioChart" style="display: none;"></canvas>
           </div>
         </div>
         
@@ -209,15 +220,45 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" data-turbo-track="reload"></script>
-  <script data-turbo-track="reload">
-    function initializeChart() {
-      const ctx = document.getElementById('portfolioChart');
-      if (!ctx) return;
-      
-      if (window.portfolioChartInstance) {
-        window.portfolioChartInstance.destroy();
-      }
+<script data-turbo-track="reload">
+    // Fonction pour charger Chart.js de manière asynchrone
+    function loadChartJS() {
+      return new Promise((resolve, reject) => {
+        if (typeof Chart !== 'undefined') {
+          resolve(Chart);
+          return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+        script.onload = () => resolve(Chart);
+        script.onerror = () => reject(new Error('Failed to load Chart.js'));
+        document.head.appendChild(script);
+      });
+    }
+    
+    async function initializeChart() {
+      try {
+        // Attendre que Chart.js soit chargé
+        await loadChartJS();
+        
+        const ctx = document.getElementById('portfolioChart');
+        if (!ctx) {
+          console.warn('Canvas element not found');
+          return;
+        }
+        
+        // Détruire l'instance précédente si elle existe
+        if (window.portfolioChartInstance) {
+          window.portfolioChartInstance.destroy();
+        }
+        
+        // Masquer le loader et afficher le canvas
+        const loadingDiv = document.getElementById('chart-loading');
+        if (loadingDiv) {
+          loadingDiv.style.display = 'none';
+        }
+        ctx.style.display = 'block';
       
       const isDarkMode = document.body.classList.contains('dark-mode');
       const textColor = isDarkMode ? '#e2e8f0' : '#1e293b';
@@ -392,11 +433,45 @@
           }
         }
       });
+      
+      } catch (error) {
+        console.error('Error initializing chart:', error);
+        // Masquer le loader et afficher un message d'erreur
+        const loadingDiv = document.getElementById('chart-loading');
+        const ctx = document.getElementById('portfolioChart');
+        
+        if (loadingDiv) {
+          loadingDiv.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 40px;"><p style="margin: 0;">Erreur lors du chargement du graphique. Veuillez actualiser la page.</p></div>';
+        }
+        
+        if (ctx) {
+          ctx.style.display = 'none';
+        }
+      }
     }
     
-    document.addEventListener('DOMContentLoaded', initializeChart);
-    document.addEventListener('turbo:load', initializeChart);
-    document.addEventListener('turbo:render', initializeChart);
+    // Fonction pour initialiser le graphique avec retry
+    function initializeChartWithRetry(retries = 3) {
+      initializeChart().catch(error => {
+        console.error('Chart initialization failed:', error);
+        if (retries > 0) {
+          console.log(`Retrying chart initialization... ${retries} attempts left`);
+          setTimeout(() => initializeChartWithRetry(retries - 1), 1000);
+        }
+      });
+    }
+    
+    // Initialiser le graphique sur différents événements
+    document.addEventListener('DOMContentLoaded', initializeChartWithRetry);
+    document.addEventListener('turbo:load', initializeChartWithRetry);
+    document.addEventListener('turbo:render', initializeChartWithRetry);
+    
+    // Fallback pour les navigateurs plus anciens
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeChartWithRetry);
+    } else {
+      initializeChartWithRetry();
+    }
   </script>
   
   <%= render 'admin/shared/campaign_popup' %>
