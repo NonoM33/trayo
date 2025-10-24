@@ -21,72 +21,132 @@
           <div class="alert"><%= flash[:alert] %></div>
         <% end %>
 
+        <% if @vps_list.any? %>
+          <div class="info-grid" style="margin-bottom: 32px;">
+            <div class="info-item">
+              <div class="info-label">Total VPS</div>
+              <div class="info-value" style="color: var(--color-accent);"><%= @vps_list.count %></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">VPS Actifs</div>
+              <div class="info-value positive"><%= @vps_list.select { |v| v.status == 'active' }.count %></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">En Configuration</div>
+              <div class="info-value" style="color: var(--color-warning);"><%= @vps_list.select { |v| v.status == 'pending' }.count %></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Coût Mensuel Total</div>
+              <div class="info-value" style="color: var(--color-info);"><%= number_to_currency(@vps_list.sum(&:monthly_price), unit: "€", format: "%n %u") %></div>
+            </div>
+          </div>
+        <% end %>
+
         <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin: 0; border: none; padding: 0;">🖥️ <%= current_user.is_admin? ? 'Gestion VPS' : 'Mes VPS' %></h2>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+            <h2 style="margin: 0; border: none; padding: 0;">📋 <%= current_user.is_admin? ? 'Tous les VPS' : 'Mes VPS' %></h2>
             <% if current_user.is_admin? %>
-              <%= link_to "➕ Nouveau VPS", new_admin_vp_path, class: "btn btn-success" %>
+              <%= link_to new_admin_vp_path, class: "btn btn-success" do %>
+                <span>➕</span> Nouveau VPS
+              <% end %>
             <% end %>
           </div>
           
           <% if @vps_list.any? %>
-            <table>
-              <thead>
-                <tr>
-                  <% if current_user.is_admin? %>
-                    <th>Client</th>
-                  <% end %>
-                  <th>Nom</th>
-                  <th>Emplacement</th>
-                  <th>IP</th>
-                  <th>Statut</th>
-                  <th>Prix Mensuel</th>
-                  <th>Commandé le</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% @vps_list.each do |vps| %>
+            <div class="table-wrapper">
+              <table>
+                <thead>
                   <tr>
                     <% if current_user.is_admin? %>
-                      <td>
-                        <%= link_to vps.user.email, admin_client_path(vps.user) %>
-                      </td>
+                      <th>Client</th>
                     <% end %>
-                    <td><strong><%= vps.name %></strong></td>
-                    <td><%= vps.server_location || '-' %></td>
-                    <td><code style="background: var(--bg-hover); padding: 4px 8px; border-radius: 4px;"><%= vps.ip_address || 'En attente' %></code></td>
-                    <td>
-                      <span style="background: <%= vps.status_color %>; color: white; padding: 6px 14px; border-radius: 16px; font-size: 12px; font-weight: 700;">
-                        <%= vps.status_icon %> <%= vps.status_label %>
-                      </span>
-                    </td>
-                    <td><%= number_to_currency(vps.monthly_price, unit: "€", format: "%n %u") %></td>
-                    <td><%= vps.ordered_at&.strftime("%d/%m/%Y") || '-' %></td>
-                    <td>
-                      <div class="action-buttons">
-                        <%= link_to "Voir", admin_vp_path(vps), class: "btn btn-primary btn-sm" %>
-                        <% if current_user.is_admin? %>
-                          <%= link_to "Modifier", edit_admin_vp_path(vps), class: "btn btn-sm", style: "background: #FF9800;" %>
-                          <%= button_to "Supprimer", admin_vp_path(vps), method: :delete,
-                              data: { turbo_confirm: "Supprimer ce VPS ?" },
-                              class: "btn btn-danger btn-sm" %>
-                        <% end %>
-                      </div>
-                    </td>
+                    <th>VPS</th>
+                    <th>Emplacement</th>
+                    <th>IP Address</th>
+                    <th>Statut</th>
+                    <th>Prix</th>
+                    <th>Commandé</th>
+                    <th>Actions</th>
                   </tr>
-                <% end %>
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  <% @vps_list.each do |vps| %>
+                    <tr>
+                      <% if current_user.is_admin? %>
+                        <td>
+                          <%= link_to admin_client_path(vps.user), style: "text-decoration: none;" do %>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                              <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--gradient-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">
+                                <%= vps.user.email.first.upcase %>
+                              </div>
+                              <span style="color: var(--text-primary); font-weight: 600;"><%= vps.user.email %></span>
+                            </div>
+                          <% end %>
+                        </td>
+                      <% end %>
+                      <td>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                          <div style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--gradient-ocean); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                            🖥️
+                          </div>
+                          <div>
+                            <div style="font-weight: 700; color: var(--text-primary); font-size: 15px;">
+                              <%= vps.name %>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: var(--bg-hover); border-radius: var(--radius-md); font-weight: 600;">
+                          <span>🌍</span> <%= vps.server_location || 'Non spécifié' %>
+                        </span>
+                      </td>
+                      <td>
+                        <code style="background: var(--bg-hover); padding: 8px 12px; border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 13px; border: 1px solid var(--border-color); font-weight: 600;">
+                          <%= vps.ip_address || '⏳ En attente' %>
+                        </code>
+                      </td>
+                      <td>
+                        <span class="status-badge" style="background: <%= vps.status_color %>; color: white; border: none;">
+                          <%= vps.status_icon %> <%= vps.status_label %>
+                        </span>
+                      </td>
+                      <td>
+                        <div style="font-weight: 700; font-size: 16px; color: var(--color-success);">
+                          <%= number_to_currency(vps.monthly_price, unit: "€", format: "%n %u") %><span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">/mois</span>
+                        </div>
+                      </td>
+                      <td style="white-space: nowrap;">
+                        <%= vps.ordered_at&.strftime("%d/%m/%Y") || '-' %>
+                      </td>
+                      <td>
+                        <div class="action-buttons">
+                          <%= link_to "👁", admin_vp_path(vps), class: "btn btn-primary btn-sm", title: "Voir" %>
+                          <% if current_user.is_admin? %>
+                            <%= link_to "✏️", edit_admin_vp_path(vps), class: "btn btn-sm", style: "background: var(--color-warning);", title: "Modifier" %>
+                            <%= button_to "🗑", admin_vp_path(vps), method: :delete,
+                                data: { turbo_confirm: "Supprimer ce VPS ?" },
+                                class: "btn btn-danger btn-sm", title: "Supprimer" %>
+                          <% end %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
           <% else %>
-            <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
-              <div style="font-size: 48px; margin-bottom: 16px;">🖥️</div>
-              <h3 style="margin: 0 0 8px 0;">Aucun VPS pour le moment</h3>
+            <div style="text-align: center; padding: 80px 24px; color: var(--text-muted);">
+              <div style="font-size: 72px; margin-bottom: 24px; animation: float 3s ease-in-out infinite;">🖥️</div>
+              <h3 style="margin: 0 0 12px 0; font-size: 24px; color: var(--text-primary);">Aucun VPS pour le moment</h3>
               <% if current_user.is_admin? %>
-                <p style="margin: 0 0 24px 0;">Créez un VPS pour vos clients</p>
-                <%= link_to "➕ Créer un VPS", new_admin_vp_path, class: "btn btn-success" %>
+                <p style="margin: 0 0 32px 0; font-size: 16px;">Créez un serveur VPS pour vos clients</p>
+                <%= link_to new_admin_vp_path, class: "btn btn-success btn-lg" do %>
+                  <span>➕</span> Créer un VPS
+                <% end %>
               <% else %>
-                <p style="margin: 0;">Contactez l'administrateur pour commander un VPS</p>
+                <p style="margin: 0 0 32px 0; font-size: 16px;">Contactez l'administrateur pour commander un VPS dédié</p>
+                <%= link_to "💬 Contacter l'Admin", "#", class: "btn btn-primary btn-lg" %>
               <% end %>
             </div>
           <% end %>
