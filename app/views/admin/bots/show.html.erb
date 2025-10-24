@@ -41,17 +41,13 @@
             <div style="flex: 1;">
               <h2 style="margin: 0 0 12px 0;"><%= @bot.name %></h2>
               <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-                <span style="background: <%= @bot.risk_badge_color %>; color: white; padding: 6px 16px; border-radius: 16px; font-size: 13px; font-weight: 600;">
+                <span class="risk-badge risk-<%= @bot.risk_level.downcase %>">
                   <%= @bot.risk_label %>
                 </span>
                 <% if @bot.is_active? %>
-                  <span style="background: #4CAF50; color: white; padding: 6px 16px; border-radius: 16px; font-size: 13px; font-weight: 600;">
-                    🟢 Disponible
-                  </span>
+                  <span class="status-badge status-validated">Disponible</span>
                 <% else %>
-                  <span style="background: #999; color: white; padding: 6px 16px; border-radius: 16px; font-size: 13px; font-weight: 600;">
-                    🔴 Non Disponible
-                  </span>
+                  <span class="status-badge status-inactive">Non Disponible</span>
                 <% end %>
               </div>
               <p style="margin: 0; color: var(--text-secondary);"><%= @bot.description %></p>

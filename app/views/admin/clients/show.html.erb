@@ -119,14 +119,11 @@
         <table>
           <thead>
             <tr>
-              <th>ID MT5</th>
-              <th>Nom du Compte</th>
               <th>Balance Initiale</th>
               <th>Balance Actuelle</th>
               <th>Gains Nets</th>
               <th>High Watermark</th>
               <th>Retraits</th>
-              <th>WM Ajusté</th>
               <th>Commissionnable</th>
               <% if current_user.is_admin? %>
                 <th>Actions</th>
@@ -136,8 +133,6 @@
           <tbody>
             <% @mt5_accounts.each do |account| %>
               <tr>
-                <td><%= account.mt5_id %></td>
-                <td><%= account.account_name %></td>
                 <td><%= number_to_currency(account.initial_balance, unit: "€", format: "%n %u") %></td>
                 <td><%= number_to_currency(account.balance, unit: "€", format: "%n %u") %></td>
                 <td class="<%= account.net_gains > 0 ? 'positive' : 'negative' %>">
@@ -145,52 +140,15 @@
                 </td>
                 <td><%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %></td>
                 <td><%= number_to_currency(account.total_withdrawals, unit: "€", format: "%n %u") %></td>
-                <td><%= number_to_currency(account.adjusted_watermark, unit: "€", format: "%n %u") %></td>
                 <td class="positive"><%= number_to_currency(account.commissionable_gains, unit: "€", format: "%n %u") %></td>
                 <% if current_user.is_admin? %>
                   <td>
-                    <button onclick="document.getElementById('edit-account-<%= account.id %>').style.display='block'" class="btn-validate" style="font-size: 12px; padding: 6px 12px;">
+                    <button onclick="document.getElementById('edit-account-<%= account.id %>').style.display='block'" class="btn btn-outline btn-sm">
                       Modifier
                     </button>
                   </td>
                 <% end %>
               </tr>
-              <% if current_user.is_admin? %>
-              <tr id="edit-account-<%= account.id %>" style="display: none; background: #f9f9f9;">
-                <td colspan="10" style="padding: 20px;">
-                  <%= form_with model: account, url: admin_mt5_account_path(account), method: :patch do |f| %>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                      <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">Balance Initiale (€)</label>
-                        <%= f.number_field :initial_balance, step: 0.01, style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" %>
-                        <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                          Capital de départ pour ce compte
-                        </div>
-                      </div>
-                      <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">High Watermark (€)</label>
-                        <%= f.number_field :high_watermark, step: 0.01, style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" %>
-                        <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                          Actuel : <%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %>
-                        </div>
-                      </div>
-                    </div>
-                    <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 4px; font-size: 13px; color: #1976D2;">
-                      <strong>Calcul Actuel :</strong><br>
-                      Gains Nets = Balance (<%= number_to_currency(account.balance, unit: "€", format: "%n %u") %>) - Initial (<%= number_to_currency(account.initial_balance, unit: "€", format: "%n %u") %>) = <%= number_to_currency(account.net_gains, unit: "€", format: "%n %u") %><br>
-                      WM Ajusté = High WM (<%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %>) - Retraits (<%= number_to_currency(account.total_withdrawals, unit: "€", format: "%n %u") %>) = <%= number_to_currency(account.adjusted_watermark, unit: "€", format: "%n %u") %><br>
-                      Commissionnable = Balance (<%= number_to_currency(account.balance, unit: "€", format: "%n %u") %>) - WM Ajusté (<%= number_to_currency(account.adjusted_watermark, unit: "€", format: "%n %u") %>) = <%= number_to_currency(account.commissionable_gains, unit: "€", format: "%n %u") %>
-                    </div>
-                    <div style="margin-top: 15px;">
-                      <%= f.submit "Mettre à Jour", class: "btn", style: "padding: 10px 20px;" %>
-                      <button type="button" onclick="document.getElementById('edit-account-<%= account.id %>').style.display='none'" class="btn" style="background: #999; padding: 10px 20px;">
-                        Annuler
-                      </button>
-                    </div>
-                  <% end %>
-                </td>
-              </tr>
-              <% end %>
             <% end %>
           </tbody>
         </table>
@@ -198,6 +156,94 @@
         <p style="color: #999;">Aucun compte MT5 pour le moment</p>
       <% end %>
     </div>
+
+    <!-- Formulaire de modification MT5 - En dehors du tableau pour utiliser toute la largeur -->
+    <% @mt5_accounts.each do |account| %>
+      <% if current_user.is_admin? %>
+        <div id="edit-account-<%= account.id %>" class="edit-account-panel" style="display: none;">
+          <div class="edit-account-content edit-account-full-width">
+            <div class="edit-account-header">
+              <h4>Modifier le Compte MT5</h4>
+              <button type="button" onclick="document.getElementById('edit-account-<%= account.id %>').style.display='none'" class="btn btn-outline btn-sm">
+                ✕ Fermer
+              </button>
+            </div>
+            
+            <%= form_with model: account, url: admin_mt5_account_path(account), method: :patch, class: "edit-account-form" do |f| %>
+              <div class="edit-account-main">
+                <div class="edit-account-inputs">
+                  <div class="input-group">
+                    <div class="input-field">
+                      <%= f.label :initial_balance, "Balance Initiale", class: "form-label" %>
+                      <div class="input-container">
+                        <%= f.number_field :initial_balance, step: 0.01, class: "form-input-large", placeholder: "0.00" %>
+                        <span class="currency-symbol">€</span>
+                      </div>
+                      <div class="help-text">
+                        Capital de départ pour ce compte
+                      </div>
+                    </div>
+                    
+                    <div class="input-field">
+                      <%= f.label :high_watermark, "High Watermark", class: "form-label" %>
+                      <div class="input-container">
+                        <%= f.number_field :high_watermark, step: 0.01, class: "form-input-large", placeholder: "0.00" %>
+                        <span class="currency-symbol">€</span>
+                      </div>
+                      <div class="help-text">
+                        Actuel : <%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="calculation-section">
+                  <h5>Calcul Actuel</h5>
+                  <div class="calculation-grid">
+                    <div class="calculation-item">
+                      <div class="calculation-label">Gains Nets</div>
+                      <div class="calculation-formula">
+                        Balance (<%= number_to_currency(account.balance, unit: "€", format: "%n %u") %>) - Initial (<%= number_to_currency(account.initial_balance, unit: "€", format: "%n %u") %>)
+                      </div>
+                      <div class="calculation-result">
+                        <%= number_to_currency(account.net_gains, unit: "€", format: "%n %u") %>
+                      </div>
+                    </div>
+                    
+                    <div class="calculation-item">
+                      <div class="calculation-label">WM Ajusté</div>
+                      <div class="calculation-formula">
+                        High WM (<%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %>) - Retraits (<%= number_to_currency(account.total_withdrawals, unit: "€", format: "%n %u") %>)
+                      </div>
+                      <div class="calculation-result">
+                        <%= number_to_currency(account.adjusted_watermark, unit: "€", format: "%n %u") %>
+                      </div>
+                    </div>
+                    
+                    <div class="calculation-item">
+                      <div class="calculation-label">Commissionnable</div>
+                      <div class="calculation-formula">
+                        Balance (<%= number_to_currency(account.balance, unit: "€", format: "%n %u") %>) - WM Ajusté (<%= number_to_currency(account.adjusted_watermark, unit: "€", format: "%n %u") %>)
+                      </div>
+                      <div class="calculation-result">
+                        <%= number_to_currency(account.commissionable_gains, unit: "€", format: "%n %u") %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="edit-account-actions">
+                <%= f.submit "Mettre à Jour", class: "btn btn-primary btn-large" %>
+                <button type="button" onclick="document.getElementById('edit-account-<%= account.id %>').style.display='none'" class="btn btn-outline btn-large">
+                  Annuler
+                </button>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
 
     <% if current_user.is_admin? %>
     <div class="card">
@@ -248,17 +294,15 @@
                   <% end %>
                 </td>
                 <td>
-                  <%= button_to purchase.is_running? ? "⏸️ Arrêter" : "▶️ Démarrer",
+                  <%= button_to purchase.is_running? ? "Arrêter" : "Démarrer",
                       toggle_status_admin_my_bot_path(purchase),
                       method: :post,
-                      class: "btn btn-sm",
-                      style: "background: #{purchase.is_running? ? '#FF9800' : '#4CAF50'}; padding: 6px 12px; font-size: 12px;" %>
-                  <%= button_to "🗑️ Retirer",
+                      class: purchase.is_running? ? "btn btn-warning btn-sm" : "btn btn-success btn-sm" %>
+                  <%= button_to "Retirer",
                       remove_from_user_admin_bot_path(purchase.trading_bot, purchase_id: purchase.id),
                       method: :delete,
                       data: { turbo_confirm: "Retirer ce bot du client ?" },
-                      class: "btn btn-danger btn-sm",
-                      style: "padding: 6px 12px; font-size: 12px;" %>
+                      class: "btn btn-danger btn-sm" %>
                 </td>
               </tr>
             <% end %>
@@ -514,7 +558,11 @@
                     <span style="color: #999; font-size: 12px;">-</span>
                   <% end %>
                 </td>
-                <td class="status-<%= payment.status %>"><%= payment.status.upcase %></td>
+                <td>
+                  <span class="status-badge status-<%= payment.status %>">
+                    <%= payment.status.upcase %>
+                  </span>
+                </td>
                 <td><%= payment.notes %></td>
                 <% if current_user.is_admin? %>
                   <td>
