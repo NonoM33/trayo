@@ -5,7 +5,7 @@
   <%= stylesheet_link_tag "admin" %>
 </head>
 <body>
-  <% @page_title = "<i class="fa-icon fa-md fa-desktop"></i> #{current_user.is_admin? ? 'Gestion VPS' : 'Mes VPS'}" %>
+  <% @page_title = current_user.is_admin? ? 'Gestion VPS' : 'Mes VPS' %>
   
   <div class="app-layout">
     <%= render 'admin/shared/sidebar' %>
