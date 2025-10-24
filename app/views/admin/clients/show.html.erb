@@ -42,9 +42,14 @@
     <div class="card">
       <h2><%= current_user.is_admin? ? "Client : #{@client.email}" : "Informations Personnelles" %></h2>
       
-      <% if @client.mt5_api_token.present? %>
+      <% if @client.mt5_api_token.present? && current_user.is_admin? %>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #2196F3;">
-          <div style="font-weight: 600; color: #1976D2; margin-bottom: 8px;">🔑 Token API MT5</div>
+          <div style="font-weight: 600; color: #1976D2; margin-bottom: 8px;">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z"/>
+            </svg>
+            Token API MT5
+          </div>
           <div style="font-family: monospace; font-size: 14px; color: #333; word-break: break-all; background: white; padding: 10px; border-radius: 4px;">
             <%= @client.mt5_api_token %>
           </div>
@@ -55,46 +60,56 @@
       <% end %>
       
       <div class="info-grid">
-        <div class="info-item">
-          <div class="info-label">Taux de Commission</div>
-          <div class="info-value"><%= number_to_percentage(@client.commission_rate, precision: 1) %></div>
-        </div>
+        <% if current_user.is_admin? %>
+          <div class="info-item">
+            <div class="info-label">Taux de Commission</div>
+            <div class="info-value"><%= number_to_percentage(@client.commission_rate, precision: 1) %></div>
+          </div>
+        <% end %>
         <div class="info-item">
           <div class="info-label">Gains Totaux</div>
           <div class="info-value positive"><%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %></div>
         </div>
-        <div class="info-item">
-          <div class="info-label">Gains Commissionnables</div>
-          <div class="info-value positive"><%= number_to_currency(@client.total_commissionable_gains, unit: "€", format: "%n %u") %></div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Commission Due</div>
-          <div class="info-value <%= @client.total_commission_due > 0 ? 'negative' : '' %>">
-            <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %>
+        <% if current_user.is_admin? %>
+          <div class="info-item">
+            <div class="info-label">Gains Commissionnables</div>
+            <div class="info-value positive"><%= number_to_currency(@client.total_commissionable_gains, unit: "€", format: "%n %u") %></div>
           </div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Crédits Appliqués</div>
-          <div class="info-value positive"><%= number_to_currency(@client.total_credits, unit: "€", format: "%n %u") %></div>
-        </div>
-        <div class="info-item">
-          <% if @client.balance_due > 0 %>
-            <div class="info-label">Solde à Payer</div>
-            <div class="info-value negative">
-              <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
+        <% end %>
+        <% if current_user.is_admin? %>
+          <div class="info-item">
+            <div class="info-label">Commission Due</div>
+            <div class="info-value <%= @client.total_commission_due > 0 ? 'negative' : '' %>">
+              <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %>
             </div>
-          <% elsif @client.balance_due < 0 %>
-            <div class="info-label">Solde Créditeur</div>
-            <div class="info-value positive">
-              <%= number_to_currency(@client.balance_due.abs, unit: "€", format: "%n %u") %>
-            </div>
-          <% else %>
-            <div class="info-label">Solde à Payer</div>
-            <div class="info-value" style="color: #4CAF50;">
-              0 € ✓
-            </div>
-          <% end %>
-        </div>
+          </div>
+        <% end %>
+        <% if current_user.is_admin? %>
+          <div class="info-item">
+            <div class="info-label">Crédits Appliqués</div>
+            <div class="info-value positive"><%= number_to_currency(@client.total_credits, unit: "€", format: "%n %u") %></div>
+          </div>
+        <% end %>
+        <% if current_user.is_admin? %>
+          <div class="info-item">
+            <% if @client.balance_due > 0 %>
+              <div class="info-label">Solde à Payer</div>
+              <div class="info-value negative">
+                <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
+              </div>
+            <% elsif @client.balance_due < 0 %>
+              <div class="info-label">Solde Créditeur</div>
+              <div class="info-value positive">
+                <%= number_to_currency(@client.balance_due.abs, unit: "€", format: "%n %u") %>
+              </div>
+            <% else %>
+              <div class="info-label">Solde à Payer</div>
+              <div class="info-value" style="color: #4CAF50;">
+                0 € ✓
+              </div>
+            <% end %>
+          </div>
+        <% end %>
         <div class="info-item">
           <div class="info-label">Historique Paiements</div>
           <div class="info-value" style="font-size: 16px; color: #666;">
@@ -103,18 +118,21 @@
         </div>
       </div>
 
-      <h3>Mettre à Jour le Taux de Commission</h3>
-      <%= form_with model: @client, url: admin_client_path(@client), method: :patch do |f| %>
-        <div class="form-group">
-          <%= f.label :commission_rate, "Taux de Commission (%)" %>
-          <%= f.number_field :commission_rate, step: 0.01, min: 0, max: 100 %>
-        </div>
-        <%= f.submit "Mettre à Jour", class: "btn" %>
+      <% if current_user.is_admin? %>
+        <h3>Mettre à Jour le Taux de Commission</h3>
+        <%= form_with model: @client, url: admin_client_path(@client), method: :patch do |f| %>
+          <div class="form-group">
+            <%= f.label :commission_rate, "Taux de Commission (%)" %>
+            <%= f.number_field :commission_rate, step: 0.01, min: 0, max: 100 %>
+          </div>
+          <%= f.submit "Mettre à Jour", class: "btn" %>
+        <% end %>
       <% end %>
     </div>
 
-    <div class="card">
-      <h2>Comptes MT5</h2>
+    <% if current_user.is_admin? %>
+      <div class="card">
+        <h2>Comptes MT5</h2>
       <% if @mt5_accounts.any? %>
         <table>
           <thead>
@@ -507,9 +525,10 @@
     </div>
     <% end %>
 
-    <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0;">Historique des Paiements</h2>
+    <% if current_user.is_admin? %>
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="margin: 0;">Historique des Paiements</h2>
         <% if current_user.is_admin? %>
           <button onclick="toggleDeleteMode()" id="lockButton" class="btn" style="background: #666; padding: 8px 16px; font-size: 14px;">
             🔒 Déverrouiller Mode Suppression
@@ -604,9 +623,11 @@
         <p style="color: #999;">Aucun paiement pour le moment</p>
       <% end %>
     </div>
+    <% end %>
 
-    <div class="card">
-      <h2>Historique des Crédits</h2>
+    <% if current_user.is_admin? %>
+      <div class="card">
+        <h2>Historique des Crédits</h2>
       <% if @credits.any? %>
         <table>
           <thead>
@@ -639,6 +660,7 @@
       <% end %>
       </div>
     </div>
+    <% end %>
   </div>
 </body>
 </html>
