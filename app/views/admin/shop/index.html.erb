@@ -354,7 +354,7 @@
                   <% if bot.image_url.present? %>
                     <img src="<%= bot.image_url %>" alt="<%= bot.name %>">
                   <% else %>
-                    <div>🤖</div>
+                 
                   <% end %>
                   <div class="risk-badge risk-<%= bot.risk_level.downcase %>" style="position: absolute; top: 0.75rem; right: 0.75rem;">
                     <%= bot.risk_label %>

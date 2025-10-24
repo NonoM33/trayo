@@ -247,7 +247,7 @@
 
     <% if current_user.is_admin? %>
     <div class="card">
-      <h2>🤖 Bots de Trading</h2>
+      <h2>Bots de Trading</h2>
       
       <% client_bots = @client.bot_purchases.includes(:trading_bot).order(created_at: :desc) %>
       
