@@ -27,6 +27,9 @@ module Trayo
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
+    
+    # Add middleware directory to autoload paths
+    config.autoload_paths << Rails.root.join('app', 'middleware')
 
     # Configuration for the application, engines, and railties goes here.
     #
@@ -41,5 +44,11 @@ module Trayo
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+    
+    # Require maintenance middleware explicitly
+    require Rails.root.join('app', 'middleware', 'maintenance_middleware')
+    
+    # Add maintenance middleware at the beginning of the stack
+    config.middleware.insert_before ActionDispatch::Static, MaintenanceMiddleware
   end
 end

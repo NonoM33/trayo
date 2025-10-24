@@ -64,6 +64,12 @@
               <span>Campagnes</span>
             <% end %>
           </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_maintenance_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/maintenance') ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">🔧</span>
+              <span>Maintenance</span>
+            <% end %>
+          </li>
         <% else %>
           <li class="sidebar-menu-item">
             <%= link_to admin_dashboard_path, class: "sidebar-menu-link #{request.path == admin_dashboard_path ? 'active' : ''}" do %>

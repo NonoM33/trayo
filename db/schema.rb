@@ -91,6 +91,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000021) do
     t.index ["user_id"], name: "index_credits_on_user_id"
   end
 
+  create_table "maintenance_settings", id: :serial, force: :cascade do |t|
+    t.boolean "is_enabled", default: false
+    t.string "logo_url", limit: 255
+    t.string "title", limit: 255
+    t.text "subtitle"
+    t.text "description"
+    t.datetime "countdown_date", precision: nil
+    t.datetime "created_at", precision: nil, default: -> { "now()" }
+    t.datetime "updated_at", precision: nil, default: -> { "now()" }
+  end
+
   create_table "mt5_accounts", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "mt5_id", null: false

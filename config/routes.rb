@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Maintenance page
+  get "maintenance", to: "maintenance#show"
+
   root "admin/sessions#new"
 
   namespace :admin do
@@ -65,6 +68,11 @@ Rails.application.routes.draw do
         post :toggle_active
       end
     end
+    
+    # Maintenance management
+    get "maintenance", to: "maintenance#show"
+    patch "maintenance", to: "maintenance#update"
+    patch "maintenance/toggle", to: "maintenance#toggle"
   end
 
   namespace :api do
