@@ -7,7 +7,7 @@
       <span><%= current_user.is_admin? ? 'Trayo Admin' : 'Trayo' %></span>
     </div>
     <button class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" id="sidebarToggleBtn" title="Réduire la barre latérale">
-      ←
+      <i class="fa-icon fa-md fa-chevron-left"></i>
     </button>
   </div>
   
@@ -18,98 +18,92 @@
         <% if current_user.is_admin? %>
           <li class="sidebar-menu-item">
             <%= link_to admin_clients_path, class: "sidebar-menu-link #{request.path == admin_clients_path ? 'active' : ''}" do %>
-              <svg class="sidebar-menu-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 7H16.5c-.8 0-1.54.5-1.85 1.26L12.5 15H15v7h5zM12.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5zM5.5 6c1.11 0 2-.89 2-2s-.89-2-2-2-2 .89-2 2 .89 2 2 2zm2 16v-7H9l-2.15-6.74A1.5 1.5 0 0 0 5.04 7H3.5c-.8 0-1.54.5-1.85 1.26L.5 15H3v7h4.5z"/>
-              </svg>
+              <i class="fa-icon fa-md fa-users"></i>
               <span>Clients</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_bots_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bots') ? 'active' : ''}" do %>
-              <svg class="sidebar-menu-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H19V9Z"/>
-              </svg>
+              <i class="fa-icon fa-md fa-robot"></i>
               <span>Bots Trading</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_payments_path, class: "sidebar-menu-link #{request.path == admin_payments_path ? 'active' : ''}" do %>
-              <svg class="sidebar-menu-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
-              </svg>
+              <i class="fa-icon fa-md fa-credit-card"></i>
               <span>Paiements</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_credits_path, class: "sidebar-menu-link #{request.path == admin_credits_path ? 'active' : ''}" do %>
-              <span class="sidebar-menu-icon">🎫</span>
+              <i class="fa-icon fa-md fa-gift"></i>
               <span>Crédits</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_bonus_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus_deposit') ? 'active' : ''}" do %>
-              <span class="sidebar-menu-icon">🎁</span>
+              <i class="fa-icon fa-md fa-gift"></i>
               <span>Dépôts Bonus</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_bonus_periods_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus_period') ? 'active' : ''}" do %>
-              <span class="sidebar-menu-icon">📅</span>
+              <i class="fa-icon fa-md fa-calendar"></i>
               <span>Périodes Bonus</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_vps_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/vps') ? 'active' : ''}" do %>
-              <span class="sidebar-menu-icon">🖥️</span>
+              <i class="fa-icon fa-md fa-desktop"></i>
               <span>VPS</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_campaigns_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/campaigns') ? 'active' : ''}" do %>
-              <span class="sidebar-menu-icon">🎯</span>
+              <i class="fa-icon fa-md fa-bullhorn"></i>
               <span>Campagnes</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_maintenance_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/maintenance') ? 'active' : ''}" do %>
-              <span class="sidebar-menu-icon">🔧</span>
+              <i class="fa-icon fa-md fa-tools"></i>
               <span>Maintenance</span>
             <% end %>
           </li>
         <% else %>
           <li class="sidebar-menu-item">
             <%= link_to admin_dashboard_path, class: "sidebar-menu-link #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
-              <span class="sidebar-menu-icon">📊</span>
+              <i class="fa-icon fa-md fa-tachometer-alt"></i>
               <span>Tableau de Bord</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_client_path(current_user), class: "sidebar-menu-link #{request.path == admin_client_path(current_user) ? 'active' : ''}" do %>
-              <span class="sidebar-menu-icon">👤</span>
+              <i class="fa-icon fa-md fa-user"></i>
               <span>Mon Profil</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_shop_index_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/shop') ? 'active' : ''}" do %>
-              <span class="sidebar-menu-icon">🛒</span>
+              <i class="fa-icon fa-md fa-shopping-cart"></i>
               <span>Boutique</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_my_bots_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/my_bots') ? 'active' : ''}" do %>
-              <span class="sidebar-menu-icon">🤖</span>
+              <i class="fa-icon fa-md fa-robot"></i>
               <span>Mes Bots</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_bonus_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus') ? 'active' : ''}" do %>
-              <span class="sidebar-menu-icon">🎁</span>
+              <i class="fa-icon fa-md fa-gift"></i>
               <span>Programme Bonus</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_vps_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/vps') ? 'active' : ''}" do %>
-              <span class="sidebar-menu-icon">🖥️</span>
+              <i class="fa-icon fa-md fa-desktop"></i>
               <span>Mes VPS</span>
             <% end %>
           </li>
@@ -138,23 +132,23 @@
   <div class="mobile-bottom-nav">
     <div class="mobile-bottom-nav-content">
       <%= link_to admin_dashboard_path, class: "mobile-nav-item #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon">📊</div>
+        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-tachometer-alt"></i></div>
         <div class="mobile-nav-label">Tableau</div>
       <% end %>
       <%= link_to admin_shop_index_path, class: "mobile-nav-item #{request.path.start_with?('/admin/shop') ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon">🛒</div>
+        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-shopping-cart"></i></div>
         <div class="mobile-nav-label">Boutique</div>
       <% end %>
       <%= link_to admin_my_bots_path, class: "mobile-nav-item #{request.path.start_with?('/admin/my_bots') ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon">🤖</div>
+        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-robot"></i></div>
         <div class="mobile-nav-label">Mes Bots</div>
       <% end %>
       <%= link_to admin_vps_path, class: "mobile-nav-item #{request.path.start_with?('/admin/vps') ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon">🖥️</div>
+        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-desktop"></i></div>
         <div class="mobile-nav-label">VPS</div>
       <% end %>
       <a href="#" class="mobile-nav-item" onclick="toggleMobileSidebar(); return false;">
-        <div class="mobile-nav-icon">☰</div>
+        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-bars"></i></div>
         <div class="mobile-nav-label">Menu</div>
       </a>
     </div>
@@ -164,23 +158,23 @@
   <div class="mobile-bottom-nav">
     <div class="mobile-bottom-nav-content">
       <%= link_to admin_clients_path, class: "mobile-nav-item #{request.path == admin_clients_path ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon">👥</div>
+        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-users"></i></div>
         <div class="mobile-nav-label">Clients</div>
       <% end %>
       <%= link_to admin_bots_path, class: "mobile-nav-item #{request.path.start_with?('/admin/bots') ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon">🤖</div>
+        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-robot"></i></div>
         <div class="mobile-nav-label">Bots</div>
       <% end %>
       <%= link_to admin_payments_path, class: "mobile-nav-item #{request.path == admin_payments_path ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon">💰</div>
+        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-credit-card"></i></div>
         <div class="mobile-nav-label">Paiements</div>
       <% end %>
       <%= link_to admin_shop_index_path, class: "mobile-nav-item #{request.path.start_with?('/admin/shop') ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon">🛒</div>
+        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-shopping-cart"></i></div>
         <div class="mobile-nav-label">Boutique</div>
       <% end %>
       <a href="#" class="mobile-nav-item" onclick="toggleMobileSidebar(); return false;">
-        <div class="mobile-nav-icon">☰</div>
+        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-bars"></i></div>
         <div class="mobile-nav-label">Plus</div>
       </a>
     </div>

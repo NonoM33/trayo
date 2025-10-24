@@ -25,11 +25,15 @@
       <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
       <% if current_user.is_admin? %>
-        <%= link_to "← Retour aux Clients", admin_clients_path, class: "back-link", style: "margin: 0;" %>
+        <%= link_to admin_clients_path, class: "back-link", style: "margin: 0;" do %>
+          <i class="fa-icon fa-md fa-arrow-left"></i> Retour aux Clients
+        <% end %>
       <% else %>
         <h1 style="margin: 0;">Mon Profil</h1>
       <% end %>
-      <%= link_to "✏️ Modifier #{current_user.is_admin? ? 'le Profil Utilisateur' : 'Mon Profil'}", edit_admin_client_path(@client), class: "btn btn-primary" %>
+      <%= link_to edit_admin_client_path(@client), class: "btn btn-primary" do %>
+        <i class="fa-icon fa-md fa-edit"></i> Modifier <%= current_user.is_admin? ? 'le Profil Utilisateur' : 'Mon Profil' %>
+      <% end %>
     </div>
 
     <% if flash[:notice] %>
@@ -45,16 +49,14 @@
       <% if @client.mt5_api_token.present? && current_user.is_admin? %>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #2196F3;">
           <div style="font-weight: 600; color: #1976D2; margin-bottom: 8px;">
-            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z"/>
-            </svg>
+            <i class="fa-icon fa-md fa-shield-alt"></i>
             Token API MT5
           </div>
           <div style="font-family: monospace; font-size: 14px; color: #333; word-break: break-all; background: white; padding: 10px; border-radius: 4px;">
             <%= @client.mt5_api_token %>
           </div>
           <div style="font-size: 12px; color: #666; margin-top: 8px;">
-            ℹ️ Ce token doit être configuré dans le script MT5 (TrayoSync.mq5) pour la synchronisation du compte
+            <i class="fa-icon fa-md fa-info-circle"></i> Ce token doit être configuré dans le script MT5 (TrayoSync.mq5) pour la synchronisation du compte
           </div>
         </div>
       <% end %>
@@ -105,7 +107,7 @@
             <% else %>
               <div class="info-label">Solde à Payer</div>
               <div class="info-value" style="color: #4CAF50;">
-                0 € ✓
+                0 € <i class="fa-icon fa-md fa-check-circle"></i>
               </div>
             <% end %>
           </div>
@@ -309,7 +311,7 @@
                 <td class="<%= purchase.within_drawdown_limit? ? '' : 'negative' %>">
                   <%= number_to_currency(purchase.max_drawdown_recorded, unit: "€", format: "%n %u") %>
                   <% unless purchase.within_drawdown_limit? %>
-                    <span style="color: #F44336; font-size: 12px;">⚠️ Limite dépassée</span>
+                    <span style="color: #F44336; font-size: 12px;"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Limite dépassée</span>
                   <% end %>
                 </td>
                 <td>
@@ -353,7 +355,9 @@
                 style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" %>
           </div>
           
-          <%= submit_tag "➕ Assigner", class: "btn btn-success", style: "margin-top: 27px;" %>
+          <%= submit_tag "Assigner", class: "btn btn-success", style: "margin-top: 27px;" do %>
+            <i class="fa-icon fa-md fa-plus"></i> Assigner
+          <% end %>
         <% end %>
       </div>
     </div>
@@ -361,7 +365,7 @@
 
     <% if current_user.is_admin? %>
     <div class="card">
-      <h2>🖥️ VPS</h2>
+      <h2><i class="fa-icon fa-md fa-desktop"></i> VPS</h2>
       
       <% if @client.vps.any? %>
         <table style="margin-bottom: 24px;">
@@ -391,11 +395,17 @@
                 <td><%= vps.ordered_at&.strftime("%d/%m/%Y") || '-' %></td>
                 <td>
                   <div class="action-buttons">
-                    <%= link_to "👁️", admin_vp_path(vps), class: "btn btn-primary btn-sm", title: "Voir" %>
-                    <%= link_to "✏️", edit_admin_vp_path(vps), class: "btn btn-sm", style: "background: #FF9800;", title: "Modifier" %>
-                    <%= button_to "🗑️", admin_vp_path(vps), method: :delete,
+                    <%= link_to admin_vp_path(vps), class: "icon-btn primary sm", title: "Voir" do %>
+                      <i class="fa-icon fa-md fa-eye"></i>
+                    <% end %>
+                    <%= link_to edit_admin_vp_path(vps), class: "icon-btn warning sm", title: "Modifier" do %>
+                      <i class="fa-icon fa-md fa-edit"></i>
+                    <% end %>
+                    <%= button_to admin_vp_path(vps), method: :delete,
                         data: { turbo_confirm: "Supprimer ce VPS ?" },
-                        class: "btn btn-danger btn-sm", title: "Supprimer" %>
+                        class: "icon-btn danger sm", title: "Supprimer" do %>
+                      <i class="fa-icon fa-md fa-trash"></i>
+                    <% end %>
                   </div>
                 </td>
               </tr>
@@ -410,7 +420,9 @@
       
       <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
         <h3 style="margin-bottom: 16px;">Créer un Nouveau VPS</h3>
-        <%= link_to "➕ Créer un VPS pour ce Client", new_admin_vp_path(user_id: @client.id), class: "btn btn-success" %>
+        <%= link_to new_admin_vp_path(user_id: @client.id), class: "btn btn-success" do %>
+          <i class="fa-icon fa-md fa-plus"></i> Créer un VPS pour ce Client
+        <% end %>
       </div>
     </div>
     <% end %>
@@ -422,7 +434,7 @@
         
         <% if @client.balance_due > 0 %>
           <div style="background: #fff3cd; padding: 12px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
-            <div style="font-weight: 600; color: #856404; margin-bottom: 5px;">💰 Solde à Payer</div>
+            <div style="font-weight: 600; color: #856404; margin-bottom: 5px;"><i class="fa-icon fa-md fa-wallet"></i> Solde à Payer</div>
             <div style="font-size: 24px; font-weight: 700; color: #856404;">
               <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
             </div>
@@ -433,7 +445,7 @@
           </div>
         <% elsif @client.balance_due < 0 %>
           <div style="background: #d4edda; padding: 12px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #28a745;">
-            <div style="font-weight: 600; color: #155724; margin-bottom: 5px;">💚 Solde Créditeur</div>
+            <div style="font-weight: 600; color: #155724; margin-bottom: 5px;"><i class="fa-icon fa-md fa-university"></i> Solde Créditeur</div>
             <div style="font-size: 24px; font-weight: 700; color: #155724;">
               <%= number_to_currency(@client.balance_due.abs, unit: "€", format: "%n %u") %>
             </div>
@@ -443,7 +455,7 @@
           </div>
         <% else %>
           <div style="background: #d4edda; padding: 12px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #28a745;">
-            <div style="font-weight: 600; color: #155724; margin-bottom: 5px;">✓ Entièrement Payé</div>
+            <div style="font-weight: 600; color: #155724; margin-bottom: 5px;"><i class="fa-icon fa-md fa-check-circle"></i> Entièrement Payé</div>
             <div style="font-size: 18px; color: #155724;">
               Aucun solde restant
             </div>
@@ -452,7 +464,7 @@
 
         <% if @mt5_accounts.any? %>
           <div style="background: #e3f2fd; padding: 12px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #2196F3;">
-            <div style="font-weight: 600; color: #1976D2; margin-bottom: 5px;">📊 Watermarks par Compte</div>
+            <div style="font-weight: 600; color: #1976D2; margin-bottom: 5px;"><i class="fa-icon fa-md fa-chart-bar"></i> Watermarks par Compte</div>
             <% @mt5_accounts.each do |account| %>
               <div style="font-size: 13px; color: #1976D2; margin-top: 3px;">
                 • <%= account.account_name %> (<%= account.mt5_id %>) : WM = <%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %>
@@ -501,7 +513,9 @@
             <%= f.text_area :notes, placeholder: "Informations supplémentaires..." %>
           </div>
 
-          <%= f.submit "Créer le Paiement", class: "btn" %>
+          <%= submit_tag "Créer le Paiement", class: "btn" do %>
+            <i class="fa-icon fa-md fa-credit-card"></i> Créer le Paiement
+          <% end %>
         <% end %>
       </div>
 
@@ -520,7 +534,9 @@
             <%= f.text_area :reason %>
           </div>
 
-          <%= f.submit "Créer le Crédit", class: "btn" %>
+          <%= f.submit "Créer le Crédit", class: "btn" do %>
+            <span class="material-icons md-18" style="vertical-align: middle;">add_circle</span> Créer le Crédit
+          <% end %>
         <% end %>
       </div>
     </div>
@@ -532,12 +548,12 @@
           <h2 style="margin: 0;">Historique des Paiements</h2>
         <% if current_user.is_admin? %>
           <button onclick="toggleDeleteMode()" id="lockButton" class="btn" style="background: #666; padding: 8px 16px; font-size: 14px;">
-            🔒 Déverrouiller Mode Suppression
+            <i class="fa-icon fa-md fa-lock"></i> Déverrouiller Mode Suppression
           </button>
         <% end %>
       </div>
       <div id="deleteModeWarning" style="display: none; background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 15px; border-radius: 4px;">
-        <strong style="color: #856404;">⚠️ Mode Suppression Actif</strong>
+        <strong style="color: #856404;"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Mode Suppression Actif</strong>
         <p style="color: #856404; margin: 5px 0 0 0; font-size: 13px;">Vous pouvez maintenant supprimer des paiements. Cliquez à nouveau sur le verrou pour désactiver ce mode.</p>
       </div>
       <% if @payments.any? %>
@@ -568,7 +584,7 @@
                     <% payment.watermark_data.each do |mt5_id, data| %>
                       <div style="font-size: 12px; margin-bottom: 3px;">
                         <strong><%= data["account_name"] %></strong> (<%= mt5_id %>)<br>
-                        WM : <%= number_to_currency(data["watermark"], unit: "€", format: "%n %u") %> → <%= number_to_currency(data["balance"], unit: "€", format: "%n %u") %><br>
+                        WM : <%= number_to_currency(data["watermark"], unit: "€", format: "%n %u") %> <i class="fa-icon fa-md fa-arrow-right"></i> <%= number_to_currency(data["balance"], unit: "€", format: "%n %u") %><br>
                         <span style="color: #4CAF50;">Commissionnable : <%= number_to_currency(data["commissionable"], unit: "€", format: "%n %u") %></span>
                       </div>
                     <% end %>
@@ -608,12 +624,12 @@
             const deleteButtons = document.querySelectorAll('.delete-btn');
             
             if (deleteModeActive) {
-              lockButton.innerHTML = '🔓 Verrouiller Mode Suppression';
+              lockButton.innerHTML = '<span class="material-icons md-18" style="vertical-align: middle;">lock_open</span> Verrouiller Mode Suppression';
               lockButton.style.background = '#f44336';
               warning.style.display = 'block';
               deleteButtons.forEach(btn => btn.style.display = 'inline-block');
             } else {
-              lockButton.innerHTML = '🔒 Déverrouiller Mode Suppression';
+              lockButton.innerHTML = '<i class="fa-icon fa-md fa-lock"></i> Déverrouiller Mode Suppression';
               lockButton.style.background = '#666';
               warning.style.display = 'none';
               deleteButtons.forEach(btn => btn.style.display = 'none');

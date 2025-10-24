@@ -14,10 +14,10 @@
       <%= render 'admin/shared/navbar' %>
       
       <div class="container" style="max-width: 800px;">
-        <%= link_to "← Retour au Programme Bonus", admin_bonus_deposits_path, class: "back-link" %>
+        <%= link_to "<i class="fa-icon fa-md fa-arrow-left"></i> Retour au Programme Bonus", admin_bonus_deposits_path, class: "back-link" %>
         
         <div class="card">
-          <h2>💰 Faire un Dépôt Bonus</h2>
+          <h2><i class="fa-icon fa-md fa-wallet"></i> Faire un Dépôt Bonus</h2>
           
           <% if @current_period && @current_bonus_rate && @current_bonus_rate > 0 %>
             <div class="info-box info-box-success" style="margin-bottom: 24px;">
@@ -29,7 +29,7 @@
             </div>
           <% else %>
             <div class="info-box info-box-warning" style="margin-bottom: 24px;">
-              <div class="info-box-title">⚠️ Aucune Période de Bonus Active</div>
+              <div class="info-box-title"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Aucune Période de Bonus Active</div>
               <p style="margin: 8px 0 0 0;">
                 Il n'y a actuellement aucune période de bonus active. Votre dépôt sera traité sans bonus.
               </p>
@@ -78,7 +78,7 @@
             </div>
             
             <div class="info-box info-box-warning">
-              <div class="info-box-title">⚠️ Important</div>
+              <div class="info-box-title"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Important</div>
               <p style="margin: 8px 0 0 0;">
                 Votre dépôt restera en attente jusqu'à validation par un administrateur. 
                 Une fois validé, le total des crédits (dépôt + bonus) sera ajouté à votre compte.

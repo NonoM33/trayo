@@ -14,7 +14,9 @@
       <%= render 'admin/shared/navbar' %>
       
       <div class="container" style="max-width: 1200px;">
-        <%= link_to "← Retour aux Bots", admin_bots_path, class: "back-link" %>
+        <%= link_to admin_bots_path, class: "back-link" do %>
+          <i class="fa-icon fa-md fa-arrow-left"></i> Retour aux Bots
+        <% end %>
         
         <h1>Créer un Nouveau Bot de Trading</h1>
         

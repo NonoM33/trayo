@@ -137,11 +137,11 @@
           
           <div class="two-col" style="margin-bottom: 24px;">
             <div class="info-box info-box-info">
-              <div class="info-box-title">📊 Performance Historique</div>
+              <div class="info-box-title"><i class="fa-icon fa-md fa-chart-bar"></i> Performance Historique</div>
               <p style="margin: 0;">Vos profits réels des 12 derniers mois</p>
             </div>
             <div class="info-box info-box-success">
-              <div class="info-box-title">🎯 Projection (6 mois)</div>
+              <div class="info-box-title"><i class="fa-icon fa-md fa-bullhorn"></i> Projection (6 mois)</div>
               <p style="margin: 0;">Basée sur votre moyenne mensuelle: <strong><%= number_to_currency((@projection_data.last[:balance] - current_user.mt5_accounts.sum(:balance)) / 6, unit: "€", format: "%n %u") %>/mois</strong></p>
             </div>
           </div>

@@ -1233,6 +1233,8 @@ textarea {
 .alert::before {
   content: '⚠';
   font-size: 20px;
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
 }
 
 /* Status Badges */
@@ -2746,4 +2748,108 @@ textarea {
 table {
   width: 100%;
   table-layout: auto;
+}
+
+/* ===== FONT AWESOME ICONS STYLES ===== */
+.fa-icon {
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-style: normal;
+  display: inline-block;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+.fa-icon.fa-sm { font-size: 14px; }
+.fa-icon.fa-md { font-size: 18px; }
+.fa-icon.fa-lg { font-size: 24px; }
+.fa-icon.fa-xl { font-size: 32px; }
+.fa-icon.fa-2xl { font-size: 48px; }
+.fa-icon.fa-3xl { font-size: 64px; }
+.fa-icon.fa-4xl { font-size: 72px; }
+
+/* Icon button styles */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.icon-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.icon-btn.primary {
+  background: var(--color-accent);
+  color: white;
+}
+
+.icon-btn.primary:hover {
+  background: var(--color-accent-hover);
+}
+
+.icon-btn.warning {
+  background: var(--color-warning);
+  color: white;
+}
+
+.icon-btn.warning:hover {
+  background: var(--color-warning-hover);
+}
+
+.icon-btn.danger {
+  background: var(--color-danger);
+  color: white;
+}
+
+.icon-btn.danger:hover {
+  background: var(--color-danger-hover);
+}
+
+.icon-btn.success {
+  background: var(--color-success);
+  color: white;
+}
+
+.icon-btn.success:hover {
+  background: var(--color-success-hover);
+}
+
+.icon-btn.outline {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.icon-btn.outline:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+}
+
+/* Small icon buttons */
+.icon-btn.sm {
+  width: 32px;
+  height: 32px;
+}
+
+.icon-btn.sm .material-icons {
+  font-size: 18px;
+}
+
+/* Large icon buttons */
+.icon-btn.lg {
+  width: 48px;
+  height: 48px;
+}
+
+.icon-btn.lg .material-icons {
+  font-size: 28px;
 }

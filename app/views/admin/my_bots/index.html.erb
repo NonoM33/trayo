@@ -160,7 +160,7 @@
       <%= render 'admin/shared/navbar' %>
       
       <div class="container">
-        <h1 style="margin-bottom: 32px;">🤖 Mes Bots de Trading</h1>
+        <h1 style="margin-bottom: 32px;"><i class="fa-icon fa-md fa-robot"></i> Mes Bots de Trading</h1>
         
         <% if flash[:notice] %>
           <div class="notice"><%= flash[:notice] %></div>
@@ -200,9 +200,9 @@
                     <%= button_to toggle_status_admin_my_bot_path(purchase), method: :post, 
                         class: "toggle-btn #{purchase.is_running? ? 'toggle-btn-stop' : 'toggle-btn-start'}" do %>
                       <% if purchase.is_running? %>
-                        ⏸️ Arrêter le Bot
+                        <i class="fa-icon fa-md fa-pause"></i> Arrêter le Bot
                       <% else %>
-                        ▶️ Démarrer le Bot
+                        <i class="fa-icon fa-md fa-play"></i> Démarrer le Bot
                       <% end %>
                     <% end %>
                   </div>
@@ -262,7 +262,7 @@
                 </div>
                 <% unless purchase.within_drawdown_limit? %>
                   <div style="margin-top: 8px; font-size: 12px; color: var(--color-danger); font-weight: 600;">
-                    ⚠️ Attention : Limite de drawdown dépassée !
+                    <i class="fa-icon fa-md fa-exclamation-triangle"></i> Attention : Limite de drawdown dépassée !
                   </div>
                 <% end %>
               </div>
@@ -291,12 +291,12 @@
           <% end %>
         <% else %>
           <div class="card empty-state">
-            <div class="empty-state-icon">🤖</div>
+            <div class="empty-state-icon"><i class="fa-icon fa-md fa-robot"></i></div>
             <h2 style="margin: 0 0 12px 0; color: var(--text-primary);">Aucun Bot Pour le Moment</h2>
             <p style="margin: 0 0 24px 0; color: var(--text-muted);">
               Découvrez nos bots de trading dans la boutique
             </p>
-            <%= link_to "🛒 Voir la Boutique", admin_shop_index_path, class: "btn btn-success", style: "font-size: 16px; padding: 14px 32px;" %>
+            <%= link_to "<i class="fa-icon fa-md fa-shopping-cart"></i> Voir la Boutique", admin_shop_index_path, class: "btn btn-success", style: "font-size: 16px; padding: 14px 32px;" %>
           </div>
         <% end %>
       </div>

@@ -23,7 +23,7 @@
         
         <% unless current_user.is_admin? %>
           <div class="card">
-            <h2>🎁 Programme de Bonus</h2>
+            <h2><i class="fa-icon fa-md fa-gift"></i> Programme de Bonus</h2>
             
             <div class="info-box info-box-info">
               <div class="info-box-title">💡 Comment ça marche</div>
@@ -55,10 +55,10 @@
             </div>
             
             <% if @current_bonus_rate && @current_bonus_rate > 0 %>
-              <%= link_to "💰 Faire un Dépôt Bonus", new_admin_bonus_deposit_path, class: "btn btn-success", style: "display: inline-block; margin-top: 8px;" %>
+              <%= link_to "<i class=\"fa-icon fa-md fa-wallet\"></i> Faire un Dépôt Bonus", new_admin_bonus_deposit_path, class: "btn btn-success", style: "display: inline-block; margin-top: 8px;" %>
             <% else %>
               <div class="info-box info-box-warning" style="margin-top: 16px;">
-                <div class="info-box-title">⚠️ Aucune Période de Bonus Active</div>
+                <div class="info-box-title"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Aucune Période de Bonus Active</div>
                 <p style="margin: 8px 0 0 0;">
                   Il n'y a actuellement aucune période de bonus active. Veuillez contacter un administrateur pour plus d'informations.
                 </p>
@@ -68,7 +68,7 @@
           
           <% if @bonus_periods&.any? %>
             <div class="card">
-              <h2>📊 Calendrier des Bonus</h2>
+              <h2><i class="fa-icon fa-md fa-chart-bar"></i> Calendrier des Bonus</h2>
               
               <table>
                 <thead>
@@ -86,7 +86,7 @@
                         <small style="color: var(--text-muted);"><%= l(period.start_date, format: :long) %> - <%= l(period.end_date, format: :long) %></small>
                       </td>
                       <td class="positive"><%= number_to_percentage(period.bonus_percentage, precision: 0) %></td>
-                      <td>1 000 € → <%= number_to_currency((1000 * (1 + period.bonus_percentage / 100)), precision: 0) %> crédits</td>
+                      <td>1 000 € <i class="fa-icon fa-md fa-arrow-right"></i> <%= number_to_currency((1000 * (1 + period.bonus_percentage / 100)), precision: 0) %> crédits</td>
                     </tr>
                   <% end %>
                 </tbody>
@@ -99,10 +99,10 @@
           <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
               <div>
-                <h2 style="margin: 0;">⚙️ Configuration du Programme Bonus</h2>
+                <h2 style="margin: 0;"><span class="material-icons md-24" style="vertical-align: middle;">settings</span> Configuration du Programme Bonus</h2>
                 <p style="margin: 8px 0 0 0; color: var(--text-muted);">Gérer les périodes et taux de bonus</p>
               </div>
-              <%= link_to "📅 Gérer les Périodes Bonus", admin_bonus_periods_path, class: "btn btn-success" %>
+              <%= link_to "<i class=\"fa-icon fa-md fa-calendar\"></i> Gérer les Périodes Bonus", admin_bonus_periods_path, class: "btn btn-success" %>
             </div>
             
             <div class="info-box info-box-info">

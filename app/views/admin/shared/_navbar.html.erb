@@ -19,11 +19,11 @@
     
     if (body.classList.contains('dark-mode')) {
       body.classList.remove('dark-mode');
-      icon.textContent = '🌙';
+      icon.innerHTML = '<i class="fa-icon fa-md fa-moon"></i>';
       localStorage.setItem('theme', 'light');
     } else {
       body.classList.add('dark-mode');
-      icon.textContent = '☀️';
+      icon.innerHTML = '<i class="fa-icon fa-md fa-sun"></i>';
       localStorage.setItem('theme', 'dark');
     }
   }
@@ -34,7 +34,7 @@
     
     if (savedTheme === 'dark') {
       document.body.classList.add('dark-mode');
-      if (icon) icon.textContent = '☀️';
+      if (icon) icon.innerHTML = '<i class="fa-icon fa-md fa-sun"></i>';
     }
     
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');

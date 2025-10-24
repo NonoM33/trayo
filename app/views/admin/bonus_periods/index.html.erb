@@ -23,8 +23,8 @@
         
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-            <h2>🎁 Bonus Periods Management</h2>
-            <%= link_to "➕ Create New Bonus Period", new_admin_bonus_period_path, class: "btn btn-success" %>
+            <h2><i class="fa-icon fa-md fa-gift"></i> Bonus Periods Management</h2>
+            <%= link_to "<i class="fa-icon fa-md fa-plus"></i> Create New Bonus Period", new_admin_bonus_period_path, class: "btn btn-success" %>
           </div>
           
           <% if @current_period %>
@@ -43,7 +43,7 @@
             </div>
           <% else %>
             <div class="info-box info-box-warning">
-              <div class="info-box-title">⚠️ No Active Bonus Period</div>
+              <div class="info-box-title"><i class="fa-icon fa-md fa-exclamation-triangle"></i> No Active Bonus Period</div>
               <p style="margin: 8px 0 0 0;">There is currently no active bonus period. Create one to enable the bonus program.</p>
             </div>
           <% end %>

@@ -230,7 +230,7 @@
       <%= render 'admin/shared/navbar' %>
       
       <div class="container" style="max-width: 1200px;">
-        <%= link_to "← Retour à la Boutique", admin_shop_index_path, class: "back-link" %>
+        <%= link_to "<i class="fa-icon fa-md fa-arrow-left"></i> Retour à la Boutique", admin_shop_index_path, class: "back-link" %>
         
         <% if flash[:notice] %>
           <div class="notice"><%= flash[:notice] %></div>
@@ -244,7 +244,7 @@
             <% if @bot.image_url.present? %>
               <img src="<%= @bot.image_url %>" alt="<%= @bot.name %>" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
             <% else %>
-              🤖
+              <i class="fa-icon fa-md fa-robot"></i>
             <% end %>
           </div>
           
@@ -259,7 +259,7 @@
           
           <% if @already_owned %>
             <%= link_to admin_my_bots_path, class: "cta-button", style: "background: #4CAF50; color: white;" do %>
-              ✓ Déjà Possédé - Voir Mes Bots
+              <i class="fa-icon fa-md fa-check-circle"></i> Déjà Possédé - Voir Mes Bots
             <% end %>
           <% else %>
             <%= button_to "🚀 Acheter Maintenant", purchase_admin_shop_path(@bot),
@@ -278,13 +278,13 @@
           </div>
           
           <div class="stat-card">
-            <div class="stat-icon">🎯</div>
+            <div class="stat-icon"><i class="fa-icon fa-md fa-bullhorn"></i></div>
             <div class="stat-value"><%= number_to_percentage(@bot.win_rate, precision: 0) %></div>
             <div class="stat-label">Taux de Réussite</div>
           </div>
           
           <div class="stat-card">
-            <div class="stat-icon">💰</div>
+            <div class="stat-icon"><i class="fa-icon fa-md fa-wallet"></i></div>
             <div class="stat-value">
               <%= number_to_currency(@bot.projection_yearly, unit: "€", format: "%n %u", precision: 0) %>
             </div>
@@ -292,7 +292,7 @@
           </div>
           
           <div class="stat-card">
-            <div class="stat-icon">🛡️</div>
+            <div class="stat-icon"><i class="fa-icon fa-md fa-shield-alt"></i></div>
             <div class="stat-value">
               <%= number_to_currency(@bot.max_drawdown_limit, unit: "€", format: "%n %u", precision: 0) %>
             </div>
@@ -301,7 +301,7 @@
         </div>
 
         <div class="card">
-          <h2>📊 Projection Interactive</h2>
+          <h2><i class="fa-icon fa-md fa-chart-bar"></i> Projection Interactive</h2>
           <div style="position: relative; height: 400px; margin: 24px 0;">
             <canvas id="projectionChart"></canvas>
           </div>
@@ -314,7 +314,7 @@
           <% user_capital = 10000 if user_capital < 1000 %>
           
           <div style="background: rgba(59, 130, 246, 0.1); padding: 16px; border-radius: 12px; margin-bottom: 24px; border-left: 4px solid var(--color-accent);">
-            <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">💰 Votre Capital Actuel</div>
+            <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;"><i class="fa-icon fa-md fa-wallet"></i> Votre Capital Actuel</div>
             <div style="font-size: 32px; font-weight: 800; color: var(--color-accent);">
               <%= number_to_currency(user_capital, unit: "€", format: "%n %u", precision: 0) %>
             </div>
@@ -368,7 +368,7 @@
 
         <% if @bot.strategy_description.present? %>
           <div class="card">
-            <h2>🎯 Stratégie de Trading</h2>
+            <h2><i class="fa-icon fa-md fa-bullhorn"></i> Stratégie de Trading</h2>
             <p style="white-space: pre-wrap; line-height: 1.8; font-size: 16px;"><%= @bot.strategy_description %></p>
           </div>
         <% end %>
@@ -379,7 +379,7 @@
             <ul class="features-list">
               <% @bot.features_list.each do |feature| %>
                 <li class="feature-item">
-                  <span class="feature-icon">✓</span>
+                  <span class="feature-icon"><i class="fa-icon fa-md fa-check-circle"></i></span>
                   <span style="font-size: 16px; font-weight: 500;"><%= feature %></span>
                 </li>
               <% end %>
@@ -389,7 +389,7 @@
 
         <% if @bot.active_users_count > 0 %>
           <div class="card" style="background: linear-gradient(135deg, #e0f2fe, #dbeafe); border: 2px solid #3b82f6;">
-            <h3 style="margin: 0 0 12px 0; color: #1e40af;">👥 Preuve Sociale</h3>
+            <h3 style="margin: 0 0 12px 0; color: #1e40af;"><i class="fa-icon fa-md fa-users"></i> Preuve Sociale</h3>
             <p style="margin: 0; font-size: 18px; font-weight: 600; color: #1e40af;">
               <strong><%= @bot.active_users_count %></strong> <%= @bot.active_users_count == 1 ? 'trader utilise' : 'traders utilisent' %> déjà ce bot avec succès !
             </p>
@@ -402,7 +402,7 @@
             <%= link_to admin_my_bots_path, 
                 class: "cta-button", 
                 style: "background: #4CAF50; color: white; font-size: 18px; padding: 16px 40px;" do %>
-              ✓ Aller à Mes Bots
+              <i class="fa-icon fa-md fa-check-circle"></i> Aller à Mes Bots
             <% end %>
           <% else %>
             <%= button_to "🚀 Acheter #{@bot.name} Maintenant", 
