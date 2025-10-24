@@ -5,7 +5,7 @@
   <%= stylesheet_link_tag "admin" %>
 </head>
 <body>
-  <% @page_title = "Gestion des Bots de Trading" %>
+  <% @page_title = "🤖 Gestion des Bots de Trading" %>
   
   <div class="app-layout">
     <%= render 'admin/shared/sidebar' %>
@@ -21,76 +21,132 @@
           <div class="alert"><%= flash[:alert] %></div>
         <% end %>
 
+        <% if @bots.any? %>
+          <div class="info-grid" style="margin-bottom: 32px;">
+            <div class="info-item">
+              <div class="info-label">Total Bots</div>
+              <div class="info-value" style="color: var(--color-accent);"><%= @bots.count %></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Bots Actifs</div>
+              <div class="info-value positive"><%= @bots.select(&:is_active?).count %></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Utilisateurs Totaux</div>
+              <div class="info-value" style="color: var(--color-info);"><%= @bots.sum(&:active_users_count) %></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Taux Moyen Réussite</div>
+              <div class="info-value" style="color: var(--color-success);"><%= number_to_percentage(@bots.average(:win_rate) || 0, precision: 1) %></div>
+            </div>
+          </div>
+        <% end %>
+
         <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin: 0; border: none; padding: 0;">🤖 Bots de Trading</h2>
-            <%= link_to "➕ Nouveau Bot", new_admin_bot_path, class: "btn btn-success" %>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+            <h2 style="margin: 0; border: none; padding: 0;">📋 Bots de Trading</h2>
+            <%= link_to new_admin_bot_path, class: "btn btn-success" do %>
+              <span>➕</span> Nouveau Bot
+            <% end %>
           </div>
           
           <% if @bots.any? %>
-            <table>
-              <thead>
-                <tr>
-                  <th>Nom</th>
-                  <th>Prix</th>
-                  <th>Niveau de Risque</th>
-                  <th>Projection Mensuelle</th>
-                  <th>Taux de Réussite</th>
-                  <th>Statut</th>
-                  <th>Disponible</th>
-                  <th>Utilisateurs Actifs</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% @bots.each do |bot| %>
+            <div class="table-wrapper">
+              <table>
+                <thead>
                   <tr>
-                    <td><strong><%= bot.name %></strong></td>
-                    <td><%= bot.formatted_price %></td>
-                    <td>
-                      <span style="background: <%= bot.risk_badge_color %>; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
-                        <%= bot.risk_label %>
-                      </span>
-                    </td>
-                    <td>
-                      <%= number_to_currency(bot.projection_monthly_min, unit: "€", format: "%n %u") %> - 
-                      <%= number_to_currency(bot.projection_monthly_max, unit: "€", format: "%n %u") %>
-                    </td>
-                    <td class="positive"><%= number_to_percentage(bot.win_rate, precision: 1) %></td>
-                    <td>
-                      <% if bot.status == 'active' %>
-                        <span style="color: #4CAF50;">✓ Actif</span>
-                      <% else %>
-                        <span style="color: #999;">○ Inactif</span>
-                      <% end %>
-                    </td>
-                    <td>
-                      <% if bot.is_active? %>
-                        <span style="color: #4CAF50;">🟢 Oui</span>
-                      <% else %>
-                        <span style="color: #F44336;">🔴 Non</span>
-                      <% end %>
-                    </td>
-                    <td style="text-align: center;"><%= bot.active_users_count %></td>
-                    <td>
-                      <div class="action-buttons">
-                        <%= link_to "Voir", admin_bot_path(bot), class: "btn btn-primary btn-sm" %>
-                        <%= link_to "Modifier", edit_admin_bot_path(bot), class: "btn btn-sm", style: "background: #FF9800;" %>
-                        <%= button_to "Supprimer", admin_bot_path(bot), method: :delete, 
-                            data: { turbo_confirm: "Supprimer ce bot ?" }, 
-                            class: "btn btn-danger btn-sm" %>
-                      </div>
-                    </td>
+                    <th>Bot</th>
+                    <th>Prix</th>
+                    <th>Risque</th>
+                    <th>Projection Mensuelle</th>
+                    <th>Win Rate</th>
+                    <th>Statut</th>
+                    <th>Utilisateurs</th>
+                    <th>Actions</th>
                   </tr>
-                <% end %>
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  <% @bots.each do |bot| %>
+                    <tr>
+                      <td>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                          <div style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--gradient-accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                            🤖
+                          </div>
+                          <div>
+                            <div style="font-weight: 700; color: var(--text-primary); font-size: 15px;">
+                              <%= bot.name %>
+                            </div>
+                            <% if bot.marketing_tagline.present? %>
+                              <div style="font-size: 12px; color: var(--text-muted);">
+                                <%= bot.marketing_tagline.truncate(40) %>
+                              </div>
+                            <% end %>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div style="font-weight: 700; font-size: 16px; color: var(--text-primary);">
+                          <%= bot.formatted_price %>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="status-badge" style="background: <%= bot.risk_badge_color %>; color: white; border: none;">
+                          <%= bot.risk_label %>
+                        </span>
+                      </td>
+                      <td style="white-space: nowrap; font-weight: 600;">
+                        <%= number_to_currency(bot.projection_monthly_min, unit: "€", format: "%n %u", precision: 0) %> - 
+                        <%= number_to_currency(bot.projection_monthly_max, unit: "€", format: "%n %u", precision: 0) %>
+                      </td>
+                      <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <div style="flex: 1; height: 8px; background: var(--bg-hover); border-radius: var(--radius-full); overflow: hidden;">
+                            <div style="width: <%= bot.win_rate %>%; height: 100%; background: var(--gradient-success); border-radius: var(--radius-full);"></div>
+                          </div>
+                          <span class="positive" style="font-weight: 700; font-size: 14px; min-width: 50px;">
+                            <%= number_to_percentage(bot.win_rate, precision: 1) %>
+                          </span>
+                        </div>
+                      </td>
+                      <td>
+                        <% if bot.is_active? %>
+                          <span class="status-badge status-validated">
+                            <span>✓</span> Actif
+                          </span>
+                        <% else %>
+                          <span class="status-badge" style="background: var(--bg-hover); color: var(--text-muted); border-color: var(--border-color);">
+                            <span>○</span> Inactif
+                          </span>
+                        <% end %>
+                      </td>
+                      <td style="text-align: center;">
+                        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: var(--bg-info-box); border-radius: var(--radius-md); font-weight: 700; color: var(--color-info);">
+                          <span>👥</span> <%= bot.active_users_count %>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="action-buttons">
+                          <%= link_to "👁", admin_bot_path(bot), class: "btn btn-primary btn-sm", title: "Voir" %>
+                          <%= link_to "✏️", edit_admin_bot_path(bot), class: "btn btn-sm", style: "background: var(--color-warning);", title: "Modifier" %>
+                          <%= button_to "🗑", admin_bot_path(bot), method: :delete, 
+                              data: { turbo_confirm: "Supprimer ce bot ?" }, 
+                              class: "btn btn-danger btn-sm", title: "Supprimer" %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
           <% else %>
-            <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
-              <div style="font-size: 48px; margin-bottom: 16px;">🤖</div>
-              <h3 style="margin: 0 0 8px 0;">Aucun bot pour le moment</h3>
-              <p style="margin: 0 0 24px 0;">Créez votre premier bot de trading</p>
-              <%= link_to "➕ Créer un Bot", new_admin_bot_path, class: "btn btn-success" %>
+            <div style="text-align: center; padding: 80px 24px; color: var(--text-muted);">
+              <div style="font-size: 72px; margin-bottom: 24px; animation: bounce 2s infinite;">🤖</div>
+              <h3 style="margin: 0 0 12px 0; font-size: 24px; color: var(--text-primary);">Aucun bot pour le moment</h3>
+              <p style="margin: 0 0 32px 0; font-size: 16px;">Créez votre premier bot de trading intelligent</p>
+              <%= link_to new_admin_bot_path, class: "btn btn-success btn-lg" do %>
+                <span>➕</span> Créer mon Premier Bot
+              <% end %>
             </div>
           <% end %>
         </div>

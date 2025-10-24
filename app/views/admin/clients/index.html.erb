@@ -14,93 +14,141 @@
       <%= render 'admin/shared/navbar' %>
       
       <div class="container">
-    <% if flash[:notice] %>
-      <div class="notice"><%= flash[:notice] %></div>
-    <% end %>
-    <% if flash[:alert] %>
-      <div class="alert" style="background: #f44336;"><%= flash[:alert] %></div>
-    <% end %>
+        <% if flash[:notice] %>
+          <div class="notice"><%= flash[:notice] %></div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert"><%= flash[:alert] %></div>
+        <% end %>
 
-    <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0; border: none; padding: 0;">Liste des Clients</h2>
-        <%= link_to "➕ Nouvel Utilisateur", new_admin_client_path, class: "btn btn-success" %>
-      </div>
-      
-      <table>
-        <thead>
-          <tr>
-            <th>Client</th>
-            <th>Email</th>
-            <th>Taux Commission</th>
-            <th>Gains Totaux</th>
-            <th>Commission Due</th>
-            <th>Solde à Payer</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @clients.each do |client| %>
-            <tr>
-              <td><%= "#{client.first_name} #{client.last_name}".strip.presence || "N/A" %></td>
-              <td><%= client.email %></td>
-              <td><%= number_to_percentage(client.commission_rate, precision: 1) %></td>
-              <td class="<%= client.total_profits > 0 ? 'positive' : '' %>">
-                <%= number_to_currency(client.total_profits, unit: "€", format: "%n %u") %>
-              </td>
-              <td class="<%= client.total_commission_due > 0 ? 'positive' : '' %>">
-                <%= number_to_currency(client.total_commission_due, unit: "€", format: "%n %u") %>
-              </td>
-              <td>
-                <% if client.balance_due > 0 %>
-                  <span class="negative"><%= number_to_currency(client.balance_due, unit: "€", format: "%n %u") %></span>
-                <% elsif client.balance_due < 0 %>
-                  <span class="positive">Crédit: <%= number_to_currency(client.balance_due.abs, unit: "€", format: "%n %u") %></span>
-                <% else %>
-                  <span style="color: #666;">0 €</span>
-                <% end %>
-              </td>
-              <td>
-                <div class="action-buttons">
-                  <%= link_to "Voir", admin_client_path(client), class: "btn btn-primary btn-sm" %>
-                  <%= button_to "Supprimer", admin_client_path(client), method: :delete, data: { turbo_confirm: "Supprimer cet utilisateur ?" }, class: "btn btn-danger btn-sm" %>
-                </div>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
+        <div class="info-grid" style="margin-bottom: 1.5rem;">
+          <div class="info-item">
+            <div class="info-label">Total Clients</div>
+            <div class="info-value"><%= @clients.count %></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Profits Totaux</div>
+            <div class="info-value positive"><%= number_to_currency(@clients.sum(&:total_profits), unit: "€", format: "%n %u") %></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Commissions Dues</div>
+            <div class="info-value"><%= number_to_currency(@clients.sum(&:total_commission_due), unit: "€", format: "%n %u") %></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Administrateurs</div>
+            <div class="info-value"><%= @admins.count %></div>
+          </div>
+        </div>
 
-    <div class="card" style="margin-top: 30px;">
-      <h2>Administrateurs</h2>
-      
-      <table>
-        <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Email</th>
-            <th>Créé le</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @admins.each do |admin| %>
-            <tr>
-              <td><%= "#{admin.first_name} #{admin.last_name}".strip.presence || "N/A" %></td>
-              <td><%= admin.email %></td>
-              <td><%= admin.created_at.strftime("%d/%m/%Y") %></td>
-              <td>
-                <% if admin.id != current_user.id %>
-                  <%= button_to "Supprimer", admin_client_path(admin), method: :delete, data: { turbo_confirm: "Supprimer cet admin ?" }, class: "btn btn-danger btn-sm" %>
-                <% else %>
-                  <span class="text-muted">Utilisateur actuel</span>
+        <div class="card">
+          <div class="card-header">
+            <h2>Liste des Clients</h2>
+            <%= link_to new_admin_client_path, class: "btn btn-primary" do %>
+              Nouvel Utilisateur
+            <% end %>
+          </div>
+          
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Email</th>
+                  <th>Taux Commission</th>
+                  <th>Gains Totaux</th>
+                  <th>Commission Due</th>
+                  <th>Solde à Payer</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @clients.each do |client| %>
+                  <tr>
+                    <td>
+                      <div class="client-info-wrapper">
+                        <div class="client-avatar">
+                          <%= client.first_name&.first&.upcase || client.email.first.upcase %>
+                        </div>
+                        <div class="client-name">
+                          <%= "#{client.first_name} #{client.last_name}".strip.presence || "N/A" %>
+                        </div>
+                      </div>
+                    </td>
+                    <td><%= client.email %></td>
+                    <td><span style="background: hsl(var(--muted)); padding: 0.25rem 0.625rem; border-radius: calc(var(--radius) - 2px); font-weight: 600; font-size: 0.8125rem;"><%= number_to_percentage(client.commission_rate, precision: 1) %></span></td>
+                    <td class="<%= client.total_profits > 0 ? 'positive' : '' %>" style="font-weight: 600;">
+                      <%= number_to_currency(client.total_profits, unit: "€", format: "%n %u") %>
+                    </td>
+                    <td style="font-weight: 600;">
+                      <%= number_to_currency(client.total_commission_due, unit: "€", format: "%n %u") %>
+                    </td>
+                    <td>
+                      <% if client.balance_due > 0 %>
+                        <span class="status-badge" style="background: var(--bg-danger-box); color: var(--color-danger); border-color: var(--color-danger);">
+                          <%= number_to_currency(client.balance_due, unit: "€", format: "%n %u") %>
+                        </span>
+                      <% elsif client.balance_due < 0 %>
+                        <span class="status-badge status-validated">
+                          Crédit: <%= number_to_currency(client.balance_due.abs, unit: "€", format: "%n %u") %>
+                        </span>
+                      <% else %>
+                        <span class="text-muted">0 €</span>
+                      <% end %>
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        <%= link_to "Voir", admin_client_path(client), class: "btn btn-outline btn-sm" %>
+                        <%= button_to "Supprimer", admin_client_path(client), method: :delete, data: { turbo_confirm: "Supprimer cet utilisateur ?" }, class: "btn btn-danger btn-sm" %>
+                      </div>
+                    </td>
+                  </tr>
                 <% end %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Administrateurs</h2>
+          
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nom</th>
+                  <th>Email</th>
+                  <th>Créé le</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @admins.each do |admin| %>
+                  <tr>
+                    <td>
+                      <div class="client-info-wrapper">
+                        <div class="client-avatar">
+                          <%= admin.first_name&.first&.upcase || admin.email.first.upcase %>
+                        </div>
+                        <div class="client-name">
+                          <%= "#{admin.first_name} #{admin.last_name}".strip.presence || "N/A" %>
+                        </div>
+                      </div>
+                    </td>
+                    <td><%= admin.email %></td>
+                    <td><%= admin.created_at.strftime("%d/%m/%Y à %H:%M") %></td>
+                    <td>
+                      <% if admin.id != current_user.id %>
+                        <%= button_to "Supprimer", admin_client_path(admin), method: :delete, data: { turbo_confirm: "Supprimer cet admin ?" }, class: "btn btn-danger btn-sm" %>
+                      <% else %>
+                        <span class="status-badge" style="background: hsl(var(--muted)); color: hsl(var(--muted-foreground)); border-color: hsl(var(--border));">Utilisateur actuel</span>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>

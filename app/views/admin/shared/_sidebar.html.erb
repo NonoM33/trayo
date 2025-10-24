@@ -1,7 +1,9 @@
+<div class="sidebar-mobile-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+
 <div class="sidebar" id="mainSidebar">
   <div class="sidebar-header">
     <div class="sidebar-logo">
-      <div class="sidebar-logo-icon" onclick="toggleSidebarCollapse()" style="cursor: pointer;" title="Réduire/Agrandir la barre latérale">T</div>
+      <div class="sidebar-logo-icon" onclick="toggleSidebarCollapse()" title="Réduire/Agrandir la barre latérale">T</div>
       <span><%= current_user.is_admin? ? 'Trayo Admin' : 'Trayo' %></span>
     </div>
     <button class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" id="sidebarToggleBtn" title="Réduire la barre latérale">
@@ -98,43 +100,78 @@
     </div>
   </nav>
   
-    <div class="sidebar-footer">
-      <div class="sidebar-user" onclick="toggleTheme()" title="Changer le thème">
-        <div class="sidebar-user-avatar">
-          <%= current_user.email[0].upcase %>
-        </div>
-        <div class="sidebar-user-info">
-          <div class="sidebar-user-name"><%= current_user.first_name || current_user.email.split('@').first %></div>
-          <div class="sidebar-user-role"><%= current_user.is_admin? ? 'Administrateur' : 'Client' %></div>
-        </div>
+  <div class="sidebar-footer">
+    <div class="sidebar-user" onclick="toggleTheme()" title="Changer le thème">
+      <div class="sidebar-user-avatar">
+        <%= current_user.email[0].upcase %>
       </div>
-      <%= link_to "Déconnexion", admin_logout_path, data: { turbo_method: :delete }, style: "display: block; text-align: center; margin-top: 8px; color: var(--text-muted); font-size: 12px; text-decoration: none; transition: color 0.2s;" %>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name"><%= current_user.first_name || current_user.email.split('@').first %></div>
+        <div class="sidebar-user-role"><%= current_user.is_admin? ? 'Administrateur' : 'Client' %></div>
+      </div>
     </div>
+    <%= link_to "Déconnexion", admin_logout_path, data: { turbo_method: :delete }, style: "display: block; text-align: center; margin-top: 12px; color: var(--text-muted); font-size: 13px; text-decoration: none; transition: all 0.2s; padding: 8px; border-radius: var(--radius-md); font-weight: 600;" %>
+  </div>
 </div>
 
+<% unless current_user.is_admin? %>
+  <div class="mobile-bottom-nav">
+    <div class="mobile-bottom-nav-content">
+      <%= link_to admin_dashboard_path, class: "mobile-nav-item #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
+        <div class="mobile-nav-icon">📊</div>
+        <div class="mobile-nav-label">Tableau</div>
+      <% end %>
+      <%= link_to admin_shop_index_path, class: "mobile-nav-item #{request.path.start_with?('/admin/shop') ? 'active' : ''}" do %>
+        <div class="mobile-nav-icon">🛒</div>
+        <div class="mobile-nav-label">Boutique</div>
+      <% end %>
+      <%= link_to admin_my_bots_path, class: "mobile-nav-item #{request.path.start_with?('/admin/my_bots') ? 'active' : ''}" do %>
+        <div class="mobile-nav-icon">🤖</div>
+        <div class="mobile-nav-label">Mes Bots</div>
+      <% end %>
+      <%= link_to admin_vps_path, class: "mobile-nav-item #{request.path.start_with?('/admin/vps') ? 'active' : ''}" do %>
+        <div class="mobile-nav-icon">🖥️</div>
+        <div class="mobile-nav-label">VPS</div>
+      <% end %>
+      <a href="#" class="mobile-nav-item" onclick="toggleMobileSidebar(); return false;">
+        <div class="mobile-nav-icon">☰</div>
+        <div class="mobile-nav-label">Menu</div>
+      </a>
+    </div>
+  </div>
+<% end %>
+
 <script>
-      function toggleSidebarCollapse() {
-        const sidebar = document.getElementById('mainSidebar');
-        const toggleBtn = document.getElementById('sidebarToggleBtn');
-        const isCollapsed = sidebar.classList.toggle('collapsed');
-        
-        toggleBtn.textContent = isCollapsed ? '→' : '←';
-        toggleBtn.title = isCollapsed ? 'Agrandir la barre latérale' : 'Réduire la barre latérale';
-        
-        localStorage.setItem('sidebarCollapsed', isCollapsed ? 'true' : 'false');
-        document.documentElement.classList.toggle('sidebar-collapsed-init', isCollapsed);
-      }
+  function toggleSidebarCollapse() {
+    const sidebar = document.getElementById('mainSidebar');
+    const toggleBtn = document.getElementById('sidebarToggleBtn');
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+    
+    toggleBtn.textContent = isCollapsed ? '→' : '←';
+    toggleBtn.title = isCollapsed ? 'Agrandir la barre latérale' : 'Réduire la barre latérale';
+    
+    localStorage.setItem('sidebarCollapsed', isCollapsed ? 'true' : 'false');
+    document.documentElement.classList.toggle('sidebar-collapsed-init', isCollapsed);
+  }
   
-      (function() {
-        const sidebar = document.getElementById('mainSidebar');
-        const toggleBtn = document.getElementById('sidebarToggleBtn');
-        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-        
-        if (isCollapsed && sidebar && toggleBtn) {
-          sidebar.classList.add('collapsed');
-          toggleBtn.textContent = '→';
-          toggleBtn.title = 'Agrandir la barre latérale';
-        }
-      })();
+  function toggleMobileSidebar() {
+    const sidebar = document.getElementById('mainSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
+    document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+  }
+
+  (function() {
+    const sidebar = document.getElementById('mainSidebar');
+    const toggleBtn = document.getElementById('sidebarToggleBtn');
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    
+    if (isCollapsed && sidebar && toggleBtn && window.innerWidth > 768) {
+      sidebar.classList.add('collapsed');
+      toggleBtn.textContent = '→';
+      toggleBtn.title = 'Agrandir la barre latérale';
+    }
+  })();
 </script>
 

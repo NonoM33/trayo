@@ -1,5 +1,10 @@
 <div class="navbar">
-  <h2 class="navbar-title"><%= @page_title || 'Dashboard' %></h2>
+  <div style="display: flex; align-items: center; gap: 16px;">
+    <button class="theme-toggle" onclick="toggleMobileSidebar()" aria-label="Toggle menu" style="display: none;" id="mobileMenuBtn">
+      <span class="theme-icon">☰</span>
+    </button>
+    <h2 class="navbar-title"><%= @page_title || 'Dashboard' %></h2>
+  </div>
   <div class="navbar-right">
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
       <span class="theme-icon" id="themeIcon">🌙</span>
@@ -23,7 +28,6 @@
     }
   }
   
-  // Load saved theme on page load
   (function() {
     const savedTheme = localStorage.getItem('theme');
     const icon = document.getElementById('themeIcon');
@@ -32,6 +36,17 @@
       document.body.classList.add('dark-mode');
       if (icon) icon.textContent = '☀️';
     }
+    
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    if (window.innerWidth <= 768 && mobileMenuBtn) {
+      mobileMenuBtn.style.display = 'flex';
+    }
+    
+    window.addEventListener('resize', function() {
+      if (mobileMenuBtn) {
+        mobileMenuBtn.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+      }
+    });
   })();
 </script>
 
