@@ -25,7 +25,11 @@
               <%= @current_campaign.days_remaining %>
             </div>
             <div style="font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
-              Jours restants
+              <% if Date.current < @current_campaign.start_date.to_date %>
+                Jours avant début
+              <% else %>
+                Jours restants
+              <% end %>
             </div>
           </div>
           
@@ -34,16 +38,27 @@
               <div style="width: <%= @current_campaign.progress_percentage %>%; height: 100%; background: var(--color-accent); border-radius: var(--radius-full); transition: width 0.3s ease;"></div>
             </div>
             <div style="font-size: 12px; text-align: center; margin-top: 6px; color: var(--text-secondary);">
-              <%= @current_campaign.progress_percentage %>% de la campagne terminé
+              <% if Date.current < @current_campaign.start_date.to_date %>
+                Campagne commence dans <%= (@current_campaign.start_date.to_date - Date.current).to_i %> jour<%= (@current_campaign.start_date.to_date - Date.current).to_i > 1 ? 's' : '' %>
+              <% elsif @current_campaign.progress_percentage >= 100 %>
+                Campagne terminée
+              <% else %>
+                <%= @current_campaign.progress_percentage %>% de la campagne terminé
+              <% end %>
             </div>
           </div>
         </div>
         
         <div style="display: flex; gap: 12px; justify-content: flex-end;">
+          <% if @current_campaign.has_button? %>
+            <a href="<%= @current_campaign.button_url %>" target="_blank" class="btn btn-primary btn-sm">
+              <%= @current_campaign.button_text %>
+            </a>
+          <% end %>
           <button onclick="closeCampaignPopup()" class="btn btn-outline btn-sm">
             Fermer
           </button>
-          <button onclick="closeCampaignPopup(true)" class="btn btn-primary btn-sm">
+          <button onclick="closeCampaignPopup(true)" class="btn btn-secondary btn-sm">
             Ne plus afficher aujourd'hui
           </button>
         </div>

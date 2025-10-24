@@ -80,6 +80,24 @@
               </div>
             </div>
             
+            <div class="two-col">
+              <div class="form-group">
+                <%= form.label :button_text, "Texte du Bouton" %>
+                <%= form.text_field :button_text, placeholder: "Ex: Découvrir l'offre" %>
+                <div class="help-text">
+                  Texte qui apparaîtra sur le bouton (optionnel)
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <%= form.label :button_url, "Lien du Bouton" %>
+                <%= form.url_field :button_url, placeholder: "https://exemple.com/offre" %>
+                <div class="help-text">
+                  URL vers laquelle le bouton redirigera (optionnel)
+                </div>
+              </div>
+            </div>
+            
             <div class="form-group">
               <div class="checkbox-group">
                 <%= form.check_box :is_active %>
@@ -131,8 +149,8 @@
                   </div>
                   <div class="campaign-popup-body">
                     <p id="popup-message">Message de la popup...</p>
-                    <div class="campaign-popup-actions">
-                      <button type="button" class="btn btn-primary">Découvrir</button>
+                    <div class="campaign-popup-actions" id="popup-actions">
+                      <button type="button" class="btn btn-primary" id="popup-custom-button" style="display: none;">Bouton Personnalisé</button>
                       <button type="button" class="btn btn-outline">Plus tard</button>
                     </div>
                   </div>
@@ -178,6 +196,8 @@
       const bannerColorInput = document.querySelector('input[name="banner_color"]');
       const popupTitleInput = document.querySelector('input[name="popup_title"]');
       const popupMessageInput = document.querySelector('textarea[name="popup_message"]');
+      const buttonTextInput = document.querySelector('input[name="button_text"]');
+      const buttonUrlInput = document.querySelector('input[name="button_url"]');
       const startDateInput = document.querySelector('input[name="start_date"]');
       const endDateInput = document.querySelector('input[name="end_date"]');
       
@@ -189,6 +209,7 @@
       
       const popupTitle = document.getElementById('popup-title');
       const popupMessage = document.getElementById('popup-message');
+      const popupCustomButton = document.getElementById('popup-custom-button');
       
       function updatePreview() {
         // Mise à jour de la bannière
@@ -208,6 +229,17 @@
         }
         if (popupMessageInput.value) {
           popupMessage.textContent = popupMessageInput.value;
+        }
+        
+        // Mise à jour du bouton personnalisé
+        if (buttonTextInput.value && buttonUrlInput.value) {
+          popupCustomButton.textContent = buttonTextInput.value;
+          popupCustomButton.style.display = 'inline-block';
+          popupCustomButton.onclick = function() {
+            window.open(buttonUrlInput.value, '_blank');
+          };
+        } else {
+          popupCustomButton.style.display = 'none';
         }
         
         // Calcul des jours restants et progression
@@ -243,7 +275,7 @@
       }
       
       // Écouteurs d'événements
-      [titleInput, descriptionInput, bannerColorInput, popupTitleInput, popupMessageInput, startDateInput, endDateInput].forEach(input => {
+      [titleInput, descriptionInput, bannerColorInput, popupTitleInput, popupMessageInput, buttonTextInput, buttonUrlInput, startDateInput, endDateInput].forEach(input => {
         if (input) {
           input.addEventListener('input', updatePreview);
           input.addEventListener('change', updatePreview);

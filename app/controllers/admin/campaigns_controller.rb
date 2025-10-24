@@ -125,11 +125,13 @@ class Admin::CampaignsController < Admin::BaseController
     banner_color = params[:banner_color]
     popup_title = params[:popup_title]
     popup_message = params[:popup_message]
+    button_text = params[:button_text]
+    button_url = params[:button_url]
     
     ActiveRecord::Base.connection.execute(
       ActiveRecord::Base.sanitize_sql_array([
-        "INSERT INTO campaigns (title, description, start_date, end_date, is_active, banner_color, popup_title, popup_message, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
-        title, description, start_date, end_date, is_active, banner_color, popup_title, popup_message
+        "INSERT INTO campaigns (title, description, start_date, end_date, is_active, banner_color, popup_title, popup_message, button_text, button_url, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+        title, description, start_date, end_date, is_active, banner_color, popup_title, popup_message, button_text, button_url
       ])
     )
     
@@ -167,11 +169,13 @@ class Admin::CampaignsController < Admin::BaseController
     banner_color = params[:banner_color]
     popup_title = params[:popup_title]
     popup_message = params[:popup_message]
+    button_text = params[:button_text]
+    button_url = params[:button_url]
     
     ActiveRecord::Base.connection.execute(
       ActiveRecord::Base.sanitize_sql_array([
-        "UPDATE campaigns SET title=?, description=?, start_date=?, end_date=?, is_active=?, banner_color=?, popup_title=?, popup_message=?, updated_at=NOW() WHERE id=?",
-        title, description, start_date, end_date, is_active, banner_color, popup_title, popup_message, params[:id]
+        "UPDATE campaigns SET title=?, description=?, start_date=?, end_date=?, is_active=?, banner_color=?, popup_title=?, popup_message=?, button_text=?, button_url=?, updated_at=NOW() WHERE id=?",
+        title, description, start_date, end_date, is_active, banner_color, popup_title, popup_message, button_text, button_url, params[:id]
       ])
     )
     
@@ -211,6 +215,8 @@ class Admin::CampaignsController < Admin::BaseController
       banner_color: data['banner_color'],
       popup_title: data['popup_title'],
       popup_message: data['popup_message'],
+      button_text: data['button_text'],
+      button_url: data['button_url'],
       created_at: parse_time_safe(data['created_at']),
       updated_at: parse_time_safe(data['updated_at'])
     )

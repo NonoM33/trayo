@@ -76,6 +76,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000021) do
     t.text "popup_message", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "button_text", limit: 255
+    t.string "button_url", limit: 255
     t.index ["is_active", "start_date", "end_date"], name: "index_campaigns_on_is_active_and_start_date_and_end_date"
   end
 
