@@ -57,9 +57,9 @@
                     <td>
                       <div class="action-buttons">
                         <% if payment.status == "pending" %>
-                          <%= button_to "Validate", admin_payment_path(payment), method: :patch, params: { action_type: "validate" }, class: "btn btn-success btn-sm" %>
+                          <%= button_to "Valider", admin_payment_path(payment), method: :patch, params: { action_type: "validate" }, class: "btn btn-success btn-sm" %>
                         <% end %>
-                        <%= link_to "View Client", admin_client_path(payment.user), class: "btn btn-primary btn-sm" %>
+                        <%= link_to "Voir Client", admin_client_path(payment.user), class: "btn btn-outline btn-sm" %>
                       </div>
                     </td>
                   </tr>
