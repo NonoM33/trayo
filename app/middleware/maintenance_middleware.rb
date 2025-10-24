@@ -167,6 +167,47 @@ class MaintenanceMiddleware
             align-items: center;
             justify-content: center;
           }
+          
+          .countdown-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+          }
+          
+          .countdown-title {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #c0c0c0;
+          }
+          
+          .countdown-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 300px;
+            margin: 0 auto;
+          }
+          
+          .countdown-item {
+            text-align: center;
+          }
+          
+          .countdown-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 5px;
+          }
+          
+          .countdown-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
         </style>
       </head>
       <body>
@@ -181,6 +222,8 @@ class MaintenanceMiddleware
           
           #{maintenance.description.present? ? "<p>#{maintenance.description}</p>" : "<p>Nous travaillons actuellement sur des améliorations pour vous offrir une meilleure expérience.</p>"}
           
+          #{maintenance.countdown_date.present? ? countdown_section(maintenance) : ""}
+          
       
         </div>
       </body>
@@ -188,5 +231,67 @@ class MaintenanceMiddleware
     HTML
     
     [200, { 'Content-Type' => 'text/html' }, [html]]
+  end
+  
+  def countdown_section(maintenance)
+    return "" unless maintenance.countdown_date.present?
+    
+    days = maintenance.countdown_days
+    hours = maintenance.countdown_hours
+    minutes = maintenance.countdown_minutes
+    seconds = maintenance.countdown_seconds
+    
+    <<~HTML
+      <div class="countdown-container">
+        <div class="countdown-title">Retour prévu dans :</div>
+        <div class="countdown-grid">
+          <div class="countdown-item">
+            <div class="countdown-number" id="days">#{days}</div>
+            <div class="countdown-label">Jours</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-number" id="hours">#{hours}</div>
+            <div class="countdown-label">Heures</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-number" id="minutes">#{minutes}</div>
+            <div class="countdown-label">Minutes</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-number" id="seconds">#{seconds}</div>
+            <div class="countdown-label">Secondes</div>
+          </div>
+        </div>
+      </div>
+      
+      <script>
+        function updateCountdown() {
+          const countdownDate = new Date('#{maintenance.countdown_date.iso8601}').getTime();
+          const now = new Date().getTime();
+          const distance = countdownDate - now;
+          
+          if (distance < 0) {
+            document.getElementById('days').innerHTML = '0';
+            document.getElementById('hours').innerHTML = '0';
+            document.getElementById('minutes').innerHTML = '0';
+            document.getElementById('seconds').innerHTML = '0';
+            return;
+          }
+          
+          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+          
+          document.getElementById('days').innerHTML = days;
+          document.getElementById('hours').innerHTML = hours;
+          document.getElementById('minutes').innerHTML = minutes;
+          document.getElementById('seconds').innerHTML = seconds;
+        }
+        
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+      </script>
+    HTML
   end
 end
