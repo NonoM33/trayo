@@ -107,7 +107,7 @@
   </nav>
   
   <div class="sidebar-footer">
-    <div class="sidebar-user" onclick="toggleTheme()" title="Changer le thème">
+    <div class="sidebar-user" onclick="openUserSettings()" title="Paramètres utilisateur">
       <div class="sidebar-user-avatar">
         <%= current_user.email[0].upcase %>
       </div>
@@ -116,7 +116,9 @@
         <div class="sidebar-user-role"><%= current_user.is_admin? ? 'Administrateur' : 'Client' %></div>
       </div>
     </div>
-    <%= link_to "Déconnexion", admin_logout_path, data: { turbo_method: :delete }, style: "display: block; text-align: center; margin-top: 12px; color: var(--text-muted); font-size: 13px; text-decoration: none; transition: all 0.2s; padding: 8px; border-radius: var(--radius-md); font-weight: 600;" %>
+    <div class="sidebar-logout-link">
+      <%= link_to "Déconnexion", admin_logout_path, data: { turbo_method: :delete }, style: "display: block; text-align: center; margin-top: 12px; color: var(--text-muted); font-size: 13px; text-decoration: none; transition: all 0.2s; padding: 8px; border-radius: var(--radius-md); font-weight: 600;" %>
+    </div>
   </div>
 </div>
 
@@ -192,6 +194,12 @@
     sidebar.classList.toggle('open');
     overlay.classList.toggle('active');
     document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+  }
+
+  function openUserSettings() {
+    // Pour l'instant, rediriger vers le profil utilisateur
+    // Plus tard, on pourra implémenter une modal de paramètres
+    window.location.href = '<%= admin_client_path(current_user) %>';
   }
 
   (function() {

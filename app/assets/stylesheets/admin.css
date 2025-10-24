@@ -229,7 +229,8 @@ html.sidebar-collapsed-init .sidebar .sidebar-logo span,
 html.sidebar-collapsed-init .sidebar .sidebar-section-title,
 html.sidebar-collapsed-init .sidebar .sidebar-menu-link > span:not(.sidebar-menu-icon),
 html.sidebar-collapsed-init .sidebar .sidebar-user-info,
-html.sidebar-collapsed-init .sidebar .sidebar-toggle-btn {
+html.sidebar-collapsed-init .sidebar .sidebar-toggle-btn,
+html.sidebar-collapsed-init .sidebar .sidebar-logout-link {
   display: none;
 }
 
@@ -272,7 +273,8 @@ html.sidebar-collapsed-init .sidebar .sidebar-footer a {
 .sidebar.collapsed .sidebar-section-title,
 .sidebar.collapsed .sidebar-menu-link > span:not(.sidebar-menu-icon),
 .sidebar.collapsed .sidebar-user-info,
-.sidebar.collapsed .sidebar-toggle-btn {
+.sidebar.collapsed .sidebar-toggle-btn,
+.sidebar.collapsed .sidebar-logout-link {
   display: none;
 }
 
