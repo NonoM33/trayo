@@ -118,43 +118,25 @@
             <p style="color: var(--text-muted); margin-bottom: 20px;">Changez le statut du VPS selon l'avancement</p>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-              <%= button_to update_status_admin_vp_path(@vps, new_status: 'ordered'), method: :post,
-                  class: "btn", 
-                  style: "background: #FF9800; #{@vps.status == 'ordered' ? 'opacity: 0.5;' : ''}" do %>
-                🛒 Marquer Commandé
-              <% end %>
+              <%= button_to "Marquer Commandé", update_status_admin_vp_path(@vps, new_status: 'ordered'), method: :post,
+                  class: @vps.status == 'ordered' ? "btn btn-warning" : "btn btn-warning" %>
               
-              <%= button_to update_status_admin_vp_path(@vps, new_status: 'configuring'), method: :post,
-                  class: "btn",
-                  style: "background: #2196F3; #{@vps.status == 'configuring' ? 'opacity: 0.5;' : ''}" do %>
-                ⚙️ Marquer En Configuration
-              <% end %>
+              <%= button_to "Marquer En Configuration", update_status_admin_vp_path(@vps, new_status: 'configuring'), method: :post,
+                  class: @vps.status == 'configuring' ? "btn btn-primary" : "btn btn-primary" %>
               
-              <%= button_to update_status_admin_vp_path(@vps, new_status: 'ready'), method: :post,
-                  class: "btn",
-                  style: "background: #4CAF50; #{@vps.status == 'ready' ? 'opacity: 0.5;' : ''}" do %>
-                ✅ Marquer Prêt
-              <% end %>
+              <%= button_to "Marquer Prêt", update_status_admin_vp_path(@vps, new_status: 'ready'), method: :post,
+                  class: @vps.status == 'ready' ? "btn btn-success" : "btn btn-success" %>
               
-              <%= button_to update_status_admin_vp_path(@vps, new_status: 'active'), method: :post,
-                  class: "btn",
-                  style: "background: #00C853; #{@vps.status == 'active' ? 'opacity: 0.5;' : ''}" do %>
-                🟢 Marquer Actif
-              <% end %>
+              <%= button_to "Marquer Actif", update_status_admin_vp_path(@vps, new_status: 'active'), method: :post,
+                  class: @vps.status == 'active' ? "btn btn-success" : "btn btn-success" %>
               
-              <%= button_to update_status_admin_vp_path(@vps, new_status: 'suspended'), method: :post,
-                  class: "btn",
-                  data: { turbo_confirm: "Suspendre ce VPS ?" },
-                  style: "background: #F44336;" do %>
-                ⏸️ Suspendre
-              <% end %>
+              <%= button_to "Suspendre", update_status_admin_vp_path(@vps, new_status: 'suspended'), method: :post,
+                  class: "btn btn-danger",
+                  data: { turbo_confirm: "Suspendre ce VPS ?" } %>
               
-              <%= button_to update_status_admin_vp_path(@vps, new_status: 'cancelled'), method: :post,
-                  class: "btn",
-                  data: { turbo_confirm: "Annuler ce VPS ? Cette action est définitive." },
-                  style: "background: #999;" do %>
-                🔴 Annuler
-              <% end %>
+              <%= button_to "Annuler", update_status_admin_vp_path(@vps, new_status: 'cancelled'), method: :post,
+                  class: "btn btn-secondary",
+                  data: { turbo_confirm: "Annuler ce VPS ? Cette action est définitive." } %>
             </div>
           </div>
         <% end %>

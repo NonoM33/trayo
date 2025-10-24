@@ -85,6 +85,9 @@
   <%= render 'admin/shared/navbar' %>
       
       <div class="container">
+     
+        <%= render 'admin/shared/campaign_banner' %>
+        
         <div class="dashboard-welcome">
           <h1>
             Bienvenue, <%= @client.first_name || @client.email.split('@').first %>

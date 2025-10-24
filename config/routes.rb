@@ -59,6 +59,12 @@ Rails.application.routes.draw do
         post :update_status
       end
     end
+    
+    resources :campaigns do
+      member do
+        post :toggle_active
+      end
+    end
   end
 
   namespace :api do

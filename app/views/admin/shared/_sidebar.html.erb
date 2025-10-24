@@ -58,6 +58,12 @@
               <span>VPS</span>
             <% end %>
           </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_campaigns_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/campaigns') ? 'active' : ''}" do %>
+              <span class="sidebar-menu-icon">🎯</span>
+              <span>Campagnes</span>
+            <% end %>
+          </li>
         <% else %>
           <li class="sidebar-menu-item">
             <%= link_to admin_dashboard_path, class: "sidebar-menu-link #{request.path == admin_dashboard_path ? 'active' : ''}" do %>

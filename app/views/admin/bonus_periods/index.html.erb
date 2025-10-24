@@ -79,7 +79,7 @@
                         <% if period.start_date > Date.current %>
                           <span class="status-pending">UPCOMING</span>
                         <% else %>
-                          <span style="background: #666; color: white; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">EXPIRED</span>
+                          <span class="status-badge status-inactive">EXPIRED</span>
                         <% end %>
                       <% else %>
                         <span class="status-rejected">INACTIVE</span>

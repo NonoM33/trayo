@@ -41,6 +41,22 @@
       padding: 0;
     }
     
+    @media (max-width: 1200px) {
+      .table-wrapper {
+        overflow-x: auto;
+      }
+      
+      table {
+        min-width: 800px;
+        font-size: 0.875rem;
+      }
+      
+      .info-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+    }
+    
     @media (max-width: 768px) {
       .card-header {
         flex-direction: column;
@@ -68,11 +84,17 @@
       
       table {
         font-size: 0.75rem;
+        min-width: 700px;
       }
       
       .status-badge {
         font-size: 0.6875rem;
         padding: 0.25rem 0.5rem;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
       }
     }
     
@@ -110,19 +132,19 @@
 
         <div class="info-grid" style="margin-bottom: 1.5rem;">
           <div class="info-item">
-            <div class="info-label">Total Clients</div>
+            <div class="info-label">Clients</div>
             <div class="info-value"><%= @clients.count %></div>
           </div>
           <div class="info-item">
-            <div class="info-label">Profits Totaux</div>
+            <div class="info-label">Profits</div>
             <div class="info-value positive"><%= number_to_currency(@clients.sum(&:total_profits), unit: "€", format: "%n %u") %></div>
           </div>
           <div class="info-item">
-            <div class="info-label">Commissions Dues</div>
+            <div class="info-label">Commissions</div>
             <div class="info-value"><%= number_to_currency(@clients.sum(&:total_commission_due), unit: "€", format: "%n %u") %></div>
           </div>
           <div class="info-item">
-            <div class="info-label">Administrateurs</div>
+            <div class="info-label">Admins</div>
             <div class="info-value"><%= @admins.count %></div>
           </div>
         </div>
@@ -141,10 +163,10 @@
                 <tr>
                   <th>Client</th>
                   <th>Email</th>
-                  <th>Taux Commission</th>
-                  <th>Gains Totaux</th>
-                  <th>Commission Due</th>
-                  <th>Solde à Payer</th>
+                  <th>Commission</th>
+                  <th>Gains</th>
+                  <th>Due</th>
+                  <th>Solde</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -161,12 +183,12 @@
                         </div>
                       </div>
                     </td>
-                    <td><%= client.email %></td>
+                    <td style="font-size: 0.875rem;"><%= client.email %></td>
                     <td><span class="status-badge" style="background: var(--bg-hover); color: var(--text-primary);"><%= number_to_percentage(client.commission_rate, precision: 1) %></span></td>
-                    <td class="<%= client.total_profits > 0 ? 'positive' : '' %>" style="font-weight: 600;">
+                    <td class="<%= client.total_profits > 0 ? 'positive' : '' %>" style="font-weight: 600; font-size: 0.875rem;">
                       <%= number_to_currency(client.total_profits, unit: "€", format: "%n %u") %>
                     </td>
-                    <td style="font-weight: 600;">
+                    <td style="font-weight: 600; font-size: 0.875rem;">
                       <%= number_to_currency(client.total_commission_due, unit: "€", format: "%n %u") %>
                     </td>
                     <td>
@@ -221,8 +243,8 @@
                         </div>
                       </div>
                     </td>
-                    <td><%= admin.email %></td>
-                    <td><%= admin.created_at.strftime("%d/%m/%Y à %H:%M") %></td>
+                    <td style="font-size: 0.875rem;"><%= admin.email %></td>
+                    <td style="font-size: 0.875rem;"><%= admin.created_at.strftime("%d/%m/%Y") %></td>
                     <td>
                       <% if admin.id != current_user.id %>
                         <%= button_to "Supprimer", admin_client_path(admin), method: :delete, data: { turbo_confirm: "Supprimer cet admin ?" }, class: "btn btn-danger btn-sm" %>

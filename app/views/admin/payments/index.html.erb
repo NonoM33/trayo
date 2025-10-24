@@ -49,7 +49,7 @@
                     <td><%= payment.payment_method_label %></td>
                     <td><%= payment.reference || "—" %></td>
                     <td>
-                      <span class="status-<%= payment.status %>">
+                      <span class="status-badge status-<%= payment.status %>">
                         <%= payment.status.upcase %>
                       </span>
                     </td>

@@ -157,6 +157,24 @@ else
   puts "Trading bots already exist (#{TradingBot.count} bots)"
 end
 
+puts "Checking campaigns..."
+campaign = Campaign.find_by(title: "🎯 Promotion Black Friday 2024")
+if campaign
+  puts "Campaign already exists: #{campaign.title}"
+else
+  campaign = Campaign.create!(
+    title: "🎯 Promotion Black Friday 2024",
+    description: "Profitez de notre offre exceptionnelle avec des réductions jusqu'à 50% sur tous nos bots de trading !",
+    start_date: 1.day.ago,
+    end_date: 7.days.from_now,
+    is_active: true,
+    banner_color: "#ff6b35",
+    popup_title: "🎯 Offre Spéciale Black Friday !",
+    popup_message: "Ne ratez pas notre promotion exceptionnelle !\n\n• Réduction de 50% sur tous les bots\n• Bonus de bienvenue doublé\n• Support premium inclus\n\nCette offre est limitée dans le temps, profitez-en maintenant !"
+  )
+  puts "✓ Campaign created: #{campaign.title}"
+end
+
 puts "\n" + "="*60
 puts "✓ Seeding completed successfully!"
 puts "="*60
@@ -169,6 +187,7 @@ puts "  • Bot Purchases: #{BotPurchase.count}"
 puts "  • Payments: #{Payment.count}"
 puts "  • Credits: #{Credit.count}"
 puts "  • Bonus Deposits: #{BonusDeposit.count}"
+puts "  • Campaigns: #{Campaign.count}"
 puts "\n🔑 Login credentials:"
 puts "  Admin: admin@trayo.com / admin123"
 puts "  Client: renaudlemagicien@gmail.com / password123"

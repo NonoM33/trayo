@@ -65,6 +65,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000021) do
     t.index ["user_id"], name: "index_bot_purchases_on_user_id"
   end
 
+  create_table "campaigns", force: :cascade do |t|
+    t.string "title", null: false
+    t.text "description", null: false
+    t.datetime "start_date", null: false
+    t.datetime "end_date", null: false
+    t.boolean "is_active", default: true
+    t.string "banner_color", default: "#3b82f6"
+    t.string "popup_title", null: false
+    t.text "popup_message", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["is_active", "start_date", "end_date"], name: "index_campaigns_on_is_active_and_start_date_and_end_date"
+  end
+
   create_table "credits", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.decimal "amount", precision: 15, scale: 2, null: false
