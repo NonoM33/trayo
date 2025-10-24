@@ -10,11 +10,11 @@ class Campaign < ApplicationRecord
   validate :end_date_after_start_date
   
   scope :active, -> { where(is_active: true) }
-  scope :current, -> { where('start_date <= ? AND end_date >= ?', Time.current, Time.current) }
+  scope :current, -> { where('end_date >= ?', Time.current) }
   scope :active_current, -> { active.current }
   
   def current?
-    Time.current.between?(start_date, end_date)
+    Time.current <= end_date
   end
   
   def active_and_current?
@@ -29,7 +29,7 @@ class Campaign < ApplicationRecord
   def progress_percentage
     return 0 unless current?
     total_days = (end_date.to_date - start_date.to_date).to_i
-    elapsed_days = (Date.current - start_date.to_date).to_i
+    elapsed_days = [(Date.current - start_date.to_date).to_i, 0].max
     [(elapsed_days.to_f / total_days * 100).round, 100].min
   end
   

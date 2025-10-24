@@ -11,18 +11,18 @@ class CampaignData
   end
 
   def active_and_current?
-    is_active && Time.current.between?(start_date, end_date)
+    is_active && Time.current <= end_date
   end
 
   def days_remaining
     return 0 unless active_and_current?
-    (end_date.to_date - Date.current).to_i
+    [(end_date.to_date - Date.current).to_i, 0].max
   end
 
   def progress_percentage
     return 0 unless active_and_current?
     total_days = (end_date.to_date - start_date.to_date).to_i
-    elapsed_days = (Date.current - start_date.to_date).to_i
+    elapsed_days = [(Date.current - start_date.to_date).to_i, 0].max
     [(elapsed_days.to_f / total_days * 100).round, 100].min
   end
 
@@ -47,7 +47,7 @@ module Admin
         Rails.logger.info "Campaign model not loaded, using SQL fallback: #{e.message}"
         puts "Campaign model not loaded, using SQL fallback: #{e.message}"
         campaign_data = ActiveRecord::Base.connection.execute(
-          "SELECT * FROM campaigns WHERE is_active = true AND start_date <= NOW() AND end_date >= NOW() LIMIT 1"
+          "SELECT * FROM campaigns WHERE is_active = true AND end_date >= NOW() LIMIT 1"
         ).first
         
         if campaign_data
