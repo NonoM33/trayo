@@ -3,7 +3,7 @@ require 'ostruct'
 # Simple Campaign class for when the model is not loaded
 class CampaignData
   attr_accessor :id, :title, :description, :start_date, :end_date, :is_active, 
-                :banner_color, :popup_title, :popup_message, :created_at, :updated_at, :errors
+                :banner_color, :popup_title, :popup_message, :button_text, :button_url, :created_at, :updated_at, :errors
 
   def initialize(data = {})
     @errors = []
@@ -16,14 +16,47 @@ class CampaignData
 
   def days_remaining
     return 0 unless active_and_current?
-    [(end_date.to_date - Date.current).to_i, 0].max
+    
+    now = Date.current
+    end_date_val = end_date.to_date
+    
+    # Si la campagne n'a pas encore commencé, retourner les jours jusqu'au début
+    if now < start_date.to_date
+      return (start_date.to_date - now).to_i
+    end
+    
+    # Sinon, retourner les jours jusqu'à la fin
+    [(end_date_val - now).to_i, 0].max
   end
 
   def progress_percentage
     return 0 unless active_and_current?
-    total_days = (end_date.to_date - start_date.to_date).to_i
-    elapsed_days = [(Date.current - start_date.to_date).to_i, 0].max
+    
+    now = Date.current
+    start = start_date.to_date
+    end_date_val = end_date.to_date
+    
+    # Si la campagne n'a pas encore commencé
+    if now < start
+      return 0
+    end
+    
+    # Si la campagne est terminée
+    if now >= end_date_val
+      return 100
+    end
+    
+    # Calculer la progression normale
+    total_days = (end_date_val - start).to_i
+    elapsed_days = (now - start).to_i
+    
+    return 0 if total_days <= 0
+    
     [(elapsed_days.to_f / total_days * 100).round, 100].min
+  end
+
+  def has_button?
+    button_text.present? && button_url.present?
   end
 
   def persisted?
@@ -103,7 +136,9 @@ module Admin
         is_active: data['is_active'] == 't' || data['is_active'] == true,
         banner_color: data['banner_color'],
         popup_title: data['popup_title'],
-        popup_message: data['popup_message']
+        popup_message: data['popup_message'],
+        button_text: data['button_text'],
+        button_url: data['button_url']
       )
     end
 
