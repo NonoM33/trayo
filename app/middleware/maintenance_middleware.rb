@@ -6,11 +6,8 @@ class MaintenanceMiddleware
   def call(env)
     request = ActionDispatch::Request.new(env)
     
-    Rails.logger.info "MaintenanceMiddleware: #{request.path} - Maintenance enabled: #{maintenance_enabled?} - Admin access: #{admin_access?(request)}"
-    
     # Vérifier si la maintenance est activée
     if maintenance_enabled? && !admin_access?(request)
-      Rails.logger.info "MaintenanceMiddleware: Showing maintenance page for #{request.path}"
       return maintenance_page
     end
     
@@ -184,12 +181,7 @@ class MaintenanceMiddleware
           
           #{maintenance.description.present? ? "<p>#{maintenance.description}</p>" : "<p>Nous travaillons actuellement sur des améliorations pour vous offrir une meilleure expérience.</p>"}
           
-          <a href="/admin" class="admin-link">Accès Administrateur</a>
-          
-          <div class="maintenance-text">
-            <span class="status-indicator"></span>
-            Mode maintenance actif
-          </div>
+      
         </div>
       </body>
       </html>

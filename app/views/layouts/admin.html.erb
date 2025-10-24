@@ -9,13 +9,12 @@
   <%= stylesheet_link_tag "admin", "data-turbo-track": "reload" %>
   <%= javascript_importmap_tags %>
 </head>
-<body>
+<body class="dark-mode">
   <script>
     (function() {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-      }
+      // Activer le mode sombre par défaut
+      document.body.classList.add('dark-mode');
+      localStorage.setItem('theme', 'dark');
     })();
   </script>
   
