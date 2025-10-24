@@ -1,7 +1,7 @@
 module Admin
   class ClientsController < BaseController
-    before_action :require_admin, except: [:show, :edit, :update]
-    before_action :ensure_own_profile_or_admin, only: [:show, :edit, :update]
+    before_action :require_admin, except: [:show]
+    before_action :ensure_own_profile_or_admin, only: [:show]
     
     def index
       @clients = User.clients.order(:email)
