@@ -46,9 +46,7 @@
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
             <h2 style="margin: 0; border: none; padding: 0;">📋 <%= current_user.is_admin? ? 'Tous les VPS' : 'Mes VPS' %></h2>
             <% if current_user.is_admin? %>
-              <%= link_to new_admin_vp_path, class: "btn btn-success" do %>
-                <span>➕</span> Nouveau VPS
-              <% end %>
+              <%= link_to "Nouveau VPS", new_admin_vp_path, class: "btn btn-success" %>
             <% end %>
           </div>
           
@@ -107,8 +105,8 @@
                         </code>
                       </td>
                       <td>
-                        <span class="status-badge" style="background: <%= vps.status_color %>; color: white; border: none;">
-                          <%= vps.status_icon %> <%= vps.status_label %>
+                        <span class="status-badge status-<%= vps.status %>">
+                          <%= vps.status_label %>
                         </span>
                       </td>
                       <td>
@@ -121,12 +119,12 @@
                       </td>
                       <td>
                         <div class="action-buttons">
-                          <%= link_to "👁", admin_vp_path(vps), class: "btn btn-primary btn-sm", title: "Voir" %>
+                          <%= link_to "Voir", admin_vp_path(vps), class: "btn btn-outline btn-sm" %>
                           <% if current_user.is_admin? %>
-                            <%= link_to "✏️", edit_admin_vp_path(vps), class: "btn btn-sm", style: "background: var(--color-warning);", title: "Modifier" %>
-                            <%= button_to "🗑", admin_vp_path(vps), method: :delete,
+                            <%= link_to "Modifier", edit_admin_vp_path(vps), class: "btn btn-warning btn-sm" %>
+                            <%= button_to "Supprimer", admin_vp_path(vps), method: :delete,
                                 data: { turbo_confirm: "Supprimer ce VPS ?" },
-                                class: "btn btn-danger btn-sm", title: "Supprimer" %>
+                                class: "btn btn-danger btn-sm" %>
                           <% end %>
                         </div>
                       </td>

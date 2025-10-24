@@ -356,7 +356,7 @@
                   <% else %>
                     <div>🤖</div>
                   <% end %>
-                  <div class="bot-card-badge" style="background: <%= bot.risk_badge_color %>;">
+                  <div class="risk-badge risk-<%= bot.risk_level.downcase %>" style="position: absolute; top: 0.75rem; right: 0.75rem;">
                     <%= bot.risk_label %>
                   </div>
                 </div>
@@ -387,13 +387,9 @@
                   </div>
                   
                   <% if @my_bot_ids.include?(bot.id) %>
-                    <%= link_to admin_my_bots_path, class: "bot-card-cta bot-card-cta-owned" do %>
-                      Déjà Possédé
-                    <% end %>
+                    <%= link_to "Déjà Possédé", admin_my_bots_path, class: "btn btn-success" %>
                   <% else %>
-                    <%= link_to admin_shop_path(bot), class: "bot-card-cta bot-card-cta-secondary" do %>
-                      Voir les Détails
-                    <% end %>
+                    <%= link_to "Voir les Détails", admin_shop_path(bot), class: "btn btn-outline" %>
                   <% end %>
                   
                   <% if bot.active_users_count > 0 %>
