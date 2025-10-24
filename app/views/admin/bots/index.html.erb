@@ -45,9 +45,7 @@
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
             <h2 style="margin: 0; border: none; padding: 0;">📋 Bots de Trading</h2>
-            <%= link_to new_admin_bot_path, class: "btn btn-success" do %>
-              <span>➕</span> Nouveau Bot
-            <% end %>
+            <%= link_to "Nouveau Bot", new_admin_bot_path, class: "btn btn-success" %>
           </div>
           
           <% if @bots.any? %>
@@ -91,7 +89,7 @@
                         </div>
                       </td>
                       <td>
-                        <span class="status-badge" style="background: <%= bot.risk_badge_color %>; color: white; border: none;">
+                        <span class="risk-badge risk-<%= bot.risk_level.downcase %>">
                           <%= bot.risk_label %>
                         </span>
                       </td>
@@ -111,27 +109,23 @@
                       </td>
                       <td>
                         <% if bot.is_active? %>
-                          <span class="status-badge status-validated">
-                            <span>✓</span> Actif
-                          </span>
+                          <span class="status-badge status-active">Actif</span>
                         <% else %>
-                          <span class="status-badge" style="background: var(--bg-hover); color: var(--text-muted); border-color: var(--border-color);">
-                            <span>○</span> Inactif
-                          </span>
+                          <span class="status-badge status-inactive">Inactif</span>
                         <% end %>
                       </td>
                       <td style="text-align: center;">
-                        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: var(--bg-info-box); border-radius: var(--radius-md); font-weight: 700; color: var(--color-info);">
-                          <span>👥</span> <%= bot.active_users_count %>
+                        <div style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--bg-info-box); border-radius: var(--radius-full); font-weight: 600; color: var(--color-info); font-size: 12px;">
+                          <%= bot.active_users_count %>
                         </div>
                       </td>
                       <td>
                         <div class="action-buttons">
-                          <%= link_to "👁", admin_bot_path(bot), class: "btn btn-primary btn-sm", title: "Voir" %>
-                          <%= link_to "✏️", edit_admin_bot_path(bot), class: "btn btn-sm", style: "background: var(--color-warning);", title: "Modifier" %>
-                          <%= button_to "🗑", admin_bot_path(bot), method: :delete, 
+                          <%= link_to "Voir", admin_bot_path(bot), class: "btn btn-outline btn-sm" %>
+                          <%= link_to "Modifier", edit_admin_bot_path(bot), class: "btn btn-warning btn-sm" %>
+                          <%= button_to "Supprimer", admin_bot_path(bot), method: :delete, 
                               data: { turbo_confirm: "Supprimer ce bot ?" }, 
-                              class: "btn btn-danger btn-sm", title: "Supprimer" %>
+                              class: "btn btn-danger btn-sm" %>
                         </div>
                       </td>
                     </tr>
@@ -144,9 +138,7 @@
               <div style="font-size: 72px; margin-bottom: 24px; animation: bounce 2s infinite;">🤖</div>
               <h3 style="margin: 0 0 12px 0; font-size: 24px; color: var(--text-primary);">Aucun bot pour le moment</h3>
               <p style="margin: 0 0 32px 0; font-size: 16px;">Créez votre premier bot de trading intelligent</p>
-              <%= link_to new_admin_bot_path, class: "btn btn-success btn-lg" do %>
-                <span>➕</span> Créer mon Premier Bot
-              <% end %>
+              <%= link_to "Créer mon Premier Bot", new_admin_bot_path, class: "btn btn-success btn-lg" %>
             </div>
           <% end %>
         </div>

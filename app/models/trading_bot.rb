@@ -26,10 +26,10 @@ class TradingBot < ApplicationRecord
 
   def risk_label
     case risk_level
-    when 'low' then 'Risque Faible'
-    when 'medium' then 'Risque Modéré'
-    when 'high' then 'Risque Élevé'
-    else 'Non défini'
+    when 'low' then 'FAIBLE'
+    when 'medium' then 'MODÉRÉ'
+    when 'high' then 'ÉLEVÉ'
+    else 'N/A'
     end
   end
 

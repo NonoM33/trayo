@@ -162,7 +162,7 @@
                       </div>
                     </td>
                     <td><%= client.email %></td>
-                    <td><span style="background: hsl(var(--muted)); padding: 0.25rem 0.625rem; border-radius: calc(var(--radius) - 2px); font-weight: 600; font-size: 0.8125rem;"><%= number_to_percentage(client.commission_rate, precision: 1) %></span></td>
+                    <td><span class="status-badge" style="background: var(--bg-hover); color: var(--text-primary);"><%= number_to_percentage(client.commission_rate, precision: 1) %></span></td>
                     <td class="<%= client.total_profits > 0 ? 'positive' : '' %>" style="font-weight: 600;">
                       <%= number_to_currency(client.total_profits, unit: "€", format: "%n %u") %>
                     </td>
@@ -171,7 +171,7 @@
                     </td>
                     <td>
                       <% if client.balance_due > 0 %>
-                        <span class="status-badge" style="background: var(--bg-danger-box); color: var(--color-danger); border-color: var(--color-danger);">
+                        <span class="status-badge status-rejected">
                           <%= number_to_currency(client.balance_due, unit: "€", format: "%n %u") %>
                         </span>
                       <% elsif client.balance_due < 0 %>
@@ -227,7 +227,7 @@
                       <% if admin.id != current_user.id %>
                         <%= button_to "Supprimer", admin_client_path(admin), method: :delete, data: { turbo_confirm: "Supprimer cet admin ?" }, class: "btn btn-danger btn-sm" %>
                       <% else %>
-                        <span class="status-badge" style="background: hsl(var(--muted)); color: hsl(var(--muted-foreground)); border-color: hsl(var(--border));">Utilisateur actuel</span>
+                        <span class="status-badge status-inactive">Utilisateur actuel</span>
                       <% end %>
                     </td>
                   </tr>
