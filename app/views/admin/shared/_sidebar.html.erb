@@ -187,7 +187,7 @@
     const toggleBtn = document.getElementById('sidebarToggleBtn');
     const isCollapsed = sidebar.classList.toggle('collapsed');
     
-    toggleBtn.textContent = isCollapsed ? '→' : '←';
+    toggleBtn.innerHTML = isCollapsed ? '<span class="material-icons md-18">chevron_right</span>' : '<i class="fa-icon fa-md fa-chevron-left"></i>';
     toggleBtn.title = isCollapsed ? 'Agrandir la barre latérale' : 'Réduire la barre latérale';
     
     localStorage.setItem('sidebarCollapsed', isCollapsed ? 'true' : 'false');
@@ -215,7 +215,7 @@
     
     if (isCollapsed && sidebar && toggleBtn && window.innerWidth > 768) {
       sidebar.classList.add('collapsed');
-      toggleBtn.textContent = '→';
+      toggleBtn.innerHTML = '<span class="material-icons md-18">chevron_right</span>';
       toggleBtn.title = 'Agrandir la barre latérale';
     }
   })();

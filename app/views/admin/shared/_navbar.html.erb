@@ -1,13 +1,16 @@
 <div class="navbar">
   <div style="display: flex; align-items: center; gap: 16px;">
     <button class="theme-toggle" onclick="toggleMobileSidebar()" aria-label="Toggle menu" style="display: none;" id="mobileMenuBtn">
-      <span class="theme-icon">☰</span>
+      <span class="theme-icon"><i class="fa-icon fa-md fa-bars"></i></span>
     </button>
-    <h2 class="navbar-title"><%= @page_title || 'Dashboard' %></h2>
+    <h2 class="navbar-title">
+      <i class="fa-icon fa-md fa-users"></i>
+      <%= @page_title || 'Dashboard' %>
+    </h2>
   </div>
   <div class="navbar-right">
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
-      <span class="theme-icon" id="themeIcon">🌙</span>
+      <span class="theme-icon" id="themeIcon"><i class="fa-icon fa-md fa-moon"></i></span>
     </button>
   </div>
 </div>
