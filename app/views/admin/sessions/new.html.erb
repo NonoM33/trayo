@@ -334,7 +334,7 @@
       <%= form_with url: admin_login_path, method: :post do |f| %>
         <div class="form-group">
           <%= label_tag :email, "Email" %>
-          <%= email_field_tag :email, nil, required: true, placeholder: "vous@exemple.com" %>
+          <%= email_field_tag :email, nil, required: true, placeholder: "admin@trayo.com" %>
         </div>
 
         <div class="form-group">
@@ -345,7 +345,6 @@
         <%= submit_tag "Se Connecter", class: "login-btn" %>
       <% end %>
     </div>
-  </div>
   
   <script>
     function toggleLoginTheme() {
