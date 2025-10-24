@@ -145,6 +145,32 @@
       </a>
     </div>
   </div>
+<% else %>
+  <!-- Mobile bottom navigation for admins -->
+  <div class="mobile-bottom-nav">
+    <div class="mobile-bottom-nav-content">
+      <%= link_to admin_clients_path, class: "mobile-nav-item #{request.path == admin_clients_path ? 'active' : ''}" do %>
+        <div class="mobile-nav-icon">👥</div>
+        <div class="mobile-nav-label">Clients</div>
+      <% end %>
+      <%= link_to admin_bots_path, class: "mobile-nav-item #{request.path.start_with?('/admin/bots') ? 'active' : ''}" do %>
+        <div class="mobile-nav-icon">🤖</div>
+        <div class="mobile-nav-label">Bots</div>
+      <% end %>
+      <%= link_to admin_payments_path, class: "mobile-nav-item #{request.path == admin_payments_path ? 'active' : ''}" do %>
+        <div class="mobile-nav-icon">💰</div>
+        <div class="mobile-nav-label">Paiements</div>
+      <% end %>
+      <%= link_to admin_shop_index_path, class: "mobile-nav-item #{request.path.start_with?('/admin/shop') ? 'active' : ''}" do %>
+        <div class="mobile-nav-icon">🛒</div>
+        <div class="mobile-nav-label">Boutique</div>
+      <% end %>
+      <a href="#" class="mobile-nav-item" onclick="toggleMobileSidebar(); return false;">
+        <div class="mobile-nav-icon">☰</div>
+        <div class="mobile-nav-label">Plus</div>
+      </a>
+    </div>
+  </div>
 <% end %>
 
 <script>
