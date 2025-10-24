@@ -971,8 +971,8 @@ textarea {
 .btn:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--bg-active);
+  border-color: var(--border-hover);
 }
 
 .btn:active {
@@ -1008,47 +1008,47 @@ textarea {
 }
 
 .btn-success {
-  background: rgba(46, 204, 113, 0.2);
-  color: #2ecc71;
-  border-color: rgba(46, 204, 113, 0.3);
+  background: var(--bg-success-box);
+  color: var(--text-success);
+  border-color: var(--text-success);
 }
 
 .btn-success:hover {
-  background: rgba(46, 204, 113, 0.3);
-  color: #2ecc71;
+  background: var(--text-success);
+  color: white;
 }
 
 .btn-danger {
-  background: rgba(231, 76, 60, 0.2);
-  color: #e74c3c;
-  border-color: rgba(231, 76, 60, 0.3);
+  background: var(--bg-danger-box);
+  color: var(--text-danger);
+  border-color: var(--text-danger);
 }
 
 .btn-danger:hover {
-  background: rgba(231, 76, 60, 0.3);
-  color: #e74c3c;
+  background: var(--text-danger);
+  color: white;
 }
 
 .btn-warning {
-  background: rgba(255, 193, 7, 0.2);
-  color: #f39c12;
-  border-color: rgba(255, 193, 7, 0.3);
+  background: var(--bg-warning-box);
+  color: var(--text-warning);
+  border-color: var(--text-warning);
 }
 
 .btn-warning:hover {
-  background: rgba(255, 193, 7, 0.3);
-  color: #f39c12;
+  background: var(--text-warning);
+  color: white;
 }
 
 .btn-outline {
   background: transparent;
   color: var(--text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--border-color);
 }
 
 .btn-outline:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
 }
 
 
