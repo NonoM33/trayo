@@ -39,7 +39,7 @@
      ```
    - **Start Command**:
      ```bash
-     bundle exec puma -C config/puma.rb
+     bundle exec puma -C config/puma.rb -p ${PORT:-3000}
      ```
    - **Plan**: Starter ($7/mois) ou Free
 
@@ -59,6 +59,7 @@ Dans **Environment** → **Environment Variables**, ajouter :
 | `MT5_API_KEY`              | `mt5_secret_key_change_in_production`                |
 | `RAILS_LOG_TO_STDOUT`      | `true`                                               |
 | `RAILS_SERVE_STATIC_FILES` | `true`                                               |
+| `MAINTENANCE_DISABLED`     | `true`                                               |
 
 **Note** : `DATABASE_URL` doit ressembler à :
 

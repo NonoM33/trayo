@@ -17,6 +17,9 @@ class MaintenanceMiddleware
   private
   
   def maintenance_enabled?
+    # Désactiver complètement en production pour éviter les problèmes de démarrage
+    return false if Rails.env.production?
+    
     # Utiliser le modèle Rails pour vérifier l'état de maintenance
     begin
       MaintenanceSetting.current.is_enabled?
