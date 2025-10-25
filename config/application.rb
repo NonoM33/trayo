@@ -45,10 +45,10 @@ module Trayo
     # Don't generate system test files.
     config.generators.system_tests = nil
     
-    # Require maintenance middleware explicitly
-    require Rails.root.join('app', 'middleware', 'maintenance_middleware')
-    
-    # Add maintenance middleware at the beginning of the stack
-    config.middleware.insert_before ActionDispatch::Static, MaintenanceMiddleware
+    # Maintenance middleware only in development/test
+    unless Rails.env.production?
+      require Rails.root.join('app', 'middleware', 'maintenance_middleware')
+      config.middleware.insert_before ActionDispatch::Static, MaintenanceMiddleware
+    end
   end
 end
