@@ -29,3 +29,19 @@
 
 en:
   hello: "Hello world"
+  views:
+    pagination:
+      first: "&laquo; First"
+      last: "Last &raquo;"
+      previous: "&lsaquo; Prev"
+      next: "Next &rsaquo;"
+      truncate: "&hellip;"
+
+fr:
+  views:
+    pagination:
+      first: "&laquo; Premier"
+      last: "Dernier &raquo;"
+      previous: "&lsaquo; Préc"
+      next: "Suiv &rsaquo;"
+      truncate: "&hellip;"

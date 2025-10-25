@@ -17,11 +17,14 @@ Rails.application.routes.draw do
       member do
         post :reset_password
         post :regenerate_token
+        post :reset_mt5
+        get :trades
       end
     end
     resources :payments, only: [:index, :create, :update, :destroy]
     resources :credits, only: [:index, :create, :destroy]
     resources :mt5_accounts, only: [:update]
+    resources :withdrawals, only: [:destroy]
     
     resources :bonus_deposits, only: [:index, :new, :create], path: 'bonus' do
       member do
@@ -69,6 +72,14 @@ Rails.application.routes.draw do
       end
     end
     
+    resources :trades, only: [:index, :show] do
+      collection do
+        get :export
+      end
+    end
+    
+    resources :withdrawals, only: [:index, :show, :new, :create, :edit, :update, :destroy]
+    
     # Maintenance management
     get "maintenance", to: "maintenance#show"
     patch "maintenance", to: "maintenance#update"
@@ -81,6 +92,7 @@ Rails.application.routes.draw do
       post "login", to: "authentication#login"
       
       post "mt5/sync", to: "mt5_data#sync"
+      post "mt5/sync_complete_history", to: "mt5_data#sync_complete_history"
       
       get "accounts/balance", to: "accounts#balance"
       get "accounts/trades", to: "accounts#recent_trades"

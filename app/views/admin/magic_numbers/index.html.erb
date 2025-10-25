@@ -1,0 +1,205 @@
+<div class="container">
+  <div class="page-header">
+    <h1>
+      <i class="fa-icon fa-md fa-magic"></i>
+      Gestion des Magic Numbers
+    </h1>
+    <p class="page-description">
+      Assignez les magic numbers détectés aux bots pour calculer automatiquement leurs performances
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Magic Numbers Détectés</h2>
+      <div class="card-actions">
+        <%= button_to "Synchroniser Performances", admin_magic_numbers_sync_performances_path, 
+              method: :post,
+              class: "btn btn-primary",
+              data: { turbo_confirm: "Synchroniser les performances de tous les bots ?" } %>
+      </div>
+    </div>
+
+    <% if @magic_numbers.any? %>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Magic Number</th>
+              <th>Nombre de Trades</th>
+              <th>Profit Total</th>
+              <th>Bot Assigné</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @magic_numbers.each do |magic_data| %>
+              <tr>
+                <td>
+                  <span class="status-badge" style="background: var(--bg-hover); color: var(--text-primary);">
+                    <%= magic_data.magic_number %>
+                  </span>
+                </td>
+                <td><%= magic_data.trades_count %></td>
+                <td class="<%= magic_data.total_profit >= 0 ? 'positive' : 'negative' %>">
+                  <%= number_to_currency(magic_data.total_profit, unit: "€", format: "%n %u") %>
+                </td>
+                <td>
+                  <% assigned_bot = @bots_with_magic.find { |bot| bot.magic_number == magic_data.magic_number } %>
+                  <% if assigned_bot %>
+                    <span class="status-badge status-validated">
+                      <%= assigned_bot.name %>
+                    </span>
+                    <%= button_to "Retirer", admin_magic_numbers_unassign_from_bot_path, 
+                          method: :post,
+                          params: { bot_id: assigned_bot.id },
+                          class: "btn btn-outline btn-sm",
+                          data: { turbo_confirm: "Retirer ce magic number du bot ?" } %>
+                  <% else %>
+                    <span class="status-badge status-pending">Non assigné</span>
+                  <% end %>
+                </td>
+                <td>
+                  <% unless assigned_bot %>
+                    <div class="dropdown">
+                      <button class="btn btn-outline btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Assigner à un bot
+                      </button>
+                      <ul class="dropdown-menu">
+                        <% TradingBot.active.each do |bot| %>
+                          <li>
+                            <%= button_to bot.name, admin_magic_numbers_assign_to_bot_path, 
+                                  method: :post,
+                                  params: { bot_id: bot.id, magic_number: magic_data.magic_number },
+                                  class: "dropdown-item",
+                                  data: { turbo_confirm: "Assigner le magic number #{magic_data.magic_number} au bot #{bot.name} ?" } %>
+                          </li>
+                        <% end %>
+                      </ul>
+                    </div>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">
+        <i class="fa-icon fa-lg fa-magic"></i>
+        <h3>Aucun Magic Number Détecté</h3>
+        <p>Les magic numbers apparaîtront ici une fois que MT5 aura synchronisé des trades.</p>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="card">
+    <h2>Bots avec Magic Numbers</h2>
+    <% if @bots_with_magic.any? %>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Bot</th>
+              <th>Magic Number</th>
+              <th>Performance Calculée</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @bots_with_magic.each do |bot| %>
+              <% performance = bot.calculate_performance_for_magic_number(bot.magic_number) %>
+              <tr>
+                <td>
+                  <strong><%= bot.name %></strong>
+                  <br>
+                  <small style="color: var(--text-muted);"><%= bot.description %></small>
+                </td>
+                <td>
+                  <span class="status-badge" style="background: var(--bg-hover); color: var(--text-primary);">
+                    <%= bot.magic_number %>
+                  </span>
+                </td>
+                <td>
+                  <div class="performance-stats">
+                    <div class="stat-item">
+                      <span class="stat-label">Profit:</span>
+                      <span class="stat-value <%= performance[:profit] >= 0 ? 'positive' : 'negative' %>">
+                        <%= number_to_currency(performance[:profit], unit: "€", format: "%n %u") %>
+                      </span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-label">Trades:</span>
+                      <span class="stat-value"><%= performance[:trades_count] %></span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-label">Drawdown:</span>
+                      <span class="stat-value negative">
+                        <%= number_to_currency(performance[:drawdown], unit: "€", format: "%n %u") %>
+                      </span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-label">Win Rate:</span>
+                      <span class="stat-value"><%= performance[:win_rate] %>%</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <%= button_to "Retirer Magic Number", admin_magic_numbers_unassign_from_bot_path, 
+                        method: :post,
+                        params: { bot_id: bot.id },
+                        class: "btn btn-outline btn-sm",
+                        data: { turbo_confirm: "Retirer le magic number de ce bot ?" } %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">
+        <i class="fa-icon fa-lg fa-robot"></i>
+        <h3>Aucun Bot avec Magic Number</h3>
+        <p>Assignez des magic numbers aux bots pour voir leurs performances calculées automatiquement.</p>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+.performance-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.stat-label {
+  color: var(--text-muted);
+}
+
+.stat-value {
+  font-weight: 600;
+}
+
+.dropdown-menu {
+  min-width: 200px;
+}
+
+.dropdown-item {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  padding: 8px 16px;
+}
+
+.dropdown-item:hover {
+  background: var(--bg-hover);
+}
+</style>

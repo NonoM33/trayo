@@ -93,6 +93,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000021) do
     t.index ["user_id"], name: "index_credits_on_user_id"
   end
 
+  create_table "deposits", force: :cascade do |t|
+    t.bigint "mt5_account_id", null: false
+    t.decimal "amount", precision: 15, scale: 2, null: false
+    t.datetime "deposit_date", null: false
+    t.string "transaction_id"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["deposit_date"], name: "index_deposits_on_deposit_date"
+    t.index ["mt5_account_id"], name: "index_deposits_on_mt5_account_id"
+    t.index ["transaction_id"], name: "index_deposits_on_transaction_id"
+  end
+
   create_table "maintenance_settings", id: :serial, force: :cascade do |t|
     t.boolean "is_enabled", default: false
     t.string "logo_url", limit: 255
@@ -115,6 +128,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000021) do
     t.decimal "high_watermark", precision: 15, scale: 2, default: "0.0"
     t.decimal "total_withdrawals", precision: 15, scale: 2, default: "0.0"
     t.decimal "initial_balance", precision: 15, scale: 2, default: "0.0"
+    t.boolean "auto_calculated_initial_balance", default: false, null: false
+    t.decimal "calculated_initial_balance", precision: 15, scale: 2
+    t.decimal "total_deposits", precision: 15, scale: 2, default: "0.0"
     t.index ["mt5_id"], name: "index_mt5_accounts_on_mt5_id", unique: true
     t.index ["user_id", "mt5_id"], name: "index_mt5_accounts_on_user_id_and_mt5_id", unique: true
     t.index ["user_id"], name: "index_mt5_accounts_on_user_id"
@@ -196,7 +212,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000021) do
     t.decimal "commission_rate", precision: 5, scale: 2, default: "0.0"
     t.boolean "is_admin", default: false
     t.string "phone"
+    t.boolean "init_mt5", default: false, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["init_mt5"], name: "index_users_on_init_mt5"
     t.index ["mt5_api_token"], name: "index_users_on_mt5_api_token", unique: true
   end
 
@@ -225,7 +243,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000021) do
     t.datetime "withdrawal_date", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "notes"
+    t.string "status", default: "completed"
+    t.string "transaction_id"
     t.index ["mt5_account_id"], name: "index_withdrawals_on_mt5_account_id"
+    t.index ["transaction_id"], name: "index_withdrawals_on_transaction_id"
     t.index ["withdrawal_date"], name: "index_withdrawals_on_withdrawal_date"
   end
 
@@ -234,6 +256,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000021) do
   add_foreign_key "bot_purchases", "trading_bots"
   add_foreign_key "bot_purchases", "users"
   add_foreign_key "credits", "users"
+  add_foreign_key "deposits", "mt5_accounts"
   add_foreign_key "mt5_accounts", "users"
   add_foreign_key "payments", "users"
   add_foreign_key "trades", "mt5_accounts"

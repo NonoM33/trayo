@@ -1,5 +1,24 @@
 puts "Checking existing data..."
 
+# Créer un utilisateur de test pour les tests MT5
+puts "Checking test user..."
+test_user = User.find_by(email: "test@trayo.com")
+if test_user
+  puts "Test user already exists: #{test_user.email}"
+else
+  test_user = User.create!(
+    email: "test@trayo.com",
+    password: "test123",
+    password_confirmation: "test123",
+    first_name: "Test",
+    last_name: "User",
+    commission_rate: 0,
+    is_admin: false,
+    mt5_api_token: "test_token_123"
+  )
+  puts "✓ Test user created: #{test_user.email}"
+end
+
 puts "Checking admin user..."
 admin = User.find_by(email: "admin@trayo.com")
 if admin

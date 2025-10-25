@@ -11,7 +11,91 @@
     .status-rejected { color: #f44336; font-weight: 600; }
     .form-inline { display: inline; }
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  </style>
+    .positive { color: #10b981; }
+  .negative { color: #ef4444; }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-hover);
+    border-radius: 6px;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  
+  .trade-type-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .trade-type-badge.buy {
+    background: #10b981;
+    color: white;
+  }
+  
+  .trade-type-badge.sell {
+    background: #ef4444;
+    color: white;
+  }
+  
+  .magic-badge {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+  }
+  
+  .empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  .empty-state h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+  }
+  
+  .empty-state ul {
+    text-align: left;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+</style>
 </head>
 <body>
   <% @page_title = "Client Details" %>
@@ -70,18 +154,25 @@
         <% end %>
         <div class="info-item">
           <div class="info-label">Gains Totaux</div>
-          <div class="info-value positive"><%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %></div>
+          <div class="info-value <%= @client.total_profits >= 0 ? 'positive' : 'negative' %>">
+            <%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %>
+          </div>
+          <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
+            Gains réels + retraits effectués
+          </div>
         </div>
         <% if current_user.is_admin? %>
           <div class="info-item">
             <div class="info-label">Gains Commissionnables</div>
-            <div class="info-value positive"><%= number_to_currency(@client.total_commissionable_gains, unit: "€", format: "%n %u") %></div>
+            <div class="info-value <%= @client.total_commissionable_gains >= 0 ? 'positive' : 'negative' %>">
+              <%= number_to_currency(@client.total_commissionable_gains, unit: "€", format: "%n %u") %>
+            </div>
           </div>
         <% end %>
         <% if current_user.is_admin? %>
           <div class="info-item">
             <div class="info-label">Commission Due</div>
-            <div class="info-value <%= @client.total_commission_due > 0 ? 'negative' : '' %>">
+            <div class="info-value <%= @client.total_commission_due > 0 ? 'negative' : 'positive' %>">
               <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %>
             </div>
           </div>
@@ -129,12 +220,49 @@
           </div>
           <%= f.submit "Mettre à Jour", class: "btn" %>
         <% end %>
+        
+        <div class="mt-4">
+          <h3>Gestion MT5</h3>
+          <div class="mt5-controls">
+            <% if @client.init_mt5? %>
+              <div class="status-indicator">
+                <span class="status-badge status-validated">
+                  <i class="fa-icon fa-md fa-check-circle"></i>
+                  MT5 Initialisé
+                </span>
+                <p class="help-text">Le compte MT5 a été synchronisé avec l'historique complet.</p>
+              </div>
+              <%= button_to "Réinitialiser MT5", reset_mt5_admin_client_path(@client), 
+                    method: :post,
+                    class: "btn btn-outline",
+                    data: { turbo_confirm: "Réinitialiser la synchronisation MT5 ? Cela forcera une nouvelle synchronisation complète de l'historique." } %>
+            <% else %>
+              <div class="status-indicator">
+                <span class="status-badge status-pending">
+                  <span style="color: white;">
+                    <i class="fa-icon fa-md fa-clock"></i>
+                    MT5 Non Initialisé
+                  </span>
+                </span>
+                <p class="help-text">Le compte MT5 nécessite une synchronisation complète de l'historique.</p>
+              </div>
+            <% end %>
+          </div>
+        </div>
       <% end %>
     </div>
 
     <% if current_user.is_admin? %>
       <div class="card">
         <h2>Comptes MT5</h2>
+        <div class="info-box" style="background: var(--bg-hover); padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+          <div style="font-size: 13px; color: var(--text-muted);">
+            <strong>💡 Calcul des gains :</strong><br>
+            • <strong>Gains Nets</strong> = Balance actuelle - Capital initial + Retraits effectués<br>
+            • <strong>Gains Commissionnables</strong> = Balance actuelle - High Watermark ajusté<br>
+            • Les retraits augmentent les gains nets car ils représentent de l'argent gagné et retiré
+          </div>
+        </div>
       <% if @mt5_accounts.any? %>
         <table>
           <thead>
@@ -160,7 +288,9 @@
                 </td>
                 <td><%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %></td>
                 <td><%= number_to_currency(account.total_withdrawals, unit: "€", format: "%n %u") %></td>
-                <td class="positive"><%= number_to_currency(account.commissionable_gains, unit: "€", format: "%n %u") %></td>
+                <td class="<%= account.commissionable_gains >= 0 ? 'positive' : 'negative' %>">
+                  <%= number_to_currency(account.commissionable_gains, unit: "€", format: "%n %u") %>
+                </td>
                 <% if current_user.is_admin? %>
                   <td>
                     <button onclick="document.getElementById('edit-account-<%= account.id %>').style.display='block'" class="btn btn-outline btn-sm">
@@ -175,6 +305,158 @@
       <% else %>
         <p style="color: #999;">Aucun compte MT5 pour le moment</p>
       <% end %>
+      </div>
+    <% end %>
+
+    <!-- Résumé des Trades -->
+    <% if current_user.is_admin? && @mt5_accounts.any? %>
+      <div class="card">
+        <div class="card-header">
+          <h2>Résumé des Trades</h2>
+          <%= link_to "Voir tous les trades", trades_admin_client_path(@client), class: "btn btn-outline btn-sm" %>
+        </div>
+        
+        <% 
+          all_trades = Trade.joins(:mt5_account).where(mt5_accounts: { user_id: @client.id })
+          recent_trades = all_trades.order(close_time: :desc).limit(10)
+          total_trades = all_trades.count
+          total_profit = all_trades.sum(:profit)
+          winning_trades = all_trades.where('profit > 0').count
+          losing_trades = all_trades.where('profit < 0').count
+          win_rate = total_trades > 0 ? (winning_trades.to_f / total_trades * 100).round(2) : 0
+        %>
+        
+        <div class="stats-grid" style="margin-bottom: 1.5rem;">
+          <div class="stat-item">
+            <div class="stat-value"><%= total_trades %></div>
+            <div class="stat-label">Total Trades</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value <%= total_profit >= 0 ? 'positive' : 'negative' %>">
+              <%= number_to_currency(total_profit, unit: "€", format: "%n %u") %>
+            </div>
+            <div class="stat-label">Profit Total</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value"><%= win_rate %>%</div>
+            <div class="stat-label">Taux de Réussite</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value"><%= winning_trades %>/<%= losing_trades %></div>
+            <div class="stat-label">Gagnants/Perdants</div>
+          </div>
+        </div>
+        
+        <% if recent_trades.any? %>
+          <h4>Derniers Trades</h4>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Symbole</th>
+                  <th>Type</th>
+                  <th>Volume</th>
+                  <th>Profit</th>
+                  <th>Bot</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% recent_trades.each do |trade| %>
+                  <tr>
+                    <td><%= trade.close_time&.strftime("%d/%m/%Y %H:%M") %></td>
+                    <td><%= trade.symbol %></td>
+                    <td>
+                      <span class="trade-type-badge <%= trade.trade_type %>">
+                        <%= trade.trade_type&.upcase %>
+                      </span>
+                    </td>
+                    <td><%= trade.volume %></td>
+                    <td class="<%= trade.profit >= 0 ? 'positive' : 'negative' %>">
+                      <%= number_to_currency(trade.profit, unit: "€", format: "%n %u") %>
+                    </td>
+                    <td>
+                      <% if trade.magic_number.present? %>
+                        <span class="magic-badge">Bot <%= trade.magic_number %></span>
+                      <% else %>
+                        <span class="text-muted">-</span>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <p style="color: #999;">Aucun trade trouvé</p>
+        <% end %>
+      </div>
+    <% end %>
+    <% if current_user.is_admin? && @mt5_accounts.any? %>
+      <div class="card">
+        <div class="card-header">
+          <h2>Historique des Retraits</h2>
+          <button onclick="showAddWithdrawalModal()" class="btn btn-outline btn-sm">
+            <i class="fa-icon fa-md fa-plus"></i> Ajouter un retrait
+          </button>
+        </div>
+        
+        <% has_withdrawals = false %>
+        <% @mt5_accounts.each do |account| %>
+          <% if account.withdrawals.any? %>
+            <% has_withdrawals = true %>
+            <h4><%= account.account_name %> (<%= account.mt5_id %>)</h4>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Montant</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% account.withdrawals.order(withdrawal_date: :desc).each do |withdrawal| %>
+                    <tr>
+                      <td><%= withdrawal.withdrawal_date.strftime("%d/%m/%Y") %></td>
+                      <td class="negative"><%= number_to_currency(withdrawal.amount, unit: "€", format: "%n %u") %></td>
+                      <td><%= withdrawal.notes.present? ? withdrawal.notes : "-" %></td>
+                      <td>
+                        <div class="action-buttons">
+                          <%= button_to "Supprimer", admin_withdrawal_path(withdrawal), 
+                                method: :delete,
+                                data: { turbo_confirm: "Supprimer ce retrait ?" },
+                                class: "btn btn-danger btn-sm" %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% end %>
+        <% end %>
+        
+        <% unless has_withdrawals %>
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <i class="fa-icon fa-lg fa-money-bill-wave"></i>
+            </div>
+            <h3>Aucun retrait enregistré</h3>
+            <p>Aucun retrait n'a été détecté pour ce compte. Les retraits peuvent être :</p>
+            <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
+              <li>Détectés automatiquement lors de la synchronisation MT5</li>
+              <li>Importés depuis l'historique MT5 complet</li>
+              <li>Ajoutés manuellement par l'administrateur</li>
+            </ul>
+            <div style="margin-top: 1rem;">
+              <button onclick="showAddWithdrawalModal()" class="btn btn-primary">
+                <i class="fa-icon fa-md fa-plus"></i> Ajouter un retrait manuellement
+              </button>
+            </div>
+          </div>
+        <% end %>
       </div>
     <% end %>
 
@@ -215,6 +497,39 @@
                         Actuel : <%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %>
                       </div>
                     </div>
+                    
+                    <div class="input-field">
+                      <%= f.label :total_withdrawals, "Total Retraits", class: "form-label" %>
+                      <div class="input-container">
+                        <%= f.number_field :total_withdrawals, step: 0.01, class: "form-input-large", placeholder: "0.00" %>
+                        <span class="currency-symbol">€</span>
+                      </div>
+                      <div class="help-text">
+                        Montant total des retraits effectués
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="withdrawal-section">
+                  <h5>Enregistrer un Nouveau Retrait</h5>
+                  <div class="withdrawal-form">
+                    <%= fields_for "withdrawal", nil do |wf| %>
+                      <div class="input-group">
+                        <div class="input-field">
+                          <%= wf.label :amount, "Montant du Retrait", class: "form-label" %>
+                          <div class="input-container">
+                            <%= wf.number_field :amount, step: 0.01, class: "form-input", placeholder: "0.00", name: "withdrawal_amount" %>
+                            <span class="currency-symbol">€</span>
+                          </div>
+                        </div>
+                        
+                        <div class="input-field">
+                          <%= wf.label :date, "Date du Retrait", class: "form-label" %>
+                          <%= wf.date_field :date, class: "form-input", name: "withdrawal_date", value: Date.current %>
+                        </div>
+                      </div>
+                    <% end %>
                   </div>
                 </div>
                 
@@ -634,6 +949,12 @@
               warning.style.display = 'none';
               deleteButtons.forEach(btn => btn.style.display = 'none');
             }
+          }
+        </script>
+        
+        <script>
+          function showAddWithdrawalModal() {
+            window.location.href = '<%= new_admin_withdrawal_path %>';
           }
         </script>
       <% else %>

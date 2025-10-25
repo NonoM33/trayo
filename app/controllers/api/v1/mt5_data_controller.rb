@@ -5,15 +5,28 @@ module Api
       before_action :verify_api_key
 
       def sync
+        user = User.find_by(mt5_api_token: sync_params[:mt5_api_token])
+        unless user
+          render json: { error: "Invalid MT5 API token" }, status: :not_found
+          return
+        end
+
+        # Vérifier si une synchronisation complète est requise
+        if !user.init_mt5
+          render json: { 
+            init_required: true, 
+            send_all_history: true,
+            message: "Complete history synchronization required"
+          }, status: :ok
+          return
+        end
+
         mt5_account = Mt5Account.find_or_initialize_by(mt5_id: sync_params[:mt5_id])
         
-        if mt5_account.new_record?
-          user = User.find_by(mt5_api_token: sync_params[:mt5_api_token])
-          unless user
-            render json: { error: "Invalid MT5 API token" }, status: :not_found
-            return
-          end
+        # Assigner l'utilisateur si nécessaire
+        if mt5_account.new_record? || mt5_account.user.nil?
           mt5_account.user = user
+          mt5_account.save! # Sauvegarder immédiatement après assignation
         end
 
         old_balance = mt5_account.balance
@@ -27,6 +40,8 @@ module Api
         )
 
         sync_trades(mt5_account, sync_params[:trades]) if sync_params[:trades].present?
+        sync_withdrawals(mt5_account, sync_params[:withdrawals]) if sync_params[:withdrawals].present?
+        sync_deposits(mt5_account, sync_params[:deposits]) if sync_params[:deposits].present?
         
         sync_bot_performances(mt5_account.user)
 
@@ -39,12 +54,95 @@ module Api
             balance: mt5_account.balance,
             last_sync_at: mt5_account.last_sync_at,
             high_watermark: mt5_account.high_watermark,
-            total_withdrawals: mt5_account.total_withdrawals
+            total_withdrawals: mt5_account.total_withdrawals,
+            total_deposits: mt5_account.total_deposits
           },
-          trades_synced: sync_params[:trades]&.count || 0
+          trades_synced: sync_params[:trades]&.count || 0,
+          withdrawals_synced: sync_params[:withdrawals]&.count || 0,
+          deposits_synced: sync_params[:deposits]&.count || 0
         }, status: :ok
       rescue ActiveRecord::RecordInvalid => e
         render json: { error: e.message }, status: :unprocessable_entity
+      end
+
+      def sync_complete_history
+        user = User.find_by(mt5_api_token: sync_params[:mt5_api_token])
+        
+        # Créer automatiquement un utilisateur de test si le token est 'test_token_123'
+        if user.nil? && sync_params[:mt5_api_token] == 'test_token_123'
+          user = User.find_or_create_by(email: 'test@trayo.com') do |u|
+            u.password = 'test123'
+            u.password_confirmation = 'test123'
+            u.first_name = 'Test'
+            u.last_name = 'User'
+            u.commission_rate = 0
+            u.is_admin = false
+            u.mt5_api_token = 'test_token_123'
+          end
+          Rails.logger.info "Utilisateur de test créé: #{user.email}"
+        end
+        
+        unless user
+          render json: { error: "Invalid MT5 API token" }, status: :not_found
+          return
+        end
+
+        mt5_account = Mt5Account.find_or_initialize_by(mt5_id: sync_params[:mt5_id])
+        
+        # Assigner l'utilisateur si nécessaire
+        if mt5_account.new_record? || mt5_account.user.nil?
+          mt5_account.user = user
+          # S'assurer que les champs requis sont présents pour un nouveau compte
+          if mt5_account.new_record?
+            mt5_account.account_name = sync_params[:account_name] if sync_params[:account_name].present?
+            mt5_account.balance = sync_params[:balance].to_f if sync_params[:balance].present?
+          end
+          mt5_account.save! # Sauvegarder immédiatement après assignation
+        end
+
+        # Mettre à jour les informations du compte
+        mt5_account.update_from_mt5_data(
+          account_name: sync_params[:account_name],
+          balance: sync_params[:balance].to_f
+        )
+
+        # Synchroniser tout l'historique
+        sync_trades(mt5_account, sync_params[:trades]) if sync_params[:trades].present?
+        sync_withdrawals(mt5_account, sync_params[:withdrawals]) if sync_params[:withdrawals].present?
+        sync_deposits(mt5_account, sync_params[:deposits]) if sync_params[:deposits].present?
+
+        # Calculer automatiquement le capital initial
+        calculated_initial = mt5_account.calculate_initial_balance_from_history
+
+        # Marquer comme initialisé
+        user.update!(init_mt5: true)
+
+        sync_bot_performances(mt5_account.user)
+
+        render json: {
+          message: "Complete history synchronized successfully",
+          mt5_account: {
+            id: mt5_account.id,
+            mt5_id: mt5_account.mt5_id,
+            account_name: mt5_account.account_name,
+            balance: mt5_account.balance,
+            calculated_initial_balance: calculated_initial,
+            auto_calculated_initial_balance: mt5_account.auto_calculated_initial_balance,
+            last_sync_at: mt5_account.last_sync_at
+          },
+          trades_synced: sync_params[:trades]&.count || 0,
+          withdrawals_synced: sync_params[:withdrawals]&.count || 0,
+          deposits_synced: sync_params[:deposits]&.count || 0,
+          init_completed: true
+        }, status: :ok
+      rescue ActiveRecord::RecordInvalid => e
+        Rails.logger.error "Sync complete history error: #{e.message}"
+        Rails.logger.error "Mt5Account: #{mt5_account.inspect}" if defined?(mt5_account)
+        render json: { error: e.message, details: e.record.errors.full_messages }, status: :unprocessable_entity
+      rescue => e
+        Rails.logger.error "Unexpected error in sync_complete_history: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        render json: { error: "Internal server error: #{e.message}" }, status: :internal_server_error
       end
 
       private
@@ -79,6 +177,18 @@ module Api
             :status,
             :magic_number,
             :comment
+          ],
+          withdrawals: [
+            :transaction_id,
+            :amount,
+            :transaction_date,
+            :description
+          ],
+          deposits: [
+            :transaction_id,
+            :amount,
+            :transaction_date,
+            :description
           ]
         )
       end
@@ -86,6 +196,38 @@ module Api
       def sync_trades(mt5_account, trades_data)
         trades_data.each do |trade_data|
           Trade.create_or_update_from_mt5(mt5_account, trade_data.to_h.symbolize_keys)
+        end
+      end
+
+      def sync_withdrawals(mt5_account, withdrawals_data)
+        withdrawals_data.each do |withdrawal_data|
+          withdrawal = mt5_account.withdrawals.find_or_initialize_by(
+            transaction_id: withdrawal_data[:transaction_id]
+          )
+          
+          withdrawal.assign_attributes(
+            amount: withdrawal_data[:amount].to_f,
+            withdrawal_date: DateTime.parse(withdrawal_data[:transaction_date]),
+            notes: withdrawal_data[:description]
+          )
+          
+          withdrawal.save! if withdrawal.changed?
+        end
+      end
+
+      def sync_deposits(mt5_account, deposits_data)
+        deposits_data.each do |deposit_data|
+          deposit = mt5_account.deposits.find_or_initialize_by(
+            transaction_id: deposit_data[:transaction_id]
+          )
+          
+          deposit.assign_attributes(
+            amount: deposit_data[:amount].to_f,
+            deposit_date: DateTime.parse(deposit_data[:transaction_date]),
+            notes: deposit_data[:description]
+          )
+          
+          deposit.save! if deposit.changed?
         end
       end
 

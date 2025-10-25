@@ -65,6 +65,66 @@ module Admin
       redirect_to edit_admin_client_path(@client), notice: "API token regenerated successfully"
     end
 
+    def trades
+      @client = User.find(params[:id])
+      
+      # Récupérer tous les trades de tous les comptes MT5 du client
+      @trades = Trade.joins(:mt5_account)
+                    .where(mt5_accounts: { user_id: @client.id })
+                    .includes(:mt5_account)
+                    .order(close_time: :desc)
+      
+      # Filtres
+      if params[:symbol].present?
+        @trades = @trades.where(symbol: params[:symbol])
+      end
+      
+      if params[:magic_number].present?
+        @trades = @trades.where(magic_number: params[:magic_number])
+      end
+      
+      if params[:date_from].present?
+        @trades = @trades.where('close_time >= ?', Date.parse(params[:date_from]).beginning_of_day)
+      end
+      
+      if params[:date_to].present?
+        @trades = @trades.where('close_time <= ?', Date.parse(params[:date_to]).end_of_day)
+      end
+      
+      # Tri
+      case params[:sort]
+      when 'symbol'
+        @trades = @trades.order(:symbol, close_time: :desc)
+      when 'profit'
+        @trades = @trades.order(:profit)
+      when 'magic_number'
+        @trades = @trades.order(:magic_number, close_time: :desc)
+      when 'close_time'
+        @trades = @trades.order(close_time: :desc)
+      else
+        @trades = @trades.order(close_time: :desc)
+      end
+      
+      # Pagination
+      @trades = @trades.page(params[:page]).per(50)
+      
+      # Statistiques
+      @total_trades = @trades.total_count
+      @total_profit = @trades.sum(:profit)
+      @winning_trades = @trades.where('profit > 0').count
+      @losing_trades = @trades.where('profit < 0').count
+      @win_rate = @total_trades > 0 ? (@winning_trades.to_f / @total_trades * 100).round(2) : 0
+      
+      # Options pour les filtres
+      @symbols = Trade.joins(:mt5_account)
+                     .where(mt5_accounts: { user_id: @client.id })
+                     .distinct.pluck(:symbol).compact.sort
+      
+      @magic_numbers = Trade.joins(:mt5_account)
+                           .where(mt5_accounts: { user_id: @client.id })
+                           .distinct.pluck(:magic_number).compact.sort
+    end
+
     def destroy
       @user = User.find(params[:id])
       if @user.id == current_user.id
