@@ -40,6 +40,13 @@ module Admin
         end
       end
       
+      # Statistiques globales (calculées AVANT pagination)
+      @total_trades = @trades.count
+      @total_profit = @trades.sum(:profit)
+      @winning_trades = @trades.where('profit > 0').count
+      @losing_trades = @trades.where('profit < 0').count
+      @win_rate = @total_trades > 0 ? (@winning_trades.to_f / @total_trades * 100).round(2) : 0
+      
       # Tri
       case params[:sort]
       when 'symbol'
@@ -56,15 +63,8 @@ module Admin
         @trades = @trades.order(close_time: :desc)
       end
       
-      # Pagination
+      # Pagination (après calcul des statistiques)
       @trades = @trades.page(params[:page]).per(100)
-      
-      # Statistiques globales
-      @total_trades = @trades.total_count
-      @total_profit = @trades.sum(:profit)
-      @winning_trades = @trades.where('profit > 0').count
-      @losing_trades = @trades.where('profit < 0').count
-      @win_rate = @total_trades > 0 ? (@winning_trades.to_f / @total_trades * 100).round(2) : 0
       
       # Options pour les filtres
       @clients = User.clients.order(:first_name, :last_name)
