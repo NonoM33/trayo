@@ -584,7 +584,7 @@
                     <% payment.watermark_data.each do |mt5_id, data| %>
                       <div style="font-size: 12px; margin-bottom: 3px;">
                         <strong><%= data["account_name"] %></strong> (<%= mt5_id %>)<br>
-                        WM : <%= number_to_currency(data["watermark"], unit: "€", format: "%n %u") %> <i class="fa-icon fa-md fa-arrow-right"></i> <%= number_to_currency(data["balance"], unit: "€", format: "%n %u") %><br>
+                        WM : <%= number_to_currency(data["watermark"], unit: "€", format: "%n %u") %> <i class='fa-icon fa-md fa-arrow-right'></i> <%= number_to_currency(data["balance"], unit: "€", format: "%n %u") %><br>
                         <span style="color: #4CAF50;">Commissionnable : <%= number_to_currency(data["commissionable"], unit: "€", format: "%n %u") %></span>
                       </div>
                     <% end %>
