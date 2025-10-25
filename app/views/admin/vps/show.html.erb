@@ -30,8 +30,8 @@
             </div>
             <% if current_user.is_admin? %>
               <div style="display: flex; gap: 12px;">
-                <%= link_to "<i class="fa-icon fa-md fa-edit"></i> Modifier", edit_admin_vp_path(@vps), class: "btn btn-primary" %>
-                <%= button_to "<i class="fa-icon fa-md fa-trash"></i> Supprimer", admin_vp_path(@vps), method: :delete,
+                <%= link_to "<i class='fa-icon fa-md fa-edit'></i> Modifier".html_safe, edit_admin_vp_path(@vps), class: "btn btn-primary" %>
+                <%= button_to "<i class='fa-icon fa-md fa-trash'></i> Supprimer".html_safe, admin_vp_path(@vps), method: :delete,
                     data: { turbo_confirm: "Supprimer ce VPS ?" }, class: "btn btn-danger" %>
               </div>
             <% end %>

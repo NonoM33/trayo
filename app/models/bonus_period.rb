@@ -1,4 +1,6 @@
 class BonusPeriod < ApplicationRecord
+  belongs_to :campaign, optional: true
+  
   validates :bonus_percentage, presence: true, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
   validates :start_date, presence: true
   validates :end_date, presence: true

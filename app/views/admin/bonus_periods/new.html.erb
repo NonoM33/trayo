@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>New Bonus Period - Trayo</title>
+  <title>Nouvelle Période Bonus - Trayo</title>
   <%= stylesheet_link_tag "admin" %>
 </head>
 <body>
-  <% @page_title = "New Bonus Period" %>
+  <% @page_title = "Nouvelle Période Bonus" %>
   
   <div class="app-layout">
     <%= render 'admin/shared/sidebar' %>
@@ -14,10 +14,10 @@
       <%= render 'admin/shared/navbar' %>
       
       <div class="container" style="max-width: 800px;">
-        <%= link_to "<i class="fa-icon fa-md fa-arrow-left"></i> Back to Bonus Periods", admin_bonus_periods_path, class: "back-link" %>
+        <%= link_to "<i class='fa-icon fa-md fa-arrow-left'></i> Retour aux Périodes Bonus".html_safe, admin_bonus_periods_path, class: "back-link" %>
         
         <div class="card">
-          <h2><i class="fa-icon fa-md fa-gift"></i> Create New Bonus Period</h2>
+          <h2><i class="fa-icon fa-md fa-gift"></i> Créer une Nouvelle Période Bonus</h2>
           
           <%= render 'form', bonus_period: @bonus_period %>
         </div>

@@ -79,11 +79,11 @@
               <div class="info-value"><%= @payments ? @payments.count : 0 %></div>
             </div>
             <div class="info-item">
-              <div class="info-label">Validated</div>
+              <div class="info-label">Validé</div>
               <div class="info-value positive"><%= @payments ? @payments.select { |p| p.status == "validated" }.count : 0 %></div>
             </div>
             <div class="info-item">
-              <div class="info-label">Pending</div>
+              <div class="info-label">En Attente</div>
               <div class="info-value" style="color: var(--color-warning);"><%= @payments ? @payments.select { |p| p.status == "pending" }.count : 0 %></div>
             </div>
             <div class="info-item">

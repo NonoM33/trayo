@@ -204,6 +204,23 @@ class Admin::CampaignsController < Admin::BaseController
 
   private
 
+  def check_scheduled_campaigns
+    # Activer automatiquement les campagnes qui doivent démarrer
+    ActiveRecord::Base.connection.execute(
+      "UPDATE campaigns SET is_active = true, updated_at = NOW() 
+       WHERE is_active = false 
+       AND start_date <= NOW() 
+       AND end_date > NOW()"
+    )
+    
+    # Désactiver automatiquement les campagnes qui sont terminées
+    ActiveRecord::Base.connection.execute(
+      "UPDATE campaigns SET is_active = false, updated_at = NOW() 
+       WHERE is_active = true 
+       AND end_date <= NOW()"
+    )
+  end
+
   def campaign_data_to_object(data)
     CampaignData.new(
       id: data['id'].to_i,

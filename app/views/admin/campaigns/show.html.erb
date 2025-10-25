@@ -115,6 +115,79 @@
             </div>
           </div>
           
+          <% if @campaign.bonus_periods.any? %>
+            <div class="card">
+              <div class="card-header">
+                <h3><i class="fa-icon fa-md fa-gift"></i> Périodes Bonus Associées</h3>
+                <%= link_to "Nouvelle Période Bonus", new_admin_bonus_period_path(campaign_id: @campaign.id), class: "btn btn-success btn-sm" %>
+              </div>
+              <div class="card-body">
+                <div class="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Nom</th>
+                        <th>Bonus %</th>
+                        <th>Période</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% @campaign.bonus_periods.each do |period| %>
+                        <tr>
+                          <td>
+                            <strong><%= period.name || "Sans nom" %></strong>
+                            <% if period.description.present? %>
+                              <br><small style="color: var(--text-muted);"><%= truncate(period.description, length: 50) %></small>
+                            <% end %>
+                          </td>
+                          <td class="positive"><strong><%= number_to_percentage(period.bonus_percentage, precision: 1) %></strong></td>
+                          <td>
+                            <%= period.start_date.strftime("%d/%m/%Y") %> - <%= period.end_date.strftime("%d/%m/%Y") %>
+                          </td>
+                          <td>
+                            <% if period.current? %>
+                              <span class="status-badge status-validated">Actuelle</span>
+                            <% elsif period.active %>
+                              <% if period.start_date > Date.current %>
+                                <span class="status-badge status-pending">À venir</span>
+                              <% else %>
+                                <span class="status-badge status-inactive">Expirée</span>
+                              <% end %>
+                            <% else %>
+                              <span class="status-badge status-inactive">Inactive</span>
+                            <% end %>
+                          </td>
+                          <td>
+                            <div class="action-buttons">
+                              <%= link_to "Voir", admin_bonus_period_path(period), class: "btn btn-outline btn-sm" %>
+                              <%= link_to "Modifier", edit_admin_bonus_period_path(period), class: "btn btn-warning btn-sm" %>
+                            </div>
+                          </td>
+                        </tr>
+                      <% end %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          <% else %>
+            <div class="card">
+              <div class="card-header">
+                <h3><i class="fa-icon fa-md fa-gift"></i> Périodes Bonus Associées</h3>
+                <%= link_to "Créer une Période Bonus", new_admin_bonus_period_path(campaign_id: @campaign.id), class: "btn btn-success" %>
+              </div>
+              <div class="card-body">
+                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                  <div style="font-size: 48px; margin-bottom: 16px;"><i class="fa-icon fa-md fa-gift"></i></div>
+                  <h4 style="margin: 0 0 8px 0; color: var(--text-primary);">Aucune période bonus associée</h4>
+                  <p style="margin: 0;">Créez une période bonus pour cette campagne</p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+          
           <div class="card-footer">
             <div class="action-buttons">
               <%= link_to "Modifier", edit_admin_campaign_path(@campaign), class: "btn btn-primary" %>

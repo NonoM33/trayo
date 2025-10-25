@@ -86,16 +86,24 @@
                         </div>
                       </td>
                       <td>
-                        <% if campaign.active_and_current? %>
+                        <% if campaign.start_date > Time.current %>
+                          <span class="status-badge status-pending">Programmée</span>
+                        <% elsif campaign.active_and_current? %>
                           <span class="status-badge status-validated">En Cours</span>
                         <% elsif campaign.is_active? %>
                           <span class="status-badge status-pending">Active</span>
+                        <% elsif campaign.end_date < Time.current %>
+                          <span class="status-badge status-inactive">Terminée</span>
                         <% else %>
                           <span class="status-badge status-inactive">Inactive</span>
                         <% end %>
                       </td>
                       <td>
-                        <% if campaign.current? %>
+                        <% if campaign.start_date > Time.current %>
+                          <span style="color: var(--color-info); font-size: 12px;">
+                            Démarre dans <%= distance_of_time_in_words(Time.current, campaign.start_date) %>
+                          </span>
+                        <% elsif campaign.current? %>
                           <div style="min-width: 100px;">
                             <div style="background: var(--bg-hover); height: 6px; border-radius: var(--radius-full); overflow: hidden; margin-bottom: 4px;">
                               <div style="width: <%= campaign.progress_percentage %>%; height: 100%; background: var(--color-accent); border-radius: var(--radius-full);"></div>
@@ -106,7 +114,7 @@
                           </div>
                         <% else %>
                           <span style="color: var(--text-muted); font-size: 12px;">
-                            <%= campaign.start_date > Time.current ? 'À venir' : 'Terminée' %>
+                            Terminée
                           </span>
                         <% end %>
                       </td>
@@ -118,6 +126,10 @@
                                 toggle_active_admin_campaign_path(campaign), 
                                 method: :post, 
                                 class: campaign.is_active? ? "btn btn-danger btn-sm" : "btn btn-success btn-sm" %>
+                          <%= button_to "Supprimer", admin_campaign_path(campaign), 
+                                method: :delete,
+                                data: { turbo_confirm: "Supprimer cette campagne ? Cette action est irréversible." },
+                                class: "btn btn-danger btn-sm" %>
                         </div>
                       </td>
                     </tr>

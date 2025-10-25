@@ -38,7 +38,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000021) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "campaign_id"
     t.index ["active"], name: "index_bonus_periods_on_active"
+    t.index ["campaign_id"], name: "index_bonus_periods_on_campaign_id"
     t.index ["end_date"], name: "index_bonus_periods_on_end_date"
     t.index ["start_date"], name: "index_bonus_periods_on_start_date"
   end

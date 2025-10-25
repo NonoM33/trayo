@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Bonus Periods Management - Trayo</title>
+  <title>Gestion des Périodes Bonus - Trayo</title>
   <%= stylesheet_link_tag "admin" %>
 </head>
 <body>
-  <% @page_title = "Bonus Periods Management" %>
+  <% @page_title = "Gestion des Périodes Bonus" %>
   
   <div class="app-layout">
     <%= render 'admin/shared/sidebar' %>
@@ -23,13 +23,13 @@
         
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-            <h2><i class="fa-icon fa-md fa-gift"></i> Bonus Periods Management</h2>
-            <%= link_to "<i class=\"fa-icon fa-md fa-plus\"></i> Create New Bonus Period", new_admin_bonus_period_path, class: "btn btn-success" %>
+            <h2><i class="fa-icon fa-md fa-gift"></i> Gestion des Périodes Bonus</h2>
+            <%= link_to "<i class='fa-icon fa-md fa-plus'></i> Créer une Nouvelle Période Bonus".html_safe, new_admin_bonus_period_path, class: "btn btn-success" %>
           </div>
           
           <% if @current_period %>
             <div class="info-box info-box-success">
-              <div class="info-box-title">✅ Current Active Bonus Period</div>
+              <div class="info-box-title">✅ Période Bonus Active Actuelle</div>
               <div style="margin-top: 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                 <div>
                   <strong><%= @current_period.name || "Unnamed Period" %></strong><br>
@@ -43,7 +43,7 @@
             </div>
           <% else %>
             <div class="info-box info-box-warning">
-              <div class="info-box-title"><i class="fa-icon fa-md fa-exclamation-triangle"></i> No Active Bonus Period</div>
+              <div class="info-box-title"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Aucune Période Bonus Active</div>
               <p style="margin: 8px 0 0 0;">There is currently no active bonus period. Create one to enable the bonus program.</p>
             </div>
           <% end %>
@@ -53,10 +53,11 @@
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Campagne</th>
                   <th>Bonus %</th>
-                  <th>Start Date</th>
-                  <th>End Date</th>
-                  <th>Status</th>
+                  <th>Date de Début</th>
+                  <th>Date de Fin</th>
+                  <th>Statut</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -67,6 +68,16 @@
                       <strong><%= period.name || "Unnamed" %></strong>
                       <% if period.description.present? %>
                         <br><small style="color: var(--text-muted);"><%= truncate(period.description, length: 50) %></small>
+                      <% end %>
+                    </td>
+                    <td>
+                      <% if period.campaign %>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <div style="width: 8px; height: 8px; border-radius: 50%; background: <%= period.campaign.banner_color %>;"></div>
+                          <span style="font-weight: 600; color: var(--text-primary);"><%= period.campaign.title %></span>
+                        </div>
+                      <% else %>
+                        <span style="color: var(--text-muted); font-style: italic;">Aucune campagne</span>
                       <% end %>
                     </td>
                     <td class="positive"><strong><%= number_to_percentage(period.bonus_percentage, precision: 1) %></strong></td>
@@ -87,12 +98,12 @@
                     </td>
                     <td>
                       <div class="action-buttons">
-                        <%= link_to "Edit", edit_admin_bonus_period_path(period), class: "btn btn-primary btn-sm" %>
+                        <%= link_to "Modifier", edit_admin_bonus_period_path(period), class: "btn btn-primary btn-sm" %>
                         <%= button_to period.active ? "Deactivate" : "Activate", 
                                       toggle_active_admin_bonus_period_path(period), 
                                       method: :post, 
                                       class: period.active ? "btn btn-warning btn-sm" : "btn btn-success btn-sm" %>
-                        <%= button_to "Delete", admin_bonus_period_path(period), 
+                        <%= button_to "Supprimer", admin_bonus_period_path(period), 
                                       method: :delete, 
                                       data: { confirm: "Are you sure you want to delete this bonus period?" },
                                       class: "btn btn-danger btn-sm" %>
@@ -110,7 +121,7 @@
         <div class="card">
           <h3>💡 Quick Guide</h3>
           <ul style="margin: 12px 0; padding-left: 20px; line-height: 1.8;">
-            <li><strong>Active periods</strong> can be used for bonus calculations</li>
+            <li><strong>Les périodes actives</strong> peuvent être utilisées pour les calculs de bonus</li>
             <li><strong>Only one period</strong> can be active for any given date range</li>
             <li>The system automatically selects the <strong>current active period</strong> based on today's date</li>
             <li>You can <strong>deactivate</strong> a period without deleting it</li>

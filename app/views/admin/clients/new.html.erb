@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>New User - Admin Trayo</title>
+  <title>Nouvel Utilisateur - Admin Trayo</title>
   <%= stylesheet_link_tag "admin" %>
   <style>
     .container { max-width: 800px; }
@@ -22,7 +22,7 @@
   </style>
 </head>
 <body>
-  <% @page_title = "Create New User" %>
+  <% @page_title = "Créer un Nouvel Utilisateur" %>
   
   <div class="app-layout">
     <%= render 'admin/shared/sidebar' %>
@@ -31,10 +31,10 @@
       <%= render 'admin/shared/navbar' %>
       
       <div class="container">
-    <%= link_to "<i class="fa-icon fa-md fa-arrow-left"></i> Back to Users", admin_clients_path, class: "back-link" %>
+    <%= link_to "<i class='fa-icon fa-md fa-arrow-left'></i> Retour aux Utilisateurs".html_safe, admin_clients_path, class: "back-link" %>
 
     <div class="card">
-      <h2>Create New User</h2>
+      <h2>Créer un Nouvel Utilisateur</h2>
 
       <% if @user.errors.any? %>
         <div class="error-messages">

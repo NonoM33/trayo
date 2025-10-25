@@ -1,4 +1,6 @@
 class Campaign < ApplicationRecord
+  has_many :bonus_periods, dependent: :nullify
+  
   validates :title, presence: true
   validates :description, presence: true
   validates :start_date, presence: true

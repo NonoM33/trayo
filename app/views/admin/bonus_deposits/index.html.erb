@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Bonus Program - Trayo</title>
+  <title>Programme Bonus - Trayo</title>
   <%= stylesheet_link_tag "admin" %>
 </head>
 <body>
-  <% @page_title = "Bonus Program" %>
+  <% @page_title = "Programme Bonus" %>
   
   <div class="app-layout">
     <%= render 'admin/shared/sidebar' %>
@@ -102,7 +102,7 @@
                 <h2 style="margin: 0;"><span class="material-icons md-24" style="vertical-align: middle;">settings</span> Configuration du Programme Bonus</h2>
                 <p style="margin: 8px 0 0 0; color: var(--text-muted);">Gérer les périodes et taux de bonus</p>
               </div>
-              <%= link_to "<i class=\"fa-icon fa-md fa-calendar\"></i> Gérer les Périodes Bonus", admin_bonus_periods_path, class: "btn btn-success" %>
+              <%= link_to "<i class='fa-icon fa-md fa-calendar'></i> Gérer les Périodes Bonus".html_safe, admin_bonus_periods_path, class: "btn btn-success" %>
             </div>
             
             <div class="info-box info-box-info">

@@ -10,6 +10,9 @@ module Admin
 
     def new
       @bonus_period = BonusPeriod.new
+      if params[:campaign_id].present?
+        @bonus_period.campaign_id = params[:campaign_id]
+      end
     end
 
     def create
@@ -50,7 +53,7 @@ module Admin
     end
 
     def bonus_period_params
-      params.require(:bonus_period).permit(:bonus_percentage, :start_date, :end_date, :name, :description, :active)
+      params.require(:bonus_period).permit(:bonus_percentage, :start_date, :end_date, :name, :description, :active, :campaign_id)
     end
   end
 end
