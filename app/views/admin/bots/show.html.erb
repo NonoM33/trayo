@@ -37,15 +37,9 @@
 
         <div class="card">
           <div style="display: flex; align-items: start; gap: 24px;">
-            <% if @bot.image_url.present? %>
-              <img src="<%= @bot.image_url %>" alt="<%= @bot.name %>" 
-                   style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; border: 2px solid var(--border-color);"
-                   onerror="this.style.display='none';">
-            <% else %>
-              <div style="width: 120px; height: 120px; background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 48px; color: white;">
-                <i class="fa-icon fa-md fa-robot"></i>
-              </div>
-            <% end %>
+            <div style="width: 120px; height: 120px; background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 48px; color: white;">
+              <i class="fa-icon fa-md fa-robot"></i>
+            </div>
             
             <div style="flex: 1;">
               <h2 style="margin: 0 0 12px 0;"><%= @bot.name %></h2>

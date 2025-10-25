@@ -230,6 +230,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000021) do
   end
 
   add_foreign_key "bonus_deposits", "users"
+  add_foreign_key "bonus_periods", "campaigns"
   add_foreign_key "bot_purchases", "trading_bots"
   add_foreign_key "bot_purchases", "users"
   add_foreign_key "credits", "users"

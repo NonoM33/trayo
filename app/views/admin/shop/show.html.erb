@@ -230,7 +230,7 @@
       <%= render 'admin/shared/navbar' %>
       
       <div class="container" style="max-width: 1200px;">
-        <%= link_to "<i class="fa-icon fa-md fa-arrow-left"></i> Retour à la Boutique", admin_shop_index_path, class: "back-link" %>
+        <%= link_to "<i class='fa-icon fa-md fa-arrow-left'></i> Retour à la Boutique".html_safe, admin_shop_index_path, class: "back-link" %>
         
         <% if flash[:notice] %>
           <div class="notice"><%= flash[:notice] %></div>

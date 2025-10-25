@@ -68,6 +68,9 @@ class Admin::CampaignsController < Admin::BaseController
   before_action :require_admin
 
   def index
+    # Vérifier et activer automatiquement les campagnes programmées
+    check_scheduled_campaigns
+    
     # Fallback to SQL if Campaign model not loaded
     begin
       @campaigns = Campaign.order(created_at: :desc)
@@ -128,6 +131,12 @@ class Admin::CampaignsController < Admin::BaseController
     button_text = params[:button_text]
     button_url = params[:button_url]
     
+    # Si la campagne est programmée pour plus tard, elle ne doit pas être active immédiatement
+    start_time = Time.parse(start_date)
+    if start_time > Time.current && is_active
+      is_active = false
+    end
+    
     ActiveRecord::Base.connection.execute(
       ActiveRecord::Base.sanitize_sql_array([
         "INSERT INTO campaigns (title, description, start_date, end_date, is_active, banner_color, popup_title, popup_message, button_text, button_url, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
@@ -135,7 +144,8 @@ class Admin::CampaignsController < Admin::BaseController
       ])
     )
     
-    redirect_to admin_campaigns_path, notice: 'Campagne créée avec succès.'
+    message = start_time > Time.current ? 'Campagne programmée avec succès.' : 'Campagne créée avec succès.'
+    redirect_to admin_campaigns_path, notice: message
   end
 
   def edit

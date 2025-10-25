@@ -14,7 +14,7 @@
       <%= render 'admin/shared/navbar' %>
       
       <div class="container">
-        <%= link_to "<i class="fa-icon fa-md fa-arrow-left"></i> Retour aux VPS", admin_vps_path, class: "back-link" %>
+        <%= link_to "<i class='fa-icon fa-md fa-arrow-left'></i> Retour aux VPS".html_safe, admin_vps_path, class: "back-link" %>
         
         <% if flash[:notice] %>
           <div class="notice"><%= flash[:notice] %></div>

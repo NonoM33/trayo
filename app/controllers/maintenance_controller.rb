@@ -7,6 +7,6 @@ class MaintenanceController < ApplicationController
       return
     end
     
-    render layout: false
+    render layout: 'admin'
   end
 end

@@ -54,19 +54,25 @@
             
             <div class="two-col">
               <div class="form-group">
-                <%= form.label :start_date, "Date de Début" %>
+                <%= form.label :start_date, "Date et Heure de Début" %>
                 <%= form.datetime_local_field :start_date, required: true, value: @campaign&.start_date&.strftime("%Y-%m-%dT%H:%M") %>
+                <div class="help-text">
+                  La campagne se déclenchera automatiquement à cette date
+                </div>
               </div>
               
               <div class="form-group">
-                <%= form.label :end_date, "Date de Fin" %>
+                <%= form.label :end_date, "Date et Heure de Fin" %>
                 <%= form.datetime_local_field :end_date, required: true, value: @campaign&.end_date&.strftime("%Y-%m-%dT%H:%M") %>
+                <div class="help-text">
+                  La campagne s'arrêtera automatiquement à cette date
+                </div>
               </div>
             </div>
             
             <div class="form-group">
               <%= form.label :popup_title, "Titre de la Popup" %>
-                <%= form.text_field :popup_title, placeholder: "Ex: <i class="fa-icon fa-md fa-bullhorn"></i> Promotion Spéciale !", required: true, value: @campaign&.popup_title %>
+                <%= form.text_field :popup_title, placeholder: "Ex: <i class='fa-icon fa-md fa-bullhorn'></i> Promotion Spéciale !", required: true, value: @campaign&.popup_title %>
               <div class="help-text">
                 Titre qui apparaîtra dans la popup quotidienne
               </div>
@@ -101,10 +107,10 @@
             <div class="form-group">
               <div class="checkbox-group">
                 <%= form.check_box :is_active, { checked: @campaign&.is_active } %>
-                <%= form.label :is_active, "Campagne Active" %>
+                <%= form.label :is_active, "Activer immédiatement" %>
               </div>
               <div class="help-text">
-                Une campagne inactive ne sera pas affichée aux utilisateurs
+                Si décoché, la campagne sera programmée et s'activera automatiquement à la date de début
               </div>
             </div>
             

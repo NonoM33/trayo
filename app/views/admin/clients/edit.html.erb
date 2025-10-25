@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Edit User - Admin Trayo</title>
+  <title>Modifier Utilisateur - Admin Trayo</title>
   <%= stylesheet_link_tag "admin" %>
 </head>
 <body>
-  <% @page_title = "Edit User Profile" %>
+  <% @page_title = "Modifier le Profil Utilisateur" %>
   
   <div class="app-layout">
     <%= render 'admin/shared/sidebar' %>
@@ -14,7 +14,7 @@
       <%= render 'admin/shared/navbar' %>
       
       <div class="container" style="max-width: 900px;">
-        <%= link_to "<i class="fa-icon fa-md fa-arrow-left"></i> Back to Client", admin_client_path(@client), class: "back-link" %>
+        <%= link_to "<i class='fa-icon fa-md fa-arrow-left'></i> Retour au Client".html_safe, admin_client_path(@client), class: "back-link" %>
         
         <% if flash[:notice] %>
           <div class="notice"><%= flash[:notice] %></div>
@@ -24,7 +24,7 @@
         <% end %>
         
         <div class="card">
-          <h2><i class="fa-icon fa-md fa-user"></i> User Information</h2>
+          <h2><i class="fa-icon fa-md fa-user"></i> Informations Utilisateur</h2>
           
           <%= form_with model: @client, url: admin_client_path(@client), method: :patch, local: true do |f| %>
             <div class="two-col">
@@ -66,7 +66,7 @@
               <div class="help-text"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Admin users have full access to the back office</div>
             </div>
             
-            <%= f.submit "💾 Save Changes", class: "btn btn-success" %>
+            <%= f.submit "💾 Sauvegarder les Modifications", class: "btn btn-success" %>
           <% end %>
         </div>
         
@@ -115,11 +115,11 @@
           <h2><i class="fa-icon fa-md fa-trash"></i> Danger Zone</h2>
           
           <div class="info-box-warning" style="margin-bottom: 20px;">
-            <div class="info-box-title"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Delete User Account</div>
-            <p style="margin: 0;">This action cannot be undone. All associated MT5 accounts, trades, payments, and credits will be permanently deleted.</p>
+            <div class="info-box-title"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Supprimer le Compte Utilisateur</div>
+            <p style="margin: 0;">Cette action ne peut pas être annulée. Tous les comptes MT5 associés, trades, paiements et crédits seront définitivement supprimés.</p>
           </div>
           
-          <%= button_to "<i class="fa-icon fa-md fa-trash"></i> Delete User Account", admin_client_path(@client), method: :delete, class: "btn btn-danger", data: { confirm: "Are you ABSOLUTELY sure? Type DELETE to confirm.\n\nThis will permanently delete:\n- User account\n- All MT5 accounts\n- All trades\n- All payments\n- All credits\n\nThis action CANNOT be undone!" } %>
+          <%= button_to "<i class='fa-icon fa-md fa-trash'></i> Supprimer le Compte Utilisateur".html_safe, admin_client_path(@client), method: :delete, class: "btn btn-danger", data: { confirm: "Êtes-vous ABSOLUMENT sûr ? Tapez SUPPRIMER pour confirmer.\n\nCela supprimera définitivement :\n- Le compte utilisateur\n- Tous les comptes MT5\n- Tous les trades\n- Tous les paiements\n- Tous les crédits\n\nCette action NE PEUT PAS être annulée !" } %>
         </div>
       </div>
     </div>

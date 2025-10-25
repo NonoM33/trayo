@@ -99,11 +99,7 @@
                           🌍 <%= vps.server_location || 'Non spécifié' %>
                         </span>
                       </td>
-                      <td>
-                        <code style="background: var(--bg-hover); padding: 8px 12px; border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 13px; border: 1px solid var(--border-color); font-weight: 600;">
-                          <%= vps.ip_address || '⏳ En attente' %>
-                        </code>
-                      </td>
+                      <%# Retired IP Address column %>
                       <td>
                         <span class="status-badge status-<%= vps.status %>">
                           <%= vps.status_label %>
