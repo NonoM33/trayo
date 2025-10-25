@@ -19,6 +19,8 @@ class User < ApplicationRecord
 
   scope :clients, -> { where(is_admin: false) }
   scope :admins, -> { where(is_admin: true) }
+  scope :mt5_initialized, -> { where(init_mt5: true) }
+  scope :mt5_not_initialized, -> { where(init_mt5: false) }
 
   def total_profits
     mt5_accounts.reload.sum { |account| account.net_gains }
