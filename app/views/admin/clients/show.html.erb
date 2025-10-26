@@ -1247,12 +1247,12 @@
           </thead>
           <tbody>
             <% @payments.each do |payment| %>
-              <tr>
-                <td><%= payment.payment_date.strftime("%Y-%m-%d") %></td>
-                <td><%= number_to_currency(payment.amount, unit: "€", format: "%n %u") %></td>
-                <td><%= payment.payment_method_label %></td>
-                <td><%= payment.reference %></td>
-                <td>
+              <tr style="cursor: default;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
+                <td style="cursor: pointer;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= payment.payment_date.strftime("%Y-%m-%d") %></td>
+                <td style="cursor: pointer;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= number_to_currency(payment.amount, unit: "€", format: "%n %u") %></td>
+                <td style="cursor: pointer;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= payment.payment_method_label %></td>
+                <td style="cursor: pointer;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= payment.reference %></td>
+                <td style="cursor: pointer;" onclick="window.location='<%= admin_payment_path(payment) %>'">
                   <% if payment.status == "validated" && payment.watermark_data.any? %>
                     <% payment.watermark_data.each do |mt5_id, data| %>
                       <div style="font-size: 12px; margin-bottom: 3px;">

@@ -5,6 +5,16 @@ module Admin
     def index
       @payments = Payment.includes(:user).order(payment_date: :desc)
     end
+    
+    def show
+      @payment = Payment.find(params[:id])
+    end
+    
+    def download_pdf
+      @payment = Payment.find(params[:id])
+      
+      render :show, layout: false
+    end
 
     def create
       @payment = Payment.new(payment_params)

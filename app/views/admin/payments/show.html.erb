@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Détails du Paiement - Admin Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+  <%= stylesheet_link_tag "pdf" %>
+</head>
+<body>
+  <% @page_title = "Détails du Paiement" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <h1>Détails du Paiement #<%= @payment.id %></h1>
+          <div style="display: flex; gap: 8px;">
+            <button onclick="window.print()" class="btn btn-primary">
+              <i class="fa-icon fa-sm fa-download"></i> Télécharger PDF
+            </button>
+            <%= link_to "← Retour", admin_client_path(@payment.user), class: "btn btn-outline" %>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Date</div>
+            <div class="info-value"><%= @payment.payment_date.strftime("%d/%m/%Y") %></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Montant</div>
+            <div class="info-value" style="color: var(--color-success); font-size: 24px; font-weight: 700;">
+              <%= number_to_currency(@payment.amount, unit: "€", format: "%n %u") %>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Méthode</div>
+            <div class="info-value"><%= @payment.payment_method_label %></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Statut</div>
+            <div class="info-value">
+              <% case @payment.status %>
+              <% when 'validated' %>
+                <span style="background: #4CAF50; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">✓ Validé</span>
+              <% when 'pending' %>
+                <span style="background: #ff9800; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">⏳ En attente</span>
+              <% when 'rejected' %>
+                <span style="background: #f44336; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">✗ Rejeté</span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+          <h2>Snapshots des Watermarks</h2>
+          
+          <% if @payment.watermark_snapshot.present? %>
+            <div style="background: #f5f5f5; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+              <div style="font-size: 13px; color: #666;">
+                <strong>ℹ️ Informations capturées au moment du paiement :</strong><br>
+                Ce snapshot contient l'état des comptes MT5 au moment de la validation du paiement.<br/>
+                Les pénalités Trade Defender (trades manuels clients) sont déjà incluses dans le watermark.
+              </div>
+            </div>
+
+            <% @payment.watermark_data.each do |mt5_id, data| %>
+              <div style="border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <h3 style="margin: 0;"><%= data["account_name"] || "Compte #{mt5_id}" %></h3>
+                  <code style="background: var(--bg-hover); padding: 4px 8px; border-radius: 4px;">MT5: <%= mt5_id %></code>
+                </div>
+
+                <table style="width: 100%;">
+                  <tr>
+                    <td style="padding: 8px 0; font-weight: 600; width: 50%;">Balance actuelle :</td>
+                    <td style="padding: 8px 0; font-size: 16px; font-weight: 700;">
+                      <%= number_to_currency(data["balance"], unit: "€", format: "%n %u") %>
+                    </td>
+                  </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: 600;">High Watermark ajusté :</td>
+                <td style="padding: 8px 0; font-size: 16px; font-weight: 700; color: var(--color-primary);">
+                  <%= number_to_currency(data["watermark"], unit: "€", format: "%n %u") %>
+                </td>
+              </tr>
+                  <tr>
+                    <td style="padding: 8px 0; font-weight: 600;">Gains commissionnables :</td>
+                    <td style="padding: 8px 0; font-size: 16px; font-weight: 700; color: var(--color-success);">
+                      <%= number_to_currency(data["commissionable"], unit: "€", format: "%n %u") %>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            <% end %>
+          <% else %>
+            <p style="color: var(--text-muted); font-style: italic;">
+              Aucun snapshot de watermark n'a été capturé pour ce paiement.
+            </p>
+          <% end %>
+        </div>
+
+        <% 
+          # Si pas de snapshot (paiement en attente ou ancien), on récupère les pénalités actuelles
+          if @payment.trade_defender_penalties_data.any?
+            penalties_data = @payment.trade_defender_penalties_data
+          else
+            # Récupérer les pénalités actuelles du compte
+            penalties_data = {}
+            @payment.user.mt5_accounts.each do |account|
+              unauthorized_trades = account.trades.where(trade_originality: 'manual_client')
+              if unauthorized_trades.any?
+                penalties_data[account.mt5_id] = {
+                  "account_name" => account.account_name,
+                  "total_penalty" => unauthorized_trades.sum { |t| t.profit.abs },
+                  "trades_count" => unauthorized_trades.count,
+                  "trades" => unauthorized_trades.limit(20).order(close_time: :desc).map do |trade|
+                    {
+                      "trade_id" => trade.trade_id,
+                      "symbol" => trade.symbol,
+                      "profit" => trade.profit,
+                      "close_time" => trade.close_time.to_s
+                    }
+                  end
+                }
+              end
+            end
+          end
+        %>
+
+        <% if penalties_data.any? %>
+          <div class="card" style="margin-top: 24px; border-left: 4px solid #ef4444;">
+            <h2>⚠️ Pénalités Trade Defender</h2>
+            
+            <% if @payment.trade_defender_penalties_data.any? %>
+              <div style="background: rgba(219, 234, 254, 0.3); border: 1px solid rgba(59, 130, 246, 0.3); padding: 12px; border-radius: 4px; margin-bottom: 15px; backdrop-filter: blur(10px);">
+                <div style="font-size: 13px; color: #1e40af;">
+                  <strong>ℹ️ Pénalités facturées :</strong> Ces pénalités ont été capturées au moment de la validation du paiement.
+                </div>
+              </div>
+            <% else %>
+              <div style="background: rgba(254, 243, 199, 0.3); border: 1px solid rgba(251, 191, 36, 0.3); padding: 12px; border-radius: 4px; margin-bottom: 15px; backdrop-filter: blur(10px);">
+                <div style="font-size: 13px; color: #78350f;">
+                  <strong>⚠️ Pénalités actuelles (non facturées) :</strong> Ces pénalités seront facturées lors de la prochaine validation d'un paiement.
+                </div>
+              </div>
+            <% end %>
+            
+            <div style="background: rgba(254, 226, 226, 0.3); border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px; border-radius: 4px; margin-bottom: 15px; backdrop-filter: blur(10px);">
+              <div style="font-size: 13px; color: #991b1b;">
+                <strong>ℹ️ Justification des pénalités :</strong><br>
+                Les clients n'ont pas le droit d'effectuer des trades manuels. Chaque trade manuel sans autorisation génère une pénalité équivalente à la valeur absolue du profit (qu'il soit positif ou négatif) soustraite du watermark pour augmenter les gains commissionnables.
+              </div>
+            </div>
+
+            <% penalties_data.each do |mt5_id, data| %>
+              <div style="border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; padding: 16px; margin-bottom: 12px; background: rgba(255, 245, 245, 0.3); backdrop-filter: blur(10px); box-shadow: 0 4px 6px rgba(239, 68, 68, 0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <h3 style="margin: 0; color: #991b1b;"><%= data["account_name"] || "Compte #{mt5_id}" %></h3>
+                  <code style="background: #ef4444; padding: 4px 8px; border-radius: 4px; color: white; font-weight: 600;">MT5: <%= mt5_id %></code>
+                </div>
+
+                <table style="width: 100%;">
+                  <tr>
+                    <td style="padding: 8px 0; font-weight: 600; width: 60%;">Total des pénalités :</td>
+                    <td style="padding: 8px 0; font-size: 20px; font-weight: 700; color: #dc2626;">
+                      -<%= number_to_currency(data["total_penalty"], unit: "€", format: "%n %u") %>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; font-weight: 600;">Nombre de trades sanctionnés :</td>
+                    <td style="padding: 8px 0; font-size: 16px; font-weight: 700; color: #991b1b;">
+                      <%= data["trades_count"] %>
+                    </td>
+                  </tr>
+                </table>
+
+                <% if data["trades"]&.any? %>
+                  <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #fca5a5;">
+                    <strong style="color: #991b1b; font-size: 13px;">DÉTAIL DES TRADES SANCTIONNÉS :</strong>
+                    <table style="width: 100%; margin-top: 8px; font-size: 12px;">
+                      <thead>
+                        <tr style="background: #dc2626;">
+                          <th style="padding: 6px; text-align: left; color: white; font-weight: 600;">Trade ID</th>
+                          <th style="padding: 6px; text-align: left; color: white; font-weight: 600;">Symbol</th>
+                          <th style="padding: 6px; text-align: right; color: white; font-weight: 600;">Profit</th>
+                          <th style="padding: 6px; text-align: left; color: white; font-weight: 600;">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% data["trades"].each_with_index do |trade, index| %>
+                          <tr style="border-bottom: 1px solid rgba(254, 202, 202, 0.5); background: <%= index.even? ? 'rgba(255, 245, 245, 0.2)' : 'rgba(254, 242, 242, 0.2)' %>;">
+                            <td style="padding: 8px; font-family: monospace; color: #374151;"><%= trade["trade_id"] %></td>
+                            <td style="padding: 8px; color: #374151;"><%= trade["symbol"] %></td>
+                            <td style="padding: 8px; text-align: right; font-weight: 600; color: <%= trade["profit"] > 0 ? '#059669' : '#dc2626' %>;">
+                              <%= number_to_currency(trade["profit"], unit: "€", format: "%n %u") %>
+                            </td>
+                            <td style="padding: 8px; color: #6b7280;"><%= DateTime.parse(trade["close_time"]).strftime("%d/%m/%Y %H:%M") rescue trade["close_time"] %></td>
+                          </tr>
+                        <% end %>
+                      </tbody>
+                    </table>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <div class="card" style="margin-top: 24px;">
+          <h2>Notes</h2>
+          <% if @payment.notes.present? %>
+            <p style="white-space: pre-wrap;"><%= @payment.notes %></p>
+          <% else %>
+            <p style="color: var(--text-muted); font-style: italic;">Aucune note</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
