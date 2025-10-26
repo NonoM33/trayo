@@ -235,73 +235,70 @@
         %>
 
         <% if penalties_data.any? %>
-          <div class="card" style="margin-top: 24px; border-left: 4px solid #ef4444;">
-            <h2>⚠️ Pénalités Trade Defender</h2>
-            
-            <% if @payment.trade_defender_penalties_data.any? %>
-              <div style="background: rgba(219, 234, 254, 0.3); border: 1px solid rgba(59, 130, 246, 0.3); padding: 12px; border-radius: 4px; margin-bottom: 15px; backdrop-filter: blur(10px);">
-                <div style="font-size: 13px; color: #1e40af;">
-                  <strong>ℹ️ Pénalités facturées :</strong> Ces pénalités ont été capturées au moment de la validation du paiement.
-                </div>
+          <div class="apple-style-card apple-penalty-card">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+              <div style="width: 40px; height: 40px; background: #ff3b30; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                <span style="color: white; font-size: 20px;">⚠️</span>
               </div>
-            <% else %>
-              <div style="background: rgba(254, 243, 199, 0.3); border: 1px solid rgba(251, 191, 36, 0.3); padding: 12px; border-radius: 4px; margin-bottom: 15px; backdrop-filter: blur(10px);">
-                <div style="font-size: 13px; color: #78350f;">
-                  <strong>⚠️ Pénalités actuelles (non facturées) :</strong> Ces pénalités seront facturées lors de la prochaine validation d'un paiement.
-                </div>
-              </div>
-            <% end %>
-            
-            <div style="background: rgba(254, 226, 226, 0.3); border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px; border-radius: 4px; margin-bottom: 15px; backdrop-filter: blur(10px);">
-              <div style="font-size: 13px; color: #991b1b;">
-                <strong>ℹ️ Justification des pénalités :</strong><br>
-                Les clients n'ont pas le droit d'effectuer des trades manuels. Chaque trade manuel sans autorisation génère une pénalité équivalente à la valeur absolue du profit (qu'il soit positif ou négatif) soustraite du watermark pour augmenter les gains commissionnables.
+              <div>
+                <h2 style="font-size: 22px; font-weight: 600; letter-spacing: -0.3px; color: #f5f5f7; margin: 0;">Pénalités</h2>
+                <p class="apple-subtitle">Trades manuels non autorisés</p>
               </div>
             </div>
+            
+            <% if @payment.trade_defender_penalties_data.any? %>
+              <div style="background: rgba(0, 122, 255, 0.1); padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; border: 0.5px solid rgba(0, 122, 255, 0.2);">
+                <div style="font-size: 13px; color: #64d2ff; font-weight: 500;">Pénalités facturées</div>
+              </div>
+            <% else %>
+              <div style="background: rgba(255, 149, 0, 0.1); padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; border: 0.5px solid rgba(255, 149, 0, 0.2);">
+                <div style="font-size: 13px; color: #ffcc00; font-weight: 500;">Pénalités actuelles (non facturées)</div>
+              </div>
+            <% end %>
 
             <% penalties_data.each do |mt5_id, data| %>
-              <div style="border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; padding: 16px; margin-bottom: 12px; background: rgba(255, 245, 245, 0.3); backdrop-filter: blur(10px); box-shadow: 0 4px 6px rgba(239, 68, 68, 0.1);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                  <h3 style="margin: 0; color: #991b1b;"><%= data["account_name"] || "Compte #{mt5_id}" %></h3>
-                  <code style="background: #ef4444; padding: 4px 8px; border-radius: 4px; color: white; font-weight: 600;">MT5: <%= mt5_id %></code>
+              <div style="background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 0.5px solid rgba(255, 59, 48, 0.2);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);">
+                  <h3 style="font-size: 18px; font-weight: 600; color: #f5f5f7; margin: 0;"><%= data["account_name"] || "Compte #{mt5_id}" %></h3>
+                  <div style="background: #ff3b30; color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;">MT5: <%= mt5_id %></div>
                 </div>
 
-                <table style="width: 100%;">
-                  <tr>
-                    <td style="padding: 8px 0; font-weight: 600; width: 60%;">Total des pénalités :</td>
-                    <td style="padding: 8px 0; font-size: 20px; font-weight: 700; color: #dc2626;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                  <div>
+                    <div class="apple-subtitle" style="margin-bottom: 8px;">Total pénalités</div>
+                    <div style="font-size: 32px; font-weight: 600; color: #ff6961; letter-spacing: -0.8px;">
                       -<%= number_to_currency(data["total_penalty"], unit: "€", format: "%n %u") %>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; font-weight: 600;">Nombre de trades sanctionnés :</td>
-                    <td style="padding: 8px 0; font-size: 16px; font-weight: 700; color: #991b1b;">
+                    </div>
+                  </div>
+                  <div>
+                    <div class="apple-subtitle" style="margin-bottom: 8px;">Trades sanctionnés</div>
+                    <div style="font-size: 32px; font-weight: 600; color: #f5f5f7; letter-spacing: -0.8px;">
                       <%= data["trades_count"] %>
-                    </td>
-                  </tr>
-                </table>
+                    </div>
+                  </div>
+                </div>
 
                 <% if data["trades"]&.any? %>
-                  <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #fca5a5;">
-                    <strong style="color: #991b1b; font-size: 13px;">DÉTAIL DES TRADES SANCTIONNÉS :</strong>
-                    <table style="width: 100%; margin-top: 8px; font-size: 12px;">
+                  <div>
+                    <div class="apple-subtitle" style="margin-bottom: 12px; font-weight: 600; color: #f5f5f7;">Détail des trades</div>
+                    <table class="apple-table">
                       <thead>
-                        <tr style="background: #dc2626;">
-                          <th style="padding: 6px; text-align: left; color: white; font-weight: 600;">Trade ID</th>
-                          <th style="padding: 6px; text-align: left; color: white; font-weight: 600;">Symbol</th>
-                          <th style="padding: 6px; text-align: right; color: white; font-weight: 600;">Profit</th>
-                          <th style="padding: 6px; text-align: left; color: white; font-weight: 600;">Date</th>
+                        <tr>
+                          <th>ID</th>
+                          <th>Symbol</th>
+                          <th style="text-align: right;">Profit</th>
+                          <th>Date</th>
                         </tr>
                       </thead>
                       <tbody>
                         <% data["trades"].each_with_index do |trade, index| %>
-                          <tr style="border-bottom: 1px solid rgba(254, 202, 202, 0.5); background: <%= index.even? ? 'rgba(255, 245, 245, 0.2)' : 'rgba(254, 242, 242, 0.2)' %>;">
-                            <td style="padding: 8px; font-family: monospace; color: #374151;"><%= trade["trade_id"] %></td>
-                            <td style="padding: 8px; color: #374151;"><%= trade["symbol"] %></td>
-                            <td style="padding: 8px; text-align: right; font-weight: 600; color: <%= trade["profit"] > 0 ? '#059669' : '#dc2626' %>;">
+                          <tr style="background: <%= index.even? ? 'transparent' : 'rgba(255, 255, 255, 0.02)' %>;">
+                            <td style="font-family: 'SF Mono', monospace; font-size: 12px;"><%= trade["trade_id"] %></td>
+                            <td><%= trade["symbol"] %></td>
+                            <td style="text-align: right; font-weight: 600; color: <%= trade["profit"] > 0 ? '#32d74b' : '#ff6961' %>;">
                               <%= number_to_currency(trade["profit"], unit: "€", format: "%n %u") %>
                             </td>
-                            <td style="padding: 8px; color: #6b7280;"><%= DateTime.parse(trade["close_time"]).strftime("%d/%m/%Y %H:%M") rescue trade["close_time"] %></td>
+                            <td style="color: #86868b;"><%= DateTime.parse(trade["close_time"]).strftime("%d/%m/%Y %H:%M") rescue trade["close_time"] %></td>
                           </tr>
                         <% end %>
                       </tbody>
