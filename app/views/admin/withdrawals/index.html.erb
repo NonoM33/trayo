@@ -1,0 +1,302 @@
+<% content_for :title, "Retraits - Administration" %>
+
+<div class="page-header">
+  <div class="page-header-content">
+    <div class="page-header-left">
+      <h1>Retraits - Administration</h1>
+      <p class="page-description">Vue complète de tous les retraits de tous les clients</p>
+    </div>
+    <div class="page-header-right">
+      <%= link_to "Ajouter un retrait", new_admin_withdrawal_path, class: "btn btn-primary" %>
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+  <!-- Statistiques globales -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value"><%= @withdrawals.total_count %></div>
+      <div class="stat-label">Total Retraits</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value negative">
+        <%= number_to_currency(@withdrawals.sum(:amount), unit: "€", format: "%n %u") %>
+      </div>
+      <div class="stat-label">Montant Total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value negative">
+        <%= number_to_currency(@withdrawals.average(:amount) || 0, unit: "€", format: "%n %u") %>
+      </div>
+      <div class="stat-label">Montant Moyen</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">
+        <%= @withdrawals.group(:mt5_account_id).count.size %>
+      </div>
+      <div class="stat-label">Comptes Actifs</div>
+    </div>
+  </div>
+
+  <!-- Table des retraits -->
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Client</th>
+          <th>Compte MT5</th>
+          <th>Montant</th>
+          <th>Notes</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @withdrawals.each do |withdrawal| %>
+          <tr>
+            <td>
+              <div class="date-cell">
+                <%= withdrawal.withdrawal_date&.strftime("%d/%m/%Y") %>
+              </div>
+            </td>
+            <td>
+              <%= link_to "#{withdrawal.mt5_account.user.first_name} #{withdrawal.mt5_account.user.last_name}", 
+                          admin_client_path(withdrawal.mt5_account.user), 
+                          class: "client-link" %>
+            </td>
+            <td><%= withdrawal.mt5_account.account_name %></td>
+            <td>
+              <span class="amount-value negative">
+                <%= number_to_currency(withdrawal.amount, unit: "€", format: "%n %u") %>
+              </span>
+            </td>
+            <td>
+              <% if withdrawal.notes.present? %>
+                <span class="notes-text" title="<%= withdrawal.notes %>">
+                  <%= truncate(withdrawal.notes, length: 30) %>
+                </span>
+              <% else %>
+                <span class="text-muted">-</span>
+              <% end %>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <%= link_to "Modifier", edit_admin_withdrawal_path(withdrawal), 
+                            class: "btn btn-sm btn-outline" %>
+                <%= link_to "Supprimer", admin_withdrawal_path(withdrawal), 
+                            method: :delete, 
+                            data: { confirm: "Êtes-vous sûr de vouloir supprimer ce retrait ?" },
+                            class: "btn btn-sm btn-danger" %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    
+    <% if @withdrawals.empty? %>
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="fa-icon fa-lg fa-money-bill-wave"></i>
+        </div>
+        <h3>Aucun retrait trouvé</h3>
+        <p>Aucun retrait n'a été enregistré pour le moment.</p>
+        <%= link_to "Ajouter le premier retrait", new_admin_withdrawal_path, class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Pagination -->
+  <% if @withdrawals.respond_to?(:current_page) %>
+    <div class="pagination-container">
+      <%= paginate @withdrawals, theme: 'github' %>
+    </div>
+  <% end %>
+</div>
+
+<style>
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value.negative {
+  color: var(--error-color);
+}
+
+.stat-label {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.date-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.amount-value {
+  font-weight: 600;
+}
+
+.amount-value.negative {
+  color: var(--error-color);
+}
+
+.notes-text {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.client-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.client-link:hover {
+  text-decoration: underline;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.btn-danger {
+  background: var(--error-color);
+  color: white;
+  border: 1px solid var(--error-color);
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.pagination-container {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+/* Pagination GitHub Style */
+.pagination {
+  display: inline-block;
+  padding-left: 0;
+  margin: 20px 0;
+  border-radius: 4px;
+}
+
+.pagination > li {
+  display: inline;
+}
+
+.pagination > li > a,
+.pagination > li > span {
+  position: relative;
+  float: left;
+  padding: 6px 12px;
+  margin-left: -1px;
+  line-height: 1.42857143;
+  color: #337ab7;
+  text-decoration: none;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.pagination > li:first-child > a,
+.pagination > li:first-child > span {
+  margin-left: 0;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.pagination > li:last-child > a,
+.pagination > li:last-child > span {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.pagination > li > a:hover,
+.pagination > li > span:hover,
+.pagination > li > a:focus,
+.pagination > li > span:focus {
+  color: #23527c;
+  background-color: #eee;
+  border-color: #ddd;
+}
+
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover,
+.pagination > .active > a:focus,
+.pagination > .active > span:focus {
+  z-index: 2;
+  color: #fff;
+  cursor: default;
+  background-color: #337ab7;
+  border-color: #337ab7;
+}
+
+.pagination > .disabled > span,
+.pagination > .disabled > span:hover,
+.pagination > .disabled > span:focus,
+.pagination > .disabled > a,
+.pagination > .disabled > a:hover,
+.pagination > .disabled > a:focus {
+  color: #777;
+  cursor: not-allowed;
+  background-color: #fff;
+  border-color: #ddd;
+}
+
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+</style>

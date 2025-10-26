@@ -10,6 +10,7 @@ class Mt5Account < ApplicationRecord
 
   after_update :check_and_update_watermark
   after_save :clear_user_cache
+  after_save :recalculate_initial_balance_if_needed
 
   def update_from_mt5_data(data)
     # Valider les données avant la mise à jour
@@ -29,7 +30,8 @@ class Mt5Account < ApplicationRecord
 
   def net_gains
     if auto_calculated_initial_balance && calculated_initial_balance.present?
-      (balance - calculated_initial_balance + (total_withdrawals || 0) - (total_deposits || 0)).round(2)
+      # Gains nets = Balance actuelle - Capital initial (somme des dépôts) + Retraits effectués
+      (balance - calculated_initial_balance + (total_withdrawals || 0)).round(2)
     else
       (balance - initial_balance + (total_withdrawals || 0)).round(2)
     end
@@ -38,6 +40,7 @@ class Mt5Account < ApplicationRecord
   def real_gains
     # Gains réels sans tenir compte des retraits (pour affichage)
     if auto_calculated_initial_balance && calculated_initial_balance.present?
+      # Gains réels = Balance actuelle - Capital initial (somme des dépôts)
       (balance - calculated_initial_balance).round(2)
     else
       (balance - initial_balance).round(2)
@@ -46,21 +49,18 @@ class Mt5Account < ApplicationRecord
 
   def calculate_initial_balance_from_history
     # Calcul automatique du capital initial basé sur l'historique complet
-    total_profits = trades.sum(:profit) || 0
-    total_withdrawals_amount = withdrawals.sum(:amount) || 0
+    # La balance initiale = somme de tous les dépôts
     total_deposits_amount = deposits.sum(:amount) || 0
-    
-    calculated_initial = balance - total_profits + total_withdrawals_amount - total_deposits_amount
     
     # Utiliser update_column pour éviter les callbacks
     update_columns(
-      calculated_initial_balance: calculated_initial.round(2),
+      calculated_initial_balance: total_deposits_amount.round(2),
       auto_calculated_initial_balance: true,
       total_deposits: total_deposits_amount,
-      total_withdrawals: total_withdrawals_amount
+      total_withdrawals: withdrawals.sum(:amount) || 0
     )
     
-    calculated_initial.round(2)
+    total_deposits_amount.round(2)
   end
 
   def adjusted_watermark
@@ -88,6 +88,19 @@ class Mt5Account < ApplicationRecord
     user.reload if user.present?
   rescue ActiveRecord::RecordNotFound
     # Ignore si l'utilisateur n'existe plus
+  end
+
+  def recalculate_initial_balance_if_needed
+    # Recalculer la balance initiale si elle est calculée automatiquement
+    if auto_calculated_initial_balance
+      calculate_initial_balance_from_history
+    end
+  end
+
+  # Méthode pour forcer le recalcul de la balance initiale
+  def force_recalculate_initial_balance!
+    calculate_initial_balance_from_history
+    save!
   end
 
   def recent_trades(limit = 20)

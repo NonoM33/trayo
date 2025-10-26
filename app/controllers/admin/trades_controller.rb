@@ -8,6 +8,9 @@ module Admin
                     .includes(:mt5_account, mt5_account: :user)
                     .order(close_time: :desc)
       
+      # Précharger les bots pour optimiser les performances
+      @bots_cache = TradingBot.where.not(magic_number_prefix: nil)
+      
       # Filtres
       if params[:client_id].present?
         @trades = @trades.where(mt5_accounts: { user_id: params[:client_id] })

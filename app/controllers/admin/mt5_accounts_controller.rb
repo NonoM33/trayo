@@ -4,6 +4,13 @@ module Admin
       @mt5_account = Mt5Account.find(params[:id])
       @client = @mt5_account.user
       
+      # Gérer le recalcul de la balance initiale
+      if params[:action] == 'recalculate_initial_balance'
+        @mt5_account.force_recalculate_initial_balance!
+        redirect_to admin_client_path(@client), notice: "Balance initiale recalculée avec succès !"
+        return
+      end
+      
       # Gérer les retraits si des données sont fournies
       if params[:withdrawal_amount].present? && params[:withdrawal_amount].to_f > 0
         withdrawal_amount = params[:withdrawal_amount].to_f

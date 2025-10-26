@@ -123,7 +123,7 @@
             <td><%= number_to_currency(trade.swap, unit: "€", format: "%n %u") %></td>
             <td>
               <% if trade.magic_number.present? %>
-                <span class="magic-number">Bot <%= trade.magic_number %></span>
+                <span class="magic-number"><%= bot_name_for_magic_number(trade.magic_number, @bots_cache) %></span>
               <% else %>
                 <span class="text-muted">-</span>
               <% end %>

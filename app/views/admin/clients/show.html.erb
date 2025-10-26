@@ -95,6 +95,12 @@
     max-width: 400px;
     margin: 0 auto;
   }
+  
+  .card-header-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
 </style>
 </head>
 <body>
@@ -250,7 +256,7 @@
               <div class="status-indicator">
                 <span class="status-badge status-validated">
                   <i class="fa-icon fa-md fa-check-circle"></i>
-                  MT5 Initialisé
+                  <span style="color: white;">MT5 Initialisé</span>
                 </span>
                 <p class="help-text">Le compte MT5 a été synchronisé avec l'historique complet.</p>
               </div>
@@ -315,9 +321,16 @@
                 </td>
                 <% if current_user.is_admin? %>
                   <td>
-                    <button onclick="document.getElementById('edit-account-<%= account.id %>').style.display='block'" class="btn btn-outline btn-sm">
-                      Modifier
-                    </button>
+                    <div class="action-buttons">
+                      <button onclick="document.getElementById('edit-account-<%= account.id %>').style.display='block'" class="btn btn-outline btn-sm">
+                        Modifier
+                      </button>
+                      <%= button_to "Recalculer Balance", admin_mt5_account_path(account, action: 'recalculate_initial_balance'), 
+                            method: :patch,
+                            data: { turbo_confirm: "Recalculer la balance initiale basée sur les dépôts ?" },
+                            class: "btn btn-primary btn-sm",
+                            style: "margin-left: 5px;" %>
+                    </div>
                   </td>
                 <% end %>
               </tr>
@@ -335,7 +348,10 @@
       <div class="card">
         <div class="card-header">
           <h2>Résumé des Trades</h2>
-          <%= link_to "Voir tous les trades", trades_admin_client_path(@client), class: "btn btn-outline btn-sm" %>
+          <div class="card-header-actions">
+            <%= link_to "Analyse des Bots", bots_admin_client_path(@client), class: "btn btn-primary btn-sm" %>
+            <%= link_to "Voir tous les trades", trades_admin_client_path(@client), class: "btn btn-outline btn-sm" %>
+          </div>
         </div>
         
         <% 
@@ -399,7 +415,7 @@
                     </td>
                     <td>
                       <% if trade.magic_number.present? %>
-                        <span class="magic-badge">Bot <%= trade.magic_number %></span>
+                        <span class="magic-badge"><%= bot_name_for_magic_number(trade.magic_number, @bots_cache) %></span>
                       <% else %>
                         <span class="text-muted">-</span>
                       <% end %>
@@ -703,6 +719,11 @@
                     <span style="background: <%= purchase.trading_bot.risk_badge_color %>; color: white; padding: 2px 8px; border-radius: 8px; font-size: 11px;">
                       <%= purchase.trading_bot.risk_label %>
                     </span>
+                    <% if purchase.purchase_type == 'auto_detected' %>
+                      <span style="background: #2196F3; color: white; padding: 2px 8px; border-radius: 8px; font-size: 11px; margin-left: 4px;">
+                        🤖 Auto
+                      </span>
+                    <% end %>
                   </div>
                 </td>
                 <td><%= number_to_currency(purchase.price_paid, unit: "€", format: "%n %u") %></td>
@@ -742,7 +763,15 @@
       <% end %>
       
       <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
-        <h3 style="margin-bottom: 16px;">Assigner un Nouveau Bot</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 style="margin: 0;">Assigner un Nouveau Bot</h3>
+          <%= button_to "🤖 Détecter Automatiquement", 
+                auto_detect_bots_admin_client_path(@client), 
+                method: :patch,
+                data: { turbo_confirm: "Détecter automatiquement les bots basés sur les magic numbers des trades ?" },
+                class: "btn btn-outline btn-sm",
+                style: "margin-left: auto;" %>
+        </div>
         <%= form_tag assign_to_user_admin_bots_path, method: :post, data: { turbo: false }, style: "display: flex; gap: 12px; align-items: end;" do %>
           <%= hidden_field_tag :user_id, @client.id %>
           
@@ -1046,6 +1075,10 @@
         <script>
           function showAddWithdrawalModal() {
             window.location.href = '<%= new_admin_withdrawal_path %>';
+          }
+          
+          function showAddDepositModal() {
+            window.location.href = '<%= new_admin_deposit_path %>';
           }
         </script>
       <% else %>

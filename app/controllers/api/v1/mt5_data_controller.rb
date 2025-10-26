@@ -6,9 +6,17 @@ module Api
 
       def sync
         user = User.find_by(mt5_api_token: sync_params[:mt5_api_token])
+        
+        # Si l'utilisateur n'existe pas, le créer automatiquement
         unless user
-          render json: { error: "Invalid MT5 API token" }, status: :not_found
-          return
+          begin
+            user = User.create_from_mt5_data(sync_params)
+            Rails.logger.info "Utilisateur auto-créé avec le token MT5: #{sync_params[:mt5_api_token]}"
+          rescue => e
+            Rails.logger.error "Erreur lors de la création automatique de l'utilisateur: #{e.message}"
+            render json: { error: "Failed to create user automatically: #{e.message}" }, status: :unprocessable_entity
+            return
+          end
         end
 
         # Vérifier si une synchronisation complète est requise
@@ -43,6 +51,9 @@ module Api
         sync_withdrawals(mt5_account, sync_params[:withdrawals]) if sync_params[:withdrawals].present?
         sync_deposits(mt5_account, sync_params[:deposits]) if sync_params[:deposits].present?
         
+        # Détecter et assigner automatiquement les bots basés sur les magic numbers
+        user.auto_detect_and_assign_bots
+        
         sync_bot_performances(mt5_account.user)
 
         render json: {
@@ -68,23 +79,16 @@ module Api
       def sync_complete_history
         user = User.find_by(mt5_api_token: sync_params[:mt5_api_token])
         
-        # Créer automatiquement un utilisateur de test si le token est 'test_token_123'
-        if user.nil? && sync_params[:mt5_api_token] == 'test_token_123'
-          user = User.find_or_create_by(email: 'test@trayo.com') do |u|
-            u.password = 'test123'
-            u.password_confirmation = 'test123'
-            u.first_name = 'Test'
-            u.last_name = 'User'
-            u.commission_rate = 0
-            u.is_admin = false
-            u.mt5_api_token = 'test_token_123'
-          end
-          Rails.logger.info "Utilisateur de test créé: #{user.email}"
-        end
-        
+        # Si l'utilisateur n'existe pas, le créer automatiquement
         unless user
-          render json: { error: "Invalid MT5 API token" }, status: :not_found
-          return
+          begin
+            user = User.create_from_mt5_data(sync_params)
+            Rails.logger.info "Utilisateur auto-créé avec le token MT5: #{sync_params[:mt5_api_token]}"
+          rescue => e
+            Rails.logger.error "Erreur lors de la création automatique de l'utilisateur: #{e.message}"
+            render json: { error: "Failed to create user automatically: #{e.message}" }, status: :unprocessable_entity
+            return
+          end
         end
 
         mt5_account = Mt5Account.find_or_initialize_by(mt5_id: sync_params[:mt5_id])
@@ -110,6 +114,9 @@ module Api
         sync_trades(mt5_account, sync_params[:trades]) if sync_params[:trades].present?
         sync_withdrawals(mt5_account, sync_params[:withdrawals]) if sync_params[:withdrawals].present?
         sync_deposits(mt5_account, sync_params[:deposits]) if sync_params[:deposits].present?
+
+        # Détecter et assigner automatiquement les bots basés sur les magic numbers
+        user.auto_detect_and_assign_bots
 
         # Calculer automatiquement le capital initial
         calculated_initial = mt5_account.calculate_initial_balance_from_history
@@ -161,6 +168,7 @@ module Api
           :mt5_id,
           :mt5_api_token,
           :account_name,
+          :client_email,
           :balance,
           trades: [
             :trade_id,

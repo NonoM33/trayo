@@ -60,7 +60,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000021) do
     t.datetime "started_at"
     t.datetime "stopped_at"
     t.integer "magic_number"
+    t.string "purchase_type", default: "manual"
     t.index ["magic_number"], name: "index_bot_purchases_on_magic_number"
+    t.index ["purchase_type"], name: "index_bot_purchases_on_purchase_type"
     t.index ["status"], name: "index_bot_purchases_on_status"
     t.index ["trading_bot_id"], name: "index_bot_purchases_on_trading_bot_id"
     t.index ["user_id", "trading_bot_id"], name: "index_bot_purchases_on_user_id_and_trading_bot_id"
@@ -134,6 +136,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000021) do
     t.index ["mt5_id"], name: "index_mt5_accounts_on_mt5_id", unique: true
     t.index ["user_id", "mt5_id"], name: "index_mt5_accounts_on_user_id_and_mt5_id", unique: true
     t.index ["user_id"], name: "index_mt5_accounts_on_user_id"
+  end
+
+  create_table "mt5_tokens", force: :cascade do |t|
+    t.string "token", null: false
+    t.text "description"
+    t.string "client_name"
+    t.datetime "used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["token"], name: "index_mt5_tokens_on_token", unique: true
+    t.index ["used_at"], name: "index_mt5_tokens_on_used_at"
   end
 
   create_table "payments", force: :cascade do |t|

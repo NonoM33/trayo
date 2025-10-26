@@ -71,6 +71,24 @@
             <% end %>
           </li>
           <li class="sidebar-menu-item">
+            <%= link_to admin_withdrawals_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/withdrawals') ? 'active' : ''}" do %>
+              <i class="fa-icon fa-md fa-money-bill-wave"></i>
+              <span>Retraits</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/deposits') ? 'active' : ''}" do %>
+              <i class="fa-icon fa-md fa-plus-circle"></i>
+              <span>Dépôts</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_mt5_tokens_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/mt5_tokens') ? 'active' : ''}" do %>
+              <i class="fa-icon fa-md fa-ticket-alt"></i>
+              <span>Tokens MT5</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
             <%= link_to admin_maintenance_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/maintenance') ? 'active' : ''}" do %>
               <i class="fa-icon fa-md fa-tools"></i>
               <span>Maintenance</span>
@@ -99,6 +117,12 @@
             <%= link_to admin_my_bots_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/my_bots') ? 'active' : ''}" do %>
               <i class="fa-icon fa-md fa-robot"></i>
               <span>Mes Bots</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_my_trades_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/my_trades') ? 'active' : ''}" do %>
+              <i class="fa-icon fa-md fa-chart-line"></i>
+              <span>Mes Trades</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
@@ -148,6 +172,10 @@
       <%= link_to admin_my_bots_path, class: "mobile-nav-item #{request.path.start_with?('/admin/my_bots') ? 'active' : ''}" do %>
         <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-robot"></i></div>
         <div class="mobile-nav-label">Mes Bots</div>
+      <% end %>
+      <%= link_to admin_my_trades_path, class: "mobile-nav-item #{request.path.start_with?('/admin/my_trades') ? 'active' : ''}" do %>
+        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-chart-line"></i></div>
+        <div class="mobile-nav-label">Mes Trades</div>
       <% end %>
       <%= link_to admin_vps_path, class: "mobile-nav-item #{request.path.start_with?('/admin/vps') ? 'active' : ''}" do %>
         <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-desktop"></i></div>

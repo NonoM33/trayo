@@ -27,6 +27,9 @@ module Admin
       @mt5_accounts = @client.mt5_accounts.reload.includes(:trades, :withdrawals)
       @payments = @client.payments.recent
       @credits = @client.credits.recent
+      
+      # Précharger les bots pour optimiser les performances
+      @bots_cache = TradingBot.where.not(magic_number_prefix: nil)
     end
 
     def edit
@@ -73,6 +76,9 @@ module Admin
                     .where(mt5_accounts: { user_id: @client.id })
                     .includes(:mt5_account)
                     .order(close_time: :desc)
+      
+      # Précharger les bots pour optimiser les performances
+      @bots_cache = TradingBot.where.not(magic_number_prefix: nil)
       
       # Filtres
       if params[:symbol].present?
@@ -162,10 +168,150 @@ module Admin
       redirect_to admin_clients_path, notice: "User deleted successfully"
     end
 
+    def auto_detect_bots
+      @client = User.find(params[:id])
+      
+      old_bot_count = @client.bot_purchases.count
+      
+      # Solution de contournement : utiliser SQL direct au lieu de la méthode Ruby
+      # qui ne fonctionne pas à cause des problèmes de Bundler
+      
+      # Récupérer tous les magic numbers uniques des trades de l'utilisateur
+      magic_numbers = Trade.joins(mt5_account: :user)
+                          .where(users: { id: @client.id })
+                          .distinct
+                          .pluck(:magic_number)
+                          .compact
+      
+      bots_assigned = 0
+      
+      magic_numbers.each do |magic_number|
+        # Chercher un bot qui correspond à ce magic number
+        bot = TradingBot.find_by(magic_number_prefix: magic_number)
+        
+        if bot && !@client.bot_purchases.exists?(trading_bot: bot)
+          # Créer automatiquement un BotPurchase pour ce bot
+          @client.bot_purchases.create!(
+            trading_bot: bot,
+            price_paid: bot.price,
+            status: 'active',
+            magic_number: magic_number,
+            is_running: true,
+            started_at: Time.current,
+            purchase_type: 'auto_detected'
+          )
+          bots_assigned += 1
+        end
+      end
+      
+      if bots_assigned > 0
+        redirect_to admin_client_path(@client), notice: "#{bots_assigned} bot(s) détecté(s) et assigné(s) automatiquement !"
+      else
+        redirect_to admin_client_path(@client), notice: "Aucun nouveau bot détecté. Tous les bots correspondants sont déjà assignés."
+      end
+    end
+
     private
 
-    def client_params
-      params.require(:user).permit(:commission_rate)
+    def analyze_bot_performances(trades, bots_cache)
+      performances = {}
+      
+      # Grouper les trades par magic number
+      trades_by_magic = trades.group_by(&:magic_number)
+      
+      trades_by_magic.each do |magic_number, bot_trades|
+        next if magic_number.blank?
+        
+        # Trouver le bot correspondant
+        bot = bots_cache.find { |b| b.magic_number_prefix == magic_number }
+        bot_name = bot ? bot.name : "Bot #{magic_number}"
+        
+        # Calculer les statistiques
+        total_profit = bot_trades.sum(&:profit)
+        winning_trades = bot_trades.count { |t| t.profit > 0 }
+        losing_trades = bot_trades.count { |t| t.profit < 0 }
+        win_rate = bot_trades.count > 0 ? (winning_trades.to_f / bot_trades.count * 100).round(2) : 0
+        
+        # Calculer le drawdown
+        drawdown = calculate_drawdown(bot_trades)
+        
+        # Calculer le profit moyen
+        avg_profit = bot_trades.count > 0 ? (total_profit / bot_trades.count).round(2) : 0
+        
+        # Analyser les heures de trading
+        trading_hours = analyze_trading_hours(bot_trades)
+        
+        # Analyser les jours de la semaine
+        trading_weekdays = analyze_trading_weekdays(bot_trades)
+        
+        performances[bot_name] = {
+          magic_number: magic_number,
+          total_trades: bot_trades.count,
+          total_profit: total_profit,
+          winning_trades: winning_trades,
+          losing_trades: losing_trades,
+          win_rate: win_rate,
+          drawdown: drawdown,
+          avg_profit: avg_profit,
+          trading_hours: trading_hours,
+          trading_weekdays: trading_weekdays,
+          trades: bot_trades
+        }
+      end
+      
+      performances
+    end
+
+    def analyze_trading_days(trades)
+      # Analyser les jours de la semaine
+      weekday_stats = trades.group_by { |t| t.close_time&.wday }
+                           .transform_values(&:count)
+      
+      # Analyser les heures de trading
+      hour_stats = trades.group_by { |t| t.close_time&.hour }
+                        .transform_values(&:count)
+      
+      {
+        weekdays: weekday_stats,
+        hours: hour_stats,
+        best_weekday: weekday_stats.max_by { |k, v| v }&.first,
+        best_hour: hour_stats.max_by { |k, v| v }&.first
+      }
+    end
+
+    def calculate_drawdown(trades)
+      return 0 if trades.empty?
+      
+      running_balance = 0
+      peak_balance = 0
+      max_drawdown = 0
+      
+      trades.sort_by(&:close_time).each do |trade|
+        running_balance += trade.profit
+        peak_balance = [peak_balance, running_balance].max
+        current_drawdown = peak_balance - running_balance
+        max_drawdown = [max_drawdown, current_drawdown].max
+      end
+      
+      max_drawdown.round(2)
+    end
+
+    def analyze_trading_hours(trades)
+      hour_stats = trades.group_by { |t| t.close_time&.hour }
+                        .transform_values(&:count)
+      
+      hour_stats.sort_by { |k, v| -v }.first(3)
+    end
+
+    def analyze_trading_weekdays(trades)
+      weekday_names = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+      
+      weekday_stats = trades.group_by { |t| t.close_time&.wday }
+                           .transform_values(&:count)
+      
+      weekday_stats.map { |wday, count| [weekday_names[wday], count] }
+                  .sort_by { |k, v| -v }
+                  .first(3)
     end
 
     def user_create_params

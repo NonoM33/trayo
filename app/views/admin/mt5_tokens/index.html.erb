@@ -1,0 +1,304 @@
+<% content_for :title, "Tokens MT5 - Administration" %>
+
+<div class="page-header">
+  <div class="page-header-content">
+    <div class="page-header-left">
+      <h1>Tokens MT5 - Administration</h1>
+      <p class="page-description">Gérer les tokens MT5 pour l'auto-inscription des clients</p>
+    </div>
+    <div class="page-header-right">
+      <%= link_to "Générer un nouveau token", new_admin_mt5_token_path, class: "btn btn-primary" %>
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+  <!-- Statistiques -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value"><%= @tokens.total_count %></div>
+      <div class="stat-label">Tokens Utilisés</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value positive"><%= @tokens.count %></div>
+      <div class="stat-label">Clients Créés</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value"><%= @tokens.group_by_day(:used_at).count.size %></div>
+      <div class="stat-label">Derniers 30 jours</div>
+    </div>
+  </div>
+
+  <!-- Liste des tokens -->
+  <div class="card">
+    <% if @tokens.any? %>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Token</th>
+              <th>Description</th>
+              <th>Client</th>
+              <th>Utilisé le</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @tokens.each do |token| %>
+              <tr>
+                <td>
+                  <code class="token-code"><%= token.token %></code>
+                </td>
+                <td><%= token.description %></td>
+                <td><%= token.client_name.presence || 'N/A' %></td>
+                <td><%= token.used_at.strftime("%d/%m/%Y %H:%M") %></td>
+                <td>
+                  <div class="action-buttons">
+                    <%= link_to "Copier", "#", 
+                                onclick: "copyToClipboard('#{token.token}'); return false;", 
+                                class: "btn btn-sm btn-outline",
+                                title: "Copier le token" %>
+                    <%= link_to "Supprimer", admin_mt5_token_path(token), 
+                                method: :delete, 
+                                data: { confirm: "Êtes-vous sûr de vouloir supprimer ce token ?" },
+                                class: "btn btn-sm btn-danger" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <% if @tokens.respond_to?(:current_page) %>
+        <div class="pagination-container">
+          <%= paginate @tokens, theme: 'github' %>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="fa-icon fa-lg fa-ticket-alt"></i>
+        </div>
+        <h3>Aucun token MT5 utilisé</h3>
+        <p>Les tokens apparaissent ici seulement après avoir été utilisés avec le script MT5.</p>
+        <%= link_to "Générer un nouveau token", new_admin_mt5_token_path, class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value.positive {
+  color: var(--success-color);
+}
+
+.stat-label {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.token-code {
+  background: var(--bg-hover);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: var(--primary-color);
+}
+
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.success {
+  background: var(--success-color);
+  color: white;
+}
+
+.status-badge.error {
+  background: var(--error-color);
+  color: white;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.btn-danger {
+  background: var(--error-color);
+  color: white;
+  border: 1px solid var(--error-color);
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.pagination-container {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+/* Pagination GitHub Style */
+.pagination {
+  display: inline-block;
+  padding-left: 0;
+  margin: 20px 0;
+  border-radius: 4px;
+}
+
+.pagination > li {
+  display: inline;
+}
+
+.pagination > li > a,
+.pagination > li > span {
+  position: relative;
+  float: left;
+  padding: 6px 12px;
+  margin-left: -1px;
+  line-height: 1.42857143;
+  color: #337ab7;
+  text-decoration: none;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.pagination > li:first-child > a,
+.pagination > li:first-child > span {
+  margin-left: 0;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.pagination > li:last-child > a,
+.pagination > li:last-child > span {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.pagination > li > a:hover,
+.pagination > li > span:hover,
+.pagination > li > a:focus,
+.pagination > li > span:focus {
+  color: #23527c;
+  background-color: #eee;
+  border-color: #ddd;
+}
+
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover,
+.pagination > .active > a:focus,
+.pagination > .active > span:focus {
+  z-index: 2;
+  color: #fff;
+  cursor: default;
+  background-color: #337ab7;
+  border-color: #337ab7;
+}
+
+.pagination > .disabled > span,
+.pagination > .disabled > span:hover,
+.pagination > .disabled > span:focus,
+.pagination > .disabled > a,
+.pagination > .disabled > a:hover,
+.pagination > .disabled > a:focus {
+  color: #777;
+  cursor: not-allowed;
+  background-color: #fff;
+  border-color: #ddd;
+}
+
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+</style>
+
+<script>
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(function() {
+    // Afficher une notification de succès
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--success-color);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    notification.textContent = 'Token copié dans le presse-papiers !';
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }).catch(function(err) {
+    console.error('Erreur lors de la copie: ', err);
+    alert('Erreur lors de la copie du token');
+  });
+}
+</script>

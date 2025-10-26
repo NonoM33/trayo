@@ -1,0 +1,387 @@
+<% content_for :title, "Analyse des Bots - #{@client.first_name} #{@client.last_name}" %>
+
+<div class="page-header">
+  <div class="page-header-content">
+    <div class="page-header-left">
+      <h1>Analyse des Bots</h1>
+      <p class="page-description">Performances détaillées de vos bots de trading</p>
+    </div>
+    <div class="page-header-right">
+      <%= link_to "← Retour au profil", admin_client_path(@client), class: "btn btn-outline" %>
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+  <!-- Statistiques globales -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fa-icon fa-lg fa-chart-line"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value"><%= @total_trades %></div>
+        <div class="stat-label">Total Trades</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fa-icon fa-lg fa-euro-sign"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value <%= @total_profit >= 0 ? 'positive' : 'negative' %>">
+          <%= number_to_currency(@total_profit, unit: "€", format: "%n %u") %>
+        </div>
+        <div class="stat-label">Profit Total</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fa-icon fa-lg fa-percentage"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value"><%= @win_rate %>%</div>
+        <div class="stat-label">Taux de Réussite</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fa-icon fa-lg fa-trophy"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value"><%= @winning_trades %>/<%= @losing_trades %></div>
+        <div class="stat-label">Gagnants/Perdants</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analyse des jours de trading -->
+  <% if @trading_days_analysis[:weekdays].any? %>
+    <div class="card">
+      <h2><i class="fa-icon fa-md fa-calendar-alt"></i> Analyse des Jours de Trading</h2>
+      
+      <div class="analysis-grid">
+        <div class="analysis-item">
+          <h3>Meilleurs Jours</h3>
+          <div class="weekday-stats">
+            <% weekday_names = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'] %>
+            <% @trading_days_analysis[:weekdays].sort_by { |k, v| -v }.first(3).each do |wday, count| %>
+              <div class="weekday-item">
+                <span class="weekday-name"><%= weekday_names[wday] %></span>
+                <span class="weekday-count"><%= count %> trades</span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        
+        <div class="analysis-item">
+          <h3>Meilleures Heures</h3>
+          <div class="hour-stats">
+            <% @trading_days_analysis[:hours].sort_by { |k, v| -v }.first(3).each do |hour, count| %>
+              <div class="hour-item">
+                <span class="hour-time"><%= hour %>h</span>
+                <span class="hour-count"><%= count %> trades</span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Performances par bot -->
+  <% if @bot_performances.any? %>
+    <div class="card">
+      <h2><i class="fa-icon fa-md fa-robot"></i> Performances par Bot</h2>
+      
+      <div class="bots-grid">
+        <% @bot_performances.each do |bot_name, performance| %>
+          <div class="bot-card">
+            <div class="bot-header">
+              <h3><%= bot_name %></h3>
+              <span class="bot-magic">Magic: <%= performance[:magic_number] %></span>
+            </div>
+            
+            <div class="bot-stats">
+              <div class="bot-stat">
+                <div class="stat-label">Trades</div>
+                <div class="stat-value"><%= performance[:total_trades] %></div>
+              </div>
+              
+              <div class="bot-stat">
+                <div class="stat-label">Profit Total</div>
+                <div class="stat-value <%= performance[:total_profit] >= 0 ? 'positive' : 'negative' %>">
+                  <%= number_to_currency(performance[:total_profit], unit: "€", format: "%n %u") %>
+                </div>
+              </div>
+              
+              <div class="bot-stat">
+                <div class="stat-label">Taux de Réussite</div>
+                <div class="stat-value"><%= performance[:win_rate] %>%</div>
+              </div>
+              
+              <div class="bot-stat">
+                <div class="stat-label">Drawdown Max</div>
+                <div class="stat-value negative">
+                  <%= number_to_currency(performance[:drawdown], unit: "€", format: "%n %u") %>
+                </div>
+              </div>
+              
+              <div class="bot-stat">
+                <div class="stat-label">Profit Moyen</div>
+                <div class="stat-value <%= performance[:avg_profit] >= 0 ? 'positive' : 'negative' %>">
+                  <%= number_to_currency(performance[:avg_profit], unit: "€", format: "%n %u") %>
+                </div>
+              </div>
+              
+              <div class="bot-stat">
+                <div class="stat-label">Gagnants/Perdants</div>
+                <div class="stat-value"><%= performance[:winning_trades] %>/<%= performance[:losing_trades] %></div>
+              </div>
+            </div>
+            
+            <!-- Analyse temporelle -->
+            <div class="bot-analysis">
+              <div class="analysis-section">
+                <h4><i class="fa-icon fa-md fa-clock"></i> Meilleures Heures</h4>
+                <div class="time-stats">
+                  <% performance[:trading_hours].each do |hour, count| %>
+                    <span class="time-badge"><%= hour %>h (<%= count %>)</span>
+                  <% end %>
+                </div>
+              </div>
+              
+              <div class="analysis-section">
+                <h4><i class="fa-icon fa-md fa-calendar"></i> Meilleurs Jours</h4>
+                <div class="day-stats">
+                  <% performance[:trading_weekdays].each do |day, count| %>
+                    <span class="day-badge"><%= day %> (<%= count %>)</span>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <div class="card">
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="fa-icon fa-lg fa-robot"></i>
+        </div>
+        <h3>Aucun bot détecté</h3>
+        <p>Vos trades n'ont pas encore été associés à des bots spécifiques.</p>
+        <p>Les bots seront automatiquement détectés lors de la synchronisation MT5.</p>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<style>
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid var(--border-color);
+}
+
+.stat-icon {
+  font-size: 2rem;
+  color: var(--primary-color);
+  opacity: 0.8;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.analysis-item h3 {
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.weekday-item, .hour-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.weekday-item:last-child, .hour-item:last-child {
+  border-bottom: none;
+}
+
+.weekday-name, .hour-time {
+  font-weight: 600;
+}
+
+.weekday-count, .hour-count {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.bots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.bot-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.bot-card:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.bot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.bot-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.bot-magic {
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.bot-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.bot-stat {
+  text-align: center;
+}
+
+.bot-stat .stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.bot-stat .stat-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.bot-analysis {
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+}
+
+.analysis-section {
+  margin-bottom: 1rem;
+}
+
+.analysis-section h4 {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.time-stats, .day-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.time-badge, .day-badge {
+  background: var(--primary-color);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.empty-state p {
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .bots-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .bot-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+</style>

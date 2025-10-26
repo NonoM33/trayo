@@ -9,6 +9,7 @@ input string API_URL = "http://127.0.0.1:3000/api/v1/mt5/sync";
 input string API_COMPLETE_HISTORY_URL = "http://127.0.0.1:3000/api/v1/mt5/sync_complete_history";
 input string API_KEY = "mt5_secret_key_change_in_production";
 input string MT5_API_TOKEN = "your_mt5_api_token_here";
+input string CLIENT_EMAIL = "client@example.com";
 input int REFRESH_INTERVAL = 300;
 input bool INIT_COMPLETE_HISTORY = true;
 
@@ -80,10 +81,11 @@ void SyncDataToAPI()
    string trades_json = GetTradesJSON();
    
    string json = StringFormat(
-      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"balance\":%.2f,\"trades\":%s}}",
+      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"trades\":%s}}",
       account_number,
       MT5_API_TOKEN,
       account_name,
+      CLIENT_EMAIL,
       balance,
       trades_json
    );
@@ -179,10 +181,11 @@ void SyncCompleteHistory()
    
    // Build complete JSON payload
    string json = StringFormat(
-      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"margin\":%.2f,\"free_margin\":%.2f,\"trades\":%s,\"withdrawals\":%s,\"deposits\":%s}}",
+      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"margin\":%.2f,\"free_margin\":%.2f,\"trades\":%s,\"withdrawals\":%s,\"deposits\":%s}}",
       account_number,
       MT5_API_TOKEN,
       account_name,
+      CLIENT_EMAIL,
       balance,
       equity,
       margin,

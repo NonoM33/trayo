@@ -1,0 +1,383 @@
+<% content_for :title, "Token MT5 généré" %>
+
+<div class="page-header">
+  <div class="page-header-content">
+    <div class="page-header-left">
+      <h1>Token MT5 généré</h1>
+      <p class="page-description">Votre token est prêt à être utilisé</p>
+    </div>
+    <div class="page-header-right">
+      <%= link_to "← Retour aux clients", admin_clients_path, class: "btn btn-outline" %>
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+  <% if @token_expired %>
+    <!-- Token expiré -->
+    <div class="token-banner expired">
+      <div class="token-banner-header">
+        <div class="token-banner-icon">
+          <i class="fa-icon fa-lg fa-clock"></i>
+        </div>
+        <div class="token-banner-content">
+          <h2>Token expiré</h2>
+          <p>Le token a expiré après 1 heure. Veuillez en générer un nouveau.</p>
+        </div>
+      </div>
+      
+      <div class="token-actions">
+        <%= link_to new_admin_mt5_token_path, class: "btn btn-primary" do %>
+          <i class="fa-icon fa-md fa-plus"></i>
+          Générer un nouveau token
+        <% end %>
+      </div>
+    </div>
+  <% elsif @generated_token %>
+    <!-- Token valide -->
+    <div class="token-banner">
+      <div class="token-banner-header">
+        <div class="token-banner-icon">
+          <i class="fa-icon fa-lg fa-ticket-alt"></i>
+        </div>
+        <div class="token-banner-content">
+          <h2>Token MT5 généré avec succès !</h2>
+          <p>Le token a été copié automatiquement dans votre presse-papiers</p>
+          <% if @token_generated_at %>
+            <p class="token-info">
+              <i class="fa-icon fa-md fa-clock"></i>
+              Valide pendant <%= distance_of_time_in_words(Time.current, Time.at(@token_generated_at + 3600)) %> encore
+            </p>
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="token-display">
+        <div class="token-label">Votre token MT5 :</div>
+        <div class="token-value" id="generatedToken">
+          <%= @generated_token %>
+        </div>
+        <div class="token-actions">
+          <button onclick="copyToClipboard('<%= @generated_token %>')" class="btn btn-primary">
+            <i class="fa-icon fa-md fa-copy"></i>
+            Copier à nouveau
+          </button>
+          <button onclick="downloadToken()" class="btn btn-outline">
+            <i class="fa-icon fa-md fa-download"></i>
+            Télécharger
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instructions simplifiées -->
+    <div class="card">
+      <h3><i class="fa-icon fa-md fa-info-circle"></i> Instructions</h3>
+      
+      <div class="simple-instructions">
+        <div class="instruction-item">
+          <div class="instruction-number">1</div>
+          <div class="instruction-text">
+            <strong>Le token est déjà copié !</strong> Collez-le dans votre script MT5 :
+          </div>
+        </div>
+        
+        <div class="code-block">
+          <code>input string MT5_API_TOKEN = "<%= @generated_token %>";</code>
+          <button onclick="copyCodeToClipboard()" class="copy-code-btn">
+            <i class="fa-icon fa-md fa-copy"></i>
+          </button>
+        </div>
+        
+        <div class="instruction-item">
+          <div class="instruction-number">1.5</div>
+          <div class="instruction-text">
+            <strong>Optionnel :</strong> Ajoutez votre email client :
+          </div>
+        </div>
+        
+        <div class="code-block">
+          <code>input string CLIENT_EMAIL = "votre.email@example.com";</code>
+          <button onclick="copyEmailCodeToClipboard()" class="copy-code-btn">
+            <i class="fa-icon fa-md fa-copy"></i>
+          </button>
+        </div>
+        
+        <div class="instruction-item">
+          <div class="instruction-number">2</div>
+          <div class="instruction-text">
+            <strong>Lancez la synchronisation</strong> - Le client sera créé automatiquement au premier lancement
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="card">
+      <div class="form-actions">
+        <%= link_to "Générer un autre token", new_admin_mt5_token_path, class: "btn btn-primary" %>
+        <%= link_to "Retour aux clients", admin_clients_path, class: "btn btn-outline" %>
+      </div>
+    </div>
+  <% else %>
+    <!-- Aucun token -->
+    <div class="token-banner error">
+      <div class="token-banner-header">
+        <div class="token-banner-icon">
+          <i class="fa-icon fa-lg fa-exclamation-triangle"></i>
+        </div>
+        <div class="token-banner-content">
+          <h2>Aucun token disponible</h2>
+          <p>Veuillez générer un nouveau token.</p>
+        </div>
+      </div>
+      
+      <div class="token-actions">
+        <%= link_to new_admin_mt5_token_path, class: "btn btn-primary" do %>
+          <i class="fa-icon fa-md fa-plus"></i>
+          Générer un token
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<style>
+.token-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  color: white;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+}
+
+.token-banner.expired {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3);
+}
+
+.token-banner.error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3);
+}
+
+.token-info {
+  font-size: 0.875rem;
+  opacity: 0.8;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.token-banner-icon {
+  font-size: 2rem;
+  margin-right: 1rem;
+  opacity: 0.9;
+}
+
+.token-banner-content h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.token-banner-content p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+.token-display {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.token-label {
+  font-size: 0.875rem;
+  opacity: 0.8;
+  margin-bottom: 0.5rem;
+}
+
+.token-value {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 1.25rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  word-break: break-all;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.token-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.simple-instructions {
+  margin-top: 1rem;
+}
+
+.instruction-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.instruction-number {
+  background: var(--primary-color);
+  color: white;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.instruction-text {
+  font-size: 1rem;
+}
+
+.code-block {
+  background: var(--bg-hover);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  position: relative;
+  border: 1px solid var(--border-color);
+}
+
+.code-block code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 1rem;
+  color: var(--primary-color);
+  display: block;
+  padding-right: 3rem;
+}
+
+.copy-code-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.copy-code-btn:hover {
+  background: #5a67d8;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .token-banner {
+    padding: 1.5rem;
+  }
+  
+  .token-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+}
+</style>
+
+<script>
+// Copier automatiquement le token au chargement de la page (seulement si le token existe)
+document.addEventListener('DOMContentLoaded', function() {
+  <% if @generated_token && !@token_expired %>
+    const token = '<%= @generated_token %>';
+    copyToClipboard(token);
+  <% end %>
+});
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(function() {
+    // Afficher une notification de succès
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--success-color);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    notification.textContent = 'Token copié dans le presse-papiers !';
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }).catch(function(err) {
+    console.error('Erreur lors de la copie: ', err);
+    alert('Erreur lors de la copie du token');
+  });
+}
+
+function copyCodeToClipboard() {
+  const code = 'input string MT5_API_TOKEN = "<%= @generated_token %>";';
+  copyToClipboard(code);
+}
+
+function copyEmailCodeToClipboard() {
+  const code = 'input string CLIENT_EMAIL = "votre.email@example.com";';
+  copyToClipboard(code);
+}
+
+function downloadToken() {
+  const token = document.getElementById('generatedToken').textContent;
+  
+  const content = `Token MT5 généré
+================
+
+Token: ${token}
+Date: ${new Date().toLocaleString('fr-FR')}
+
+Instructions:
+1. Le token est déjà copié dans votre presse-papiers
+2. Ouvrez votre script TrayoSync.mq5
+3. Remplacez la ligne: input string MT5_API_TOKEN = "votre_token_ici";
+4. Optionnel: Ajoutez votre email client: input string CLIENT_EMAIL = "votre.email@example.com";
+5. Lancez la synchronisation
+
+Le client sera créé automatiquement au premier lancement avec l'email fourni.
+`;
+  
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `token_mt5_${token.substring(0, 8)}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}
+</script>

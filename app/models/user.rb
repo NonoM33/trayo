@@ -47,8 +47,89 @@ class User < ApplicationRecord
     (total_commission_due - total_credits).round(2)
   end
 
+  # Détecter automatiquement les bots basés sur les magic numbers des trades
+  def auto_detect_and_assign_bots
+    return unless mt5_accounts.any?
+    
+    # Récupérer tous les magic numbers uniques des trades de l'utilisateur
+    magic_numbers = trades.distinct.pluck(:magic_number).compact
+    
+    magic_numbers.each do |magic_number|
+      # Chercher un bot qui correspond à ce magic number
+      bot = TradingBot.find_by(magic_number_prefix: magic_number)
+      
+      if bot && !bot_purchases.exists?(trading_bot: bot)
+        # Créer automatiquement un BotPurchase pour ce bot
+        create_auto_bot_purchase(bot, magic_number)
+      end
+    end
+  end
+
+  # Créer un BotPurchase automatique
+  def create_auto_bot_purchase(trading_bot, magic_number)
+    bot_purchase = bot_purchases.create!(
+      trading_bot: trading_bot,
+      price_paid: trading_bot.price, # Prix standard du bot
+      status: 'active',
+      magic_number: magic_number,
+      is_running: true,
+      started_at: Time.current,
+      purchase_type: 'auto_detected' # Nouveau champ pour distinguer les achats automatiques
+    )
+    
+    Rails.logger.info "Bot automatiquement assigné: #{trading_bot.name} (#{magic_number}) pour l'utilisateur #{email}"
+    bot_purchase
+  end
+
   def pending_payments_total
     payments.pending.sum(:amount)
+  end
+
+  # Générer un token MT5 spécial pour auto-inscription
+  def self.generate_mt5_registration_token
+    "MT5_" + SecureRandom.hex(16).upcase
+  end
+
+  # Créer un utilisateur automatiquement à partir des données MT5
+  def self.create_from_mt5_data(mt5_data)
+    # Extraire les informations du nom du compte MT5
+    account_name = mt5_data[:account_name] || "Compte MT5"
+    
+    # Parser le nom pour extraire prénom/nom si possible
+    name_parts = account_name.split
+    first_name = name_parts.first || "Utilisateur"
+    last_name = name_parts[1..-1].join(" ") || "MT5"
+    
+    # Utiliser l'email du client s'il est fourni, sinon générer un email unique
+    mt5_token = mt5_data[:mt5_api_token]
+    email = mt5_data[:client_email].present? ? mt5_data[:client_email] : "mt5_#{mt5_token.downcase}@trayo.auto"
+    
+    # Générer un mot de passe aléatoire
+    random_password = SecureRandom.hex(16)
+    
+    # Créer l'utilisateur
+    user = create!(
+      email: email,
+      first_name: first_name,
+      last_name: last_name,
+      password: random_password,
+      password_confirmation: random_password,
+      mt5_api_token: mt5_token,
+      commission_rate: 0, # Par défaut, pas de commission
+      is_admin: false,
+      init_mt5: false # Pas encore initialisé
+    )
+    
+    # Enregistrer le token comme utilisé
+    Mt5Token.create!(
+      token: mt5_token,
+      description: "Token utilisé automatiquement",
+      client_name: "#{first_name} #{last_name}",
+      used_at: Time.current
+    )
+    
+    Rails.logger.info "Utilisateur auto-créé: #{user.email} (#{user.first_name} #{user.last_name})"
+    user
   end
 
   private

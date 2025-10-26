@@ -19,7 +19,11 @@ Rails.application.routes.draw do
         post :regenerate_token
         post :reset_mt5
         get :trades
+        get :bots
+        patch :auto_detect_bots
       end
+      resources :withdrawals, only: [:destroy]
+      resources :deposits, only: [:destroy]
     end
     resources :payments, only: [:index, :create, :update, :destroy]
     resources :credits, only: [:index, :create, :destroy]
@@ -60,6 +64,8 @@ Rails.application.routes.draw do
       end
     end
     
+    resources :my_trades, only: [:index]
+    
     resources :vps, path: 'vps' do
       member do
         post :update_status
@@ -79,6 +85,12 @@ Rails.application.routes.draw do
     end
     
     resources :withdrawals, only: [:index, :show, :new, :create, :edit, :update, :destroy]
+    resources :deposits, only: [:index, :show, :new, :create, :edit, :update, :destroy]
+    resources :mt5_tokens, only: [:index, :new, :create, :show, :destroy] do
+      collection do
+        get :show_token
+      end
+    end
     
     # Maintenance management
     get "maintenance", to: "maintenance#show"
