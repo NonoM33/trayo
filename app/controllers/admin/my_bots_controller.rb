@@ -14,61 +14,63 @@ module Admin
       else
         Rails.logger.info "User is client, fetching bot purchases..."
         
-        # SOLUTION: Utiliser l'utilisateur existant en base pour les performances
-        if current_user.email == 'renaudlemagicien@gmail.com' && current_user.id == 13
-          Rails.logger.info "Détection utilisateur spécial - synchronisation avec utilisateur local"
+        # DÉTECTION AUTOMATIQUE : Scanner tous les bots enregistrés et vérifier si le client a des trades
+        Rails.logger.info "Détection automatique de tous les bots pour l'utilisateur connecté"
+        
+        # Récupérer tous les bots enregistrés avec leur magic number
+        registered_bots = TradingBot.where.not(magic_number_prefix: nil)
+        Rails.logger.info "Bots enregistrés trouvés: #{registered_bots.count}"
+        
+        registered_bots.each do |bot|
+          Rails.logger.info "Vérification du bot: #{bot.name} (magic: #{bot.magic_number_prefix})"
           
-          # Utiliser l'utilisateur existant en base (ID 5)
-          local_user = User.find_by(email: current_user.email)
-          if local_user
-            Rails.logger.info "Utilisateur local trouvé avec ID: #{local_user.id}"
+          # Vérifier si le client a des trades avec ce magic number
+          client_trades = Trade.joins(mt5_account: :user)
+                              .where(users: { id: current_user.id })
+                              .where(magic_number: bot.magic_number_prefix)
+          
+          if client_trades.any?
+            Rails.logger.info "Client a #{client_trades.count} trades avec le bot #{bot.name}"
             
-            # Créer directement le bot_purchase avec les performances de l'utilisateur local
-            local_user.bot_purchases.each do |local_purchase|
-              # Vérifier si le bot_purchase existe déjà pour l'utilisateur connecté
-              existing_purchase = current_user.bot_purchases.find_by(trading_bot: local_purchase.trading_bot)
+            # Vérifier si le bot_purchase existe déjà
+            existing_purchase = current_user.bot_purchases.find_by(trading_bot: bot)
+            
+            if existing_purchase
+              Rails.logger.info "Bot #{bot.name} déjà assigné, synchronisation des performances"
+              sync_bot_performance(current_user, bot)
+            else
+              Rails.logger.info "Création du bot_purchase pour #{bot.name}"
               
-              if existing_purchase
-                # Mettre à jour les performances
-                existing_purchase.update!(
-                  total_profit: local_purchase.total_profit,
-                  trades_count: local_purchase.trades_count,
-                  current_drawdown: local_purchase.current_drawdown,
-                  max_drawdown_recorded: local_purchase.max_drawdown_recorded
-                )
-                Rails.logger.info "Performances synchronisées pour #{local_purchase.trading_bot.name}"
-              else
-                # Calculer la date d'achat basée sur le premier trade
-                first_trade = Trade.joins(mt5_account: :user)
-                                 .where(users: { id: current_user.id })
-                                 .where(magic_number: local_purchase.magic_number)
-                                 .order(:open_time)
-                                 .first
-                
-                purchase_date = first_trade&.open_time || Time.current
-                Rails.logger.info "Date d'achat calculée: #{purchase_date} (basée sur le premier trade)"
-                
-                # Créer le bot_purchase avec les performances
-                new_purchase = current_user.bot_purchases.create!(
-                  trading_bot: local_purchase.trading_bot,
-                  price_paid: local_purchase.price_paid,
-                  status: local_purchase.status,
-                  magic_number: local_purchase.magic_number,
-                  is_running: local_purchase.is_running,
-                  total_profit: local_purchase.total_profit,
-                  trades_count: local_purchase.trades_count,
-                  current_drawdown: local_purchase.current_drawdown,
-                  max_drawdown_recorded: local_purchase.max_drawdown_recorded,
-                  purchase_type: local_purchase.purchase_type,
-                  started_at: purchase_date,
-                  created_at: purchase_date,
-                  updated_at: Time.current
-                )
-                Rails.logger.info "Bot #{local_purchase.trading_bot.name} créé avec ID #{new_purchase.id} et performances"
-              end
+              # Calculer la date d'achat basée sur le premier trade
+              first_trade = client_trades.order(:open_time).first
+              purchase_date = first_trade&.open_time || Time.current
+              Rails.logger.info "Date d'achat calculée: #{purchase_date}"
+              
+              # Calculer les performances actuelles
+              total_profit = client_trades.sum(:profit)
+              trades_count = client_trades.count
+              
+              # Créer le bot_purchase
+              new_purchase = current_user.bot_purchases.create!(
+                trading_bot: bot,
+                price_paid: bot.price,
+                status: 'active',
+                magic_number: bot.magic_number_prefix,
+                is_running: true,
+                total_profit: total_profit,
+                trades_count: trades_count,
+                current_drawdown: 0,
+                max_drawdown_recorded: 0,
+                purchase_type: 'auto_detected',
+                started_at: purchase_date,
+                created_at: purchase_date,
+                updated_at: Time.current
+              )
+              
+              Rails.logger.info "Bot #{bot.name} créé avec ID #{new_purchase.id}, profit: #{total_profit}€, trades: #{trades_count}"
             end
           else
-            Rails.logger.info "Utilisateur local non trouvé"
+            Rails.logger.info "Client n'a pas de trades avec le bot #{bot.name}"
           end
         end
         
