@@ -1,0 +1,88 @@
+<div class="card">
+  <h2>🔍 Diagnostic des Icônes FontAwesome</h2>
+  
+  <div style="margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+    <h3>📊 Résultats du test :</h3>
+    <div id="test-results">
+      <p>⏳ Chargement du test...</p>
+    </div>
+  </div>
+  
+  <div style="margin: 20px 0;">
+    <h3>🎯 Test de la sidebar réelle :</h3>
+    <div style="border: 2px solid #007bff; padding: 15px; background: #1a1a1a; color: white; border-radius: 8px;">
+      <p><strong>Simulation exacte de la sidebar :</strong></p>
+      <div class="sidebar-menu-link" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; margin: 8px 0;">
+        <i class="fa-solid fa-chart-line sidebar-menu-icon"></i>
+        <span>Tableau de Bord</span>
+      </div>
+      <div class="sidebar-menu-link" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; margin: 8px 0;">
+        <i class="fa-solid fa-user sidebar-menu-icon"></i>
+        <span>Mon Profil</span>
+      </div>
+      <div class="sidebar-menu-link" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; margin: 8px 0;">
+        <i class="fa-solid fa-shopping-cart sidebar-menu-icon"></i>
+        <span>Boutique</span>
+      </div>
+    </div>
+  </div>
+  
+  <div style="margin: 20px 0;">
+    <h3>🔧 Test des icônes individuelles :</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+      <div style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+        <i class="fa-solid fa-home"></i> fa-home
+      </div>
+      <div style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+        <i class="fa-solid fa-user"></i> fa-user
+      </div>
+      <div style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+        <i class="fa-solid fa-chart-line"></i> fa-chart-line
+      </div>
+      <div style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+        <i class="fa-solid fa-shopping-cart"></i> fa-shopping-cart
+      </div>
+      <div style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+        <i class="fa-solid fa-robot"></i> fa-robot
+      </div>
+    </div>
+  </div>
+  
+  <div style="margin: 20px 0;">
+    <h3>📋 Instructions :</h3>
+    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+      <p><strong>Dites-moi :</strong></p>
+      <ol>
+        <li>Voyez-vous les icônes dans la "Simulation exacte de la sidebar" ?</li>
+        <li>Voyez-vous les icônes dans le "Test des icônes individuelles" ?</li>
+        <li>Quelle est la différence entre les deux ?</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<script>
+  console.log('=== TEST ICONS PAGE DEBUG ===');
+  console.log('Page loaded, checking icons...');
+  
+  // Check FontAwesome
+  const fontAwesomeLink = document.querySelector('link[href*="font-awesome"]');
+  console.log('FontAwesome link:', fontAwesomeLink);
+  
+  // Check all icons on page
+  const allIcons = document.querySelectorAll('i');
+  console.log('All icons found:', allIcons.length);
+  
+  allIcons.forEach((icon, index) => {
+    console.log(`Icon ${index}:`, icon);
+    console.log(`Classes:`, icon.className);
+    const style = window.getComputedStyle(icon);
+    console.log(`Font family:`, style.fontFamily);
+    console.log(`Font weight:`, style.fontWeight);
+    console.log(`Display:`, style.display);
+    console.log(`Visibility:`, style.visibility);
+    console.log(`Opacity:`, style.opacity);
+  });
+  
+  console.log('=== END TEST ICONS PAGE DEBUG ===');
+</script>

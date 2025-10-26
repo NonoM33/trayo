@@ -182,10 +182,15 @@ module Admin
         # Statistics for charts
         @monthly_profits = calculate_monthly_profits
         @projection_data = calculate_projection
-      end
     end
+  end
 
-    private
+  def test_icons
+    # Page de test pour les icônes
+    render 'admin/test_icons'
+  end
+
+  private
 
     def campaign_data_to_object(data)
       CampaignData.new(
