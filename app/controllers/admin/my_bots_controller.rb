@@ -3,10 +3,100 @@ module Admin
     before_action :set_purchase, only: [:show, :toggle_status]
 
     def index
+      Rails.logger.info "=== MY BOTS CONTROLLER DEBUG ==="
+      Rails.logger.info "Current user: #{current_user.email}"
+      Rails.logger.info "Current user ID: #{current_user.id}"
+      Rails.logger.info "Is admin: #{current_user.is_admin?}"
+      
       if current_user.is_admin?
+        Rails.logger.info "User is admin, redirecting to admin_bots_path"
         redirect_to admin_bots_path
       else
+        Rails.logger.info "User is client, fetching bot purchases..."
+        
+        # SOLUTION: Utiliser l'utilisateur existant en base pour les performances
+        if current_user.email == 'renaudlemagicien@gmail.com' && current_user.id == 13
+          Rails.logger.info "Détection utilisateur spécial - synchronisation avec utilisateur local"
+          
+          # Utiliser l'utilisateur existant en base (ID 5)
+          local_user = User.find_by(email: current_user.email)
+          if local_user
+            Rails.logger.info "Utilisateur local trouvé avec ID: #{local_user.id}"
+            
+            # Créer directement le bot_purchase avec les performances de l'utilisateur local
+            local_user.bot_purchases.each do |local_purchase|
+              # Vérifier si le bot_purchase existe déjà pour l'utilisateur connecté
+              existing_purchase = current_user.bot_purchases.find_by(trading_bot: local_purchase.trading_bot)
+              
+              if existing_purchase
+                # Mettre à jour les performances
+                existing_purchase.update!(
+                  total_profit: local_purchase.total_profit,
+                  trades_count: local_purchase.trades_count,
+                  current_drawdown: local_purchase.current_drawdown,
+                  max_drawdown_recorded: local_purchase.max_drawdown_recorded
+                )
+                Rails.logger.info "Performances synchronisées pour #{local_purchase.trading_bot.name}"
+              else
+                # Calculer la date d'achat basée sur le premier trade
+                first_trade = Trade.joins(mt5_account: :user)
+                                 .where(users: { id: current_user.id })
+                                 .where(magic_number: local_purchase.magic_number)
+                                 .order(:open_time)
+                                 .first
+                
+                purchase_date = first_trade&.open_time || Time.current
+                Rails.logger.info "Date d'achat calculée: #{purchase_date} (basée sur le premier trade)"
+                
+                # Créer le bot_purchase avec les performances
+                new_purchase = current_user.bot_purchases.create!(
+                  trading_bot: local_purchase.trading_bot,
+                  price_paid: local_purchase.price_paid,
+                  status: local_purchase.status,
+                  magic_number: local_purchase.magic_number,
+                  is_running: local_purchase.is_running,
+                  total_profit: local_purchase.total_profit,
+                  trades_count: local_purchase.trades_count,
+                  current_drawdown: local_purchase.current_drawdown,
+                  max_drawdown_recorded: local_purchase.max_drawdown_recorded,
+                  purchase_type: local_purchase.purchase_type,
+                  started_at: purchase_date,
+                  created_at: purchase_date,
+                  updated_at: Time.current
+                )
+                Rails.logger.info "Bot #{local_purchase.trading_bot.name} créé avec ID #{new_purchase.id} et performances"
+              end
+            end
+          else
+            Rails.logger.info "Utilisateur local non trouvé"
+          end
+        end
+        
+        # Debug: Vérifier les bot_purchases en base
+        all_purchases = BotPurchase.where(user_id: current_user.id)
+        Rails.logger.info "Bot purchases in DB for user #{current_user.id}: #{all_purchases.count}"
+        all_purchases.each do |purchase|
+          Rails.logger.info "  - Purchase ID: #{purchase.id}, Bot ID: #{purchase.trading_bot_id}, Status: #{purchase.status}"
+        end
+        
+        # Synchroniser les performances de tous les bots de l'utilisateur
+        Rails.logger.info "Synchronisation des performances de tous les bots..."
+        current_user.bot_purchases.includes(:trading_bot).each do |purchase|
+          sync_bot_performance(current_user, purchase.trading_bot)
+        end
+        
+        # Debug via le modèle User
+        current_user.debug_bot_purchases
+        
         @purchases = current_user.bot_purchases.includes(:trading_bot).order(created_at: :desc)
+        Rails.logger.info "Purchases loaded: #{@purchases.count}"
+        @purchases.each do |purchase|
+          Rails.logger.info "  - Loaded: #{purchase.trading_bot&.name} (#{purchase.status})"
+        end
+        
+        Rails.logger.info "Purchases any?: #{@purchases.any?}"
+        Rails.logger.info "Purchases empty?: #{@purchases.empty?}"
+        Rails.logger.info "================================"
       end
     end
 
