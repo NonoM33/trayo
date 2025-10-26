@@ -74,7 +74,7 @@ class TradingBot < ApplicationRecord
   def trades_for_magic_number_prefix(magic_number_prefix)
     Trade.joins(mt5_account: :user)
          .where(users: { id: users.ids })
-         .where("magic_number LIKE ?", "#{magic_number_prefix}%")
+         .where("magic_number::text LIKE ?", "#{magic_number_prefix}%")
   end
 
   def calculate_performance_for_magic_number_prefix(magic_number_prefix)

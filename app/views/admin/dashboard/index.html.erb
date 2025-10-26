@@ -1,1446 +1,699 @@
 <style>
-  .dashboard-welcome {
-    margin-bottom: 2rem;
+.dashboard-welcome {
+  margin-bottom: 2rem;
+}
+
+.dashboard-welcome h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.025em;
+}
+
+.dashboard-welcome p {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  margin: 0;
+}
+
+.chart-container {
+  position: relative;
+  height: 400px;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .chart-container {
+    height: 350px;
   }
-  
+}
+
+@media (max-width: 768px) {
   .dashboard-welcome h1 {
-    font-size: 1.875rem;
-    font-weight: 700;
-    margin: 0 0 0.5rem 0;
-    letter-spacing: -0.025em;
-  }
-  
-  .dashboard-welcome p {
-    font-size: 0.875rem;
-    color: hsl(var(--muted-foreground));
-    margin: 0;
+    font-size: 1.5rem;
   }
   
   .chart-container {
-    position: relative;
-    height: 400px;
-    width: 100%;
+    height: 300px;
   }
   
-  @media (max-width: 1024px) {
-    .chart-container {
-      height: 350px;
-    }
+  .info-box {
+    padding: 1rem;
   }
   
-  @media (max-width: 768px) {
-    .dashboard-welcome h1 {
-      font-size: 1.5rem;
-    }
-    
-    .chart-container {
-      height: 300px;
-    }
-    
-    .info-box {
-      padding: 1rem;
-    }
-    
-    .info-box-title {
-      font-size: 0.875rem;
-    }
+  .info-box-title {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 390px) {
+  .dashboard-welcome {
+    margin-bottom: 1.5rem;
   }
   
-  @media (max-width: 390px) {
-    .dashboard-welcome {
-      margin-bottom: 1.5rem;
-    }
-    
-    .dashboard-welcome h1 {
-      font-size: 1.375rem;
-    }
-    
-    .dashboard-welcome p {
-      font-size: 0.8125rem;
-    }
-    
-    .chart-container {
-      height: 250px;
-    }
-    
-    .info-box {
-      padding: 0.875rem;
-    }
-    
-    .info-box p {
-      font-size: 0.8125rem;
-    }
+  .dashboard-welcome h1 {
+    font-size: 1.375rem;
   }
   
-  @media (hover: none) and (pointer: coarse) {
-    .chart-container {
-      touch-action: pan-y;
-    }
+  .dashboard-welcome p {
+    font-size: 0.8125rem;
   }
   
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  .chart-container {
+    height: 250px;
   }
-
-  /* Styles pour la bannière de prédictions */
-  .prediction-banner {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-    color: white;
+  
+  .info-box {
+    padding: 0.875rem;
   }
-
-  .prediction-banner-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 20px;
+  
+  .info-box p {
+    font-size: 0.8125rem;
   }
+}
 
-  .prediction-banner-icon {
-    width: 48px;
-    height: 48px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(10px);
+@media (hover: none) and (pointer: coarse) {
+  .chart-container {
+    touch-action: pan-y;
   }
+}
 
-  .prediction-banner-icon i {
-    font-size: 1.5rem;
-    color: white;
-  }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
-  .prediction-banner-content h2 {
-    margin: 0 0 4px 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: white;
-  }
+/* Interface compacte des prédictions des bots */
+.bots-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
 
-  .prediction-banner-content p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.8);
-  }
+.bot-compact-card {
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
 
-  .prediction-summary {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    align-items: start;
-  }
+.bot-compact-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
 
-  .summary-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-  }
+.bot-compact-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
 
-  .summary-stat {
-    text-align: center;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    backdrop-filter: blur(10px);
-  }
+.bot-compact-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
 
-  .stat-number {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: white;
-    margin-bottom: 4px;
-  }
+.bot-compact-stats {
+  display: flex;
+  gap: 8px;
+}
 
-  .stat-label {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.8);
-    font-weight: 500;
-  }
+.bot-stat {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--background-secondary);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
 
-  .top-predictions {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 16px;
-    backdrop-filter: blur(10px);
-  }
+.bot-stat.success {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
 
-  .top-predictions h3 {
-    margin: 0 0 12px 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: white;
-  }
+.bot-compact-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
-  .prediction-items {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+.predictions-compact h4,
+.patterns-compact h4 {
+  margin: 0 0 8px 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
 
-  .prediction-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    transition: all 0.2s ease;
-  }
+.predictions-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
-  .prediction-item:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateX(4px);
-  }
+.pred-mini {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+}
 
-  .prediction-bot .bot-name {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: white;
-  }
+.pred-time {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 30px;
+}
 
-  .prediction-time {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+.pred-bar-mini {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
 
-  .prediction-hour {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: #fbbf24;
-    background: rgba(251, 191, 36, 0.2);
-    padding: 2px 8px;
-    border-radius: 4px;
-  }
+.pred-fill-mini {
+  height: 100%;
+  background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
 
-  .prediction-probability {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: #10b981;
-    background: rgba(16, 185, 129, 0.2);
-    padding: 2px 8px;
-    border-radius: 4px;
-  }
+.pred-percent {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 35px;
+  text-align: right;
+}
 
-  .no-predictions-today {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.875rem;
-    font-style: italic;
-  }
+.no-predictions-mini {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-style: italic;
+  background: var(--background-secondary);
+  border-radius: 6px;
+}
 
-  .no-predictions-today i {
-    font-size: 1rem;
-  }
+.patterns-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
-  /* Responsive pour la bannière */
-  @media (max-width: 768px) {
-    .prediction-summary {
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
+.pattern-mini {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
 
-    .summary-stats {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
+.pattern-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 50px;
+}
 
-    .prediction-banner-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-    }
+.pattern-tag {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+  border-radius: 4px;
+  font-weight: 500;
+}
 
-    .prediction-banner-icon {
-      width: 40px;
-      height: 40px;
-    }
+.no-bots-today {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
 
-    .prediction-banner-content h2 {
-      font-size: 1.25rem;
-    }
-  }
+.no-bots-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
 
-  @media (max-width: 480px) {
-    .summary-stats {
-      grid-template-columns: 1fr;
-    }
+.no-bots-today h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
 
-    .prediction-item {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
-    }
+.no-bots-today p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
 
-    .prediction-time {
-      align-self: flex-end;
-    }
-  }
-
-  /* Styles pour les prédictions des bots */
-  .predictions-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 24px;
-    margin-top: 16px;
-  }
-
-  .prediction-card {
-    background: var(--card-background);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 20px;
-    transition: all 0.2s ease;
-  }
-
-  .prediction-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-  }
-
-  .prediction-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .prediction-header h3 {
-    margin: 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-
-  .prediction-stats {
-    display: flex;
+@media (max-width: 768px) {
+  .bots-compact-grid {
+    grid-template-columns: 1fr;
     gap: 12px;
   }
+  
+  .bot-compact-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .bot-compact-stats {
+    align-self: flex-end;
+  }
+}
 
-  .stat-item {
-    display: flex;
-    align-items: center;
+@media (max-width: 480px) {
+  .bot-compact-card {
+    padding: 12px;
+  }
+  
+  .pred-mini {
+    padding: 4px 6px;
+  }
+  
+  .pattern-mini {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 4px;
-    font-size: 0.875rem;
-    color: var(--text-muted);
   }
-
-  .stat-item i {
-    color: var(--color-accent);
-  }
-
-  .prediction-timeline {
-    margin-bottom: 20px;
-  }
-
-  .prediction-timeline h4 {
-    margin: 0 0 12px 0;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-
-  .timeline-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border-color-light);
-  }
-
-  .timeline-item:last-child {
-    border-bottom: none;
-  }
-
-  .timeline-time {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 60px;
-    padding: 8px;
-    background: var(--background-secondary);
-    border-radius: 8px;
-  }
-
-  .timeline-date {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-
-  .timeline-hour {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--color-accent);
-  }
-
-  .timeline-content {
-    flex: 1;
-  }
-
-  .timeline-day {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-  }
-
-  .timeline-probability {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .probability-bar {
-    flex: 1;
-    height: 6px;
-    background: var(--background-secondary);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .probability-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
-    border-radius: 3px;
-    transition: width 0.3s ease;
-  }
-
-  .probability-text {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    min-width: 35px;
-    text-align: right;
-  }
-
-  .no-predictions {
-    text-align: center;
-    padding: 20px;
-    color: var(--text-muted);
-  }
-
-  .no-predictions i {
-    font-size: 2rem;
-    margin-bottom: 8px;
-    opacity: 0.5;
-  }
-
-  .prediction-patterns {
-    background: var(--background-secondary);
-    border-radius: 8px;
-    padding: 12px;
-  }
-
-  .prediction-patterns h4 {
-    margin: 0 0 8px 0;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-
-  .pattern-item {
-    margin-bottom: 8px;
-  }
-
-  .pattern-item:last-child {
-    margin-bottom: 0;
-  }
-
-  .pattern-item strong {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .pattern-badge {
-    display: inline-block;
-    background: var(--color-accent);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    margin-right: 6px;
-    margin-bottom: 4px;
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .predictions-grid {
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-
-    .prediction-card {
-      padding: 16px;
-    }
-
-    .prediction-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-    }
-
-    .prediction-stats {
-      flex-wrap: wrap;
-    }
-
-    .timeline-item {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-    }
-
-    .timeline-time {
-      flex-direction: row;
-      gap: 8px;
-    }
-  }
+}
 </style>
 
 <%= render 'admin/shared/sidebar' %>
 
 <div class="main-content">
   <%= render 'admin/shared/navbar' %>
+  
+  <div class="container">
+    <%= render 'admin/shared/campaign_banner' %>
+    
+    <div class="dashboard-welcome">
+      <h1>Bienvenue, <%= @client.first_name || @client.email.split('@').first %></h1>
+      <p>Voici un aperçu de vos performances de trading</p>
+    </div>
+    
+    <div class="info-grid" style="margin-bottom: 1.5rem;">
+      <div class="info-item">
+        <div class="info-label">Balance Totale</div>
+        <div class="info-value">
+          <%= number_to_currency(@client.mt5_accounts.sum(:balance), unit: "€", format: "%n %u") %>
+        </div>
+      </div>
       
-      <div class="container">
-     
-        <%= render 'admin/shared/campaign_banner' %>
+      <div class="info-item">
+        <div class="info-label">Gains Totaux</div>
+        <div class="info-value <%= @client.total_profits > 0 ? 'positive' : 'negative' %>">
+          <%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %>
+        </div>
+      </div>
+      
+      <div class="info-item">
+        <div class="info-label">Commission Due</div>
+        <div class="info-value">
+          <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %>
+        </div>
+      </div>
+      
+      <div class="info-item">
+        <div class="info-label">Solde à Payer</div>
+        <div class="info-value <%= @client.balance_due > 0 ? 'negative' : 'positive' %>">
+          <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Section Prédictions des Bots -->
+    <% if @bot_predictions&.any? %>
+      <div class="card">
+        <div class="card-header">
+          <h2>🤖 Prédictions de Mes Bots - Aujourd'hui</h2>
+          <span class="badge badge-info">Prédictions pour le jour J</span>
+        </div>
         
-        <div class="dashboard-welcome">
-          <h1>
-            Bienvenue, <%= @client.first_name || @client.email.split('@').first %>
-          </h1>
-          <p>
-            Voici un aperçu de vos performances de trading
-          </p>
-        </div>
-
-        <div class="info-grid" style="margin-bottom: 1.5rem;">
-          <div class="info-item">
-            <div class="info-label">Balance Totale</div>
-            <div class="info-value">
-              <%= number_to_currency(@client.mt5_accounts.sum(:balance), unit: "€", format: "%n %u") %>
-            </div>
-          </div>
-          
-          <div class="info-item">
-            <div class="info-label">Gains Totaux</div>
-            <div class="info-value <%= @client.total_profits > 0 ? 'positive' : 'negative' %>">
-              <%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %>
-            </div>
-          </div>
-          
-          <div class="info-item">
-            <div class="info-label">Commission Due</div>
-            <div class="info-value">
-              <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %>
-            </div>
-          </div>
-          
-          <div class="info-item">
-            <div class="info-label">Solde à Payer</div>
-            <div class="info-value <%= @client.balance_due > 0 ? 'negative' : 'positive' %>">
-              <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
-            </div>
-          </div>
-        </div>
-
-
-
-
-
-
-        <% if current_user.is_admin? %>
-          <!-- Section Trades en cours (Admin) -->
-          <div class="card">
-            <div class="card-header">
-              <h2>Trades en Cours</h2>
-              <div class="card-header-actions">
-                <span class="badge badge-info"><%= @total_active_trades %> trades actifs</span>
-                <span class="badge badge-success"><%= @total_active_users %> utilisateurs actifs</span>
-              </div>
-            </div>
-            
-            <% if @active_trades.any? %>
-              <div class="table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Client</th>
-                      <th>Symbole</th>
-                      <th>Type</th>
-                      <th>Volume</th>
-                      <th>Prix Ouverture</th>
-                      <th>Bot</th>
-                      <th>Ouvert depuis</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <% @active_trades.limit(10).each do |trade| %>
-                      <tr>
-                        <td>
-                          <div style="display: flex; align-items: center; gap: 8px;">
-                            <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
-                            <%= trade.mt5_account.user.first_name %> <%= trade.mt5_account.user.last_name %>
-                          </div>
-                        </td>
-                        <td><%= trade.symbol %></td>
-                        <td>
-                          <span class="badge <%= trade.trade_type == 'BUY' ? 'badge-success' : 'badge-danger' %>">
-                            <%= trade.trade_type %>
-                          </span>
-                        </td>
-                        <td><%= trade.volume %></td>
-                        <td><%= number_to_currency(trade.open_price, unit: "€", format: "%n %u") %></td>
-                        <td>
-                          <% if trade.magic_number.present? %>
-                            <% bot = TradingBot.find_by(magic_number_prefix: trade.magic_number) %>
-                            <% if bot %>
-                              <span class="magic-badge"><%= bot.name %></span>
-                            <% else %>
-                              <span class="magic-number">Bot <%= trade.magic_number %></span>
-                            <% end %>
-                          <% else %>
-                            <span class="text-muted">-</span>
-                          <% end %>
-                        </td>
-                        <td>
-                          <% if trade.open_time %>
-                            <% duration = Time.current - trade.open_time %>
-                            <% if duration < 1.hour %>
-                              <%= pluralize((duration / 1.minute).round, 'minute') %>
-                            <% elsif duration < 1.day %>
-                              <%= pluralize((duration / 1.hour).round, 'heure') %>
-                            <% else %>
-                              <%= pluralize((duration / 1.day).round, 'jour') %>
-                            <% end %>
-                          <% end %>
-                        </td>
-                      </tr>
-                    <% end %>
-                  </tbody>
-                </table>
-              </div>
-              
-              <% if @active_trades.count > 10 %>
-                <div style="text-align: center; margin-top: 16px;">
-                  <span class="text-muted">Et <%= @active_trades.count - 10 %> autres trades en cours...</span>
+        <% bots_with_predictions = @bot_predictions.select { |prediction| prediction[:predictions]&.select { |pred| pred[:date] == Date.current }&.any? } %>
+        <% if bots_with_predictions.any? %>
+          <div class="bots-compact-grid">
+            <% bots_with_predictions.each do |prediction| %>
+              <% today_predictions = prediction[:predictions]&.select { |pred| pred[:date] == Date.current } || [] %>
+              <div class="bot-compact-card">
+                <div class="bot-compact-header">
+                  <h3><%= prediction[:bot][:name] %></h3>
+                  <div class="bot-compact-stats">
+                    <span class="bot-stat"><%= prediction[:total_trades] %> trades</span>
+                    <span class="bot-stat success"><%= prediction[:success_rate] %>%</span>
+                  </div>
                 </div>
-              <% end %>
-            <% else %>
-              <div class="empty-state">
-                <div class="empty-state-icon">
-                  <i class="fa-icon fa-lg fa-chart-line"></i>
-                </div>
-                <h3>Aucun trade en cours</h3>
-                <p>Tous les trades sont fermés pour le moment</p>
-              </div>
-            <% end %>
-          </div>
-
-          <!-- Section Prédictions des Bots (Admin) -->
-          <div class="card">
-            <div class="card-header">
-              <h2>Prédictions des Bots - 2 Prochains Jours</h2>
-              <div class="card-header-actions">
-                <span class="badge badge-info">Basé sur l'analyse des 30 derniers jours</span>
-              </div>
-            </div>
-            
-            <% if @bot_predictions.any? %>
-              <div class="predictions-grid">
-                <% @bot_predictions.each do |prediction| %>
-                  <div class="prediction-card">
-                    <div class="prediction-header">
-                      <h3><%= prediction[:bot][:name] %></h3>
-                      <div class="prediction-stats">
-                        <span class="stat-item">
-                          <i class="fa-icon fa-md fa-chart-bar"></i>
-                          <%= prediction[:total_trades] %> trades
-                        </span>
-                        <span class="stat-item">
-                          <i class="fa-icon fa-md fa-trophy"></i>
-                          <%= prediction[:success_rate] %>%
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <% if prediction[:predictions].any? %>
-                      <div class="prediction-timeline">
-                        <h4>Prédictions pour les 2 prochains jours :</h4>
-                        <% prediction[:predictions].each do |pred| %>
-                          <div class="timeline-item">
-                            <div class="timeline-time">
-                              <div class="timeline-date"><%= pred[:date].strftime("%d/%m") %></div>
-                              <div class="timeline-hour"><%= pred[:hour] %>h</div>
+                
+                <div class="bot-compact-content">
+                  <!-- Prédictions -->
+                  <div class="predictions-compact">
+                    <h4>📅 Prédictions Aujourd'hui</h4>
+                    <% if today_predictions.any? %>
+                      <div class="predictions-mini">
+                        <% today_predictions.each do |pred| %>
+                          <div class="pred-mini">
+                            <span class="pred-time"><%= pred[:hour] %>h</span>
+                            <div class="pred-bar-mini">
+                              <div class="pred-fill-mini" style="width: <%= (pred[:probability] * 100).round %>%"></div>
                             </div>
-                            <div class="timeline-content">
-                              <div class="timeline-day"><%= pred[:day_name] %></div>
-                              <div class="timeline-probability">
-                                <div class="probability-bar">
-                                  <div class="probability-fill" style="width: <%= (pred[:probability] * 100).round %>%"></div>
-                                </div>
-                                <span class="probability-text"><%= (pred[:probability] * 100).round %>%</span>
-                              </div>
-                            </div>
+                            <span class="pred-percent"><%= (pred[:probability] * 100).round %>%</span>
                           </div>
                         <% end %>
                       </div>
                     <% else %>
-                      <div class="no-predictions">
-                        <i class="fa-icon fa-md fa-info-circle"></i>
-                        <p>Aucune prédiction disponible pour les 2 prochains jours</p>
+                      <div class="no-predictions-mini">
+                        <i class="fa-icon fa-md fa-clock"></i>
+                        <span>Aucune prédiction pour aujourd'hui</span>
                       </div>
                     <% end %>
-                    
-                    <div class="prediction-patterns">
-                      <h4>Patterns détectés :</h4>
-                      <div class="pattern-item">
-                        <strong>Meilleures heures :</strong>
-                        <% prediction[:trading_hours].first(3).each do |hour| %>
-                          <span class="pattern-badge"><%= hour[:hour] %>h (<%= hour[:percentage] %>%)</span>
+                  </div>
+                  
+                  <!-- Patterns -->
+                  <div class="patterns-compact">
+                    <h4>📊 Patterns</h4>
+                    <div class="patterns-mini">
+                      <div class="pattern-mini">
+                        <span class="pattern-label">Heures:</span>
+                        <% (prediction[:trading_hours] || []).first(3).each do |hour| %>
+                          <span class="pattern-tag"><%= hour[:hour] %>h</span>
                         <% end %>
                       </div>
-                      <div class="pattern-item">
-                        <strong>Meilleurs jours :</strong>
-                        <% prediction[:trading_days].each do |day| %>
-                          <span class="pattern-badge"><%= day[:day_name] %> (<%= day[:percentage] %>%)</span>
+                      <div class="pattern-mini">
+                        <span class="pattern-label">Jours:</span>
+                        <% (prediction[:trading_days] || []).each do |day| %>
+                          <span class="pattern-tag"><%= day[:day_name] %></span>
                         <% end %>
                       </div>
                     </div>
                   </div>
-                <% end %>
-              </div>
-            <% else %>
-              <div class="empty-state">
-                <div class="empty-state-icon">
-                  <i class="fa-icon fa-lg fa-robot"></i>
                 </div>
-                <h3>Aucune prédiction disponible</h3>
-                <p>Les bots n'ont pas assez de données pour générer des prédictions</p>
               </div>
             <% end %>
           </div>
         <% else %>
-          <!-- Section Trades en cours (Client) -->
-          <% if @active_trades.any? %>
-            <div class="card">
-              <div class="card-header">
-                <h2>Mes Trades en Cours</h2>
-                <span class="badge badge-info"><%= @active_trades.count %> trades actifs</span>
-              </div>
-              
-              <div class="table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Symbole</th>
-                      <th>Type</th>
-                      <th>Volume</th>
-                      <th>Prix Ouverture</th>
-                      <th>Bot</th>
-                      <th>Ouvert depuis</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <% @active_trades.each do |trade| %>
-                      <tr>
-                        <td><%= trade.symbol %></td>
-                        <td>
-                          <span class="badge <%= trade.trade_type == 'BUY' ? 'badge-success' : 'badge-danger' %>">
-                            <%= trade.trade_type %>
-                          </span>
-                        </td>
-                        <td><%= trade.volume %></td>
-                        <td><%= number_to_currency(trade.open_price, unit: "€", format: "%n %u") %></td>
-                        <td>
-                          <% if trade.magic_number.present? %>
-                            <% bot = TradingBot.find_by(magic_number_prefix: trade.magic_number) %>
-                            <% if bot %>
-                              <span class="magic-badge"><%= bot.name %></span>
-                            <% else %>
-                              <span class="magic-number">Bot <%= trade.magic_number %></span>
-                            <% end %>
-                          <% else %>
-                            <span class="text-muted">-</span>
-                          <% end %>
-                        </td>
-                        <td>
-                          <% if trade.open_time %>
-                            <% duration = Time.current - trade.open_time %>
-                            <% if duration < 1.hour %>
-                              <%= pluralize((duration / 1.minute).round, 'minute') %>
-                            <% elsif duration < 1.day %>
-                              <%= pluralize((duration / 1.hour).round, 'heure') %>
-                            <% else %>
-                              <%= pluralize((duration / 1.day).round, 'jour') %>
-                            <% end %>
-                          <% end %>
-                        </td>
-                      </tr>
-                    <% end %>
-                  </tbody>
-                </table>
-              </div>
+          <div class="no-bots-today">
+            <div class="no-bots-icon">
+              <i class="fa-icon fa-lg fa-robot"></i>
             </div>
-          <% end %>
-
-          <!-- Section Prédictions des Bots (Client) - Version Compacte -->
-          <% if @bot_predictions.any? %>
-            <div class="card">
-              <div class="card-header">
-                <h2>🤖 Prédictions de Mes Bots - Aujourd'hui</h2>
-                <span class="badge badge-info">Prédictions pour le jour J</span>
-              </div>
-              
-              <% bots_with_predictions = @bot_predictions.select { |prediction| prediction[:predictions].select { |pred| pred[:date] == Date.current }.any? } %>
-              <% if bots_with_predictions.any? %>
-                <div class="bots-compact-grid">
-                  <% bots_with_predictions.each do |prediction| %>
-                    <% today_predictions = prediction[:predictions].select { |pred| pred[:date] == Date.current } %>
-                    <div class="bot-compact-card">
-                    <div class="bot-compact-header">
-                      <h3><%= prediction[:bot][:name] %></h3>
-                      <div class="bot-compact-stats">
-                        <span class="bot-stat"><%= prediction[:total_trades] %> trades</span>
-                        <span class="bot-stat success"><%= prediction[:success_rate] %>%</span>
-                      </div>
-                    </div>
-                    
-                    <div class="bot-compact-content">
-                      <!-- Prédictions -->
-                      <div class="predictions-compact">
-                        <h4>📅 Prédictions Aujourd'hui</h4>
-                        <% today_predictions = prediction[:predictions].select { |pred| pred[:date] == Date.current } %>
-                        <% if today_predictions.any? %>
-                          <div class="predictions-mini">
-                            <% today_predictions.each do |pred| %>
-                              <div class="pred-mini">
-                                <span class="pred-time"><%= pred[:hour] %>h</span>
-                                <div class="pred-bar-mini">
-                                  <div class="pred-fill-mini" style="width: <%= (pred[:probability] * 100).round %>%"></div>
-                                </div>
-                                <span class="pred-percent"><%= (pred[:probability] * 100).round %>%</span>
-                              </div>
-                            <% end %>
-                          </div>
-                        <% else %>
-                          <div class="no-predictions-mini">
-                            <i class="fa-icon fa-md fa-clock"></i>
-                            <span>Aucune prédiction pour aujourd'hui</span>
-                          </div>
-                        <% end %>
-                      </div>
-                      
-                      <!-- Patterns -->
-                      <div class="patterns-compact">
-                        <h4>📊 Patterns</h4>
-                        <div class="patterns-mini">
-                          <div class="pattern-mini">
-                            <span class="pattern-label">Heures:</span>
-                            <% prediction[:trading_hours].first(3).each do |hour| %>
-                              <span class="pattern-tag"><%= hour[:hour] %>h</span>
-                            <% end %>
-                          </div>
-                          <div class="pattern-mini">
-                            <span class="pattern-label">Jours:</span>
-                            <% prediction[:trading_days].each do |day| %>
-                              <span class="pattern-tag"><%= day[:day_name] %></span>
-                            <% end %>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <% end %>
-                </div>
-              <% else %>
-                <div class="no-bots-today">
-                  <div class="no-bots-icon">
-                    <i class="fa-icon fa-lg fa-robot"></i>
-                  </div>
-                  <h3>Aucun bot actif aujourd'hui</h3>
-                  <p>Vos bots n'ont pas de prédictions pour aujourd'hui. Ils se déclencheront peut-être demain !</p>
-                </div>
-              <% end %>
-            </div>
-          <% end %>
+            <h3>Aucun bot actif aujourd'hui</h3>
+            <p>Vos bots n'ont pas de prédictions pour aujourd'hui. Ils se déclencheront peut-être demain !</p>
+          </div>
         <% end %>
-        
-        <div class="card">
-          <h2>Profits Mensuels & Projection</h2>
-          
-          <div class="two-col" style="margin-bottom: 24px;">
-            <div class="info-box info-box-info">
-              <div class="info-box-title"><i class="fa-icon fa-md fa-chart-bar"></i> Performance Historique</div>
-              <p style="margin: 0;">Vos profits réels des 12 derniers mois</p>
-            </div>
-            <div class="info-box info-box-success">
-              <div class="info-box-title"><i class="fa-icon fa-md fa-bullhorn"></i> Projection (6 mois)</div>
-              <p style="margin: 0;">Basée sur votre moyenne mensuelle: <strong><%= number_to_currency((@projection_data.last[:balance] - current_user.mt5_accounts.sum(:balance)) / 6, unit: "€", format: "%n %u") %>/mois</strong></p>
-            </div>
-          </div>
-          
-          <div class="chart-container">
-            <div id="chart-loading" style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);">
-              <div style="text-align: center;">
-                <div style="width: 40px; height: 40px; border: 3px solid var(--border-color); border-top: 3px solid var(--color-accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
-                <p style="margin: 0;">Chargement du graphique...</p>
-              </div>
-            </div>
-            <canvas id="portfolioChart" style="display: none;"></canvas>
+      </div>
+    <% end %>
+    
+    <!-- Graphique des Performances des Bots -->
+    <div class="card">
+      <div class="card-header">
+        <h2>📊 Performances des Bots</h2>
+        <p>Analyse des performances de tous vos bots</p>
+      </div>
+      
+      <div class="chart-container" style="height: 400px;">
+        <div id="bots-chart-loading" style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);">
+          <div style="text-align: center;">
+            <div style="width: 40px; height: 40px; border: 3px solid var(--border-color); border-top: 3px solid var(--color-accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
+            <p style="margin: 0;">Chargement du graphique des bots...</p>
           </div>
         </div>
-        
-        <div class="two-col">
-          <div class="card">
-            <h2>Comptes MT5</h2>
-            
-            <% if @mt5_accounts.any? %>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Compte</th>
-                    <th>Balance</th>
-                    <th>Gains</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% @mt5_accounts.each do |account| %>
-                    <tr>
-                      <td><%= account.account_name %></td>
-                      <td class="positive"><%= number_to_currency(account.balance, unit: "€", format: "%n %u") %></td>
-                      <td class="<%= account.net_gains > 0 ? 'positive' : 'negative' %>">
-                        <%= number_to_currency(account.net_gains, unit: "€", format: "%n %u") %>
-                      </td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-            <% else %>
-              <p style="text-align: center; color: var(--text-muted); padding: 40px;">Aucun compte MT5</p>
-            <% end %>
-          </div>
-          
-          <div class="card">
-            <h2>Activité Récente</h2>
-            
-            <% recent_trades = @client.trades.order(close_time: :desc).limit(5) %>
-            <% if recent_trades.any? %>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Symbole</th>
-                    <th>Profit</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% recent_trades.each do |trade| %>
-                    <tr>
-                      <td><%= trade.close_time&.strftime("%d/%m/%Y") || "Ouvert" %></td>
-                      <td><%= trade.symbol %></td>
-                      <td class="<%= trade.profit > 0 ? 'positive' : 'negative' %>">
-                        <%= number_to_currency(trade.profit, unit: "€", format: "%n %u") %>
-                      </td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-            <% else %>
-              <p style="text-align: center; color: var(--text-muted); padding: 40px;">Aucune transaction récente</p>
-            <% end %>
+        <canvas id="botsChart" style="display: none;"></canvas>
+      </div>
+    </div>
+    
+    <!-- Profits Mensuels & Projection -->
+    <div class="card">
+      <h2>Profits Mensuels & Projection</h2>
+      
+      <div class="two-col" style="margin-bottom: 24px;">
+        <div class="info-box info-box-info">
+          <div class="info-box-title"><i class="fa-icon fa-md fa-chart-bar"></i> Performance Historique</div>
+          <p style="margin: 0;">Vos profits réels des 12 derniers mois</p>
+        </div>
+        <div class="info-box info-box-success">
+          <div class="info-box-title"><i class="fa-icon fa-md fa-bullhorn"></i> Projection (6 mois)</div>
+          <p style="margin: 0;">Basée sur votre moyenne mensuelle: <strong><%= number_to_currency((@projection_data&.last&.dig(:balance) || 0 - current_user.mt5_accounts.sum(:balance)) / 6, unit: "€", format: "%n %u") %>/mois</strong></p>
+        </div>
+      </div>
+      
+      <div class="chart-container">
+        <div id="chart-loading" style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);">
+          <div style="text-align: center;">
+            <div style="width: 40px; height: 40px; border: 3px solid var(--border-color); border-top: 3px solid var(--color-accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
+            <p style="margin: 0;">Chargement du graphique...</p>
           </div>
         </div>
+        <canvas id="portfolioChart" style="display: none;"></canvas>
+      </div>
+    </div>
+    
+    <!-- Comptes MT5 et Activité Récente -->
+    <div class="two-col">
+      <div class="card">
+        <h2>Comptes MT5</h2>
+        <% if @mt5_accounts&.any? %>
+          <table>
+            <thead>
+              <tr>
+                <th>Compte</th>
+                <th>Balance</th>
+                <th>Gains</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @mt5_accounts.each do |account| %>
+                <tr>
+                  <td><%= account.account_name %></td>
+                  <td class="positive"><%= number_to_currency(account.balance, unit: "€", format: "%n %u") %></td>
+                  <td class="<%= account.net_gains > 0 ? 'positive' : 'negative' %>">
+                    <%= number_to_currency(account.net_gains, unit: "€", format: "%n %u") %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <p style="text-align: center; color: var(--text-muted); padding: 40px;">Aucun compte MT5</p>
+        <% end %>
+      </div>
+      
+      <div class="card">
+        <h2>Activité Récente</h2>
+        <% recent_trades = @client.trades.order(close_time: :desc).limit(5) %>
+        <% if recent_trades.any? %>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Symbole</th>
+                <th>Profit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recent_trades.each do |trade| %>
+                <tr>
+                  <td><%= trade.close_time&.strftime("%d/%m/%Y") || "Ouvert" %></td>
+                  <td><%= trade.symbol %></td>
+                  <td class="<%= trade.profit > 0 ? 'positive' : 'negative' %>">
+                    <%= number_to_currency(trade.profit, unit: "€", format: "%n %u") %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <p style="text-align: center; color: var(--text-muted); padding: 40px;">Aucune transaction récente</p>
+        <% end %>
+      </div>
+    </div>
   </div>
 </div>
 
 <script data-turbo-track="reload">
-    // Fonction pour charger Chart.js de manière asynchrone
-    function loadChartJS() {
-      return new Promise((resolve, reject) => {
-        if (typeof Chart !== 'undefined') {
-          resolve(Chart);
-          return;
-        }
-        
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
-        script.onload = () => resolve(Chart);
-        script.onerror = () => reject(new Error('Failed to load Chart.js'));
-        document.head.appendChild(script);
-      });
+// Fonction pour charger Chart.js de manière asynchrone
+function loadChartJS() {
+  return new Promise((resolve, reject) => {
+    if (typeof Chart !== 'undefined') {
+      resolve(Chart);
+      return;
     }
     
-    async function initializeChart() {
-      try {
-        // Attendre que Chart.js soit chargé
-        await loadChartJS();
-        
-        const ctx = document.getElementById('portfolioChart');
-        if (!ctx) {
-          console.warn('Canvas element not found');
-          return;
-        }
-        
-        // Détruire l'instance précédente si elle existe
-        if (window.portfolioChartInstance) {
-          window.portfolioChartInstance.destroy();
-        }
-        
-        // Masquer le loader et afficher le canvas
-        const loadingDiv = document.getElementById('chart-loading');
-        if (loadingDiv) {
-          loadingDiv.style.display = 'none';
-        }
-        ctx.style.display = 'block';
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+    script.onload = () => resolve(Chart);
+    script.onerror = () => reject(new Error('Failed to load Chart.js'));
+    document.head.appendChild(script);
+  });
+}
+
+// Initialiser le graphique des bots
+async function initializeBotsChart() {
+  try {
+    await loadChartJS();
+    
+    const ctx = document.getElementById('botsChart');
+    if (!ctx) return;
+    
+    const loadingDiv = document.getElementById('bots-chart-loading');
+    if (loadingDiv) {
+      loadingDiv.style.display = 'none';
+    }
+    ctx.style.display = 'block';
+    
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const textColor = isDarkMode ? '#e2e8f0' : '#1e293b';
+    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+    
+    const botsData = <%= raw current_user.bot_purchases.includes(:trading_bot).map { |bp| 
+      # Calculer le taux de réussite directement depuis les trades du user
+      user_trades = Trade.joins(:mt5_account).where(mt5_accounts: { user_id: current_user.id })
+                         .where(magic_number: bp.magic_number)
+      winning_trades = user_trades.where("profit > 0").count
+      total_trades = user_trades.count
+      success_rate = total_trades > 0 ? (winning_trades.to_f / total_trades * 100).round(2) : 0
       
-      const isDarkMode = document.body.classList.contains('dark-mode');
-      const textColor = isDarkMode ? '#e2e8f0' : '#1e293b';
-      const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-      
-      const historicalData = <%= raw @monthly_profits.to_json %>;
-      const projectionData = <%= raw @projection_data.to_json %>;
-      const currentBalance = <%= current_user.mt5_accounts.sum(:balance) %>;
-      
-      const historicalLabels = historicalData.map(d => d.month);
-      const projectionLabels = projectionData.map(d => d.month);
-      const allLabels = [...historicalLabels, ...projectionLabels];
-      
-      const historicalProfits = historicalData.map(d => d.profit);
-      
-      const projectionProfits = new Array(historicalData.length).fill(null);
-      projectionData.forEach((d, i) => {
-        projectionProfits.push(d.balance);
-      });
-      
-      projectionProfits[historicalData.length] = currentBalance;
-      
-      window.portfolioChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: allLabels,
-          datasets: [
-            {
-              type: 'bar',
-              label: 'Profits Mensuels',
-              data: [...historicalProfits, ...new Array(projectionData.length).fill(null)],
-              backgroundColor: historicalProfits.map(p => p >= 0 ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'),
-              borderColor: historicalProfits.map(p => p >= 0 ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)'),
-              borderWidth: 1,
-              borderRadius: 8,
-              yAxisID: 'y',
-              order: 2
-            },
-            {
-              type: 'line',
-              label: 'Balance Projetée',
-              data: projectionProfits,
-              borderColor: '#3b82f6',
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
-              borderWidth: 4,
-              borderDash: [10, 5],
-              fill: false,
-              tension: 0.4,
-              pointRadius: 6,
-              pointHoverRadius: 8,
-              pointBackgroundColor: '#3b82f6',
-              pointBorderColor: '#fff',
-              pointBorderWidth: 3,
-              yAxisID: 'y1',
-              order: 1
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: {
-            intersect: false,
-            mode: 'index'
+      {
+        name: bp.trading_bot.name,
+        profit: bp.total_profit || 0,
+        trades: bp.trades_count || 0,
+        success_rate: success_rate,
+        magic_number: bp.magic_number
+      }
+    }.to_json %>;
+    
+    if (botsData.length === 0) {
+      ctx.style.display = 'none';
+      loadingDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fa-icon fa-lg fa-robot" style="font-size: 3rem; opacity: 0.5; margin-bottom: 16px;"></i><h3>Aucun bot trouvé</h3><p>Vous n\'avez pas encore de bots assignés</p></div>';
+      loadingDiv.style.display = 'flex';
+      return;
+    }
+    
+    const botNames = botsData.map(bot => bot.name);
+    const profits = botsData.map(bot => bot.profit);
+    const tradesCount = botsData.map(bot => bot.trades);
+    
+    const profitColors = profits.map(profit => 
+      profit >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'
+    );
+    
+    const borderColors = profits.map(profit => 
+      profit >= 0 ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)'
+    );
+    
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: botNames,
+        datasets: [
+          {
+            label: 'Profit Total (€)',
+            data: profits,
+            backgroundColor: profitColors,
+            borderColor: borderColors,
+            borderWidth: 2,
+            borderRadius: 8,
+            yAxisID: 'y-profit'
           },
-          plugins: {
-            legend: {
-              display: true,
-              position: 'top',
-              labels: {
-                color: textColor,
-                font: {
-                  size: 14,
-                  weight: '600'
-                },
-                padding: 15,
-                usePointStyle: true
-              }
-            },
-            tooltip: {
-              backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-              titleColor: textColor,
-              bodyColor: textColor,
-              borderColor: isDarkMode ? '#475569' : '#cbd5e1',
-              borderWidth: 1,
-              padding: 12,
-              displayColors: true,
-              callbacks: {
-                label: function(context) {
-                  if (context.parsed.y === null) return '';
-                  let label = context.dataset.label || '';
-                  if (label) {
-                    label += ': ';
-                  }
-                  const value = context.parsed.y;
-                  const formattedValue = Math.abs(value).toLocaleString('fr-FR', { 
-                    minimumFractionDigits: 2, 
-                    maximumFractionDigits: 2 
-                  }) + ' €';
-                  label += value >= 0 ? formattedValue : '-' + formattedValue;
-                  return label;
-                }
-              }
-            }
+          {
+            label: 'Nombre de Trades',
+            data: tradesCount,
+            type: 'line',
+            borderColor: 'rgba(59, 130, 246, 1)',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderWidth: 3,
+            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            yAxisID: 'y-trades'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Performances des Bots',
+            font: { size: 18, weight: 'bold' },
+            color: textColor
           },
-          scales: {
-            x: {
-              grid: {
-                display: false
-              },
-              ticks: {
-                color: textColor,
-                font: {
-                  size: 11
-                },
-                maxRotation: 45,
-                minRotation: 45
-              }
-            },
-            y: {
-              type: 'linear',
-              position: 'left',
-              beginAtZero: true,
-              grid: {
-                color: gridColor,
-                drawBorder: false
-              },
-              ticks: {
-                color: textColor,
-                font: {
-                  size: 12
-                },
-                callback: function(value) {
-                  return value.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €';
-                }
-              },
-              title: {
-                display: true,
-                text: 'Profits Mensuels',
-                color: textColor,
-                font: {
-                  size: 12,
-                  weight: '600'
-                }
-              }
-            },
-            y1: {
-              type: 'linear',
-              position: 'right',
-              grid: {
-                display: false
-              },
-              ticks: {
-                color: textColor,
-                font: {
-                  size: 12
-                },
-                callback: function(value) {
-                  return value.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €';
-                }
-              },
-              title: {
-                display: true,
-                text: 'Balance Projetée',
-                color: textColor,
-                font: {
-                  size: 12,
-                  weight: '600'
-                }
+          legend: {
+            display: true,
+            position: 'top',
+            labels: { color: textColor, font: { size: 12 } }
+          },
+          tooltip: {
+            backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.9)',
+            titleColor: textColor,
+            bodyColor: textColor,
+            borderColor: gridColor,
+            borderWidth: 1,
+            callbacks: {
+              afterBody: function(context) {
+                const index = context[0].dataIndex;
+                const bot = botsData[index];
+                return [
+                  `Magic Number: ${bot.magic_number}`,
+                  `Taux de réussite: ${bot.success_rate}%`
+                ];
               }
             }
           }
-        }
-      });
-      
-      } catch (error) {
-        console.error('Error initializing chart:', error);
-        // Masquer le loader et afficher un message d'erreur
-        const loadingDiv = document.getElementById('chart-loading');
-        const ctx = document.getElementById('portfolioChart');
-        
-        if (loadingDiv) {
-          loadingDiv.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 40px;"><p style="margin: 0;">Erreur lors du chargement du graphique. Veuillez actualiser la page.</p></div>';
-        }
-        
-        if (ctx) {
-          ctx.style.display = 'none';
-        }
+        },
+        scales: {
+          x: {
+            ticks: { color: textColor, font: { size: 11 } },
+            grid: { color: gridColor }
+          },
+          'y-profit': {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            title: { display: true, text: 'Profit (€)', color: textColor },
+            ticks: { color: textColor, callback: function(value) { return value.toFixed(0) + '€'; } },
+            grid: { color: gridColor }
+          },
+          'y-trades': {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            title: { display: true, text: 'Nombre de Trades', color: textColor },
+            ticks: { color: textColor },
+            grid: { drawOnChartArea: false, color: gridColor }
+          }
+        },
+        interaction: { intersect: false, mode: 'index' }
       }
-    }
-    
-    // Fonction pour initialiser le graphique avec retry
-    function initializeChartWithRetry(retries = 3) {
-      initializeChart().catch(error => {
-        console.error('Chart initialization failed:', error);
-        if (retries > 0) {
-          console.log(`Retrying chart initialization... ${retries} attempts left`);
-          setTimeout(() => initializeChartWithRetry(retries - 1), 1000);
-        }
-      });
-    }
-    
-    // Initialiser le graphique sur différents événements
-    document.addEventListener('DOMContentLoaded', initializeChartWithRetry);
-    document.addEventListener('turbo:load', initializeChartWithRetry);
-    document.addEventListener('turbo:render', initializeChartWithRetry);
-    
-    // Fallback pour les navigateurs plus anciens
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initializeChartWithRetry);
-    } else {
-      initializeChartWithRetry();
-    }
-  </script>
-  
-  <!-- CSS pour l'interface compacte des prédictions -->
-  <style>
-    /* Interface compacte des prédictions des bots */
-    .bots-compact-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 16px;
-      margin-top: 16px;
-    }
-    
-    .bot-compact-card {
-      background: var(--card-background);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 16px;
-      transition: all 0.2s ease;
-    }
-    
-    .bot-compact-card:hover {
-      border-color: var(--color-accent);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-    
-    .bot-compact-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .bot-compact-header h3 {
-      margin: 0;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    
-    .bot-compact-stats {
-      display: flex;
-      gap: 8px;
-    }
-    
-    .bot-stat {
-      font-size: 0.75rem;
-      padding: 4px 8px;
-      border-radius: 6px;
-      background: var(--background-secondary);
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-    
-    .bot-stat.success {
-      background: rgba(16, 185, 129, 0.2);
-      color: #10b981;
-    }
-    
-    .bot-compact-content {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    
-    .predictions-compact h4,
-    .patterns-compact h4 {
-      margin: 0 0 8px 0;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    
-    .predictions-mini {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    
-    .pred-mini {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 8px;
-      background: var(--background-secondary);
-      border-radius: 6px;
-    }
-    
-    .pred-time {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      min-width: 30px;
-    }
-    
-    .pred-bar-mini {
-      flex: 1;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    
-    .pred-fill-mini {
-      height: 100%;
-      background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
-      border-radius: 2px;
-      transition: width 0.3s ease;
-    }
-    
-    .pred-percent {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      min-width: 35px;
-      text-align: right;
-    }
-    
-    .no-predictions-mini {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px;
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      font-style: italic;
-      background: var(--background-secondary);
-      border-radius: 6px;
-    }
-    
-    .patterns-mini {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    
-    .pattern-mini {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    
-    .pattern-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      min-width: 50px;
-    }
-    
-    .pattern-tag {
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      background: rgba(59, 130, 246, 0.2);
-      color: #3b82f6;
-      border-radius: 4px;
-      font-weight: 500;
-    }
-    
-    /* Message quand aucun bot n'est actif */
-    .no-bots-today {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-muted);
-    }
-    
-    .no-bots-icon {
-      font-size: 3rem;
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
-    
-    .no-bots-today h3 {
-      margin: 0 0 8px 0;
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    
-    .no-bots-today p {
-      margin: 0;
-      font-size: 0.875rem;
-      line-height: 1.5;
-    }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
-      .bots-compact-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-      
-      .bot-compact-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-      }
-      
-      .bot-compact-stats {
-        align-self: flex-end;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .bot-compact-card {
-        padding: 12px;
-      }
-      
-      .pred-mini {
-        padding: 4px 6px;
-      }
-      
-      .pattern-mini {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
-      }
-    }
-  </style>
-  
-  <%= render 'admin/shared/campaign_popup' %>
+    });
+  } catch (error) {
+    console.error('Error initializing bots chart:', error);
+  }
+}
 
+// Initialiser les graphiques
+document.addEventListener('DOMContentLoaded', initializeBotsChart);
+document.addEventListener('turbo:load', initializeBotsChart);
+document.addEventListener('turbo:render', initializeBotsChart);
+</script>
+
+<%= render 'admin/shared/campaign_popup' %>
