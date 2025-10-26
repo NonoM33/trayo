@@ -5,8 +5,8 @@
 #property copyright "Trayo"
 #property version   "1.00"
 
-input string API_URL = "http://127.0.0.1:3000/api/v1/mt5/sync";
-input string API_COMPLETE_HISTORY_URL = "http://127.0.0.1:3000/api/v1/mt5/sync_complete_history";
+input string API_URL = "https://trayo.onrender.com/api/v1/mt5/sync";
+input string API_COMPLETE_HISTORY_URL = "https://trayo.onrender.com/api/v1/mt5/sync_complete_history";
 input string API_KEY = "mt5_secret_key_change_in_production";
 input string MT5_API_TOKEN = "25eb820906140c0eea3eae64f465542137533e931239fc2af5757916e6cb032a";
 input string CLIENT_EMAIL = "renaud@renaud.com";
@@ -837,12 +837,11 @@ string GetActiveExpertsJSON()
       }
    }
    
-   // Scanner l'historique TRÈS récent (12 dernières heures seulement)
-   // pour détecter uniquement les EAs qui ont tradé aujourd'hui
-   datetime recent_from = TimeCurrent() - (12 * 3600);  // 12 heures seulement
+   // Scanner l'historique sur 30 jours pour détecter les EAs actifs
+   datetime recent_from = TimeCurrent() - (30 * 24 * 3600);  // 30 derniers jours
    if(HistorySelect(recent_from, TimeCurrent()))
    {
-      Print("Scanning last 12 hours for RECENT trades...");
+      Print("Scanning last 30 days for active magic numbers...");
       
       for(int i = 0; i < HistoryDealsTotal(); i++)
       {
@@ -869,22 +868,92 @@ string GetActiveExpertsJSON()
                   ArrayResize(active_magic_numbers, magic_count + 1);
                   active_magic_numbers[magic_count] = magic;
                   magic_count++;
-                  Print("Found RECENT trade from magic number: ", magic);
+                  Print("Found trade from magic number: ", magic);
                }
             }
          }
       }
    }
    
-   Print("Total active magic numbers found: ", magic_count);
+   // Détection supplémentaire : chercher dans les paramètres des EAs actifs
+   Print("Scanning all charts for EA parameters...");
+   int total_charts = ChartGetInteger(0, CHART_WINDOWS_TOTAL);
+   Print("Total windows: ", total_charts);
    
-   // Afficher la liste complète des magic numbers détectés
+   for(int chart_id = 0; chart_id < total_charts; chart_id++)
+   {
+      long chart_window = ChartGetInteger(0, CHART_WINDOW_HANDLE, chart_id);
+      if(chart_window > 0)
+      {
+         string symbol = ChartSymbol(chart_window);
+         Print("Chart ", chart_id, ": ", symbol);
+      }
+   }
+   
+   Print("Total magic numbers found: ", magic_count);
+   
+   // Vérifier l'activité récente de chaque magic number
    if(magic_count > 0)
    {
-      Print("=== LISTE COMPLÈTE DES MAGIC NUMBERS ===");
+      Print("=== ÉTAT DES EAs (ACTIVITÉ RÉCENTE) ===");
+      
       for(int i = 0; i < magic_count; i++)
       {
-         Print("  Magic #", i + 1, ": ", active_magic_numbers[i]);
+         long magic = active_magic_numbers[i];
+         
+         // Chercher des positions ouvertes avec ce magic number
+         bool has_open_positions = false;
+         int open_positions_count = 0;
+         
+         for(int p = 0; p < PositionsTotal(); p++)
+         {
+            if(PositionGetTicket(p) > 0)
+            {
+               long position_magic = PositionGetInteger(POSITION_MAGIC);
+               if(position_magic == magic)
+               {
+                  has_open_positions = true;
+                  open_positions_count++;
+               }
+            }
+         }
+         
+         // Chercher des trades très récents (dernières 24h)
+         bool has_recent_trades = false;
+         datetime recent_trade_time = 0;
+         
+         datetime last_24h = TimeCurrent() - 86400;
+         if(HistorySelect(last_24h, TimeCurrent()))
+         {
+            for(int d = 0; d < HistoryDealsTotal(); d++)
+            {
+               ulong deal = HistoryDealGetTicket(d);
+               if(deal > 0)
+               {
+                  long deal_magic = HistoryDealGetInteger(deal, DEAL_MAGIC);
+                  if(deal_magic == magic)
+                  {
+                     has_recent_trades = true;
+                     datetime deal_time = (datetime)HistoryDealGetInteger(deal, DEAL_TIME);
+                     if(deal_time > recent_trade_time)
+                        recent_trade_time = deal_time;
+                  }
+               }
+            }
+         }
+         
+         // Afficher le statut
+         string status = "ARRÊTÉ";
+         if(has_open_positions)
+            status = "ACTIF (positions ouvertes)";
+         else if(has_recent_trades)
+            status = "ACTIF (trade récent)";
+         
+         Print("  Magic #", i + 1, ": ", magic, " - ", status);
+         if(has_open_positions)
+            Print("    → ", open_positions_count, " position(s) ouverte(s)");
+         if(has_recent_trades)
+            Print("    → Dernier trade: ", TimeToString(recent_trade_time, TIME_DATE|TIME_SECONDS));
       }
       Print("===========================================");
    }
