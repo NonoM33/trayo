@@ -1094,17 +1094,9 @@ async function initializeBotsChart() {
     if (!ctx) return;
     
     const loadingDiv = document.getElementById('bots-chart-loading');
-    if (loadingDiv) {
-      loadingDiv.style.display = 'none';
-    }
-    ctx.style.display = 'block';
-    
     const isDarkMode = document.body.classList.contains('dark-mode');
-    const textColor = isDarkMode ? '#e2e8f0' : '#1e293b';
-    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
     
     const botsData = <%= raw current_user.bot_purchases.includes(:trading_bot).map { |bp| 
-      # Calculer le taux de réussite directement depuis les trades du user
       user_trades = Trade.joins(:mt5_account).where(mt5_accounts: { user_id: current_user.id })
                          .where(magic_number: bp.magic_number)
       winning_trades = user_trades.where("profit > 0").count
@@ -1121,23 +1113,22 @@ async function initializeBotsChart() {
     }.to_json %>;
     
     if (botsData.length === 0) {
-      ctx.style.display = 'none';
-      loadingDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fa-icon fa-lg fa-robot" style="font-size: 3rem; opacity: 0.5; margin-bottom: 16px;"></i><h3>Aucun bot trouvé</h3><p>Vous n\'avez pas encore de bots assignés</p></div>';
+      loadingDiv.innerHTML = '<div class="empty-state"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"/></svg><h3>Aucun bot trouvé</h3><p>Vous n\'avez pas encore de bots assignés</p></div>';
       loadingDiv.style.display = 'flex';
       return;
     }
     
+    if (loadingDiv) loadingDiv.style.display = 'none';
+    ctx.style.display = 'block';
+    
+    const textColor = isDarkMode ? '#e2e8f0' : '#1e293b';
+    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
     const botNames = botsData.map(bot => bot.name);
     const profits = botsData.map(bot => bot.profit);
     const tradesCount = botsData.map(bot => bot.trades);
     
-    const profitColors = profits.map(profit => 
-      profit >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'
-    );
-    
-    const borderColors = profits.map(profit => 
-      profit >= 0 ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)'
-    );
+    const profitColors = profits.map(profit => profit >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)');
+    const borderColors = profits.map(profit => profit >= 0 ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)');
     
     new Chart(ctx, {
       type: 'bar',
@@ -1228,28 +1219,19 @@ async function initializeBotsChart() {
   }
 }
 
-// Initialiser le graphique des profits mensuels
 async function initializeChart() {
   try {
-    // Attendre que Chart.js soit chargé
     await loadChartJS();
     
     const ctx = document.getElementById('portfolioChart');
-    if (!ctx) {
-      console.warn('Canvas element not found');
-      return;
-    }
+    if (!ctx) return;
     
-    // Détruire l'instance précédente si elle existe
     if (window.portfolioChartInstance) {
       window.portfolioChartInstance.destroy();
     }
     
-    // Masquer le loader et afficher le canvas
     const loadingDiv = document.getElementById('chart-loading');
-    if (loadingDiv) {
-      loadingDiv.style.display = 'none';
-    }
+    if (loadingDiv) loadingDiv.style.display = 'none';
     ctx.style.display = 'block';
   
     const isDarkMode = document.body.classList.contains('dark-mode');
@@ -1265,7 +1247,6 @@ async function initializeChart() {
     const allLabels = [...historicalLabels, ...projectionLabels];
     
     const historicalProfits = historicalData.map(d => d.profit);
-    
     const projectionProfits = new Array(historicalData.length).fill(null);
     projectionData.forEach((d, i) => {
       projectionProfits.push(d.balance);
