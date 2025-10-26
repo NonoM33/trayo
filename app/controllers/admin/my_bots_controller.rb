@@ -155,14 +155,20 @@ module Admin
         # Mettre à jour le bot_purchase
         bot_purchase = user.bot_purchases.find_by(trading_bot: bot)
         if bot_purchase
+          # Calculer la date d'achat basée sur le premier trade
+          first_trade = trades.order(:open_time).first
+          purchase_date = first_trade&.open_time || bot_purchase.created_at
+          
           bot_purchase.update!(
             total_profit: total_profit,
             trades_count: trades_count,
             current_drawdown: 0, # À calculer si nécessaire
-            max_drawdown_recorded: 0 # À calculer si nécessaire
+            max_drawdown_recorded: 0, # À calculer si nécessaire
+            started_at: purchase_date,
+            created_at: purchase_date
           )
           
-          Rails.logger.info "Bot purchase mis à jour avec les nouvelles statistiques"
+          Rails.logger.info "Bot purchase mis à jour avec les nouvelles statistiques et date d'achat: #{purchase_date}"
         end
         
         Rails.logger.info "Bot purchase mis à jour avec succès"
