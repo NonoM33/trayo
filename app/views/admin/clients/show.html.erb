@@ -366,37 +366,68 @@
         
         <div class="stats-grid" style="margin-bottom: 1.5rem;">
           <div class="stat-item">
-            <div class="stat-value"><%= total_trades %></div>
+            <div class="stat-value">
+              <%= stat_icon(:trades, size: 'sm') %>
+              <%= total_trades %>
+            </div>
             <div class="stat-label">Total Trades</div>
           </div>
           <div class="stat-item">
             <div class="stat-value <%= total_profit >= 0 ? 'positive' : 'negative' %>">
+              <%= profit_icon(total_profit) %>
               <%= number_to_currency(total_profit, unit: "€", format: "%n %u") %>
             </div>
             <div class="stat-label">Profit Total</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value"><%= win_rate %>%</div>
+            <div class="stat-value">
+              <%= stat_icon(:win_rate, size: 'sm') %>
+              <%= win_rate %>%
+            </div>
             <div class="stat-label">Taux de Réussite</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value"><%= winning_trades %>/<%= losing_trades %></div>
+            <div class="stat-value">
+              <%= stat_icon(:trades, size: 'sm') %>
+              <%= winning_trades %>/<%= losing_trades %>
+            </div>
             <div class="stat-label">Gagnants/Perdants</div>
           </div>
         </div>
         
         <% if recent_trades.any? %>
-          <h4>Derniers Trades</h4>
+          <h4>
+            <%= stat_icon(:trades, size: 'md') %>
+            Derniers Trades
+          </h4>
           <div class="table-wrapper">
             <table>
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Symbole</th>
-                  <th>Type</th>
-                  <th>Volume</th>
-                  <th>Profit</th>
-                  <th>Bot</th>
+                  <th>
+                    <%= stat_icon(:monthly, size: 'sm') %>
+                    Date
+                  </th>
+                  <th>
+                    <%= stat_icon(:symbols, size: 'sm') %>
+                    Symbole
+                  </th>
+                  <th>
+                    <%= stat_icon(:trades, size: 'sm') %>
+                    Type
+                  </th>
+                  <th>
+                    <%= stat_icon(:volume, size: 'sm') %>
+                    Volume
+                  </th>
+                  <th>
+                    <%= stat_icon(:profit, size: 'sm') %>
+                    Profit
+                  </th>
+                  <th>
+                    <%= stat_icon(:bots, size: 'sm') %>
+                    Bot
+                  </th>
                 </tr>
               </thead>
               <tbody>
