@@ -588,17 +588,7 @@
                     </td>
                     <td><%= number_to_currency(position.swap || 0, unit: "€", format: "%n %u") %></td>
                     <td>
-                      <% if duration_minutes %>
-                        <% if duration_minutes >= 1440 %>
-                          <%= (duration_minutes / 1440).round %> jours
-                        <% elsif duration_minutes >= 60 %>
-                          <%= (duration_minutes / 60).round %>h
-                        <% else %>
-                          <%= duration_minutes %> min
-                        <% end %>
-                      <% else %>
-                        <span class="text-muted">-</span>
-                      <% end %>
+                      <%= format_duration(duration_minutes) %>
                     </td>
                     <td>
                       <% if position.magic_number.present? %>
