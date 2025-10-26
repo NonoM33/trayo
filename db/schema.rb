@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_26_144133) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_26_223555) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -156,6 +156,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_26_144133) do
     t.boolean "auto_calculated_initial_balance", default: false, null: false
     t.decimal "calculated_initial_balance", precision: 15, scale: 2
     t.decimal "total_deposits", precision: 15, scale: 2, default: "0.0"
+    t.boolean "is_admin_account", default: false
+    t.index ["is_admin_account"], name: "index_mt5_accounts_on_is_admin_account"
     t.index ["mt5_id"], name: "index_mt5_accounts_on_mt5_id", unique: true
     t.index ["user_id", "mt5_id"], name: "index_mt5_accounts_on_user_id_and_mt5_id", unique: true
     t.index ["user_id"], name: "index_mt5_accounts_on_user_id"
@@ -206,12 +208,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_26_144133) do
     t.datetime "updated_at", null: false
     t.string "comment"
     t.integer "magic_number"
+    t.string "trade_originality", default: "unknown"
+    t.boolean "is_unauthorized_manual", default: false
     t.index ["close_time"], name: "index_trades_on_close_time"
     t.index ["comment"], name: "index_trades_on_comment"
+    t.index ["is_unauthorized_manual"], name: "index_trades_on_is_unauthorized_manual"
     t.index ["magic_number"], name: "index_trades_on_magic_number"
     t.index ["mt5_account_id", "trade_id"], name: "index_trades_on_mt5_account_id_and_trade_id", unique: true
     t.index ["mt5_account_id"], name: "index_trades_on_mt5_account_id"
     t.index ["open_time"], name: "index_trades_on_open_time"
+    t.index ["trade_originality"], name: "index_trades_on_trade_originality"
   end
 
   create_table "trading_bots", force: :cascade do |t|

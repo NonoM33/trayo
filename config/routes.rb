@@ -106,6 +106,18 @@ Rails.application.routes.draw do
       end
     end
     
+    resources :trade_defenders, only: [:index] do
+      collection do
+        post :bulk_mark_as_admin
+        post :bulk_mark_as_client
+      end
+      member do
+        post :approve_trade
+        post :mark_as_client_trade
+        post :recalculate_penalties_for_account
+      end
+    end
+    
     # Maintenance management
     get "maintenance", to: "maintenance#show"
     patch "maintenance", to: "maintenance#update"
