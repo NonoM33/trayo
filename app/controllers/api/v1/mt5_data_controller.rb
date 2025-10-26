@@ -5,9 +5,21 @@ module Api
       before_action :verify_api_key
 
       def sync
+        # Chercher d'abord par token MT5
         user = User.find_by(mt5_api_token: sync_params[:mt5_api_token])
         
-        # Si l'utilisateur n'existe pas, le créer automatiquement
+        # Si pas trouvé par token, chercher par email
+        unless user
+          user = User.find_by(email: sync_params[:client_email])
+        end
+        
+        # Si l'utilisateur existe déjà mais n'a pas de token, mettre à jour le token
+        if user && user.mt5_api_token.blank?
+          user.update(mt5_api_token: sync_params[:mt5_api_token])
+          Rails.logger.info "Token MT5 mis à jour pour l'utilisateur: #{user.email}"
+        end
+        
+        # Si l'utilisateur n'existe toujours pas, le créer automatiquement
         unless user
           begin
             user = User.create_from_mt5_data(sync_params)
@@ -48,6 +60,7 @@ module Api
         )
 
         sync_trades(mt5_account, sync_params[:trades]) if sync_params[:trades].present?
+        sync_open_positions(mt5_account, sync_params[:open_positions]) if sync_params[:open_positions].present?
         sync_withdrawals(mt5_account, sync_params[:withdrawals]) if sync_params[:withdrawals].present?
         sync_deposits(mt5_account, sync_params[:deposits]) if sync_params[:deposits].present?
         
@@ -170,7 +183,24 @@ module Api
           :account_name,
           :client_email,
           :balance,
+          :equity,
           trades: [
+            :trade_id,
+            :symbol,
+            :trade_type,
+            :volume,
+            :open_price,
+            :close_price,
+            :profit,
+            :commission,
+            :swap,
+            :open_time,
+            :close_time,
+            :status,
+            :magic_number,
+            :comment
+          ],
+          open_positions: [
             :trade_id,
             :symbol,
             :trade_type,
@@ -204,6 +234,12 @@ module Api
       def sync_trades(mt5_account, trades_data)
         trades_data.each do |trade_data|
           Trade.create_or_update_from_mt5(mt5_account, trade_data.to_h.symbolize_keys)
+        end
+      end
+
+      def sync_open_positions(mt5_account, open_positions_data)
+        open_positions_data.each do |position_data|
+          Trade.create_or_update_from_mt5(mt5_account, position_data.to_h.symbolize_keys)
         end
       end
 

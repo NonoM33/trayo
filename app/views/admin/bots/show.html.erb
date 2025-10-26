@@ -19,22 +19,28 @@
             <%= link_to admin_client_path(params[:client_id]), class: "back-link", style: "margin: 0;" do %>
               <i class="fa-icon fa-md fa-arrow-left"></i> Retour au Client
             <% end %>
+          <% elsif params[:from] == 'my_bots' %>
+            <%= link_to admin_my_bots_path, class: "back-link", style: "margin: 0;" do %>
+              <i class="fa-icon fa-md fa-arrow-left"></i> Retour à Mes Bots
+            <% end %>
           <% else %>
             <%= link_to admin_bots_path, class: "back-link", style: "margin: 0;" do %>
               <i class="fa-icon fa-md fa-arrow-left"></i> Retour aux Bots
             <% end %>
           <% end %>
-          <div style="display: flex; gap: 12px;">
-            <%= link_to edit_admin_bot_path(@bot), class: "btn btn-primary" do %>
-              <i class="fa-icon fa-md fa-edit"></i>
-              Modifier
-            <% end %>
-            <%= button_to admin_bot_path(@bot), method: :delete,
-                data: { turbo_confirm: "Supprimer ce bot ?" }, class: "btn btn-danger" do %>
-              <i class="fa-icon fa-md fa-trash"></i>
-              Supprimer
-            <% end %>
-          </div>
+          <% if current_user.is_admin? %>
+            <div style="display: flex; gap: 12px;">
+              <%= link_to edit_admin_bot_path(@bot), class: "btn btn-primary" do %>
+                <i class="fa-icon fa-md fa-edit"></i>
+                Modifier
+              <% end %>
+              <%= button_to admin_bot_path(@bot), method: :delete,
+                  data: { turbo_confirm: "Supprimer ce bot ?" }, class: "btn btn-danger" do %>
+                <i class="fa-icon fa-md fa-trash"></i>
+                Supprimer
+              <% end %>
+            </div>
+          <% end %>
         </div>
 
         <% if flash[:notice] %>
@@ -248,17 +254,24 @@
                 <div class="info-item">
                   <div class="info-label">Durée Moyenne des Trades</div>
                   <% duration = best_purchase.analyze_trade_duration %>
-                  <div class="info-value">
-                    <% if duration[:avg_duration_hours] > 0 %>
-                      <%= duration[:avg_duration_hours] %>h
-                    <% else %>
-                      <%= duration[:avg_duration_minutes] %> min
-                    <% end %>
-                  </div>
-                  <div class="help-text">
-                    Min: <%= duration[:min_duration_minutes] %> min
-                    | Max: <%= duration[:max_duration_minutes] %> min
-                  </div>
+                  <% if duration[:avg_duration_minutes] == 0 && duration[:avg_duration_hours] == 0 %>
+                    <div class="info-value" style="color: #999;">Non disponible</div>
+                    <div class="help-text" style="font-size: 11px;">
+                      Les timestamps MT5 sont identiques pour open/close
+                    </div>
+                  <% else %>
+                    <div class="info-value">
+                      <% if duration[:avg_duration_hours] >= 1 %>
+                        <%= duration[:avg_duration_hours] %>h
+                      <% else %>
+                        <%= duration[:avg_duration_minutes] %> min
+                      <% end %>
+                    </div>
+                    <div class="help-text">
+                      Min: <%= duration[:min_duration_minutes] %> min
+                      | Max: <%= duration[:max_duration_minutes] %> min
+                    </div>
+                  <% end %>
                 </div>
                 
                 <div class="info-item">
@@ -275,10 +288,10 @@
                 </div>
                 
                 <div class="info-item">
-                  <div class="info-label">Drawdown Actuel</div>
+                  <div class="info-label">Drawdown Max</div>
                   <% 
                     drawdown_pct = best_purchase.drawdown_percentage
-                    drawdown_amount = best_purchase.current_drawdown || 0
+                    drawdown_amount = best_purchase.get_current_drawdown
                   %>
                   <div class="info-value <%= drawdown_pct <= 80 ? 'positive' : drawdown_pct <= 95 ? '' : 'negative' %>">
                     <%= number_to_percentage(drawdown_pct, precision: 1) %>%
@@ -378,12 +391,13 @@
           <% end %>
         </div>
 
-        <div class="card">
-          <h3>
-            <i class="fa-icon fa-md fa-users"></i>
-            Clients Utilisant ce Bot
-          </h3>
-          <% if @purchases.any? %>
+        <% if current_user.is_admin? %>
+          <div class="card">
+            <h3>
+              <i class="fa-icon fa-md fa-users"></i>
+              Clients Utilisant ce Bot
+            </h3>
+            <% if @purchases.any? %>
             <table>
               <thead>
                 <tr>
@@ -424,12 +438,13 @@
                 <% end %>
               </tbody>
             </table>
-          <% else %>
-            <p style="text-align: center; color: var(--text-muted); padding: 40px;">
-              Aucun client n'utilise ce bot pour le moment
-            </p>
-          <% end %>
-        </div>
+            <% else %>
+              <p style="text-align: center; color: var(--text-muted); padding: 40px;">
+                Aucun client n'utilise ce bot pour le moment
+              </p>
+            <% end %>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>

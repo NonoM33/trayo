@@ -1,6 +1,6 @@
 module Admin
   class BotsController < BaseController
-    before_action :require_admin
+    before_action :require_admin, except: [:show]
     before_action :set_bot, only: [:show, :edit, :update, :destroy, :remove_from_user]
 
     def index

@@ -5,11 +5,11 @@
 #property copyright "Trayo"
 #property version   "1.00"
 
-input string API_URL = "https://treyo.omrender.com/api/v1/mt5/sync";
-input string API_COMPLETE_HISTORY_URL = "https://treyo.omrender.com/api/v1/mt5/sync_complete_history";
+input string API_URL = "http://127.0.0.1:3000/api/v1/mt5/sync";
+input string API_COMPLETE_HISTORY_URL = "http://127.0.0.1:3000/api/v1/mt5/sync_complete_history";
 input string API_KEY = "mt5_secret_key_change_in_production";
-input string MT5_API_TOKEN = "your_mt5_api_token_here";
-input string CLIENT_EMAIL = "client@example.com";
+input string MT5_API_TOKEN = "25eb820906140c0eea3eae64f465542137533e931239fc2af5757916e6cb032a";
+input string CLIENT_EMAIL = "renaud@renaud.com";
 input int REFRESH_INTERVAL = 300;
 input bool INIT_COMPLETE_HISTORY = true;
 
@@ -80,14 +80,18 @@ void SyncDataToAPI()
    
    string trades_json = GetTradesJSON();
    
+   string open_positions_json = GetOpenPositionsJSON();
+   
    string json = StringFormat(
-      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"trades\":%s}}",
+      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"trades\":%s,\"open_positions\":%s}}",
       account_number,
       MT5_API_TOKEN,
       account_name,
       CLIENT_EMAIL,
       balance,
-      trades_json
+      equity,
+      trades_json,
+      open_positions_json
    );
    
    char post_data[];
@@ -99,7 +103,7 @@ void SyncDataToAPI()
    string headers = "Content-Type: application/json\r\n";
    headers += "X-API-Key: " + API_KEY + "\r\n";
    
-   int timeout = 5000;
+   int timeout = 30000;
    int res = WebRequest(
       "POST",
       API_URL,
@@ -135,6 +139,15 @@ void SyncDataToAPI()
       Print("[ERROR] WebRequest failed with error: ", error);
       Print("Solution: Add URL to Tools -> Options -> Expert Advisors -> Allow WebRequest");
       Print("URL to add: ", API_URL);
+   }
+   else if(res == 1001)
+   {
+      Print("[ERROR] HTTP 1001 - Protocol Error");
+      Print("This usually means:");
+      Print("1. Localhost URL requires HTTP (not HTTPS)");
+      Print("2. The server is not responding");
+      Print("3. SSL certificate issue if using HTTPS");
+      Print("Try changing API_URL to: http://127.0.0.1:3000/api/v1/mt5/sync");
    }
    else
    {
@@ -250,76 +263,151 @@ void SyncCompleteHistory()
 //+------------------------------------------------------------------+
 string GetAllTradesJSON()
 {
-   // Get ALL trades from account history (not just last 24h)
-   datetime from_time = D'2020.01.01 00:00:00';  // Start from 2020
-   datetime to_time = TimeCurrent();
-   
    Print("=== TRADES DEBUG ===");
-   Print("Searching trades from: ", TimeToString(from_time), " to: ", TimeToString(to_time));
+   Print("Searching ALL positions from beginning of history");
    
-   HistorySelect(from_time, to_time);
-   
-   int total_deals = HistoryDealsTotal();
-   
-   Print("Total deals found: ", total_deals);
-   
-   if(total_deals == 0)
+   // Sélectionner tout l'historique depuis le début (0) jusqu'à maintenant
+   if(!HistorySelect(0, TimeCurrent()))
    {
-      Print("No trades found in complete history");
+      Print("Failed to select history");
       Print("=== END TRADES DEBUG ===");
       return "[]";
    }
    
+   int total_deals = HistoryDealsTotal();
+   
+   if(total_deals == 0)
+   {
+      Print("No deals found in complete history");
+      Print("=== END TRADES DEBUG ===");
+      return "[]";
+   }
+   
+   Print("Total deals found: ", total_deals);
+   
    string trades = "[";
    int count = 0;
    
-   for(int i = 0; i < total_deals; i++)
+   // Collecter toutes les positions uniques
+   long positions_done[];
+   int positions_count = 0;
+   
+   for(long i = HistoryDealsTotal() - 1; i >= 0; i--)
    {
-      ulong ticket = HistoryDealGetTicket(i);
-      if(ticket > 0)
+      ulong deal_ticket = HistoryDealGetTicket(i);
+      if(deal_ticket > 0)
       {
-         long deal_type = HistoryDealGetInteger(ticket, DEAL_TYPE);
+         long deal_entry = HistoryDealGetInteger(deal_ticket, DEAL_ENTRY);
+         ulong position_id = HistoryDealGetInteger(deal_ticket, DEAL_POSITION_ID);
          
-         if(deal_type == DEAL_TYPE_BUY || deal_type == DEAL_TYPE_SELL)
+         if(deal_entry == DEAL_ENTRY_OUT)
          {
-            string symbol = HistoryDealGetString(ticket, DEAL_SYMBOL);
-            double volume = HistoryDealGetDouble(ticket, DEAL_VOLUME);
-            double price = HistoryDealGetDouble(ticket, DEAL_PRICE);
-            double profit = HistoryDealGetDouble(ticket, DEAL_PROFIT);
-            double commission = HistoryDealGetDouble(ticket, DEAL_COMMISSION);
-            double swap = HistoryDealGetDouble(ticket, DEAL_SWAP);
-            datetime deal_time = (datetime)HistoryDealGetInteger(ticket, DEAL_TIME);
-            long position_id = HistoryDealGetInteger(ticket, DEAL_POSITION_ID);
-            long magic_number = HistoryDealGetInteger(ticket, DEAL_MAGIC);
-            string comment = HistoryDealGetString(ticket, DEAL_COMMENT);
+            bool already_done = false;
+            for(int j = 0; j < positions_count; j++)
+            {
+               if(positions_done[j] == position_id)
+               {
+                  already_done = true;
+                  break;
+               }
+            }
             
-            string type_str = (deal_type == DEAL_TYPE_BUY) ? "buy" : "sell";
-            
-            string time_iso = TimeToString(deal_time, TIME_DATE|TIME_SECONDS);
-            StringReplace(time_iso, ".", "-");
-            StringReplace(time_iso, " ", "T");
-            time_iso += "Z";
-            
-            if(count > 0) trades += ",";
-            
-            trades += StringFormat(
-               "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"closed\"}",
-               position_id,
-               symbol,
-               type_str,
-               volume,
-               price,
-               price,
-               profit,
-               commission,
-               swap,
-               time_iso,
-               time_iso,
-               magic_number,
-               comment
-            );
-            
-            count++;
+            if(!already_done)
+            {
+               ArrayResize(positions_done, positions_count + 1);
+               positions_done[positions_count] = position_id;
+               positions_count++;
+               
+               if(HistorySelectByPosition(position_id))
+               {
+                  int position_deals = HistoryDealsTotal();
+                  
+                  datetime open_time = 0;
+                  datetime close_time = 0;
+                  double open_price = 0.0;
+                  double close_price = 0.0;
+                  double volume = 0.0;
+                  double total_profit = 0.0;
+                  double total_commission = 0.0;
+                  double total_swap = 0.0;
+                  long magic_number = 0;
+                  string symbol = "";
+                  string comment = "";
+                  string type_str = "";
+                  
+                  for(int j = 0; j < position_deals; j++)
+                  {
+                     ulong deal = HistoryDealGetTicket(j);
+                     if(deal > 0)
+                     {
+                        long deal_type_inner = HistoryDealGetInteger(deal, DEAL_TYPE);
+                        long deal_entry_inner = HistoryDealGetInteger(deal, DEAL_ENTRY);
+                        datetime deal_time = (datetime)HistoryDealGetInteger(deal, DEAL_TIME);
+                        double deal_profit = HistoryDealGetDouble(deal, DEAL_PROFIT);
+                        double deal_commission = HistoryDealGetDouble(deal, DEAL_COMMISSION);
+                        double deal_swap = HistoryDealGetDouble(deal, DEAL_SWAP);
+                        
+                        if(deal_entry_inner == DEAL_ENTRY_IN)
+                        {
+                           open_time = deal_time;
+                           open_price = HistoryDealGetDouble(deal, DEAL_PRICE);
+                           volume = HistoryDealGetDouble(deal, DEAL_VOLUME);
+                           symbol = HistoryDealGetString(deal, DEAL_SYMBOL);
+                           magic_number = HistoryDealGetInteger(deal, DEAL_MAGIC);
+                           comment = HistoryDealGetString(deal, DEAL_COMMENT);
+                           
+                           if(deal_type_inner == DEAL_TYPE_BUY)
+                              type_str = "buy";
+                           else if(deal_type_inner == DEAL_TYPE_SELL)
+                              type_str = "sell";
+                        }
+                        else if(deal_entry_inner == DEAL_ENTRY_OUT)
+                        {
+                           close_time = deal_time;
+                           close_price = HistoryDealGetDouble(deal, DEAL_PRICE);
+                        }
+                        
+                        total_profit += deal_profit;
+                        total_commission += deal_commission;
+                        total_swap += deal_swap;
+                     }
+                  }
+                  
+                  if(open_time > 0 && close_time > 0 && close_time >= open_time)
+                  {
+                     string open_time_iso = TimeToString(open_time, TIME_DATE|TIME_SECONDS);
+                     StringReplace(open_time_iso, ".", "-");
+                     StringReplace(open_time_iso, " ", "T");
+                     open_time_iso += "Z";
+                     
+                     string close_time_iso = TimeToString(close_time, TIME_DATE|TIME_SECONDS);
+                     StringReplace(close_time_iso, ".", "-");
+                     StringReplace(close_time_iso, " ", "T");
+                     close_time_iso += "Z";
+                     
+                     if(count > 0) trades += ",";
+                     
+                     trades += StringFormat(
+                        "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"closed\"}",
+                        position_id,
+                        symbol,
+                        type_str,
+                        volume,
+                        open_price,
+                        close_price,
+                        total_profit,
+                        total_commission,
+                        total_swap,
+                        open_time_iso,
+                        close_time_iso,
+                        magic_number,
+                        comment
+                     );
+                     
+                     count++;
+                  }
+               }
+            }
          }
       }
    }
@@ -337,15 +425,17 @@ string GetAllTradesJSON()
 //+------------------------------------------------------------------+
 string GetAllWithdrawalsJSON()
 {
-   datetime from_time = D'2020.01.01 00:00:00';  // Start from 2020
-   datetime to_time = TimeCurrent();
-   HistorySelect(from_time, to_time);
+   Print("=== WITHDRAWALS DEBUG ===");
+   Print("Searching ALL withdrawals from beginning of history");
+   
+   if(!HistorySelect(0, TimeCurrent()))
+   {
+      Print("Failed to select history");
+      return "[]";
+   }
    
    int total_deals = HistoryDealsTotal();
-   
-   Print("=== WITHDRAWALS DEBUG ===");
    Print("Total deals found: ", total_deals);
-   Print("Searching from: ", TimeToString(from_time), " to: ", TimeToString(to_time));
    
    if(total_deals == 0)
    {
@@ -418,15 +508,17 @@ string GetAllWithdrawalsJSON()
 //+------------------------------------------------------------------+
 string GetAllDepositsJSON()
 {
-   datetime from_time = D'2020.01.01 00:00:00';  // Start from 2020
-   datetime to_time = TimeCurrent();
-   HistorySelect(from_time, to_time);
+   Print("=== DEPOSITS DEBUG ===");
+   Print("Searching ALL deposits from beginning of history");
+   
+   if(!HistorySelect(0, TimeCurrent()))
+   {
+      Print("Failed to select history");
+      return "[]";
+   }
    
    int total_deals = HistoryDealsTotal();
-   
-   Print("=== DEPOSITS DEBUG ===");
    Print("Total deals found: ", total_deals);
-   Print("Searching from: ", TimeToString(from_time), " to: ", TimeToString(to_time));
    
    if(total_deals == 0)
    {
@@ -518,44 +610,101 @@ string GetTradesJSON()
          
          if(deal_type == DEAL_TYPE_BUY || deal_type == DEAL_TYPE_SELL)
          {
-            string symbol = HistoryDealGetString(ticket, DEAL_SYMBOL);
-            double volume = HistoryDealGetDouble(ticket, DEAL_VOLUME);
-            double price = HistoryDealGetDouble(ticket, DEAL_PRICE);
-            double profit = HistoryDealGetDouble(ticket, DEAL_PROFIT);
-            double commission = HistoryDealGetDouble(ticket, DEAL_COMMISSION);
-            double swap = HistoryDealGetDouble(ticket, DEAL_SWAP);
-            datetime deal_time = (datetime)HistoryDealGetInteger(ticket, DEAL_TIME);
-            long position_id = HistoryDealGetInteger(ticket, DEAL_POSITION_ID);
-            long magic_number = HistoryDealGetInteger(ticket, DEAL_MAGIC);
-            string comment = HistoryDealGetString(ticket, DEAL_COMMENT);
+            long deal_entry = HistoryDealGetInteger(ticket, DEAL_ENTRY);
+            ulong position_id = HistoryDealGetInteger(ticket, DEAL_POSITION_ID);
             
-            string type_str = (deal_type == DEAL_TYPE_BUY) ? "buy" : "sell";
-            
-            string time_iso = TimeToString(deal_time, TIME_DATE|TIME_SECONDS);
-            StringReplace(time_iso, ".", "-");
-            StringReplace(time_iso, " ", "T");
-            time_iso += "Z";
-            
-            if(count > 0) trades += ",";
-            
-            trades += StringFormat(
-               "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"closed\"}",
-               position_id,
-               symbol,
-               type_str,
-               volume,
-               price,
-               price,
-               profit,
-               commission,
-               swap,
-               time_iso,
-               time_iso,
-               magic_number,
-               comment
-            );
-            
-            count++;
+            if(deal_entry == DEAL_ENTRY_OUT)
+            {
+               if(HistorySelectByPosition(position_id))
+               {
+                  int position_deals = HistoryDealsTotal();
+                  
+                  datetime open_time = 0;
+                  datetime close_time = 0;
+                  double open_price = 0.0;
+                  double close_price = 0.0;
+                  double volume = 0.0;
+                  double total_profit = 0.0;
+                  double total_commission = 0.0;
+                  double total_swap = 0.0;
+                  long magic_number = 0;
+                  string symbol = "";
+                  string comment = "";
+                  string type_str = "";
+                  
+                  for(int j = 0; j < position_deals; j++)
+                  {
+                     ulong deal_ticket = HistoryDealGetTicket(j);
+                     if(deal_ticket > 0)
+                     {
+                        long deal_type_inner = HistoryDealGetInteger(deal_ticket, DEAL_TYPE);
+                        long deal_entry_inner = HistoryDealGetInteger(deal_ticket, DEAL_ENTRY);
+                        datetime deal_time = (datetime)HistoryDealGetInteger(deal_ticket, DEAL_TIME);
+                        double deal_profit = HistoryDealGetDouble(deal_ticket, DEAL_PROFIT);
+                        double deal_commission = HistoryDealGetDouble(deal_ticket, DEAL_COMMISSION);
+                        double deal_swap = HistoryDealGetDouble(deal_ticket, DEAL_SWAP);
+                        
+                        if(deal_entry_inner == DEAL_ENTRY_IN)
+                        {
+                           open_time = deal_time;
+                           open_price = HistoryDealGetDouble(deal_ticket, DEAL_PRICE);
+                           volume = HistoryDealGetDouble(deal_ticket, DEAL_VOLUME);
+                           symbol = HistoryDealGetString(deal_ticket, DEAL_SYMBOL);
+                           magic_number = HistoryDealGetInteger(deal_ticket, DEAL_MAGIC);
+                           comment = HistoryDealGetString(deal_ticket, DEAL_COMMENT);
+                           
+                           if(deal_type_inner == DEAL_TYPE_BUY)
+                              type_str = "buy";
+                           else if(deal_type_inner == DEAL_TYPE_SELL)
+                              type_str = "sell";
+                        }
+                        else if(deal_entry_inner == DEAL_ENTRY_OUT)
+                        {
+                           close_time = deal_time;
+                           close_price = HistoryDealGetDouble(deal_ticket, DEAL_PRICE);
+                        }
+                        
+                        total_profit += deal_profit;
+                        total_commission += deal_commission;
+                        total_swap += deal_swap;
+                     }
+                  }
+                  
+                  if(open_time > 0 && close_time > 0 && close_time >= open_time)
+                  {
+                     string open_time_iso = TimeToString(open_time, TIME_DATE|TIME_SECONDS);
+                     StringReplace(open_time_iso, ".", "-");
+                     StringReplace(open_time_iso, " ", "T");
+                     open_time_iso += "Z";
+                     
+                     string close_time_iso = TimeToString(close_time, TIME_DATE|TIME_SECONDS);
+                     StringReplace(close_time_iso, ".", "-");
+                     StringReplace(close_time_iso, " ", "T");
+                     close_time_iso += "Z";
+                     
+                     if(count > 0) trades += ",";
+                     
+                     trades += StringFormat(
+                        "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"closed\"}",
+                        position_id,
+                        symbol,
+                        type_str,
+                        volume,
+                        open_price,
+                        close_price,
+                        total_profit,
+                        total_commission,
+                        total_swap,
+                        open_time_iso,
+                        close_time_iso,
+                        magic_number,
+                        comment
+                     );
+                     
+                     count++;
+                  }
+               }
+            }
          }
       }
    }
@@ -565,6 +714,91 @@ string GetTradesJSON()
    Print("Prepared ", count, " trades for sync");
    
    return trades;
+}
+
+//+------------------------------------------------------------------+
+//| Get open positions as JSON                                       |
+//+------------------------------------------------------------------+
+string GetOpenPositionsJSON()
+{
+   string positions = "[";
+   int count = 0;
+   
+   int total_positions = PositionsTotal();
+   
+   Print("=== OPEN POSITIONS DEBUG ===");
+   Print("Total open positions: ", total_positions);
+   
+   if(total_positions == 0)
+   {
+      Print("No open positions found");
+      Print("=== END OPEN POSITIONS DEBUG ===");
+      return "[]";
+   }
+   
+   for(int i = 0; i < total_positions; i++)
+   {
+      if(PositionGetTicket(i) > 0)
+      {
+         ulong position_ticket = PositionGetInteger(POSITION_TICKET);
+         string symbol = PositionGetString(POSITION_SYMBOL);
+         long magic_number = PositionGetInteger(POSITION_MAGIC);
+         ENUM_POSITION_TYPE position_type = (ENUM_POSITION_TYPE)PositionGetInteger(POSITION_TYPE);
+         double volume = PositionGetDouble(POSITION_VOLUME);
+         double open_price = PositionGetDouble(POSITION_PRICE_OPEN);
+         double current_price = 0.0;
+         double swap = PositionGetDouble(POSITION_SWAP);
+         double profit = PositionGetDouble(POSITION_PROFIT);
+         datetime open_time = (datetime)PositionGetInteger(POSITION_TIME);
+         double commission = 0.0;
+         string comment = PositionGetString(POSITION_COMMENT);
+         
+         if(position_type == POSITION_TYPE_BUY)
+            current_price = SymbolInfoDouble(symbol, SYMBOL_BID);
+         else if(position_type == POSITION_TYPE_SELL)
+            current_price = SymbolInfoDouble(symbol, SYMBOL_ASK);
+         
+         string type_str = (position_type == POSITION_TYPE_BUY) ? "buy" : "sell";
+         
+         string open_time_iso = TimeToString(open_time, TIME_DATE|TIME_SECONDS);
+         StringReplace(open_time_iso, ".", "-");
+         StringReplace(open_time_iso, " ", "T");
+         open_time_iso += "Z";
+         
+         string current_time_iso = TimeToString(TimeCurrent(), TIME_DATE|TIME_SECONDS);
+         StringReplace(current_time_iso, ".", "-");
+         StringReplace(current_time_iso, " ", "T");
+         current_time_iso += "Z";
+         
+         if(count > 0) positions += ",";
+         
+         positions += StringFormat(
+            "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"open\"}",
+            position_ticket,
+            symbol,
+            type_str,
+            volume,
+            open_price,
+            current_price,
+            profit,
+            commission,
+            swap,
+            open_time_iso,
+            current_time_iso,
+            magic_number,
+            comment
+         );
+         
+         count++;
+      }
+   }
+   
+   positions += "]";
+   
+   Print("Prepared ", count, " open positions");
+   Print("=== END OPEN POSITIONS DEBUG ===");
+   
+   return positions;
 }
 
 //+------------------------------------------------------------------+

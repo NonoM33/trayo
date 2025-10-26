@@ -112,9 +112,32 @@ class BotPurchase < ApplicationRecord
     total_profit > 0
   end
 
+  def calculate_current_drawdown
+    trades = associated_trades.order(:close_time)
+    return 0 unless trades.any?
+    
+    running_balance = 0
+    peak_balance = 0
+    max_drawdown = 0
+    
+    trades.each do |trade|
+      running_balance += (trade.profit || 0)
+      peak_balance = [peak_balance, running_balance].max
+      current_drawdown = peak_balance - running_balance
+      max_drawdown = [max_drawdown, current_drawdown].max
+    end
+    
+    max_drawdown.round(2)
+  end
+  
   def drawdown_percentage
     return 0 if trading_bot.max_drawdown_limit.zero?
-    ((current_drawdown / trading_bot.max_drawdown_limit) * 100).round(2)
+    current_dd = calculate_current_drawdown
+    ((current_dd / trading_bot.max_drawdown_limit) * 100).round(2)
+  end
+  
+  def get_current_drawdown
+    calculate_current_drawdown
   end
 
   def within_drawdown_limit?
@@ -165,13 +188,15 @@ class BotPurchase < ApplicationRecord
   
   def analyze_trade_duration
     trades = associated_trades.where.not(open_time: nil, close_time: nil)
-    return { avg_duration_minutes: 0, avg_duration_hours: 0 } unless trades.any?
+    return { avg_duration_minutes: 0, avg_duration_hours: 0, min_duration_minutes: 0, max_duration_minutes: 0 } unless trades.any?
     
     durations = trades.map do |t|
-      ((t.close_time - t.open_time) / 60) if t.close_time && t.open_time
+      if t.close_time && t.open_time && t.close_time != t.open_time
+        ((t.close_time - t.open_time) / 60)
+      end
     end.compact
     
-    return { avg_duration_minutes: 0, avg_duration_hours: 0 } if durations.empty?
+    return { avg_duration_minutes: 0, avg_duration_hours: 0, min_duration_minutes: 0, max_duration_minutes: 0 } if durations.empty?
     
     avg_minutes = (durations.sum / durations.count).round(1)
     
