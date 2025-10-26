@@ -75,7 +75,8 @@ module Admin
       if @backtest.save
         Rails.logger.info "✅ Backtest créé avec succès"
         @backtest.calculate_projections
-        Rails.logger.info "📊 Projections calculées"
+        @backtest.save if @backtest.changed?
+        Rails.logger.info "📊 Projections calculées: #{@backtest.projection_monthly_min} - #{@backtest.projection_monthly_max}"
         Rails.logger.info "=" * 80
         redirect_to admin_bot_backtests_path(@bot), notice: "Backtest créé avec succès"
       else
