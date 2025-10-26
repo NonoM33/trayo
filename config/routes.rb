@@ -32,7 +32,11 @@ Rails.application.routes.draw do
       resources :withdrawals, only: [:destroy]
       resources :deposits, only: [:destroy]
     end
-    resources :payments, only: [:index, :create, :update, :destroy]
+    resources :payments, only: [:index, :show, :create, :update, :destroy] do
+      member do
+        get :download_pdf
+      end
+    end
     resources :credits, only: [:index, :create, :destroy]
     resources :mt5_accounts, only: [:update]
     resources :withdrawals, only: [:destroy]
@@ -110,6 +114,8 @@ Rails.application.routes.draw do
       collection do
         post :bulk_mark_as_admin
         post :bulk_mark_as_client
+        post :mark_all_pending_as_admin
+        post :mark_all_pending_as_client
       end
       member do
         post :approve_trade

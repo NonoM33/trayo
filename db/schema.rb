@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_26_223555) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_26_230648) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -185,6 +185,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_26_223555) do
     t.datetime "updated_at", null: false
     t.string "payment_method"
     t.text "watermark_snapshot"
+    t.text "trade_defender_penalties_snapshot"
     t.index ["payment_date"], name: "index_payments_on_payment_date"
     t.index ["status"], name: "index_payments_on_status"
     t.index ["user_id"], name: "index_payments_on_user_id"
