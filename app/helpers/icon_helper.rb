@@ -117,6 +117,13 @@ module IconHelper
 
   # Méthode principale pour obtenir une icône
   def icon(name, type: :navigation, size: 'md', color: nil, css_class: nil)
+    Rails.logger.info "=== ICON HELPER DEBUG ==="
+    Rails.logger.info "Icon name: #{name}"
+    Rails.logger.info "Type: #{type}"
+    Rails.logger.info "Size: #{size}"
+    Rails.logger.info "Color: #{color}"
+    Rails.logger.info "CSS class: #{css_class}"
+    
     icon_map = case type
                when :navigation then NAVIGATION_ICONS
                when :stats then STATS_ICONS
@@ -127,6 +134,7 @@ module IconHelper
                end
 
     icon_class = icon_map[name.to_sym] || 'fa-question-circle'
+    Rails.logger.info "Icon class found: #{icon_class}"
     
     size_class = case size
                  when 'xs' then 'fa-xs'
@@ -140,13 +148,16 @@ module IconHelper
     css_classes = ["fa-solid", icon_class, size_class]
     css_classes << "text-#{color}" if color
     css_classes << css_class if css_class
+    
+    Rails.logger.info "Final CSS classes: #{css_classes.join(' ')}"
+    Rails.logger.info "=== END ICON HELPER DEBUG ==="
 
     content_tag(:i, '', class: css_classes.join(' '))
   end
 
   # Méthodes de convenance pour les types courants
   def nav_icon(name, **options)
-    icon(name, type: :navigation, **options)
+    icon(name, type: :navigation, css_class: 'sidebar-menu-icon', **options)
   end
 
   def stat_icon(name, **options)

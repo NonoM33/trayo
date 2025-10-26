@@ -16,6 +16,22 @@
       // Activer le mode sombre par défaut
       document.body.classList.add('dark-mode');
       localStorage.setItem('theme', 'dark');
+      
+      // Debug: Check FontAwesome loading
+      console.log('=== FONTAWESOME DEBUG ===');
+      console.log('FontAwesome CSS loaded:', document.querySelector('link[href*="font-awesome"]') !== null);
+      
+      // Test FontAwesome classes
+      const testIcon = document.createElement('i');
+      testIcon.className = 'fa-solid fa-home';
+      document.body.appendChild(testIcon);
+      
+      const computedStyle = window.getComputedStyle(testIcon);
+      console.log('FontAwesome font-family:', computedStyle.fontFamily);
+      console.log('FontAwesome font-weight:', computedStyle.fontWeight);
+      
+      document.body.removeChild(testIcon);
+      console.log('=== END FONTAWESOME DEBUG ===');
     })();
   </script>
   

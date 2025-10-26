@@ -16,8 +16,10 @@
       <div class="sidebar-section-title">Principal</div>
       <ul class="sidebar-menu">
         <% if current_user.is_admin? %>
+          <% Rails.logger.info "=== SIDEBAR DEBUG: Rendering admin sidebar ===" %>
           <li class="sidebar-menu-item">
             <%= link_to admin_dashboard_path, class: "sidebar-menu-link #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
+              <% Rails.logger.info "=== SIDEBAR DEBUG: Dashboard icon ===" %>
               <%= nav_icon(:dashboard) %>
               <span>Tableau de Bord</span>
             <% end %>
@@ -101,8 +103,10 @@
             <% end %>
           </li>
         <% else %>
+          <% Rails.logger.info "=== SIDEBAR DEBUG: Rendering non-admin sidebar ===" %>
           <li class="sidebar-menu-item">
             <%= link_to admin_dashboard_path, class: "sidebar-menu-link #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
+              <% Rails.logger.info "=== SIDEBAR DEBUG: Non-admin Dashboard icon ===" %>
               <%= nav_icon(:dashboard) %>
               <span>Tableau de Bord</span>
             <% end %>
@@ -249,15 +253,52 @@
   }
 
   (function() {
+    console.log('=== SIDEBAR JAVASCRIPT DEBUG ===');
     const sidebar = document.getElementById('mainSidebar');
     const toggleBtn = document.getElementById('sidebarToggleBtn');
     const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    
+    console.log('Sidebar element:', sidebar);
+    console.log('Toggle button:', toggleBtn);
+    console.log('Is collapsed:', isCollapsed);
+    
+    // Debug: Check for FontAwesome icons
+    const icons = document.querySelectorAll('.sidebar-menu-icon');
+    console.log('Found sidebar icons:', icons.length);
+    icons.forEach((icon, index) => {
+      console.log(`Icon ${index}:`, icon);
+      console.log(`Icon classes:`, icon.className);
+      const style = window.getComputedStyle(icon);
+      console.log(`Icon computed style:`, style);
+      console.log(`Font family:`, style.fontFamily);
+      console.log(`Font weight:`, style.fontWeight);
+      console.log(`Display:`, style.display);
+      console.log(`Visibility:`, style.visibility);
+      console.log(`Opacity:`, style.opacity);
+      console.log(`Color:`, style.color);
+      
+      // Check if icon has content
+      console.log(`Icon text content:`, icon.textContent);
+      console.log(`Icon innerHTML:`, icon.innerHTML);
+    });
+    
+    // Debug: Check for any FontAwesome icons in sidebar
+    const allFaSolid = document.querySelectorAll('.sidebar .fa-solid');
+    console.log('Found all .fa-solid in sidebar:', allFaSolid.length);
+    allFaSolid.forEach((icon, index) => {
+      console.log(`FA Solid ${index}:`, icon);
+      console.log(`Classes:`, icon.className);
+      const style = window.getComputedStyle(icon);
+      console.log(`Font family:`, style.fontFamily);
+      console.log(`Display:`, style.display);
+    });
     
     if (isCollapsed && sidebar && toggleBtn && window.innerWidth > 768) {
       sidebar.classList.add('collapsed');
       toggleBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
       toggleBtn.title = 'Agrandir la barre latérale';
     }
+    console.log('=== END SIDEBAR JAVASCRIPT DEBUG ===');
   })();
 </script>
 
