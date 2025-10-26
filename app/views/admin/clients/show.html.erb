@@ -957,18 +957,22 @@
                     </div>
                   </td>
                   <td onclick="event.stopPropagation();">
-                    <div style="display: flex; flex-direction: column; gap: 6px;">
-                      <%= button_to purchase.is_running? ? "⏸ Arrêter" : "▶ Démarrer",
-                          toggle_status_admin_my_bot_path(purchase),
-                          method: :post,
-                          class: purchase.is_running? ? "btn btn-warning btn-sm" : "btn btn-success btn-sm",
-                          style: "font-size: 11px; padding: 6px 12px;" %>
-                      <%= button_to "🗑 Retirer",
-                          remove_from_user_admin_bot_path(purchase.trading_bot, purchase_id: purchase.id),
-                          method: :delete,
-                          data: { turbo_confirm: "Retirer ce bot ?" },
-                          class: "btn btn-danger btn-sm",
-                          style: "font-size: 11px; padding: 6px 12px;" %>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                      <%= form_with url: toggle_status_admin_my_bot_path(purchase), method: :post, style: "margin: 0;", data: { turbo_method: :post } do |f| %>
+                        <button type="submit" 
+                                class="<%= purchase.is_running? ? 'action-btn action-btn-stop' : 'action-btn action-btn-start' %>"
+                                title="<%= purchase.is_running? ? 'Arrêter le bot' : 'Démarrer le bot' %>">
+                          <i class="fa-icon fa-sm <%= purchase.is_running? ? 'fa-pause' : 'fa-play' %>"></i>
+                        </button>
+                      <% end %>
+                      
+                      <%= form_with url: remove_from_user_admin_bot_path(purchase.trading_bot, purchase_id: purchase.id), method: :delete, style: "margin: 0;", data: { turbo_method: :delete, turbo_confirm: "Retirer ce bot ?" } do |f| %>
+                        <button type="submit" 
+                                class="action-btn action-btn-delete"
+                                title="Retirer le bot">
+                          <i class="fa-icon fa-sm fa-trash"></i>
+                        </button>
+                      <% end %>
                     </div>
                   </td>
                 </tr>

@@ -261,15 +261,11 @@
                     </div>
                   <% else %>
                     <div class="info-value">
-                      <% if duration[:avg_duration_hours] >= 1 %>
-                        <%= duration[:avg_duration_hours] %>h
-                      <% else %>
-                        <%= duration[:avg_duration_minutes] %> min
-                      <% end %>
+                      <%= format_duration(duration[:avg_duration_minutes]) %>
                     </div>
                     <div class="help-text">
-                      Min: <%= duration[:min_duration_minutes] %> min
-                      | Max: <%= duration[:max_duration_minutes] %> min
+                      Min: <%= format_duration(duration[:min_duration_minutes]) %>
+                      | Max: <%= format_duration(duration[:max_duration_minutes]) %>
                     </div>
                   <% end %>
                 </div>
