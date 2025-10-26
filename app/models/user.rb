@@ -68,37 +68,42 @@ class User < ApplicationRecord
     (total_commission_due - total_credits).round(2)
   end
 
-  # Détecter automatiquement les bots basés sur les magic numbers des trades
+  # Détecter automatiquement les bots basés sur les bots enregistrés
   def auto_detect_and_assign_bots
     return unless mt5_accounts.any?
     
-    # Récupérer tous les magic numbers uniques des trades de l'utilisateur
-    magic_numbers = trades.distinct.pluck(:magic_number).compact
+    # Récupérer tous les bots enregistrés avec leur magic number
+    registered_bots = TradingBot.where.not(magic_number_prefix: nil)
     
-    magic_numbers.each do |magic_number|
-      # Chercher un bot qui correspond à ce magic number
-      bot = TradingBot.find_by(magic_number_prefix: magic_number)
+    registered_bots.each do |bot|
+      # Vérifier si l'utilisateur a des trades avec ce magic number
+      user_trades = trades.where(magic_number: bot.magic_number_prefix)
       
-      if bot && !bot_purchases.exists?(trading_bot: bot)
+      if user_trades.any? && !bot_purchases.exists?(trading_bot: bot)
         # Créer automatiquement un BotPurchase pour ce bot
-        create_auto_bot_purchase(bot, magic_number)
+        create_auto_bot_purchase(bot, bot.magic_number_prefix)
       end
     end
   end
 
   # Créer un BotPurchase automatique
   def create_auto_bot_purchase(trading_bot, magic_number)
+    # Calculer la date d'achat basée sur le premier trade
+    first_trade = trades.where(magic_number: magic_number).order(:open_time).first
+    purchase_date = first_trade&.open_time || Time.current
+    
     bot_purchase = bot_purchases.create!(
       trading_bot: trading_bot,
       price_paid: trading_bot.price, # Prix standard du bot
       status: 'active',
       magic_number: magic_number,
       is_running: true,
-      started_at: Time.current,
+      started_at: purchase_date,
+      created_at: purchase_date,
       purchase_type: 'auto_detected' # Nouveau champ pour distinguer les achats automatiques
     )
     
-    Rails.logger.info "Bot automatiquement assigné: #{trading_bot.name} (#{magic_number}) pour l'utilisateur #{email}"
+    Rails.logger.info "Bot automatiquement assigné: #{trading_bot.name} (#{magic_number}) pour l'utilisateur #{email} - Date d'achat: #{purchase_date}"
     bot_purchase
   end
 
