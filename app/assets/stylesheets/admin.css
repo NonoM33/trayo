@@ -23,10 +23,10 @@
   --gradient-sunset: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
   --gradient-ocean: linear-gradient(135deg, #667eea 0%, #06b6d4 100%);
   
-  --bg-body: #f5f5f7;
+  --bg-body: #1a1a1a;
   --bg-card: rgba(255, 255, 255, 0.8);
-  --bg-navbar: rgba(255, 255, 255, 0.8);
-  --bg-sidebar: rgba(255, 255, 255, 0.8);
+  --bg-navbar: rgba(30, 30, 30, 0.8);
+  --bg-sidebar: rgba(30, 30, 30, 0.8);
   --bg-input: rgba(255, 255, 255, 0.6);
   --card-background: rgba(255, 255, 255, 0.8);
   --background-secondary: rgba(247, 247, 248, 0.8);
@@ -37,18 +37,18 @@
   --bg-warning-box: rgba(255, 193, 7, 0.1);
   --bg-danger-box: rgba(231, 76, 60, 0.1);
   
-  --text-primary: #1d1d1f;
-  --text-secondary: #424245;
-  --text-muted: #86868b;
+  --text-primary: #ffffff;
+  --text-secondary: #c0c0c0;
+  --text-muted: #888888;
   --text-on-primary: #ffffff;
   --text-info: #667eea;
   --text-success: #2ecc71;
   --text-warning: #f39c12;
   --text-danger: #e74c3c;
   
-  --border-color: rgba(0, 0, 0, 0.1);
-  --border-light: rgba(0, 0, 0, 0.05);
-  --border-hover: rgba(0, 0, 0, 0.15);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-light: rgba(255, 255, 255, 0.05);
+  --border-hover: rgba(255, 255, 255, 0.15);
   
   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
@@ -669,14 +669,11 @@ html.sidebar-collapsed-init .sidebar .sidebar-footer a {
   position: sticky;
   top: 0;
   z-index: 90;
-  backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(20px);
+  background: rgba(30, 30, 30, 0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
-.dark-mode .navbar {
-  background: rgba(30, 41, 59, 0.95);
-}
 
 .navbar-title {
   color: var(--text-primary);
@@ -786,17 +783,17 @@ h3 .icon {
 }
 
 .card {
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   padding: 32px;
   margin-bottom: 32px;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
   box-sizing: border-box;
   position: relative;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
 

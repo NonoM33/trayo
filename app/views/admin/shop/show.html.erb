@@ -81,17 +81,21 @@
     }
     
     .stat-card {
-      background: var(--bg-card);
-      border: 2px solid var(--border-color);
-      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+      backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
       padding: 24px;
       text-align: center;
-      transition: all 0.3s;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     }
     
     .stat-card:hover {
-      border-color: var(--color-accent);
+      border-color: rgba(255, 255, 255, 0.25);
       transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%);
     }
     
     .stat-icon {
@@ -114,14 +118,13 @@
     }
     
     .calculator-card {
-      background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+      backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 20px;
       padding: 32px;
       margin: 40px 0;
-    }
-    
-    .dark-mode .calculator-card {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     }
     
     .calculator-title {
@@ -169,9 +172,11 @@
     }
     
     .calculator-result {
-      background: white;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.03) 100%);
+      backdrop-filter: blur(30px);
       padding: 20px;
       border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       text-align: center;
     }
     
@@ -203,15 +208,19 @@
       gap: 16px;
       padding: 16px;
       margin-bottom: 12px;
-      background: var(--bg-hover);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 12px;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
     
     .feature-item:hover {
-      background: var(--color-accent);
-      color: white;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.05) 100%);
+      border-color: rgba(255, 255, 255, 0.2);
       transform: translateX(8px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
     
     .feature-icon {
@@ -384,9 +393,9 @@
         <% end %>
 
         <% if @bot.active_users_count > 0 %>
-          <div class="card" style="background: linear-gradient(135deg, #e0f2fe, #dbeafe); border: 2px solid #3b82f6;">
-            <h3 style="margin: 0 0 12px 0; color: #1e40af;"><i class="fa-icon fa-md fa-users"></i> Preuve Sociale</h3>
-            <p style="margin: 0; font-size: 18px; font-weight: 600; color: #1e40af;">
+          <div class="card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.08) 100%); border: 1px solid rgba(59, 130, 246, 0.3);">
+            <h3 style="margin: 0 0 12px 0; color: var(--text-primary);"><i class="fa-icon fa-md fa-users"></i> Preuve Sociale</h3>
+            <p style="margin: 0; font-size: 18px; font-weight: 600; color: var(--text-primary);">
               <strong><%= @bot.active_users_count %></strong> <%= @bot.active_users_count == 1 ? 'trader utilise' : 'traders utilisent' %> déjà ce bot avec succès !
             </p>
           </div>
