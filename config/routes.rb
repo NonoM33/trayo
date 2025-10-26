@@ -51,6 +51,12 @@ Rails.application.routes.draw do
     end
     
     resources :bots do
+      resources :backtests, only: [:index, :new, :create, :destroy] do
+        member do
+          post :activate
+        end
+      end
+      
       member do
         delete :remove_from_user
       end
