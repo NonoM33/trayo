@@ -130,6 +130,14 @@ class User < ApplicationRecord
     mt5_token = mt5_data[:mt5_api_token]
     email = mt5_data[:client_email].present? ? mt5_data[:client_email] : "mt5_#{mt5_token.downcase}@trayo.auto"
     
+    # Vérifier si l'utilisateur existe déjà
+    existing_user = User.find_by(email: email)
+    if existing_user
+      Rails.logger.warn "Utilisateur avec email #{email} existe déjà. Mise à jour du token MT5."
+      existing_user.update(mt5_api_token: mt5_token) if existing_user.mt5_api_token.blank?
+      return existing_user
+    end
+    
     # Générer un mot de passe aléatoire
     random_password = SecureRandom.hex(16)
     
