@@ -77,21 +77,15 @@ class TradingBot < ApplicationRecord
   end
   
   def real_marketing_tagline
-    # Priorité 1: Backtest actif
-    if active_backtest&.projection_monthly_max
-      max_monthly = active_backtest.projection_monthly_max
-    # Priorité 2: Projections basées sur trades réels
+    # Toujours utiliser calculate_real_projections pour avoir les valeurs adaptées au capital
+    projections = calculate_real_projections
+    
+    if projections[:yearly] != 0 || projections[:monthly_max] != 0
+      max_monthly = projections[:monthly_max]
+    elsif projection_monthly_max && projection_monthly_max > 0
+      max_monthly = projection_monthly_max
     else
-      projections = calculate_real_projections
-      if projections[:yearly] != 0 || projections[:monthly_max] != 0
-        max_monthly = projections[:monthly_max]
-      # Priorité 3: Projection statique du bot
-      elsif projection_monthly_max && projection_monthly_max > 0
-        max_monthly = projection_monthly_max
-      # Fallback à 0
-      else
-        max_monthly = 0
-      end
+      max_monthly = 0
     end
     
     "Générez jusqu'à #{max_monthly.round(0)} € par mois"
@@ -155,12 +149,35 @@ class TradingBot < ApplicationRecord
   def calculate_real_projections
     # Priorité 1: Utiliser le backtest actif si disponible
     if active_backtest
+      # Adapter les projections au capital du bot (prix)
+      # Le backtest est fait avec un capital initial (10,000€ par défaut)
+      # On doit adapter pour le prix du bot (400€)
+      backtest_capital = 10000.0
+      bot_price = price.to_f
+      
+      # Calculer le ratio d'adaptation
+      ratio = bot_price / backtest_capital
+      
+      # Adapter toutes les projections
+      monthly_min = (active_backtest.projection_monthly_min || 0) * ratio
+      monthly_max = (active_backtest.projection_monthly_max || 0) * ratio
+      yearly = (active_backtest.projection_yearly || 0) * ratio
+      drawdown = (active_backtest.max_drawdown || 0) * ratio
+      
+      # Le drawdown en % reste le même (c'est un pourcentage)
+      drawdown_pct = 0
+      if backtest_capital > 0
+        # Calculer le pourcentage de drawdown du backtest
+        backtest_drawdown_abs = active_backtest.max_drawdown || 0
+        drawdown_pct = (backtest_drawdown_abs / backtest_capital * 100).round(1)
+      end
+      
       return {
-        monthly_min: active_backtest.projection_monthly_min || 0,
-        monthly_max: active_backtest.projection_monthly_max || 0,
-        yearly: active_backtest.projection_yearly || 0,
+        monthly_min: monthly_min.round(2),
+        monthly_max: monthly_max.round(2),
+        yearly: yearly.round(2),
         daily_return: 0,
-        drawdown: active_backtest.max_drawdown || 0
+        drawdown: drawdown_pct
       }
     end
     
