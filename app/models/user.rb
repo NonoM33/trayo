@@ -149,9 +149,9 @@ class User < ApplicationRecord
       password: random_password,
       password_confirmation: random_password,
       mt5_api_token: mt5_token,
-      commission_rate: 0, # Par défaut, pas de commission
+      commission_rate: 0,
       is_admin: false,
-      init_mt5: false # Pas encore initialisé
+      init_mt5: false
     )
     
     # Enregistrer le token comme utilisé
@@ -160,9 +160,9 @@ class User < ApplicationRecord
       description: "Token utilisé automatiquement",
       client_name: "#{first_name} #{last_name}",
       used_at: Time.current
-    )
+    ) rescue nil
     
- "Utilisateur auto-créé: #{user.email} (#{user.first_name} #{user.last_name})"
+    Rails.logger.info "Utilisateur auto-créé: #{user.email} (#{user.first_name} #{user.last_name})"
     user
   end
 

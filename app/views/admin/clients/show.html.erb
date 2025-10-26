@@ -484,6 +484,80 @@
         <% end %>
       </div>
     <% end %>
+    
+    <!-- Positions Ouvertes -->
+    <% if current_user.is_admin? && @mt5_accounts.any? %>
+      <% open_positions = Trade.joins(:mt5_account).where(mt5_accounts: { user_id: @client.id }).where(status: 'open').order(open_time: :desc) %>
+      <% if open_positions.any? %>
+        <div class="card">
+          <div class="card-header">
+            <h2>⚡ Positions Ouvertes</h2>
+            <div style="font-size: 14px; color: var(--text-muted);">
+              <%= open_positions.count %> position(s) en cours
+            </div>
+          </div>
+          
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Symbole</th>
+                  <th>Type</th>
+                  <th>Volume</th>
+                  <th>Prix Ouverture</th>
+                  <th>Prix Actuel</th>
+                  <th>Profit FL</th>
+                  <th>Swap</th>
+                  <th>Durée</th>
+                  <th>Bot</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% open_positions.each do |position| %>
+                  <% duration_minutes = ((Time.current - position.open_time) / 60).round if position.open_time %>
+                  <tr>
+                    <td><strong><%= position.symbol %></strong></td>
+                    <td>
+                      <span class="trade-type-badge <%= position.trade_type %>">
+                        <%= position.trade_type&.upcase %>
+                      </span>
+                    </td>
+                    <td><%= position.volume %></td>
+                    <td><%= number_to_currency(position.open_price, unit: "€", format: "%n %u") %></td>
+                    <td><%= number_to_currency(position.close_price, unit: "€", format: "%n %u") %></td>
+                    <td class="<%= position.profit >= 0 ? 'positive' : 'negative' %>">
+                      <%= number_to_currency(position.profit, unit: "€", format: "%n %u") %>
+                    </td>
+                    <td><%= number_to_currency(position.swap || 0, unit: "€", format: "%n %u") %></td>
+                    <td>
+                      <% if duration_minutes %>
+                        <% if duration_minutes >= 1440 %>
+                          <%= (duration_minutes / 1440).round %> jours
+                        <% elsif duration_minutes >= 60 %>
+                          <%= (duration_minutes / 60).round %>h
+                        <% else %>
+                          <%= duration_minutes %> min
+                        <% end %>
+                      <% else %>
+                        <span class="text-muted">-</span>
+                      <% end %>
+                    </td>
+                    <td>
+                      <% if position.magic_number.present? %>
+                        <span class="magic-badge"><%= bot_name_for_magic_number(position.magic_number, @bots_cache) %></span>
+                      <% else %>
+                        <span class="text-muted">-</span>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+    
     <% if current_user.is_admin? && @mt5_accounts.any? %>
       <div class="card">
         <div class="card-header">
