@@ -54,6 +54,7 @@ Rails.application.routes.draw do
       resources :backtests, only: [:index, :new, :create, :destroy] do
         member do
           post :activate
+          post :recalculate
         end
       end
       

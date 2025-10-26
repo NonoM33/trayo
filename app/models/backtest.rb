@@ -18,16 +18,19 @@ class Backtest < ApplicationRecord
   end
   
   def calculate_projections
-    return unless start_date && end_date
+    return unless start_date && end_date && total_profit
     
     days = duration_days
-    return if days <= 0
+    return if days <= 0 || total_profit.zero?
     
-    total_days_in_period = days
-    avg_daily_profit = total_profit / total_days_in_period
+    # Calculer le profit moyen par jour de trading
+    avg_daily_profit = total_profit / days.to_f
     
+    # Projections mensuelles (22 jours de trading par mois)
     self.projection_monthly_min = (avg_daily_profit * 22 * 0.8).round(2)
     self.projection_monthly_max = (avg_daily_profit * 22 * 1.2).round(2)
+    
+    # Projection annuelle (252 jours de trading par an)
     self.projection_yearly = (avg_daily_profit * 252).round(2)
   end
   

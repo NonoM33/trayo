@@ -102,6 +102,11 @@
                               </button>
                             <% end %>
                           <% end %>
+                          <%= form_with url: recalculate_admin_bot_backtest_path(@bot, backtest), method: :post, local: true, style: "margin: 0;" do |f| %>
+                            <button type="submit" class="btn btn-sm btn-secondary" title="Recalculer les projections">
+                              <i class="fa-icon fa-xs fa-calculator"></i>
+                            </button>
+                          <% end %>
                           <%= button_to admin_bot_backtest_path(@bot, backtest), method: :delete, 
                               data: { turbo_confirm: "Supprimer ce backtest ?" }, 
                               class: "btn btn-sm btn-danger",

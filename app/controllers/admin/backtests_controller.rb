@@ -2,7 +2,7 @@ module Admin
   class BacktestsController < BaseController
     before_action :require_admin
     before_action :set_bot
-    before_action :set_backtest, only: [:show, :destroy, :activate]
+    before_action :set_backtest, only: [:show, :destroy, :activate, :recalculate]
 
     def index
       @backtests = @bot.backtests.latest
