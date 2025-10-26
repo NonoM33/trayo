@@ -125,6 +125,32 @@ module Admin
                            .distinct.pluck(:magic_number).compact.sort
     end
 
+    def bots
+      @client = User.find(params[:id])
+      
+      # Récupérer tous les trades du client
+      @trades = Trade.joins(:mt5_account)
+                    .where(mt5_accounts: { user_id: @client.id })
+                    .includes(:mt5_account)
+                    .order(close_time: :desc)
+      
+      # Précharger les bots
+      @bots_cache = TradingBot.where.not(magic_number_prefix: nil)
+      
+      # Analyser les performances par bot
+      @bot_performances = analyze_bot_performances(@trades, @bots_cache)
+      
+      # Analyser les jours de trading
+      @trading_days_analysis = analyze_trading_days(@trades)
+      
+      # Statistiques globales
+      @total_trades = @trades.count
+      @total_profit = @trades.sum(:profit)
+      @winning_trades = @trades.where('profit > 0').count
+      @losing_trades = @trades.where('profit < 0').count
+      @win_rate = @total_trades > 0 ? (@winning_trades.to_f / @total_trades * 100).round(2) : 0
+    end
+
     def destroy
       @user = User.find(params[:id])
       if @user.id == current_user.id

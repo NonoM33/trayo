@@ -1,0 +1,136 @@
+<% content_for :title, "Modifier le dépôt" %>
+
+<div class="page-header">
+  <div class="page-header-content">
+    <div class="page-header-left">
+      <h1>Modifier le dépôt</h1>
+      <p class="page-description">Modifier les informations du dépôt</p>
+    </div>
+    <div class="page-header-right">
+      <%= link_to "← Retour", :back, class: "btn btn-outline" %>
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+  <div class="card">
+    <%= form_with model: [:admin, @deposit], local: true do |form| %>
+      <% if @deposit.errors.any? %>
+        <div class="alert alert-danger">
+          <h4><%= pluralize(@deposit.errors.count, "erreur") %> empêche(nt) l'enregistrement :</h4>
+          <ul>
+            <% @deposit.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="form-group">
+        <%= form.label :mt5_account_id, "Compte MT5", class: "form-label" %>
+        <%= form.select :mt5_account_id, 
+            options_from_collection_for_select(@mt5_accounts, :id, :account_name_with_user, @deposit.mt5_account_id), 
+            { prompt: "Sélectionner un compte" }, 
+            { class: "form-select", required: true } %>
+      </div>
+
+      <div class="form-group">
+        <%= form.label :amount, "Montant (€)", class: "form-label" %>
+        <%= form.number_field :amount, 
+            step: 0.01, 
+            min: 0.01, 
+            class: "form-input", 
+            required: true,
+            placeholder: "0.00" %>
+      </div>
+
+      <div class="form-group">
+        <%= form.label :deposit_date, "Date du dépôt", class: "form-label" %>
+        <%= form.date_field :deposit_date, 
+            class: "form-input", 
+            required: true %>
+      </div>
+
+      <div class="form-group">
+        <%= form.label :notes, "Notes (optionnel)", class: "form-label" %>
+        <%= form.text_area :notes, 
+            class: "form-textarea", 
+            rows: 3,
+            placeholder: "Description du dépôt, référence, etc." %>
+      </div>
+
+      <div class="form-actions">
+        <%= form.submit "Mettre à jour le dépôt", class: "btn btn-primary" %>
+        <%= link_to "Annuler", :back, class: "btn btn-outline" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.alert {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 6px;
+}
+
+.alert-danger {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+}
+
+.alert h4 {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.alert ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+</style>

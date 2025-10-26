@@ -148,6 +148,28 @@
       <div class="info-grid">
         <% if current_user.is_admin? %>
           <div class="info-item">
+            <div class="info-label">Capital à l'instant T</div>
+            <div class="info-value positive">
+              <%= number_to_currency(@mt5_accounts.sum(&:balance), unit: "€", format: "%n %u") %>
+            </div>
+            <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
+              Balance actuelle totale
+            </div>
+          </div>
+        <% end %>
+        <% if current_user.is_admin? %>
+          <div class="info-item">
+            <div class="info-label">High Watermark</div>
+            <div class="info-value positive">
+              <%= number_to_currency(@mt5_accounts.sum(&:high_watermark), unit: "€", format: "%n %u") %>
+            </div>
+            <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
+              Plus haut niveau atteint
+            </div>
+          </div>
+        <% end %>
+        <% if current_user.is_admin? %>
+          <div class="info-item">
             <div class="info-label">Taux de Commission</div>
             <div class="info-value"><%= number_to_percentage(@client.commission_rate, precision: 1) %></div>
           </div>
@@ -281,7 +303,7 @@
           <tbody>
             <% @mt5_accounts.each do |account| %>
               <tr>
-                <td><%= number_to_currency(account.initial_balance, unit: "€", format: "%n %u") %></td>
+                <td><%= number_to_currency(account.auto_calculated_initial_balance && account.calculated_initial_balance.present? ? account.calculated_initial_balance : account.initial_balance, unit: "€", format: "%n %u") %></td>
                 <td><%= number_to_currency(account.balance, unit: "€", format: "%n %u") %></td>
                 <td class="<%= account.net_gains > 0 ? 'positive' : 'negative' %>">
                   <%= number_to_currency(account.net_gains, unit: "€", format: "%n %u") %>
@@ -453,6 +475,75 @@
             <div style="margin-top: 1rem;">
               <button onclick="showAddWithdrawalModal()" class="btn btn-primary">
                 <i class="fa-icon fa-md fa-plus"></i> Ajouter un retrait manuellement
+              </button>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Historique des Dépôts -->
+    <% if current_user.is_admin? && @mt5_accounts.any? %>
+      <div class="card">
+        <div class="card-header">
+          <h2>Historique des Dépôts</h2>
+          <button onclick="showAddDepositModal()" class="btn btn-outline btn-sm">
+            <i class="fa-icon fa-md fa-plus"></i> Ajouter un dépôt
+          </button>
+        </div>
+        
+        <% has_deposits = false %>
+        <% @mt5_accounts.each do |account| %>
+          <% if account.deposits.any? %>
+            <% has_deposits = true %>
+            <h4><%= account.account_name %> (<%= account.mt5_id %>)</h4>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Montant</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% account.deposits.order(deposit_date: :desc).each do |deposit| %>
+                    <tr>
+                      <td><%= deposit.deposit_date.strftime("%d/%m/%Y") %></td>
+                      <td class="positive"><%= number_to_currency(deposit.amount, unit: "€", format: "%n %u") %></td>
+                      <td><%= deposit.notes.present? ? deposit.notes : "-" %></td>
+                      <td>
+                        <div class="action-buttons">
+                          <%= button_to "Supprimer", admin_deposit_path(deposit), 
+                                method: :delete,
+                                data: { turbo_confirm: "Supprimer ce dépôt ?" },
+                                class: "btn btn-danger btn-sm" %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% end %>
+        <% end %>
+        
+        <% unless has_deposits %>
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <i class="fa-icon fa-lg fa-plus-circle"></i>
+            </div>
+            <h3>Aucun dépôt enregistré</h3>
+            <p>Aucun dépôt n'a été détecté pour ce compte. Les dépôts peuvent être :</p>
+            <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
+              <li>Détectés automatiquement lors de la synchronisation MT5</li>
+              <li>Importés depuis l'historique MT5 complet</li>
+              <li>Ajoutés manuellement par l'administrateur</li>
+            </ul>
+            <div style="margin-top: 1rem;">
+              <button onclick="showAddDepositModal()" class="btn btn-primary">
+                <i class="fa-icon fa-md fa-plus"></i> Ajouter un dépôt manuellement
               </button>
             </div>
           </div>
