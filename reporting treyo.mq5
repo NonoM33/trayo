@@ -82,8 +82,10 @@ void SyncDataToAPI()
    
    string open_positions_json = GetOpenPositionsJSON();
    
+   string active_experts_json = GetActiveExpertsJSON();
+   
    string json = StringFormat(
-      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"trades\":%s,\"open_positions\":%s}}",
+      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"trades\":%s,\"open_positions\":%s,\"active_experts\":%s}}",
       account_number,
       MT5_API_TOKEN,
       account_name,
@@ -91,7 +93,8 @@ void SyncDataToAPI()
       balance,
       equity,
       trades_json,
-      open_positions_json
+      open_positions_json,
+      active_experts_json
    );
    
    char post_data[];
@@ -182,19 +185,19 @@ void SyncCompleteHistory()
    string all_trades_json = GetAllTradesJSON();
    string all_withdrawals_json = GetAllWithdrawalsJSON();
    string all_deposits_json = GetAllDepositsJSON();
+   string active_experts_json = GetActiveExpertsJSON();
    
    // Debug: Print what we found
    Print("=== SYNC DATA SUMMARY ===");
    Print("Trades JSON length: ", StringLen(all_trades_json));
    Print("Withdrawals JSON length: ", StringLen(all_withdrawals_json));
    Print("Deposits JSON length: ", StringLen(all_deposits_json));
-   Print("Withdrawals data: ", all_withdrawals_json);
-   Print("Deposits data: ", all_deposits_json);
+   Print("Active Experts: ", active_experts_json);
    Print("=== END SYNC DATA SUMMARY ===");
    
    // Build complete JSON payload
    string json = StringFormat(
-      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"margin\":%.2f,\"free_margin\":%.2f,\"trades\":%s,\"withdrawals\":%s,\"deposits\":%s}}",
+      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"margin\":%.2f,\"free_margin\":%.2f,\"trades\":%s,\"withdrawals\":%s,\"deposits\":%s,\"active_experts\":%s}}",
       account_number,
       MT5_API_TOKEN,
       account_name,
@@ -205,7 +208,8 @@ void SyncCompleteHistory()
       free_margin,
       all_trades_json,
       all_withdrawals_json,
-      all_deposits_json
+      all_deposits_json,
+      active_experts_json
    );
    
    char post_data[];
