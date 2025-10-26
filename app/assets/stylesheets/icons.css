@@ -1,0 +1,336 @@
+/* Styles pour les icônes FontAwesome */
+.fa-icon, .fa-solid {
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+}
+
+/* Icônes en mode sombre */
+.dark-mode .fa-icon,
+.dark-mode .fa-solid {
+  color: #ffffff !important;
+}
+
+/* Icônes dans la navbar */
+.navbar .fa-icon,
+.navbar .fa-solid {
+  color: var(--text-primary);
+}
+
+.dark-mode .navbar .fa-icon,
+.dark-mode .navbar .fa-solid {
+  color: #ffffff !important;
+}
+
+/* Icônes dans la sidebar */
+.sidebar .fa-icon,
+.sidebar .fa-solid {
+  color: var(--text-primary);
+}
+
+.dark-mode .sidebar .fa-icon,
+.dark-mode .sidebar .fa-solid {
+  color: #ffffff !important;
+}
+
+/* Assurer que les icônes FontAwesome sont visibles */
+.sidebar-menu-link .fa-icon,
+.sidebar-menu-link .fa-solid {
+  margin-right: 12px;
+  width: 20px;
+  text-align: center;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar-menu-link:hover .fa-icon,
+.sidebar-menu-link:hover .fa-solid {
+  opacity: 1;
+}
+
+.sidebar-menu-link.active .fa-icon,
+.sidebar-menu-link.active .fa-solid {
+  opacity: 1;
+}
+
+.fa-xs { font-size: 0.75em; }
+.fa-sm { font-size: 0.875em; }
+.fa-md { font-size: 1em; }
+.fa-lg { font-size: 1.25em; }
+.fa-xl { font-size: 1.5em; }
+
+/* Couleurs pour les icônes */
+.text-success { color: #4CAF50 !important; }
+.text-danger { color: #f44336 !important; }
+.text-warning { color: #ff9800 !important; }
+.text-info { color: #2196f3 !important; }
+.text-primary { color: var(--color-primary) !important; }
+.text-secondary { color: var(--text-secondary) !important; }
+.text-muted { color: var(--text-muted) !important; }
+
+/* Éléments avec icônes */
+.icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-text-label {
+  font-weight: 500;
+}
+
+/* Boutons avec icônes */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.btn-icon:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-icon.primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-icon.secondary {
+  background: var(--background-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.btn-icon.success {
+  background: #4CAF50;
+  color: white;
+}
+
+.btn-icon.danger {
+  background: #f44336;
+  color: white;
+}
+
+.btn-icon.warning {
+  background: #ff9800;
+  color: white;
+}
+
+.btn-icon.info {
+  background: #2196f3;
+  color: white;
+}
+
+/* Icônes dans les cartes */
+.card-icon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.card-icon:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-icon-content {
+  flex: 1;
+}
+
+.card-icon-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+
+.card-icon-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Icônes dans les statistiques */
+.stat-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.stat-icon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 8px 0;
+}
+
+.stat-icon-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Icônes dans les listes */
+.list-icon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.list-icon:hover {
+  background: var(--background-secondary);
+}
+
+.list-icon:last-child {
+  border-bottom: none;
+}
+
+.list-icon-content {
+  flex: 1;
+}
+
+.list-icon-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 2px 0;
+}
+
+.list-icon-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Icônes dans les badges */
+.badge-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-icon.success {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+}
+
+.badge-icon.danger {
+  background: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+}
+
+.badge-icon.warning {
+  background: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+}
+
+.badge-icon.info {
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196f3;
+}
+
+/* Icônes dans les tableaux */
+.table-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-icon-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .icon-text {
+    gap: 6px;
+  }
+  
+  .btn-icon {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+  }
+  
+  .card-icon {
+    padding: 12px;
+    gap: 8px;
+  }
+  
+  .stat-icon {
+    padding: 16px;
+  }
+  
+  .stat-icon-value {
+    font-size: 1.25rem;
+  }
+  
+  .list-icon {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .icon-text {
+    gap: 4px;
+  }
+  
+  .btn-icon {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+  
+  .card-icon {
+    padding: 8px;
+    gap: 6px;
+  }
+  
+  .stat-icon {
+    padding: 12px;
+  }
+  
+  .stat-icon-value {
+    font-size: 1.125rem;
+  }
+  
+  .list-icon {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+}

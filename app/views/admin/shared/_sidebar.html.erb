@@ -7,7 +7,7 @@
       <span><%= current_user.is_admin? ? 'Trayo Admin' : 'Trayo' %></span>
     </div>
     <button class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" id="sidebarToggleBtn" title="Réduire la barre latérale">
-      <i class="fa-icon fa-md fa-chevron-left"></i>
+      <i class="fa-solid fa-chevron-left"></i>
     </button>
   </div>
   
@@ -17,32 +17,38 @@
       <ul class="sidebar-menu">
         <% if current_user.is_admin? %>
           <li class="sidebar-menu-item">
+            <%= link_to admin_dashboard_path, class: "sidebar-menu-link #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
+              <%= nav_icon(:dashboard) %>
+              <span>Tableau de Bord</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
             <%= link_to admin_clients_path, class: "sidebar-menu-link #{request.path == admin_clients_path ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-users"></i>
+              <%= nav_icon(:clients) %>
               <span>Clients</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_bots_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bots') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-robot"></i>
+              <%= nav_icon(:my_bots) %>
               <span>Bots Trading</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_payments_path, class: "sidebar-menu-link #{request.path == admin_payments_path ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-credit-card"></i>
+              <%= nav_icon(:payments) %>
               <span>Paiements</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_credits_path, class: "sidebar-menu-link #{request.path == admin_credits_path ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-gift"></i>
+              <%= nav_icon(:bonus_program) %>
               <span>Crédits</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_bonus_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus_deposit') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-gift"></i>
+              <%= nav_icon(:bonus_program) %>
               <span>Dépôts Bonus</span>
             <% end %>
           </li>
@@ -54,86 +60,86 @@
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_vps_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/vps') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-desktop"></i>
+              <%= nav_icon(:my_vps) %>
               <span>VPS</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_campaigns_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/campaigns') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-bullhorn"></i>
+              <%= nav_icon(:campaigns) %>
               <span>Campagnes</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_trades_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/trades') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-chart-line"></i>
+              <%= nav_icon(:trades) %>
               <span>Trades</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_withdrawals_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/withdrawals') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-money-bill-wave"></i>
+              <%= nav_icon(:withdrawals) %>
               <span>Retraits</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/deposits') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-plus-circle"></i>
+              <%= nav_icon(:deposits) %>
               <span>Dépôts</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_mt5_tokens_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/mt5_tokens') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-ticket-alt"></i>
+              <%= nav_icon(:mt5_tokens) %>
               <span>Tokens MT5</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_maintenance_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/maintenance') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-tools"></i>
+              <%= nav_icon(:maintenance) %>
               <span>Maintenance</span>
             <% end %>
           </li>
         <% else %>
           <li class="sidebar-menu-item">
             <%= link_to admin_dashboard_path, class: "sidebar-menu-link #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-tachometer-alt"></i>
+              <%= nav_icon(:dashboard) %>
               <span>Tableau de Bord</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_client_path(current_user), class: "sidebar-menu-link #{request.path == admin_client_path(current_user) ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-user"></i>
+              <%= nav_icon(:profile) %>
               <span>Mon Profil</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_shop_index_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/shop') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-shopping-cart"></i>
+              <%= nav_icon(:shop) %>
               <span>Boutique</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_my_bots_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/my_bots') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-robot"></i>
+              <%= nav_icon(:my_bots) %>
               <span>Mes Bots</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_my_trades_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/my_trades') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-chart-line"></i>
+              <%= nav_icon(:my_trades) %>
               <span>Mes Trades</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_bonus_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-gift"></i>
+              <%= nav_icon(:bonus_program) %>
               <span>Programme Bonus</span>
             <% end %>
           </li>
           <li class="sidebar-menu-item">
             <%= link_to admin_vps_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/vps') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-desktop"></i>
+              <%= nav_icon(:my_vps) %>
               <span>Mes VPS</span>
             <% end %>
           </li>
@@ -221,7 +227,7 @@
     const toggleBtn = document.getElementById('sidebarToggleBtn');
     const isCollapsed = sidebar.classList.toggle('collapsed');
     
-    toggleBtn.innerHTML = isCollapsed ? '<span class="material-icons md-18">chevron_right</span>' : '<i class="fa-icon fa-md fa-chevron-left"></i>';
+    toggleBtn.innerHTML = isCollapsed ? '<i class="fa-solid fa-chevron-right"></i>' : '<i class="fa-solid fa-chevron-left"></i>';
     toggleBtn.title = isCollapsed ? 'Agrandir la barre latérale' : 'Réduire la barre latérale';
     
     localStorage.setItem('sidebarCollapsed', isCollapsed ? 'true' : 'false');
@@ -249,7 +255,7 @@
     
     if (isCollapsed && sidebar && toggleBtn && window.innerWidth > 768) {
       sidebar.classList.add('collapsed');
-      toggleBtn.innerHTML = '<span class="material-icons md-18">chevron_right</span>';
+      toggleBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
       toggleBtn.title = 'Agrandir la barre latérale';
     }
   })();
