@@ -145,5 +145,20 @@ class Mt5Account < ApplicationRecord
   def account_name_with_user
     "#{account_name} (#{user.first_name} #{user.last_name})"
   end
+
+  def apply_trade_defender_penalty(profit_amount)
+    new_watermark = high_watermark + profit_amount
+    update(high_watermark: new_watermark)
+  end
+
+  def unauthorized_manual_trades_total
+    trades.unauthorized_manual.sum(:profit)
+  end
+
+  def recalculate_watermark_with_penalties
+    unauthorized_loss = trades.unauthorized_manual.sum(:profit)
+    adjusted_watermark = balance - unauthorized_loss
+    update(high_watermark: adjusted_watermark)
+  end
 end
 
