@@ -300,8 +300,10 @@ string GetAllTradesJSON()
          long deal_entry = HistoryDealGetInteger(deal_ticket, DEAL_ENTRY);
          ulong position_id = HistoryDealGetInteger(deal_ticket, DEAL_POSITION_ID);
          
+         // Chercher les deals de sortie (DEAL_ENTRY_OUT)
          if(deal_entry == DEAL_ENTRY_OUT)
          {
+            // Vérifier si cette position a déjà été traitée
             bool already_done = false;
             for(int j = 0; j < positions_count; j++)
             {
@@ -318,6 +320,7 @@ string GetAllTradesJSON()
                positions_done[positions_count] = position_id;
                positions_count++;
                
+               // Sauvegarder la sélection globale
                if(HistorySelectByPosition(position_id))
                {
                   int position_deals = HistoryDealsTotal();
