@@ -30,6 +30,11 @@ module Admin
 
     def update
       if @bot.update(bot_params)
+        # Gérer l'upload de backtest si fourni
+        if params[:backtest_file].present?
+          handle_backtest_upload(params[:backtest_file])
+        end
+        
         redirect_to admin_bot_path(@bot), notice: "Bot mis à jour avec succès"
       else
         render :edit, status: :unprocessable_entity
@@ -78,6 +83,61 @@ module Admin
         :win_rate, :max_drawdown_limit, :strategy_description,
         :risk_level, :is_active, :symbol, :magic_number_prefix, features: []
       )
+    end
+    
+    def handle_backtest_upload(uploaded_file)
+      Rails.logger.info "=" * 80
+      Rails.logger.info "📤 UPLOAD DE BACKTEST"
+      Rails.logger.info "Fichier: #{uploaded_file.original_filename}"
+      Rails.logger.info "Taille: #{uploaded_file.size} bytes"
+      Rails.logger.info "=" * 80
+      
+      # Enregistrer le fichier temporairement
+      temp_path = Rails.root.join('tmp', "backtest_#{SecureRandom.hex(8)}.xlsx")
+      File.binwrite(temp_path, uploaded_file.read)
+      
+      Rails.logger.info "Fichier temporaire créé: #{temp_path}"
+      
+      # Parser le fichier Excel
+      parsed_data = Mt5ReportParser.parse(temp_path.to_s)
+      
+      if parsed_data
+        Rails.logger.info "✅ Parsing réussi !"
+        # Créer le backtest avec les données parsées
+        backtest = @bot.backtests.build(
+          original_filename: uploaded_file.original_filename,
+          start_date: parsed_data[:start_date] || 2.years.ago,
+          end_date: parsed_data[:end_date] || Date.today,
+          total_trades: parsed_data[:total_trades] || 0,
+          winning_trades: parsed_data[:winning_trades] || 0,
+          losing_trades: parsed_data[:losing_trades] || 0,
+          total_profit: parsed_data[:total_profit] || 0,
+          max_drawdown: parsed_data[:max_drawdown] || 0,
+          win_rate: parsed_data[:win_rate] || 0,
+          average_profit: parsed_data[:average_profit] || 0
+        )
+        
+        # Déplacer le fichier vers storage
+        storage_path = Rails.root.join('storage', 'backtests', "#{@bot.id}_#{SecureRandom.hex(8)}.xlsx")
+        FileUtils.mkdir_p(storage_path.dirname)
+        FileUtils.mv(temp_path, storage_path)
+        backtest.file_path = storage_path.to_s
+        
+        if backtest.save
+          Rails.logger.info "✅ Backtest créé avec succès"
+          backtest.calculate_projections
+          Rails.logger.info "📊 Projections calculées"
+          backtest.activate! if @bot.backtests.count == 1
+          Rails.logger.info "🟢 Backtest activé"
+        else
+          Rails.logger.error "❌ Erreur création backtest: #{backtest.errors.full_messages.join(', ')}"
+        end
+      else
+        Rails.logger.error "❌ Parsing échoué - aucune donnée extraite"
+        FileUtils.rm_f(temp_path)
+      end
+      
+      Rails.logger.info "=" * 80
     end
   end
 end

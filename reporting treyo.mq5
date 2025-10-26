@@ -82,8 +82,10 @@ void SyncDataToAPI()
    
    string open_positions_json = GetOpenPositionsJSON();
    
+   string active_experts_json = GetActiveExpertsJSON();
+   
    string json = StringFormat(
-      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"trades\":%s,\"open_positions\":%s}}",
+      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"trades\":%s,\"open_positions\":%s,\"active_experts\":%s}}",
       account_number,
       MT5_API_TOKEN,
       account_name,
@@ -91,7 +93,8 @@ void SyncDataToAPI()
       balance,
       equity,
       trades_json,
-      open_positions_json
+      open_positions_json,
+      active_experts_json
    );
    
    char post_data[];
@@ -182,19 +185,19 @@ void SyncCompleteHistory()
    string all_trades_json = GetAllTradesJSON();
    string all_withdrawals_json = GetAllWithdrawalsJSON();
    string all_deposits_json = GetAllDepositsJSON();
+   string active_experts_json = GetActiveExpertsJSON();
    
    // Debug: Print what we found
    Print("=== SYNC DATA SUMMARY ===");
    Print("Trades JSON length: ", StringLen(all_trades_json));
    Print("Withdrawals JSON length: ", StringLen(all_withdrawals_json));
    Print("Deposits JSON length: ", StringLen(all_deposits_json));
-   Print("Withdrawals data: ", all_withdrawals_json);
-   Print("Deposits data: ", all_deposits_json);
+   Print("Active Experts: ", active_experts_json);
    Print("=== END SYNC DATA SUMMARY ===");
    
    // Build complete JSON payload
    string json = StringFormat(
-      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"margin\":%.2f,\"free_margin\":%.2f,\"trades\":%s,\"withdrawals\":%s,\"deposits\":%s}}",
+      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"margin\":%.2f,\"free_margin\":%.2f,\"trades\":%s,\"withdrawals\":%s,\"deposits\":%s,\"active_experts\":%s}}",
       account_number,
       MT5_API_TOKEN,
       account_name,
@@ -205,7 +208,8 @@ void SyncCompleteHistory()
       free_margin,
       all_trades_json,
       all_withdrawals_json,
-      all_deposits_json
+      all_deposits_json,
+      active_experts_json
    );
    
    char post_data[];
@@ -450,15 +454,15 @@ string GetAllTradesJSON()
                      StringReplace(close_time_iso, ".", "-");
                      StringReplace(close_time_iso, " ", "T");
                      close_time_iso += "Z";
-                     
-                     if(count > 0) trades += ",";
-                     
-                     trades += StringFormat(
-                        "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"closed\"}",
-                        position_id,
-                        symbol,
-                        type_str,
-                        volume,
+            
+            if(count > 0) trades += ",";
+            
+            trades += StringFormat(
+               "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"closed\"}",
+               position_id,
+               symbol,
+               type_str,
+               volume,
                         open_price,
                         close_price,
                         total_profit,
@@ -466,11 +470,11 @@ string GetAllTradesJSON()
                         total_swap,
                         open_time_iso,
                         close_time_iso,
-                        magic_number,
-                        comment
-                     );
-                     
-                     count++;
+               magic_number,
+               comment
+            );
+            
+            count++;
                   }
                }
             }
@@ -747,15 +751,15 @@ string GetTradesJSON()
                      StringReplace(close_time_iso, ".", "-");
                      StringReplace(close_time_iso, " ", "T");
                      close_time_iso += "Z";
-                     
-                     if(count > 0) trades += ",";
-                     
-                     trades += StringFormat(
-                        "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"closed\"}",
-                        position_id,
-                        symbol,
-                        type_str,
-                        volume,
+            
+            if(count > 0) trades += ",";
+            
+            trades += StringFormat(
+               "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"closed\"}",
+               position_id,
+               symbol,
+               type_str,
+               volume,
                         open_price,
                         close_price,
                         total_profit,
@@ -763,11 +767,11 @@ string GetTradesJSON()
                         total_swap,
                         open_time_iso,
                         close_time_iso,
-                        magic_number,
-                        comment
-                     );
-                     
-                     count++;
+               magic_number,
+               comment
+            );
+            
+            count++;
                   }
                }
             }
@@ -780,6 +784,133 @@ string GetTradesJSON()
    Print("Prepared ", count, " trades for sync");
    
    return trades;
+}
+
+//+------------------------------------------------------------------+
+//| Get active expert advisors (magic numbers)                       |
+//+------------------------------------------------------------------+
+string GetActiveExpertsJSON()
+{
+   string experts = "[";
+   int count = 0;
+   
+   // Récupérer les magic numbers depuis l'historique (30 derniers jours)
+   datetime from_time = TimeCurrent() - (30 * 24 * 3600);
+   if(!HistorySelect(from_time, TimeCurrent()))
+   {
+      Print("Failed to select history for active experts");
+      return "[]";
+   }
+   
+   int total_deals = HistoryDealsTotal();
+   ulong active_magic_numbers[];
+   int magic_count = 0;
+   
+   Print("=== ACTIVE EXPERTS DEBUG ===");
+   Print("Scanning last 30 days for active magic numbers...");
+   
+   // Scanner les positions ouvertes
+   for(int i = 0; i < PositionsTotal(); i++)
+   {
+      if(PositionGetTicket(i) > 0)
+      {
+         long magic = PositionGetInteger(POSITION_MAGIC);
+         
+         // Vérifier si le magic number n'est pas déjà dans la liste
+         bool found = false;
+         for(int j = 0; j < magic_count; j++)
+         {
+            if(active_magic_numbers[j] == magic)
+            {
+               found = true;
+               break;
+            }
+         }
+         
+         if(!found && magic > 0)
+         {
+            ArrayResize(active_magic_numbers, magic_count + 1);
+            active_magic_numbers[magic_count] = magic;
+            magic_count++;
+            Print("Found active magic number from open position: ", magic);
+         }
+      }
+   }
+   
+   // Scanner l'historique TRÈS récent (12 dernières heures seulement)
+   // pour détecter uniquement les EAs qui ont tradé aujourd'hui
+   datetime recent_from = TimeCurrent() - (12 * 3600);  // 12 heures seulement
+   if(HistorySelect(recent_from, TimeCurrent()))
+   {
+      Print("Scanning last 12 hours for RECENT trades...");
+      
+      for(int i = 0; i < HistoryDealsTotal(); i++)
+      {
+         ulong deal_ticket = HistoryDealGetTicket(i);
+         if(deal_ticket > 0)
+         {
+            long magic = HistoryDealGetInteger(deal_ticket, DEAL_MAGIC);
+            
+            if(magic > 0)
+            {
+               // Vérifier si le magic number n'est pas déjà dans la liste
+               bool found = false;
+               for(int j = 0; j < magic_count; j++)
+               {
+                  if(active_magic_numbers[j] == magic)
+                  {
+                     found = true;
+                     break;
+                  }
+               }
+               
+               if(!found)
+               {
+                  ArrayResize(active_magic_numbers, magic_count + 1);
+                  active_magic_numbers[magic_count] = magic;
+                  magic_count++;
+                  Print("Found RECENT trade from magic number: ", magic);
+               }
+            }
+         }
+      }
+   }
+   
+   Print("Total active magic numbers found: ", magic_count);
+   
+   // Afficher la liste complète des magic numbers détectés
+   if(magic_count > 0)
+   {
+      Print("=== LISTE COMPLÈTE DES MAGIC NUMBERS ===");
+      for(int i = 0; i < magic_count; i++)
+      {
+         Print("  Magic #", i + 1, ": ", active_magic_numbers[i]);
+      }
+      Print("===========================================");
+   }
+   else
+   {
+      Print("⚠️  AUCUN MAGIC NUMBER DÉTECTÉ - Tous les EAs sont probablement arrêtés");
+   }
+   
+   Print("=== END ACTIVE EXPERTS DEBUG ===");
+   
+   // RESTAURER la sélection globale
+   HistorySelect(0, TimeCurrent());
+   
+   // Construire le JSON
+   for(int i = 0; i < magic_count; i++)
+   {
+      if(count > 0) experts += ",";
+      experts += StringFormat("{\"magic_number\":%d,\"source\":\"auto_detected\"}", active_magic_numbers[i]);
+      count++;
+   }
+   
+   experts += "]";
+   
+   Print("JSON envoyé: ", experts);
+   
+   return experts;
 }
 
 //+------------------------------------------------------------------+

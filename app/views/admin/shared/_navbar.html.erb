@@ -19,9 +19,13 @@
     </h2>
   </div>
   <div class="navbar-right">
-    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
-      <span class="theme-icon" id="themeIcon"><i class="fa-solid fa-moon"></i></span>
-    </button>
+    <% total_credits = current_user.total_credits %>
+    <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: linear-gradient(135deg, var(--color-success), var(--color-success-hover)); border-radius: 12px; box-shadow: var(--shadow-sm);">
+      <i class="fa-icon fa-md fa-gift" style="color: white;"></i>
+      <span style="color: white; font-weight: 700; font-size: 15px;">
+        <%= number_to_currency(total_credits, unit: "€", format: "%n %u", precision: 2) %> crédits
+      </span>
+    </div>
   </div>
 </div>
 

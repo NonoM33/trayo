@@ -33,7 +33,7 @@
     </div>
     <div class="stat-card">
       <div class="stat-value">
-        <%= @withdrawals.group(:mt5_account_id).count.size %>
+        <%= Withdrawal.select(:mt5_account_id).distinct.count %>
       </div>
       <div class="stat-label">Comptes Actifs</div>
     </div>

@@ -69,6 +69,7 @@ module Api
 
         sync_trades(mt5_account, sync_params[:trades]) if sync_params[:trades].present?
         sync_open_positions(mt5_account, sync_params[:open_positions]) if sync_params[:open_positions].present?
+        sync_active_experts(mt5_account, sync_params[:active_experts]) if sync_params[:active_experts].present?
         sync_withdrawals(mt5_account, sync_params[:withdrawals]) if sync_params[:withdrawals].present?
         sync_deposits(mt5_account, sync_params[:deposits]) if sync_params[:deposits].present?
         
@@ -133,6 +134,7 @@ module Api
 
         # Synchroniser tout l'historique
         sync_trades(mt5_account, sync_params[:trades]) if sync_params[:trades].present?
+        sync_active_experts(mt5_account, sync_params[:active_experts]) if sync_params[:active_experts].present?
         sync_withdrawals(mt5_account, sync_params[:withdrawals]) if sync_params[:withdrawals].present?
         sync_deposits(mt5_account, sync_params[:deposits]) if sync_params[:deposits].present?
 
@@ -235,6 +237,10 @@ module Api
             :amount,
             :transaction_date,
             :description
+          ],
+          active_experts: [
+            :magic_number,
+            :source
           ]
         )
       end
@@ -249,6 +255,70 @@ module Api
         open_positions_data.each do |position_data|
           Trade.create_or_update_from_mt5(mt5_account, position_data.to_h.symbolize_keys)
         end
+      end
+
+      def sync_active_experts(mt5_account, active_experts_data)
+        return unless active_experts_data.present?
+        
+        user = mt5_account.user
+        
+        Rails.logger.info "=" * 80
+        Rails.logger.info "🔍 ANALYSE DES EXPERTS ADVISORS ACTIFS"
+        Rails.logger.info "=" * 80
+        
+        active_magic_numbers = active_experts_data.map { |ex| ex[:magic_number] }.compact
+        
+        Rails.logger.info "📊 Magic numbers détectés comme actifs dans MT5: #{active_magic_numbers.inspect}"
+        Rails.logger.info "📊 Nombre d'experts actifs détectés: #{active_magic_numbers.count}"
+        
+        if user && active_magic_numbers.any?
+          bot_purchases = user.bot_purchases.includes(:trading_bot).where.not(status: 'inactive')
+          
+          Rails.logger.info "👤 Utilisateur: #{user.email}"
+          Rails.logger.info "🤖 Bots assignés à cet utilisateur: #{bot_purchases.count}"
+          
+          bot_purchases.each do |purchase|
+            bot_name = purchase.trading_bot.name
+            bot_magic = purchase.trading_bot.magic_number_prefix
+            current_status = purchase.is_running? ? "🟢 ACTIF" : "🔴 INACTIF"
+            
+            Rails.logger.info "-" * 60
+            Rails.logger.info "🤖 Bot: #{bot_name}"
+            Rails.logger.info "   Magic number: #{bot_magic.inspect}"
+            Rails.logger.info "   Statut actuel: #{current_status}"
+            Rails.logger.info "   Est-ce que ce magic est dans la liste active? #{active_magic_numbers.include?(bot_magic)}"
+            
+            if bot_magic && active_magic_numbers.include?(bot_magic)
+              new_status = "🟢 ACTIF"
+              Rails.logger.info "   ✅ ACTION: Mise à jour → #{new_status}"
+              purchase.update(is_running: true) unless purchase.is_running?
+            else
+              new_status = "🔴 INACTIF"
+              Rails.logger.info "   ❌ ACTION: Mise à jour → #{new_status}"
+              
+              # Log supplémentaire pour comprendre pourquoi il devient inactif
+              if bot_magic.nil?
+                Rails.logger.info "   ⚠️  Raison: Magic number est NIL"
+              elsif active_magic_numbers.empty?
+                Rails.logger.info "   ⚠️  Raison: Aucun expert actif détecté dans MT5"
+              else
+                Rails.logger.info "   ⚠️  Raison: Magic number #{bot_magic} non trouvé dans #{active_magic_numbers.inspect}"
+              end
+              
+              purchase.update(is_running: false) if purchase.is_running?
+            end
+          end
+        else
+          if !user
+            Rails.logger.warn "⚠️  Aucun utilisateur trouvé pour ce compte MT5"
+          elsif active_magic_numbers.empty?
+            Rails.logger.warn "⚠️  Aucun magic number actif détecté dans MT5"
+          end
+        end
+        
+        Rails.logger.info "=" * 80
+        Rails.logger.info "✅ FIN DE L'ANALYSE DES EXPERTS ADVISORS"
+        Rails.logger.info "=" * 80
       end
 
       def sync_withdrawals(mt5_account, withdrawals_data)

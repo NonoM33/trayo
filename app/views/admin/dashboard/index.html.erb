@@ -1,303 +1,3 @@
-<style>
-.dashboard-welcome {
-  margin-bottom: 2rem;
-}
-
-.dashboard-welcome h1 {
-  font-size: 1.875rem;
-  font-weight: 700;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.025em;
-}
-
-.dashboard-welcome p {
-  font-size: 0.875rem;
-  color: hsl(var(--muted-foreground));
-  margin: 0;
-}
-
-.chart-container {
-  position: relative;
-  height: 400px;
-  width: 100%;
-}
-
-@media (max-width: 1024px) {
-  .chart-container {
-    height: 350px;
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard-welcome h1 {
-    font-size: 1.5rem;
-  }
-  
-  .chart-container {
-    height: 300px;
-  }
-  
-  .info-box {
-    padding: 1rem;
-  }
-  
-  .info-box-title {
-    font-size: 0.875rem;
-  }
-}
-
-@media (max-width: 390px) {
-  .dashboard-welcome {
-    margin-bottom: 1.5rem;
-  }
-  
-  .dashboard-welcome h1 {
-    font-size: 1.375rem;
-  }
-  
-  .dashboard-welcome p {
-    font-size: 0.8125rem;
-  }
-  
-  .chart-container {
-    height: 250px;
-  }
-  
-  .info-box {
-    padding: 0.875rem;
-  }
-  
-  .info-box p {
-    font-size: 0.8125rem;
-  }
-}
-
-@media (hover: none) and (pointer: coarse) {
-  .chart-container {
-    touch-action: pan-y;
-  }
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Interface compacte des prédictions des bots */
-.bots-compact-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.bot-compact-card {
-  background: var(--card-background);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 16px;
-  transition: all 0.2s ease;
-}
-
-.bot-compact-card:hover {
-  border-color: var(--color-accent);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.bot-compact-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.bot-compact-header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.bot-compact-stats {
-  display: flex;
-  gap: 8px;
-}
-
-.bot-stat {
-  font-size: 0.75rem;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: var(--background-secondary);
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.bot-stat.success {
-  background: rgba(16, 185, 129, 0.2);
-  color: #10b981;
-}
-
-.bot-compact-content {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.predictions-compact h4,
-.patterns-compact h4 {
-  margin: 0 0 8px 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.predictions-mini {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.pred-mini {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  background: var(--background-secondary);
-  border-radius: 6px;
-}
-
-.pred-time {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  min-width: 30px;
-}
-
-.pred-bar-mini {
-  flex: 1;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.pred-fill-mini {
-  height: 100%;
-  background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
-  border-radius: 2px;
-  transition: width 0.3s ease;
-}
-
-.pred-percent {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  min-width: 35px;
-  text-align: right;
-}
-
-.no-predictions-mini {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  font-style: italic;
-  background: var(--background-secondary);
-  border-radius: 6px;
-}
-
-.patterns-mini {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.pattern-mini {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.pattern-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  min-width: 50px;
-}
-
-.pattern-tag {
-  font-size: 0.7rem;
-  padding: 2px 6px;
-  background: rgba(59, 130, 246, 0.2);
-  color: #3b82f6;
-  border-radius: 4px;
-  font-weight: 500;
-}
-
-.no-bots-today {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-muted);
-}
-
-.no-bots-icon {
-  font-size: 3rem;
-  margin-bottom: 16px;
-  opacity: 0.5;
-}
-
-.no-bots-today h3 {
-  margin: 0 0 8px 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.no-bots-today p {
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-@media (max-width: 768px) {
-  .bots-compact-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  
-  .bot-compact-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  
-  .bot-compact-stats {
-    align-self: flex-end;
-  }
-}
-
-@media (max-width: 480px) {
-  .bot-compact-card {
-    padding: 12px;
-  }
-  
-  .pred-mini {
-    padding: 4px 6px;
-  }
-  
-  .pattern-mini {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-}
-</style>
-
 <%= render 'admin/shared/sidebar' %>
 
 <div class="main-content">
@@ -306,191 +6,130 @@
   <div class="container">
     <%= render 'admin/shared/campaign_banner' %>
     
-    <div class="dashboard-welcome">
-      <h1>Bienvenue, <%= @client.first_name || @client.email.split('@').first %></h1>
-      <p>Voici un aperçu de vos performances de trading</p>
+    <div class="dashboard-hero">
+      <div class="hero-content">
+        <h1 class="hero-title">Bienvenue, <%= @client.first_name || @client.email.split('@').first %></h1>
+        <p class="hero-subtitle">Surveillez et analysez vos performances de trading en temps réel</p>
+      </div>
+      <div class="hero-actions">
+        <%= link_to admin_shop_index_path, class: "hero-button" do %>
+          <%= svg_tag "arrow-up-right", size: "16" %>
+          <span>Explorer les bots</span>
+        <% end %>
+      </div>
     </div>
     
-    <!-- Filtres Dashboard -->
-    <div class="card" style="margin-bottom: 1.5rem;">
-      <div class="card-header">
-        <h3>
-          <%= stat_icon(:filter, size: 'md') %>
-          Filtres du Dashboard
-        </h3>
-      </div>
-      
-      <%= form_with url: admin_dashboard_path, method: :get, local: true, class: "filters-form" do |form| %>
-        <div class="filters-grid">
-          <div class="filter-group">
-            <%= form.label :period, "Période", class: "filter-label" %>
-            <%= form.select :period, options_for_select([
-              ["7 derniers jours", "7_days"],
-              ["30 derniers jours", "30_days"],
-              ["3 derniers mois", "3_months"],
-              ["6 derniers mois", "6_months"],
-              ["1 an", "1_year"],
-              ["Tout", "all"]
-            ], params[:period] || "30_days"), {}, { class: "filter-select" } %>
-          </div>
-          
-          <div class="filter-group">
-            <%= form.label :bot_filter, "Bot", class: "filter-label" %>
-            <%= form.select :bot_filter, options_for_select([
-              ["Tous les bots", ""]
-            ] + (@client.bot_purchases.includes(:trading_bot).map { |bp| 
-              ["#{bp.trading_bot.name} (#{bp.magic_number})", bp.magic_number] 
-            }), params[:bot_filter]), {}, { class: "filter-select" } %>
-          </div>
-          
-          <div class="filter-group">
-            <%= form.label :data_type, "Type de données", class: "filter-label" %>
-            <%= form.select :data_type, options_for_select([
-              ["Toutes les données", "all"],
-              ["Profits seulement", "profits"],
-              ["Trades seulement", "trades"],
-              ["Statistiques seulement", "stats"]
-            ], params[:data_type] || "all"), {}, { class: "filter-select" } %>
-          </div>
-          
-          <div class="filter-group">
-            <%= form.label :chart_type, "Type de graphique", class: "filter-label" %>
-            <%= form.select :chart_type, options_for_select([
-              ["Graphique combiné", "combined"],
-              ["Graphique séparé", "separate"],
-              ["Graphique simple", "simple"]
-            ], params[:chart_type] || "combined"), {}, { class: "filter-select" } %>
-          </div>
+    <div class="stats-grid">
+      <div class="stat-card stat-card-accent">
+        <div class="stat-icon">
+          <%= svg_tag "wallet", size: "48" %>
         </div>
-        
-        <div style="display: flex; gap: 12px; margin-top: 16px;">
-          <%= form.submit "Appliquer les filtres", class: "btn btn-primary" %>
-          <%= link_to "Réinitialiser", admin_dashboard_path, class: "btn btn-outline" %>
-        </div>
-      <% end %>
-    </div>
-    
-    <div class="info-grid" style="margin-bottom: 1.5rem;">
-      <div class="info-item">
-        <div class="info-label">
-          <%= stat_icon(:balance, size: 'sm') %>
-          Balance Totale
-        </div>
-        <div class="info-value">
-          <%= number_to_currency(@client.mt5_accounts.sum(:balance), unit: "€", format: "%n %u") %>
+        <div class="stat-content">
+          <div class="stat-label">Balance Totale</div>
+          <div class="stat-value"><%= number_to_currency(@client.mt5_accounts.sum(:balance), unit: "€", format: "%n %u") %></div>
+          <div class="stat-change">Tous comptes</div>
         </div>
       </div>
       
-      <div class="info-item">
-        <div class="info-label">
-          <%= profit_icon(@client.total_profits) %>
-          Gains Totaux
+      <div class="stat-card stat-card-success">
+        <div class="stat-icon">
+          <%= svg_tag "trending-up", size: "24" %>
         </div>
-        <div class="info-value <%= @client.total_profits > 0 ? 'positive' : 'negative' %>">
-          <%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %>
-        </div>
-      </div>
-      
-      <div class="info-item">
-        <div class="info-label">
-          <%= stat_icon(:commission, size: 'sm') %>
-          Commission Due
-        </div>
-        <div class="info-value">
-          <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %>
+        <div class="stat-content">
+          <div class="stat-label">Gains Totaux</div>
+          <div class="stat-value <%= @client.total_profits > 0 ? 'value-positive' : 'value-negative' %>">
+            <%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %>
+          </div>
+          <div class="stat-change">Performance globale</div>
         </div>
       </div>
       
-      <div class="info-item">
-        <div class="info-label">
-          <%= stat_icon(:balance, size: 'sm', color: @client.balance_due > 0 ? 'danger' : 'success') %>
-          Solde à Payer
+      <div class="stat-card stat-card-info">
+        <div class="stat-icon">
+          <%= svg_tag "percent", size: "24" %>
         </div>
-        <div class="info-value <%= @client.balance_due > 0 ? 'negative' : 'positive' %>">
-          <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
+        <div class="stat-content">
+          <div class="stat-label">Commission Due</div>
+          <div class="stat-value"><%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %></div>
+          <div class="stat-change">À payer</div>
+        </div>
+      </div>
+      
+      <div class="stat-card stat-card-warning">
+        <div class="stat-icon">
+          <%= svg_tag "alert-circle", size: "24" %>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">Solde à Payer</div>
+          <div class="stat-value <%= @client.balance_due > 0 ? 'value-negative' : 'value-positive' %>">
+            <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
+          </div>
+          <div class="stat-change">Régularisation</div>
         </div>
       </div>
     </div>
     
-    <!-- Section Prédictions des Bots -->
+  
+    
     <% if @bot_predictions&.any? %>
-      <div class="card">
-        <div class="card-header">
-          <h2>
-            <%= nav_icon(:my_bots, size: 'lg') %>
-            Prédictions de Mes Bots - Aujourd'hui
+      <div class="section-card prediction-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <%= svg_tag "layers", size: "20" %>
+            Prédictions Aujourd'hui
           </h2>
-          <span class="badge badge-info">
-            <%= stat_icon(:projection, size: 'sm') %>
-            Prédictions pour le jour J
-          </span>
+          <div class="section-badge">En temps réel</div>
         </div>
         
         <% bots_with_predictions = @bot_predictions.select { |prediction| prediction[:predictions]&.select { |pred| pred[:date] == Date.current }&.any? } %>
         <% if bots_with_predictions.any? %>
-          <div class="bots-compact-grid">
+          <div class="bot-prediction-grid">
             <% bots_with_predictions.each do |prediction| %>
               <% today_predictions = prediction[:predictions]&.select { |pred| pred[:date] == Date.current } || [] %>
-              <div class="bot-compact-card">
-                <div class="bot-compact-header">
-                  <h3><%= prediction[:bot][:name] %></h3>
-                  <div class="bot-compact-stats">
-                    <span class="bot-stat"><%= prediction[:total_trades] %> trades</span>
-                    <span class="bot-stat success"><%= prediction[:success_rate] %>%</span>
+              <div class="bot-prediction-card">
+                <div class="prediction-card-header">
+                  <div class="prediction-bot-info">
+                    <div class="prediction-bot-icon">🤖</div>
+                    <div>
+                      <h3 class="prediction-bot-name"><%= prediction[:bot][:name] %></h3>
+                      <span class="prediction-bot-meta">
+                        <%= prediction[:total_trades] %> trades • <%= prediction[:success_rate] %>% succès
+                      </span>
+                    </div>
                   </div>
                 </div>
                 
-                <div class="bot-compact-content">
-                  <!-- Prédictions -->
-                  <div class="predictions-compact">
-                    <h4>📅 Prédictions Aujourd'hui</h4>
-                    <% if today_predictions.any? %>
-                      <div class="predictions-mini">
-                        <% today_predictions.each do |pred| %>
-                          <div class="pred-mini">
-                            <span class="pred-time"><%= pred[:hour] %>h</span>
-                            <div class="pred-bar-mini">
-                              <div class="pred-fill-mini" style="width: <%= (pred[:probability] * 100).round %>%"></div>
+                <div class="prediction-content">
+                  <h4 class="prediction-title">Prédictions Aujourd'hui</h4>
+                  <% if today_predictions.any? %>
+                    <div class="prediction-items">
+                      <% today_predictions.each do |pred| %>
+                        <div class="prediction-item">
+                          <div class="prediction-time"><%= pred[:hour] %>h</div>
+                          <div class="prediction-progress">
+                            <div class="prediction-progress-track">
+                              <div class="prediction-progress-fill" style="width: <%= (pred[:probability] * 100).round %>%">
+                                <div class="prediction-progress-glow"></div>
+                              </div>
                             </div>
-                            <span class="pred-percent"><%= (pred[:probability] * 100).round %>%</span>
                           </div>
-                        <% end %>
-                      </div>
-                    <% else %>
-                      <div class="no-predictions-mini">
-                        <i class="fa-icon fa-md fa-clock"></i>
-                        <span>Aucune prédiction pour aujourd'hui</span>
-                      </div>
-                    <% end %>
-                  </div>
-                  
-                  <!-- Patterns -->
-                  <div class="patterns-compact">
-                    <h4>📊 Patterns</h4>
-                    <div class="patterns-mini">
-                      <div class="pattern-mini">
-                        <span class="pattern-label">Heures:</span>
-                        <% (prediction[:trading_hours] || []).first(3).each do |hour| %>
-                          <span class="pattern-tag"><%= hour[:hour] %>h</span>
-                        <% end %>
-                      </div>
-                      <div class="pattern-mini">
-                        <span class="pattern-label">Jours:</span>
-                        <% (prediction[:trading_days] || []).each do |day| %>
-                          <span class="pattern-tag"><%= day[:day_name] %></span>
-                        <% end %>
-                      </div>
+                          <div class="prediction-probability"><%= (pred[:probability] * 100).round %>%</div>
+                        </div>
+                      <% end %>
                     </div>
-                  </div>
+                  <% else %>
+                    <div class="prediction-empty">
+                      <%= svg_tag "calendar", size: "32" %>
+                      <p>Aucune prédiction pour aujourd'hui</p>
+                    </div>
+                  <% end %>
                 </div>
               </div>
             <% end %>
           </div>
         <% else %>
-          <div class="no-bots-today">
-            <div class="no-bots-icon">
-              <i class="fa-icon fa-lg fa-robot"></i>
-            </div>
+          <div class="empty-state">
+            <%= svg_tag "robot", size: "64" %>
             <h3>Aucun bot actif aujourd'hui</h3>
             <p>Vos bots n'ont pas de prédictions pour aujourd'hui. Ils se déclencheront peut-être demain !</p>
           </div>
@@ -498,159 +137,940 @@
       </div>
     <% end %>
     
-    <!-- Graphique des Performances des Bots -->
-    <div class="card">
-      <div class="card-header">
-        <h2>
-          <%= stat_icon(:performance, size: 'lg') %>
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <%= svg_tag "bar-chart", size: "20" %>
           Performances des Bots
         </h2>
-        <p>
-          <%= stat_icon(:analysis, size: 'sm') %>
-          Analyse des performances de tous vos bots
-        </p>
+        <p class="section-subtitle">Analyse détaillée des performances de tous vos bots</p>
       </div>
       
-      <div class="chart-container" style="height: 400px;">
-        <div id="bots-chart-loading" style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);">
-          <div style="text-align: center;">
-            <div style="width: 40px; height: 40px; border: 3px solid var(--border-color); border-top: 3px solid var(--color-accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
-            <p style="margin: 0;">Chargement du graphique des bots...</p>
-          </div>
+      <div class="chart-container-apple">
+        <div id="bots-chart-loading" class="chart-loader">
+          <div class="loader-spinner"></div>
+          <p>Chargement du graphique...</p>
         </div>
-        <canvas id="botsChart" style="display: none;"></canvas>
+        <canvas id="botsChart"></canvas>
       </div>
     </div>
     
-    <!-- Profits Mensuels & Projection -->
-    <div class="card">
-      <h2>
-        <%= stat_icon(:monthly, size: 'lg') %>
-        Profits Mensuels & Projection
-      </h2>
-      
-      <div class="two-col" style="margin-bottom: 24px;">
-        <div class="info-box info-box-info">
-          <div class="info-box-title">
-            <%= stat_icon(:performance, size: 'md') %>
-            Performance Historique
-          </div>
-          <p style="margin: 0;">Vos profits réels des 12 derniers mois</p>
-        </div>
-        <div class="info-box info-box-success">
-          <div class="info-box-title">
-            <%= stat_icon(:projection, size: 'md') %>
-            Projection (6 mois)
-          </div>
-          <p style="margin: 0;">Basée sur votre moyenne mensuelle: <strong><%= number_to_currency((@projection_data&.last&.dig(:balance) || 0 - current_user.mt5_accounts.sum(:balance)) / 6, unit: "€", format: "%n %u") %>/mois</strong></p>
-        </div>
-      </div>
-      
-      <div class="chart-container">
-        <div id="chart-loading" style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);">
-          <div style="text-align: center;">
-            <div style="width: 40px; height: 40px; border: 3px solid var(--border-color); border-top: 3px solid var(--color-accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
-            <p style="margin: 0;">Chargement du graphique...</p>
-          </div>
-        </div>
-        <canvas id="portfolioChart" style="display: none;"></canvas>
-      </div>
-    </div>
-    
-    <!-- Comptes MT5 et Activité Récente -->
-    <div class="two-col">
-      <div class="card">
-        <h2>
-          <%= stat_icon(:accounts, size: 'lg') %>
-          Comptes MT5
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <%= svg_tag "trending-up", size: "20" %>
+          Profits Mensuels & Projection
         </h2>
+        <p class="section-subtitle">Performance historique et projection future</p>
+      </div>
+      
+      <div class="info-cards">
+        <div class="info-card">
+          <%= svg_tag "clock", size: "24" %>
+          <div>
+            <h3>Performance Historique</h3>
+            <p>Vos profits réels des 12 derniers mois</p>
+          </div>
+        </div>
+        <div class="info-card info-card-highlight">
+          <%= svg_tag "target", size: "24" %>
+          <div>
+            <h3>Projection (6 mois)</h3>
+            <p>Basée sur votre moyenne mensuelle: <strong><%= number_to_currency((@projection_data&.last&.dig(:balance) || 0 - current_user.mt5_accounts.sum(:balance)) / 6, unit: "€", format: "%n %u") %>/mois</strong></p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="chart-container-apple">
+        <div id="chart-loading" class="chart-loader">
+          <div class="loader-spinner"></div>
+          <p>Chargement du graphique...</p>
+        </div>
+        <canvas id="portfolioChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="two-col-layout">
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">
+            <%= svg_tag "wallet", size: "20" %>
+            Comptes MT5
+          </h2>
+        </div>
+        
         <% if @mt5_accounts&.any? %>
-          <table>
-            <thead>
-              <tr>
-                <th>
-                  <%= stat_icon(:accounts, size: 'sm') %>
-                  Compte
-                </th>
-                <th>
-                  <%= stat_icon(:balance, size: 'sm') %>
-                  Balance
-                </th>
-                <th>
-                  <%= stat_icon(:profit, size: 'sm') %>
-                  Gains
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <% @mt5_accounts.each do |account| %>
+          <div class="table-container">
+            <table class="apple-table">
+              <thead>
                 <tr>
-                  <td><%= account.account_name %></td>
-                  <td class="positive"><%= number_to_currency(account.balance, unit: "€", format: "%n %u") %></td>
-                  <td class="<%= account.net_gains > 0 ? 'positive' : 'negative' %>">
-                    <%= number_to_currency(account.net_gains, unit: "€", format: "%n %u") %>
-                  </td>
+                  <th>Compte</th>
+                  <th>Balance</th>
+                  <th>Gains</th>
                 </tr>
-              <% end %>
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                <% @mt5_accounts.each do |account| %>
+                  <tr>
+                    <td>
+                      <div class="account-name">
+                        <%= svg_tag "user", size: "16" %>
+                        <span><%= account.account_name %></span>
+                      </div>
+                    </td>
+                    <td class="<%= 'value-positive' %>">
+                      <%= number_to_currency(account.balance, unit: "€", format: "%n %u") %>
+                    </td>
+                    <td class="<%= account.net_gains > 0 ? 'value-positive' : 'value-negative' %>">
+                      <%= number_to_currency(account.net_gains, unit: "€", format: "%n %u") %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
         <% else %>
-          <p style="text-align: center; color: var(--text-muted); padding: 40px;">
-            <%= stat_icon(:accounts, size: 'lg', color: 'muted') %>
-            Aucun compte MT5
-          </p>
+          <div class="empty-state">
+            <%= svg_tag "wallet", size: "64" %>
+            <h3>Aucun compte MT5</h3>
+            <p>Connectez vos comptes pour commencer</p>
+          </div>
         <% end %>
       </div>
       
-      <div class="card">
-        <h2>
-          <%= stat_icon(:trades, size: 'lg') %>
-          Activité Récente
-        </h2>
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">
+            <%= svg_tag "activity", size: "20" %>
+            Activité Récente
+          </h2>
+        </div>
+        
         <% recent_trades = @client.trades.order(close_time: :desc).limit(5) %>
         <% if recent_trades.any? %>
-          <table>
-            <thead>
-              <tr>
-                <th>
-                  <%= stat_icon(:monthly, size: 'sm') %>
-                  Date
-                </th>
-                <th>
-                  <%= stat_icon(:symbols, size: 'sm') %>
-                  Symbole
-                </th>
-                <th>
-                  <%= stat_icon(:profit, size: 'sm') %>
-                  Profit
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <% recent_trades.each do |trade| %>
+          <div class="table-container">
+            <table class="apple-table">
+              <thead>
                 <tr>
-                  <td><%= trade.close_time&.strftime("%d/%m/%Y") || "Ouvert" %></td>
-                  <td><%= trade.symbol %></td>
-                  <td class="<%= trade.profit > 0 ? 'positive' : 'negative' %>">
-                    <%= number_to_currency(trade.profit, unit: "€", format: "%n %u") %>
-                  </td>
+                  <th>Date</th>
+                  <th>Symbole</th>
+                  <th>Profit</th>
                 </tr>
-              <% end %>
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                <% recent_trades.each do |trade| %>
+                  <tr>
+                    <td><%= trade.close_time&.strftime("%d/%m/%Y") || "Ouvert" %></td>
+                    <td><%= trade.symbol %></td>
+                    <td class="<%= trade.profit > 0 ? 'value-positive' : 'value-negative' %>">
+                      <%= number_to_currency(trade.profit, unit: "€", format: "%n %u") %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
         <% else %>
-          <p style="text-align: center; color: var(--text-muted); padding: 40px;">
-            <%= stat_icon(:trades, size: 'lg', color: 'muted') %>
-            Aucune transaction récente
-          </p>
+          <div class="empty-state">
+            <%= svg_tag "activity", size: "64" %>
+            <h3>Aucune transaction récente</h3>
+            <p>Vos trades apparaîtront ici</p>
+          </div>
         <% end %>
       </div>
     </div>
   </div>
 </div>
 
+<style>
+.dashboard-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding: 40px 0;
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-content h1 {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 12px 0;
+}
+
+.hero-subtitle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.hero-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--color-accent);
+  color: white;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.hero-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 28px;
+  padding: 32px;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 4px rgba(255, 255, 255, 0.2);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transform: scaleX(0);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.1), inset 0 1px 4px rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.15) 100%);
+}
+
+.stat-card:hover::before {
+  transform: scaleX(1);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-card-accent {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+}
+
+.stat-card-accent .stat-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35);
+}
+
+.stat-card-accent::before {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-card-success {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%);
+}
+
+.stat-card-success .stat-icon {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+}
+
+.stat-card-success::before {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.stat-card-info {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.08) 100%);
+}
+
+.stat-card-info .stat-icon {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
+}
+
+.stat-card-info::before {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.stat-card-warning {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.08) 100%);
+}
+
+.stat-card-warning .stat-icon {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.35);
+}
+
+.stat-card-warning::before {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.stat-icon {
+  color: white;
+}
+
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.value-positive {
+  color: #10b981;
+}
+
+.value-negative {
+  color: #ef4444;
+}
+
+.stat-change {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.dashboard-filters {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 28px;
+  padding: 40px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 4px rgba(255, 255, 255, 0.2);
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.filter-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.filter-select-apple {
+  width: 100%;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23424245' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  box-shadow: inset 0 1px 4px rgba(255, 255, 255, 0.15);
+}
+
+.filter-select-apple:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), 0 8px 24px rgba(59, 130, 246, 0.08), inset 0 1px 4px rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.12) 100%);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-apple {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-apple-primary {
+  background: var(--color-accent);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-apple-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+}
+
+.btn-apple-secondary {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(20px);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.btn-apple-secondary:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.3) 100%);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.4), 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.section-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 28px;
+  padding: 44px;
+  margin-bottom: 32px;
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 4px rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.section-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+}
+
+.section-header {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 8px 0;
+}
+
+.section-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+}
+
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+  backdrop-filter: blur(10px);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 8px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.bot-prediction-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.bot-prediction-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 4px rgba(255, 255, 255, 0.2);
+}
+
+.prediction-card-header {
+  margin-bottom: 16px;
+}
+
+.prediction-bot-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.prediction-bot-icon {
+  font-size: 32px;
+}
+
+.prediction-bot-name {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.prediction-bot-meta {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.prediction-content h4 {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin: 0 0 12px 0;
+}
+
+.prediction-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prediction-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.15);
+}
+
+.prediction-time {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 35px;
+}
+
+.prediction-progress {
+  flex: 1;
+  min-width: 0;
+}
+
+.prediction-progress-track {
+  height: 10px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.04) 100%);
+  backdrop-filter: blur(8px);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.08), inset 0 -2px 4px rgba(255, 255, 255, 0.2);
+}
+
+.prediction-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
+  border-radius: 6px;
+  position: relative;
+  box-shadow: 0 2px 12px rgba(16, 185, 129, 0.4), inset 0 1px 3px rgba(255, 255, 255, 0.3);
+  filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.3));
+}
+
+.prediction-probability {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 40px;
+  text-align: right;
+}
+
+.prediction-empty {
+  text-align: center;
+  padding: 48px 24px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px dashed rgba(0, 0, 0, 0.1);
+  color: var(--text-muted);
+}
+
+.prediction-empty svg {
+  opacity: 0.3;
+  margin-bottom: 16px;
+}
+
+.prediction-empty p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.chart-container-apple {
+  position: relative;
+  height: 400px;
+  width: 100%;
+}
+
+.chart-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.3);
+}
+
+.chart-loader p {
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.loader-spinner {
+  width: 56px;
+  height: 56px;
+  border: 4px solid rgba(59, 130, 246, 0.2);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+#botsChart, #portfolioChart {
+  display: none;
+}
+
+.info-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.info-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 24px;
+  padding: 28px;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 4px rgba(255, 255, 255, 0.2);
+}
+
+.info-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1), inset 0 1px 4px rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.15) 100%);
+}
+
+.info-card-highlight {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.info-card h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.info-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.two-col-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.table-container {
+  overflow-x: auto;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(40px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 4px rgba(255, 255, 255, 0.15), 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.apple-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.apple-table thead tr {
+  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+.apple-table th {
+  text-align: left;
+  padding: 16px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.06) 100%);
+  backdrop-filter: blur(20px);
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.15);
+}
+
+.apple-table td {
+  padding: 20px 16px;
+  font-size: 15px;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  backdrop-filter: blur(20px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1);
+}
+
+.apple-table tbody tr:hover td {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.12) 100%);
+  transform: translateX(4px);
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.25), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.account-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 32px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.2) 100%);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 1px dashed rgba(0, 0, 0, 0.08);
+  color: var(--text-muted);
+}
+
+.empty-state svg {
+  opacity: 0.3;
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+}
+
+.empty-state p {
+  font-size: 14px;
+  margin: 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboard-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 32px 0;
+  }
+  
+  .hero-content h1 {
+    font-size: 36px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .bot-prediction-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .two-col-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-hero {
+    padding: 24px 0;
+  }
+  
+  .hero-content h1 {
+    font-size: 28px;
+  }
+  
+  .hero-subtitle {
+    font-size: 16px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .stat-card {
+    padding: 20px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
+  
+  .dashboard-filters {
+    padding: 24px;
+  }
+  
+  .filter-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .filter-actions {
+    flex-direction: column;
+  }
+  
+  .btn-apple {
+    width: 100%;
+  }
+  
+  .section-card {
+    padding: 24px;
+  }
+  
+  .section-title {
+    font-size: 20px;
+  }
+  
+  .chart-container-apple {
+    height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-hero {
+    padding: 20px 0;
+  }
+  
+  .hero-content h1 {
+    font-size: 24px;
+  }
+  
+  .hero-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .stat-card {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .dashboard-filters {
+    padding: 20px;
+  }
+  
+  .section-card {
+    padding: 20px;
+  }
+  
+  .chart-container-apple {
+    height: 250px;
+  }
+}
+</style>
+
 <script data-turbo-track="reload">
-// Fonction pour charger Chart.js de manière asynchrone
 function loadChartJS() {
   return new Promise((resolve, reject) => {
     if (typeof Chart !== 'undefined') {
@@ -666,7 +1086,6 @@ function loadChartJS() {
   });
 }
 
-// Initialiser le graphique des bots
 async function initializeBotsChart() {
   try {
     await loadChartJS();
@@ -675,17 +1094,9 @@ async function initializeBotsChart() {
     if (!ctx) return;
     
     const loadingDiv = document.getElementById('bots-chart-loading');
-    if (loadingDiv) {
-      loadingDiv.style.display = 'none';
-    }
-    ctx.style.display = 'block';
-    
     const isDarkMode = document.body.classList.contains('dark-mode');
-    const textColor = isDarkMode ? '#e2e8f0' : '#1e293b';
-    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
     
     const botsData = <%= raw current_user.bot_purchases.includes(:trading_bot).map { |bp| 
-      # Calculer le taux de réussite directement depuis les trades du user
       user_trades = Trade.joins(:mt5_account).where(mt5_accounts: { user_id: current_user.id })
                          .where(magic_number: bp.magic_number)
       winning_trades = user_trades.where("profit > 0").count
@@ -702,23 +1113,22 @@ async function initializeBotsChart() {
     }.to_json %>;
     
     if (botsData.length === 0) {
-      ctx.style.display = 'none';
-      loadingDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fa-icon fa-lg fa-robot" style="font-size: 3rem; opacity: 0.5; margin-bottom: 16px;"></i><h3>Aucun bot trouvé</h3><p>Vous n\'avez pas encore de bots assignés</p></div>';
+      loadingDiv.innerHTML = '<div class="empty-state"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"/></svg><h3>Aucun bot trouvé</h3><p>Vous n\'avez pas encore de bots assignés</p></div>';
       loadingDiv.style.display = 'flex';
       return;
     }
     
+    if (loadingDiv) loadingDiv.style.display = 'none';
+    ctx.style.display = 'block';
+    
+    const textColor = isDarkMode ? '#e2e8f0' : '#1e293b';
+    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
     const botNames = botsData.map(bot => bot.name);
     const profits = botsData.map(bot => bot.profit);
     const tradesCount = botsData.map(bot => bot.trades);
     
-    const profitColors = profits.map(profit => 
-      profit >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'
-    );
-    
-    const borderColors = profits.map(profit => 
-      profit >= 0 ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)'
-    );
+    const profitColors = profits.map(profit => profit >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)');
+    const borderColors = profits.map(profit => profit >= 0 ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)');
     
     new Chart(ctx, {
       type: 'bar',
@@ -738,10 +1148,10 @@ async function initializeBotsChart() {
             label: 'Nombre de Trades',
             data: tradesCount,
             type: 'line',
-            borderColor: 'rgba(59, 130, 246, 1)',
+            borderColor: '#3b82f6',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             borderWidth: 3,
-            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+            pointBackgroundColor: '#3b82f6',
             pointBorderColor: '#fff',
             pointBorderWidth: 2,
             pointRadius: 6,
@@ -754,10 +1164,7 @@ async function initializeBotsChart() {
         maintainAspectRatio: false,
         plugins: {
           title: {
-            display: true,
-            text: 'Performances des Bots',
-            font: { size: 18, weight: 'bold' },
-            color: textColor
+            display: false
           },
           legend: {
             display: true,
@@ -812,28 +1219,19 @@ async function initializeBotsChart() {
   }
 }
 
-// Initialiser le graphique des profits mensuels
 async function initializeChart() {
   try {
-    // Attendre que Chart.js soit chargé
     await loadChartJS();
     
     const ctx = document.getElementById('portfolioChart');
-    if (!ctx) {
-      console.warn('Canvas element not found');
-      return;
-    }
+    if (!ctx) return;
     
-    // Détruire l'instance précédente si elle existe
     if (window.portfolioChartInstance) {
       window.portfolioChartInstance.destroy();
     }
     
-    // Masquer le loader et afficher le canvas
     const loadingDiv = document.getElementById('chart-loading');
-    if (loadingDiv) {
-      loadingDiv.style.display = 'none';
-    }
+    if (loadingDiv) loadingDiv.style.display = 'none';
     ctx.style.display = 'block';
   
     const isDarkMode = document.body.classList.contains('dark-mode');
@@ -849,7 +1247,6 @@ async function initializeChart() {
     const allLabels = [...historicalLabels, ...projectionLabels];
     
     const historicalProfits = historicalData.map(d => d.profit);
-    
     const projectionProfits = new Array(historicalData.length).fill(null);
     projectionData.forEach((d, i) => {
       projectionProfits.push(d.balance);
@@ -1014,7 +1411,6 @@ async function initializeChart() {
   }
 }
 
-// Initialiser les graphiques
 document.addEventListener('DOMContentLoaded', function() {
   initializeChart();
   initializeBotsChart();

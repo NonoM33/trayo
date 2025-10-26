@@ -24,7 +24,7 @@
       <div class="stat-label">Clients Créés</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value"><%= @tokens.group_by_day(:used_at).count.size %></div>
+      <div class="stat-value"><%= Mt5Token.where(used_at: 30.days.ago..Time.current).count %></div>
       <div class="stat-label">Derniers 30 jours</div>
     </div>
   </div>

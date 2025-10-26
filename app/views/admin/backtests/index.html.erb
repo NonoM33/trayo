@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Backtests - <%= @bot.name %></title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "Backtests - #{@bot.name}" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <%= link_to admin_bot_path(@bot), class: "back-link" do %>
+          <i class="fa-icon fa-md fa-arrow-left"></i> Retour au bot
+        <% end %>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 24px 0;">
+          <h1>📊 Backtests - <%= @bot.name %></h1>
+          <%= link_to new_admin_bot_backtest_path(@bot), class: "btn btn-primary" do %>
+            <i class="fa-icon fa-md fa-plus"></i> Ajouter un backtest
+          <% end %>
+        </div>
+        
+        <% if @backtests.any? %>
+          <div class="card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Période</th>
+                    <th>Durée</th>
+                    <th>Trades</th>
+                    <th>Profit Total</th>
+                    <th>Win Rate</th>
+                    <th>Drawdown Max</th>
+                    <th>Proj. Mensuelle</th>
+                    <th>Proj. Annuelle</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @backtests.each do |backtest| %>
+                    <tr>
+                      <td>
+                        <div style="font-weight: 600;"><%= backtest.start_date&.strftime("%d/%m/%Y") %></div>
+                        <div style="font-size: 12px; color: var(--text-muted);">au <%= backtest.end_date&.strftime("%d/%m/%Y") %></div>
+                      </td>
+                      <td>
+                        <div><%= backtest.duration_years %> ans</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">(<%= backtest.duration_days %> jours)</div>
+                      </td>
+                      <td>
+                        <div><%= backtest.total_trades %></div>
+                        <div style="font-size: 11px; color: var(--text-muted);">
+                          <span style="color: var(--color-success);">+<%= backtest.winning_trades %></span> 
+                          / 
+                          <span style="color: var(--color-danger);">-<%= backtest.losing_trades %></span>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="<%= backtest.total_profit > 0 ? 'positive' : 'negative' %>">
+                          <%= number_to_currency(backtest.total_profit, unit: "€", format: "%n %u") %>
+                        </div>
+                      </td>
+                      <td>
+                        <div style="font-weight: 600;"><%= number_to_percentage(backtest.win_rate, precision: 1) %></div>
+                      </td>
+                      <td>
+                        <div class="<%= backtest.max_drawdown.abs < 100 ? '' : 'negative' %>">
+                          <%= number_to_currency(backtest.max_drawdown, unit: "€", format: "%n %u") %>
+                        </div>
+                      </td>
+                      <td>
+                        <div style="font-size: 13px;">
+                          <%= number_to_currency(backtest.projection_monthly_min, unit: "€", format: "%n %u") %> - 
+                          <%= number_to_currency(backtest.projection_monthly_max, unit: "€", format: "%n %u") %>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="<%= backtest.projection_yearly > 0 ? 'positive' : '' %>" style="font-weight: 600;">
+                          <%= number_to_currency(backtest.projection_yearly, unit: "€", format: "%n %u") %>
+                        </div>
+                      </td>
+                      <td>
+                        <% if backtest.is_active? %>
+                          <span class="status-badge status-validated">Actif</span>
+                        <% else %>
+                          <span class="status-badge status-pending">Inactif</span>
+                        <% end %>
+                      </td>
+                      <td>
+                        <div style="display: flex; gap: 8px;">
+                          <% unless backtest.is_active? %>
+                            <%= form_with url: activate_admin_bot_backtest_path(@bot, backtest), method: :post, local: true, style: "margin: 0;" do |f| %>
+                              <button type="submit" class="btn btn-sm btn-success" title="Activer ce backtest">
+                                <i class="fa-icon fa-xs fa-check-circle"></i>
+                              </button>
+                            <% end %>
+                          <% end %>
+                          <%= form_with url: recalculate_admin_bot_backtest_path(@bot, backtest), method: :post, local: true, style: "margin: 0;" do |f| %>
+                            <button type="submit" class="btn btn-sm btn-secondary" title="Recalculer les projections">
+                              <i class="fa-icon fa-xs fa-calculator"></i>
+                            </button>
+                          <% end %>
+                          <%= button_to admin_bot_backtest_path(@bot, backtest), method: :delete, 
+                              data: { turbo_confirm: "Supprimer ce backtest ?" }, 
+                              class: "btn btn-sm btn-danger",
+                              title: "Supprimer" do %>
+                            <i class="fa-icon fa-xs fa-trash"></i>
+                          <% end %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <% else %>
+          <div class="card" style="text-align: center; padding: 60px 20px;">
+            <div style="font-size: 60px; margin-bottom: 24px; opacity: 0.3;">
+              <i class="fa-icon fa-md fa-chart-line"></i>
+            </div>
+            <h2>Aucun backtest</h2>
+            <p style="color: var(--text-muted); margin-bottom: 32px;">
+              Ajoutez un backtest de 2 ans pour afficher les projections dans la boutique
+            </p>
+            <%= link_to new_admin_bot_backtest_path(@bot), class: "btn btn-primary" do %>
+              <i class="fa-icon fa-md fa-plus"></i> Ajouter le premier backtest
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

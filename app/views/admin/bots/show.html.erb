@@ -24,22 +24,26 @@
               <i class="fa-icon fa-md fa-arrow-left"></i> Retour à Mes Bots
             <% end %>
           <% else %>
-            <%= link_to admin_bots_path, class: "back-link", style: "margin: 0;" do %>
-              <i class="fa-icon fa-md fa-arrow-left"></i> Retour aux Bots
+          <%= link_to admin_bots_path, class: "back-link", style: "margin: 0;" do %>
+            <i class="fa-icon fa-md fa-arrow-left"></i> Retour aux Bots
             <% end %>
           <% end %>
           <% if current_user.is_admin? %>
-            <div style="display: flex; gap: 12px;">
-              <%= link_to edit_admin_bot_path(@bot), class: "btn btn-primary" do %>
-                <i class="fa-icon fa-md fa-edit"></i>
-                Modifier
+          <div style="display: flex; gap: 12px;">
+              <%= link_to admin_bot_backtests_path(@bot), class: "btn btn-secondary" do %>
+                <i class="fa-icon fa-md fa-chart-line"></i>
+                Backtests
               <% end %>
-              <%= button_to admin_bot_path(@bot), method: :delete,
-                  data: { turbo_confirm: "Supprimer ce bot ?" }, class: "btn btn-danger" do %>
-                <i class="fa-icon fa-md fa-trash"></i>
-                Supprimer
-              <% end %>
-            </div>
+            <%= link_to edit_admin_bot_path(@bot), class: "btn btn-primary" do %>
+              <i class="fa-icon fa-md fa-edit"></i>
+              Modifier
+            <% end %>
+            <%= button_to admin_bot_path(@bot), method: :delete,
+                data: { turbo_confirm: "Supprimer ce bot ?" }, class: "btn btn-danger" do %>
+              <i class="fa-icon fa-md fa-trash"></i>
+              Supprimer
+            <% end %>
+          </div>
           <% end %>
         </div>
 
@@ -49,9 +53,7 @@
 
         <div class="card">
           <div style="display: flex; align-items: start; gap: 24px;">
-            <div style="width: 120px; height: 120px; background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 48px; color: white;">
-              <i class="fa-icon fa-md fa-robot"></i>
-            </div>
+         
             
             <div style="flex: 1;">
               <h2 style="margin: 0 0 12px 0;"><%= @bot.name %></h2>
@@ -77,27 +79,28 @@
               Informations Financières
             </h3>
             <div class="info-grid">
+              <% projections = @bot.calculate_real_projections %>
               <div class="info-item">
                 <div class="info-label">Prix</div>
                 <div class="info-value positive"><%= @bot.formatted_price %></div>
               </div>
               <div class="info-item">
                 <div class="info-label">Projection Mensuelle</div>
-                <div class="info-value">
-                  <%= number_to_currency(@bot.projection_monthly_min, unit: "€", format: "%n %u") %> - 
-                  <%= number_to_currency(@bot.projection_monthly_max, unit: "€", format: "%n %u") %>
+                <div class="info-value <%= projections[:monthly_max] > 0 ? 'positive' : '' %>">
+                  <%= number_to_currency(projections[:monthly_min], unit: "€", format: "%n %u") %> - 
+                  <%= number_to_currency(projections[:monthly_max], unit: "€", format: "%n %u") %>
                 </div>
               </div>
               <div class="info-item">
                 <div class="info-label">Projection Annuelle</div>
-                <div class="info-value positive">
-                  <%= number_to_currency(@bot.projection_yearly, unit: "€", format: "%n %u") %>
+                <div class="info-value <%= projections[:yearly] > 0 ? 'positive' : 'negative' %>">
+                  <%= number_to_currency(projections[:yearly], unit: "€", format: "%n %u") %>
                 </div>
               </div>
               <div class="info-item">
                 <div class="info-label">Drawdown Max</div>
-                <div class="info-value negative">
-                  <%= number_to_percentage(@bot.max_drawdown_limit, precision: 1) %>%
+                <div class="info-value <%= projections[:drawdown] > 80 ? 'negative' : '' %>">
+                  <%= number_to_percentage(projections[:drawdown], precision: 1) %>%
                 </div>
               </div>
             </div>
@@ -112,6 +115,12 @@
               <div class="info-item">
                 <div class="info-label">Taux de Réussite</div>
                 <div class="info-value positive"><%= number_to_percentage(@bot.win_rate, precision: 1) %></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Rendement Journalier</div>
+                <div class="info-value <%= projections[:daily_return] > 0 ? 'positive' : 'negative' %>">
+                  <%= number_to_percentage(projections[:daily_return], precision: 3) %>%
+                </div>
               </div>
               <div class="info-item">
                 <div class="info-label">Utilisateurs Actifs</div>
@@ -137,38 +146,11 @@
           </div>
         </div>
 
-        <% if @bot.strategy_description.present? %>
           <div class="card">
             <h3>
-              <i class="fa-icon fa-md fa-brain"></i>
-              Stratégie de Trading
-            </h3>
-            <p style="white-space: pre-wrap; line-height: 1.6;"><%= @bot.strategy_description %></p>
-          </div>
-        <% end %>
-
-        <% if @bot.features_list.any? %>
-          <div class="card">
-            <h3>
-              <i class="fa-icon fa-md fa-star"></i>
-              Caractéristiques Clés
-            </h3>
-            <ul style="list-style: none; padding: 0; margin: 0;">
-              <% @bot.features_list.each do |feature| %>
-                <li style="padding: 12px; margin-bottom: 8px; background: var(--bg-hover); border-radius: 8px; display: flex; align-items: center; gap: 12px;">
-                  <i class="fa-icon fa-md fa-check-circle"></i>
-                  <span><%= feature %></span>
-                </li>
-              <% end %>
-            </ul>
-          </div>
-        <% end %>
-
-        <div class="card">
-          <h3>
             <i class="fa-icon fa-md fa-chart-bar"></i>
             Analyse des Performances
-          </h3>
+            </h3>
           <% if @purchases.any? %>
             <% 
               # Analyser les statistiques des meilleurs purchases
@@ -261,15 +243,11 @@
                     </div>
                   <% else %>
                     <div class="info-value">
-                      <% if duration[:avg_duration_hours] >= 1 %>
-                        <%= duration[:avg_duration_hours] %>h
-                      <% else %>
-                        <%= duration[:avg_duration_minutes] %> min
-                      <% end %>
+                      <%= format_duration(duration[:avg_duration_minutes]) %>
                     </div>
                     <div class="help-text">
-                      Min: <%= duration[:min_duration_minutes] %> min
-                      | Max: <%= duration[:max_duration_minutes] %> min
+                      Min: <%= format_duration(duration[:min_duration_minutes]) %>
+                      | Max: <%= format_duration(duration[:max_duration_minutes]) %>
                     </div>
                   <% end %>
                 </div>
@@ -288,7 +266,12 @@
                 </div>
                 
                 <div class="info-item">
-                  <div class="info-label">Drawdown Max</div>
+                  <div class="info-label">
+                    Drawdown Max
+                    <span class="help-icon" title="Perte maximale depuis le pic de capital par rapport au capital investi. Au-dessus de 80%, le risque devient important.">
+                      <i class="fa-icon fa-sm fa-info-circle" style="color: #9ca3af; cursor: help; margin-left: 6px;"></i>
+                    </span>
+                  </div>
                   <% 
                     drawdown_pct = best_purchase.drawdown_percentage
                     drawdown_amount = best_purchase.get_current_drawdown
@@ -297,8 +280,8 @@
                     <%= number_to_percentage(drawdown_pct, precision: 1) %>%
                   </div>
                   <div class="help-text">
-                    <%= number_to_currency(drawdown_amount, unit: "€", format: "%n %u") %>
-                    sur <%= number_to_currency(best_purchase.trading_bot.max_drawdown_limit, unit: "€", format: "%n %u") %>
+                    Drawdown: <%= number_to_currency(drawdown_amount, unit: "€", format: "%n %u") %><br>
+                    Limite: <%= number_to_currency(best_purchase.trading_bot.max_drawdown_limit, unit: "€", format: "%n %u") %>
                   </div>
                 </div>
               </div>
@@ -337,15 +320,15 @@
                           </td>
                           <td style="color: #10b981;"><%= day[:winning_trades] %></td>
                           <td style="color: #ef4444;"><%= day[:losing_trades] %></td>
-                          <td><%= number_to_currency(day[:total_commission], unit: "€", format: "%n %u") %></td>
-                          <td><%= number_to_currency(day[:total_swap], unit: "€", format: "%n %u") %></td>
+                          <td style="color: <%= day[:total_commission] >= 0 ? '#10b981' : '#ef4444' %>;"><%= format_cost_with_sign(day[:total_commission]) %></td>
+                          <td style="color: <%= day[:total_swap] >= 0 ? '#10b981' : '#ef4444' %>;"><%= format_cost_with_sign(day[:total_swap]) %></td>
                         </tr>
                       <% end %>
                     </tbody>
                   </table>
-                </div>
-              <% end %>
-              
+          </div>
+        <% end %>
+
               <% if hour_stats.any? %>
                 <h4 style="margin-top: 24px; margin-bottom: 16px;">⏰ Analyse par Heure</h4>
                 <div class="table-wrapper">
@@ -392,12 +375,12 @@
         </div>
 
         <% if current_user.is_admin? %>
-          <div class="card">
-            <h3>
-              <i class="fa-icon fa-md fa-users"></i>
-              Clients Utilisant ce Bot
-            </h3>
-            <% if @purchases.any? %>
+        <div class="card">
+          <h3>
+            <i class="fa-icon fa-md fa-users"></i>
+            Clients Utilisant ce Bot
+          </h3>
+          <% if @purchases.any? %>
             <table>
               <thead>
                 <tr>
@@ -438,12 +421,12 @@
                 <% end %>
               </tbody>
             </table>
-            <% else %>
-              <p style="text-align: center; color: var(--text-muted); padding: 40px;">
-                Aucun client n'utilise ce bot pour le moment
-              </p>
-            <% end %>
-          </div>
+          <% else %>
+            <p style="text-align: center; color: var(--text-muted); padding: 40px;">
+              Aucun client n'utilise ce bot pour le moment
+            </p>
+          <% end %>
+        </div>
         <% end %>
       </div>
     </div>

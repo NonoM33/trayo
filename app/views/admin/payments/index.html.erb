@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Payments - Admin Trayo</title>
+  <title>Paiements - Admin Trayo</title>
   <%= stylesheet_link_tag "admin" %>
 </head>
 <body>
-  <% @page_title = "Payments Management" %>
+  <% @page_title = "Gestion des Paiements" %>
   
   <div class="app-layout">
     <%= render 'admin/shared/sidebar' %>
@@ -22,7 +22,7 @@
         <% end %>
         
         <div class="card">
-          <h2>All Payments</h2>
+          <h2>Tous les Paiements</h2>
           
           <% if @payments && @payments.any? %>
             <table>
@@ -30,10 +30,10 @@
                 <tr>
                   <th>Date</th>
                   <th>Client</th>
-                  <th>Amount</th>
-                  <th>Method</th>
-                  <th>Reference</th>
-                  <th>Status</th>
+                  <th>Montant</th>
+                  <th>Méthode</th>
+                  <th>Référence</th>
+                  <th>Statut</th>
                   <th>Notes</th>
                   <th>Actions</th>
                 </tr>
@@ -67,15 +67,15 @@
               </tbody>
             </table>
           <% else %>
-            <p style="color: var(--text-muted); text-align: center; padding: 40px;">No payments yet</p>
+            <p style="color: var(--text-muted); text-align: center; padding: 40px;">Aucun paiement pour le moment</p>
           <% end %>
         </div>
         
         <div class="card">
-          <h2>Payment Statistics</h2>
+          <h2>Statistiques des Paiements</h2>
           <div class="info-grid">
             <div class="info-item">
-              <div class="info-label">Total Payments</div>
+              <div class="info-label">TOTAL DES PAIEMENTS</div>
               <div class="info-value"><%= @payments ? @payments.count : 0 %></div>
             </div>
             <div class="info-item">
@@ -87,9 +87,9 @@
               <div class="info-value" style="color: var(--color-warning);"><%= @payments ? @payments.select { |p| p.status == "pending" }.count : 0 %></div>
             </div>
             <div class="info-item">
-              <div class="info-label">Total Amount</div>
+              <div class="info-label">MONTANT TOTAL</div>
               <div class="info-value positive">
-                <%= @payments ? number_to_currency(@payments.sum(&:amount), unit: "€", format: "%n %u") : "$0.00" %>
+                <%= @payments ? number_to_currency(@payments.sum(&:amount), unit: "€", format: "%n %u") : "0,00 €" %>
               </div>
             </div>
           </div>
