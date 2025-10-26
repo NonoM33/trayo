@@ -19,7 +19,12 @@
     })();
   </script>
   
-  <%= yield %>
+  <%= render 'admin/shared/navbar' %>
+  <%= render 'admin/shared/sidebar' %>
+  
+  <div class="main-content">
+    <%= yield %>
+  </div>
 </body>
 </html>
 

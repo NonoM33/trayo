@@ -20,7 +20,7 @@
   </div>
   <div class="navbar-right">
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
-      <span class="theme-icon" id="themeIcon"><i class="fa-icon fa-md fa-moon"></i></span>
+      <span class="theme-icon" id="themeIcon"><i class="fa-solid fa-moon"></i></span>
     </button>
   </div>
 </div>
@@ -32,11 +32,11 @@
     
     if (body.classList.contains('dark-mode')) {
       body.classList.remove('dark-mode');
-      icon.innerHTML = '<i class="fa-icon fa-md fa-moon"></i>';
+      icon.innerHTML = '<i class="fa-solid fa-moon"></i>';
       localStorage.setItem('theme', 'light');
     } else {
       body.classList.add('dark-mode');
-      icon.innerHTML = '<i class="fa-icon fa-md fa-sun"></i>';
+      icon.innerHTML = '<i class="fa-solid fa-sun"></i>';
       localStorage.setItem('theme', 'dark');
     }
   }
@@ -47,7 +47,7 @@
     
     if (savedTheme === 'dark') {
       document.body.classList.add('dark-mode');
-      if (icon) icon.innerHTML = '<i class="fa-icon fa-md fa-sun"></i>';
+      if (icon) icon.innerHTML = '<i class="fa-solid fa-sun"></i>';
     }
     
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
