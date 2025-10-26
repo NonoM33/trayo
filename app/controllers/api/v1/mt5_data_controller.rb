@@ -31,8 +31,18 @@ module Api
           end
         end
 
+        mt5_account = Mt5Account.find_or_initialize_by(mt5_id: sync_params[:mt5_id])
+        
         # Vérifier si une synchronisation complète est requise
-        if !user.init_mt5
+        # FORCER LA SYNCHRO COMPLÈTE SI LE COMPTE A PEU DE TRADES
+        trades_count = mt5_account.persisted? ? mt5_account.trades.count : 0
+        
+        if !user.init_mt5 || (trades_count > 0 && trades_count < 50)
+          # Demandons la synchro complète si init_mt5 est false OU si on a très peu de trades
+          if trades_count < 50 && trades_count > 0
+            Rails.logger.warn "Compte #{sync_params[:mt5_id]}: seulement #{trades_count} trades détectés. Forcer la synchro complète."
+          end
+          
           render json: { 
             init_required: true, 
             send_all_history: true,

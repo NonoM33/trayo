@@ -436,6 +436,9 @@ string GetAllTradesJSON()
                      }
                   }
                   
+                  // RESTAURER la sélection globale !
+                  HistorySelect(0, TimeCurrent());
+                  
                   if(open_time > 0 && close_time > 0 && close_time >= open_time)
                   {
                      string open_time_iso = TimeToString(open_time, TIME_DATE|TIME_SECONDS);
