@@ -487,6 +487,46 @@ html.sidebar-collapsed-init .sidebar .sidebar-footer a {
   flex-shrink: 0;
   transition: transform var(--transition-fast);
   z-index: 1;
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+/* Debug: S'assurer que les icônes FontAwesome sont visibles */
+.sidebar-menu-icon.fa-solid {
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 900 !important;
+  color: var(--text-secondary) !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.dark-mode .sidebar-menu-icon.fa-solid {
+  color: #ffffff !important;
+}
+
+/* Debug: Forcer l'affichage des icônes */
+.sidebar-menu-link .fa-solid {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Debug: Forcer l'affichage de TOUTES les icônes FontAwesome */
+.fa-solid {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 900 !important;
+}
+
+/* Debug: Forcer l'affichage spécifique dans la sidebar */
+.sidebar .fa-solid {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #ffffff !important;
 }
 
 .sidebar-menu-link:hover .sidebar-menu-icon {
@@ -2751,7 +2791,7 @@ table {
 }
 
 /* ===== FONT AWESOME ICONS STYLES ===== */
-.fa-icon {
+.fa-icon, .fa-solid {
   font-family: 'Font Awesome 6 Free';
   font-weight: 900;
   font-style: normal;
@@ -2760,13 +2800,13 @@ table {
   -webkit-font-smoothing: antialiased;
 }
 
-.fa-icon.fa-sm { font-size: 14px; }
-.fa-icon.fa-md { font-size: 18px; }
-.fa-icon.fa-lg { font-size: 24px; }
-.fa-icon.fa-xl { font-size: 32px; }
-.fa-icon.fa-2xl { font-size: 48px; }
-.fa-icon.fa-3xl { font-size: 64px; }
-.fa-icon.fa-4xl { font-size: 72px; }
+.fa-icon.fa-sm, .fa-solid.fa-sm { font-size: 14px; }
+.fa-icon.fa-md, .fa-solid.fa-md { font-size: 18px; }
+.fa-icon.fa-lg, .fa-solid.fa-lg { font-size: 24px; }
+.fa-icon.fa-xl, .fa-solid.fa-xl { font-size: 32px; }
+.fa-icon.fa-2xl, .fa-solid.fa-2xl { font-size: 48px; }
+.fa-icon.fa-3xl, .fa-solid.fa-3xl { font-size: 64px; }
+.fa-icon.fa-4xl, .fa-solid.fa-4xl { font-size: 72px; }
 
 /* Icon button styles */
 .icon-btn {
