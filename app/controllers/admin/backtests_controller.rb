@@ -95,6 +95,12 @@ module Admin
       @backtest.activate!
       redirect_to admin_bot_backtests_path(@bot), notice: "Backtest activé avec succès"
     end
+    
+    def recalculate
+      @backtest.calculate_projections
+      @backtest.save if @backtest.changed?
+      redirect_to admin_bot_backtests_path(@bot), notice: "Projections recalculées avec succès"
+    end
 
     private
 
