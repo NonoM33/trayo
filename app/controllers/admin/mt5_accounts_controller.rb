@@ -51,7 +51,7 @@ module Admin
     private
 
     def mt5_account_params
-      params.require(:mt5_account).permit(:high_watermark, :initial_balance, :total_withdrawals)
+      params.require(:mt5_account).permit(:high_watermark, :initial_balance, :total_withdrawals, :is_admin_account)
     end
   end
 end

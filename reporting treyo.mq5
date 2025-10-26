@@ -457,6 +457,11 @@ string GetAllTradesJSON()
             
             if(count > 0) trades += ",";
             
+            string comment_safe = comment != "" ? comment : "No comment";
+            StringReplace(comment_safe, "\"", "'");
+            StringReplace(comment_safe, "\n", " ");
+            StringReplace(comment_safe, "\r", " ");
+            
             trades += StringFormat(
                "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"closed\"}",
                position_id,
@@ -471,7 +476,7 @@ string GetAllTradesJSON()
                         open_time_iso,
                         close_time_iso,
                magic_number,
-               comment
+               comment_safe
             );
             
             count++;
@@ -754,6 +759,11 @@ string GetTradesJSON()
             
             if(count > 0) trades += ",";
             
+            string comment_safe = comment != "" ? comment : "No comment";
+            StringReplace(comment_safe, "\"", "'");
+            StringReplace(comment_safe, "\n", " ");
+            StringReplace(comment_safe, "\r", " ");
+            
             trades += StringFormat(
                "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"closed\"}",
                position_id,
@@ -768,7 +778,7 @@ string GetTradesJSON()
                         open_time_iso,
                         close_time_iso,
                magic_number,
-               comment
+               comment_safe
             );
             
             count++;
