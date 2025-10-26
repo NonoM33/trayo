@@ -285,14 +285,74 @@ string GetAllTradesJSON()
    
    Print("Total deals found: ", total_deals);
    
+   // DEBUG: Compter les types de deals et afficher des exemples
+   int entry_in_count = 0;
+   int entry_out_count = 0;
+   int closed_positions = 0;
+   ulong positions_seen[];
+   int pos_count = 0;
+   
+   for(int i = 0; i < total_deals; i++)
+   {
+      ulong deal_ticket = HistoryDealGetTicket(i);
+      if(deal_ticket > 0)
+      {
+         long deal_entry = HistoryDealGetInteger(deal_ticket, DEAL_ENTRY);
+         ulong position_id = HistoryDealGetInteger(deal_ticket, DEAL_POSITION_ID);
+         datetime deal_time = (datetime)HistoryDealGetInteger(deal_ticket, DEAL_TIME);
+         
+         if(deal_entry == DEAL_ENTRY_IN)
+         {
+            entry_in_count++;
+            
+            // Vérifier si cette position a été fermée
+            bool is_closed = false;
+            for(int j = i + 1; j < total_deals; j++)
+            {
+               ulong next_deal = HistoryDealGetTicket(j);
+               if(next_deal > 0)
+               {
+                  ulong next_pos_id = HistoryDealGetInteger(next_deal, DEAL_POSITION_ID);
+                  long next_entry = HistoryDealGetInteger(next_deal, DEAL_ENTRY);
+                  if(next_pos_id == position_id && next_entry == DEAL_ENTRY_OUT)
+                  {
+                     is_closed = true;
+                     closed_positions++;
+                     break;
+                  }
+               }
+            }
+            
+            // Afficher les 5 premières positions ouvertes et fermées
+            if(pos_count < 5)
+            {
+               string symbol = HistoryDealGetString(deal_ticket, DEAL_SYMBOL);
+               Print("  Position #", position_id, " (", symbol, ") opened at ", TimeToString(deal_time), " - ", is_closed ? "CLOSED" : "OPEN");
+               pos_count++;
+            }
+         }
+         else if(deal_entry == DEAL_ENTRY_OUT)
+         {
+            entry_out_count++;
+         }
+      }
+   }
+   
+   Print("DEALS BREAKDOWN:");
+   Print("  Total Entry IN: ", entry_in_count);
+   Print("  Total Entry OUT: ", entry_out_count);
+   Print("  Closed positions: ", closed_positions);
+   Print("  Still open: ", entry_in_count - closed_positions);
+   
    string trades = "[";
    int count = 0;
    
-   // Collecter toutes les positions uniques
-   long positions_done[];
+   // Collecter toutes les positions uniques fermées
+   ulong positions_done[];
    int positions_count = 0;
    
-   for(long i = HistoryDealsTotal() - 1; i >= 0; i--)
+   // Parcourir tous les deals pour trouver les positions fermées
+   for(int i = 0; i < total_deals; i++)
    {
       ulong deal_ticket = HistoryDealGetTicket(i);
       if(deal_ticket > 0)
