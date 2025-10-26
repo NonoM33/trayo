@@ -4,6 +4,126 @@
   <title>Détails du Paiement - Admin Trayo</title>
   <%= stylesheet_link_tag "admin" %>
   <%= stylesheet_link_tag "pdf" %>
+  <style>
+    .apple-style-card {
+      background: rgba(30, 30, 30, 0.6);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      border: 0.5px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+    }
+    
+    .apple-status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+    
+    .apple-title {
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      color: #f5f5f7;
+      margin-bottom: 8px;
+    }
+    
+    .apple-subtitle {
+      font-size: 13px;
+      color: #86868b;
+      font-weight: 400;
+    }
+    
+    .apple-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .apple-info-row:last-child {
+      border-bottom: none;
+    }
+    
+    .apple-info-label {
+      font-size: 15px;
+      color: #86868b;
+      font-weight: 400;
+    }
+    
+    .apple-info-value {
+      font-size: 15px;
+      color: #f5f5f7;
+      font-weight: 600;
+    }
+    
+    .apple-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    
+    .apple-table thead tr {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+    
+    .apple-table th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      color: #86868b;
+      letter-spacing: -0.1px;
+      border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .apple-table td {
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #f5f5f7;
+      border-bottom: 0.5px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .apple-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .apple-table tbody tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    
+    .apple-button {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .apple-button-primary {
+      background: #007aff;
+      color: white;
+    }
+    
+    .apple-button-primary:hover {
+      background: #0051d5;
+    }
+    
+    .apple-penalty-card {
+      background: linear-gradient(135deg, rgba(60, 30, 30, 0.8) 0%, rgba(40, 20, 20, 0.8) 100%);
+      border: 1px solid rgba(255, 59, 48, 0.2);
+      box-shadow: 0 4px 16px rgba(255, 59, 48, 0.15);
+    }
+  </style>
 </head>
 <body>
   <% @page_title = "Détails du Paiement" %>
@@ -14,101 +134,84 @@
     <div class="main-content">
       <%= render 'admin/shared/navbar' %>
       
-      <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-          <h1>Détails du Paiement #<%= @payment.id %></h1>
-          <div style="display: flex; gap: 8px;">
-            <button onclick="window.print()" class="btn btn-primary">
-              <i class="fa-icon fa-sm fa-download"></i> Télécharger PDF
+      <div class="container" style="max-width: 1000px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px;">
+          <div>
+            <h1 style="font-size: 32px; font-weight: 600; letter-spacing: -0.8px; color: #f5f5f7; margin-bottom: 8px;">Paiement #<%= @payment.id %></h1>
+            <p class="apple-subtitle"><%= @payment.payment_date.strftime("%d %B %Y") %></p>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button onclick="window.print()" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: #007aff; color: white; border: none; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer;">
+              <i class="fa-icon fa-sm fa-download"></i> PDF
             </button>
-            <%= link_to "← Retour", admin_client_path(@payment.user), class: "btn btn-outline" %>
+            <%= link_to "Retour", admin_client_path(@payment.user), style: "display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: rgba(255, 255, 255, 0.08); color: #f5f5f7; border: 0.5px solid rgba(255, 255, 255, 0.1); border-radius: 20px; font-size: 14px; font-weight: 600; text-decoration: none;" %>
           </div>
         </div>
 
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="info-label">Date</div>
-            <div class="info-value"><%= @payment.payment_date.strftime("%d/%m/%Y") %></div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Montant</div>
-            <div class="info-value" style="color: var(--color-success); font-size: 24px; font-weight: 700;">
-              <%= number_to_currency(@payment.amount, unit: "€", format: "%n %u") %>
+        <div class="apple-style-card" style="background: linear-gradient(135deg, rgba(30, 30, 30, 0.9) 0%, rgba(25, 25, 28, 0.9) 100%);">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 32px; padding-bottom: 32px; border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);">
+            <div>
+              <div class="apple-subtitle" style="margin-bottom: 8px;">Montant</div>
+              <div style="font-size: 36px; font-weight: 600; color: #34c759; letter-spacing: -1px;">
+                <%= number_to_currency(@payment.amount, unit: "€", format: "%n %u") %>
+              </div>
             </div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Méthode</div>
-            <div class="info-value"><%= @payment.payment_method_label %></div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Statut</div>
-            <div class="info-value">
+            <div>
+              <div class="apple-subtitle" style="margin-bottom: 8px;">Méthode</div>
+              <div class="apple-info-value"><%= @payment.payment_method_label %></div>
+            </div>
+            <div>
+              <div class="apple-subtitle" style="margin-bottom: 8px;">Statut</div>
               <% case @payment.status %>
               <% when 'validated' %>
-                <span style="background: #4CAF50; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">✓ Validé</span>
+                <span class="apple-status-badge" style="background: #34c759; color: white;">Validé</span>
               <% when 'pending' %>
-                <span style="background: #ff9800; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">⏳ En attente</span>
+                <span class="apple-status-badge" style="background: #ff9500; color: white;">En attente</span>
               <% when 'rejected' %>
-                <span style="background: #f44336; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">✗ Rejeté</span>
+                <span class="apple-status-badge" style="background: #ff3b30; color: white;">Rejeté</span>
               <% end %>
             </div>
           </div>
         </div>
 
-        <div class="card" style="margin-top: 24px;">
-          <h2>Snapshots des Watermarks</h2>
-          
-          <% if @payment.watermark_snapshot.present? %>
-            <div style="background: #f5f5f5; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
-              <div style="font-size: 13px; color: #666;">
-                <strong>ℹ️ Informations capturées au moment du paiement :</strong><br>
-                Ce snapshot contient l'état des comptes MT5 au moment de la validation du paiement.<br/>
-                Les pénalités Trade Defender (trades manuels clients) sont déjà incluses dans le watermark.
+        <% if @payment.watermark_snapshot.present? %>
+          <div class="apple-style-card">
+            <h2 style="font-size: 22px; font-weight: 600; letter-spacing: -0.3px; color: #f5f5f7; margin-bottom: 24px;">Watermarks</h2>
+            
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 16px; border-radius: 12px; margin-bottom: 24px; border: 0.5px solid rgba(255, 255, 255, 0.08);">
+              <div style="font-size: 13px; color: #86868b; line-height: 1.6;">
+                Capturés au moment du paiement. Les pénalités Trade Defender sont déjà incluses.
               </div>
             </div>
 
             <% @payment.watermark_data.each do |mt5_id, data| %>
-              <div style="border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin-bottom: 12px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                  <h3 style="margin: 0;"><%= data["account_name"] || "Compte #{mt5_id}" %></h3>
-                  <code style="background: var(--bg-hover); padding: 4px 8px; border-radius: 4px;">MT5: <%= mt5_id %></code>
+              <div style="background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 20px; margin-bottom: 16px; border: 0.5px solid rgba(255, 255, 255, 0.08);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                  <h3 style="font-size: 18px; font-weight: 600; color: #f5f5f7; margin: 0;"><%= data["account_name"] || "Compte #{mt5_id}" %></h3>
+                  <code style="background: rgba(255, 255, 255, 0.08); padding: 6px 12px; border-radius: 8px; font-size: 12px; color: #86868b; border: 0.5px solid rgba(255, 255, 255, 0.1);">MT5: <%= mt5_id %></code>
                 </div>
 
-                <table style="width: 100%;">
-                  <tr>
-                    <td style="padding: 8px 0; font-weight: 600; width: 50%;">Balance actuelle :</td>
-                    <td style="padding: 8px 0; font-size: 16px; font-weight: 700;">
-                      <%= number_to_currency(data["balance"], unit: "€", format: "%n %u") %>
-                    </td>
-                  </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: 600;">High Watermark ajusté :</td>
-                <td style="padding: 8px 0; font-size: 16px; font-weight: 700; color: var(--color-primary);">
-                  <%= number_to_currency(data["watermark"], unit: "€", format: "%n %u") %>
-                </td>
-              </tr>
-                  <tr>
-                    <td style="padding: 8px 0; font-weight: 600;">Gains commissionnables :</td>
-                    <td style="padding: 8px 0; font-size: 16px; font-weight: 700; color: var(--color-success);">
-                      <%= number_to_currency(data["commissionable"], unit: "€", format: "%n %u") %>
-                    </td>
-                  </tr>
-                </table>
+                <div class="apple-info-row">
+                  <div class="apple-info-label">Balance</div>
+                  <div class="apple-info-value"><%= number_to_currency(data["balance"], unit: "€", format: "%n %u") %></div>
+                </div>
+                <div class="apple-info-row">
+                  <div class="apple-info-label">Watermark ajusté</div>
+                  <div class="apple-info-value" style="color: #64d2ff;"><%= number_to_currency(data["watermark"], unit: "€", format: "%n %u") %></div>
+                </div>
+                <div class="apple-info-row">
+                  <div class="apple-info-label">Gains commissionnables</div>
+                  <div class="apple-info-value" style="color: #32d74b;"><%= number_to_currency(data["commissionable"], unit: "€", format: "%n %u") %></div>
+                </div>
               </div>
             <% end %>
-          <% else %>
-            <p style="color: var(--text-muted); font-style: italic;">
-              Aucun snapshot de watermark n'a été capturé pour ce paiement.
-            </p>
-          <% end %>
-        </div>
+          </div>
+        <% end %>
 
         <% 
-          # Si pas de snapshot (paiement en attente ou ancien), on récupère les pénalités actuelles
           if @payment.trade_defender_penalties_data.any?
             penalties_data = @payment.trade_defender_penalties_data
           else
-            # Récupérer les pénalités actuelles du compte
             penalties_data = {}
             @payment.user.mt5_accounts.each do |account|
               unauthorized_trades = account.trades.where(trade_originality: 'manual_client')
