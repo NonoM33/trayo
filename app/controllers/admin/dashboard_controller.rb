@@ -85,15 +85,15 @@ module Admin
         
         if campaign_data
           @current_campaign = campaign_data_to_object(campaign_data)
-          Rails.logger.info "=== CAMPAIGN DATA DEBUG ==="
-          Rails.logger.info "Raw campaign data: #{campaign_data.inspect}"
-          Rails.logger.info "Parsed campaign: #{@current_campaign.inspect}"
-          Rails.logger.info "Is active: #{@current_campaign.is_active}"
-          Rails.logger.info "Start date: #{@current_campaign.start_date}"
-          Rails.logger.info "End date: #{@current_campaign.end_date}"
-          Rails.logger.info "Current time: #{Time.current}"
-          Rails.logger.info "Active and current: #{@current_campaign.active_and_current?}"
-          Rails.logger.info "=========================="
+ "=== CAMPAIGN DATA DEBUG ==="
+ "Raw campaign data: #{campaign_data.inspect}"
+ "Parsed campaign: #{@current_campaign.inspect}"
+ "Is active: #{@current_campaign.is_active}"
+ "Start date: #{@current_campaign.start_date}"
+ "End date: #{@current_campaign.end_date}"
+ "Current time: #{Time.current}"
+ "Active and current: #{@current_campaign.active_and_current?}"
+ "=========================="
         end
       end
       
@@ -156,11 +156,11 @@ module Admin
         # Prédictions déjà créées au-dessus
         
         # Debug
-        Rails.logger.info "=== DASHBOARD DEBUG ==="
-        Rails.logger.info "TradingBot.count: #{TradingBot.count}"
-        Rails.logger.info "Trade.count: #{Trade.count}"
-        Rails.logger.info "@bot_predictions.count: #{@bot_predictions.count}"
-        Rails.logger.info "======================="
+ "=== DASHBOARD DEBUG ==="
+ "TradingBot.count: #{TradingBot.count}"
+ "Trade.count: #{Trade.count}"
+ "@bot_predictions.count: #{@bot_predictions.count}"
+ "======================="
         
         # Statistiques globales
         @total_active_trades = @active_trades.count
