@@ -101,6 +101,64 @@
     gap: 0.5rem;
     align-items: center;
   }
+  
+  .action-btn {
+    background: var(--bg-hover);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  
+  .action-btn:active {
+    transform: translateY(0);
+  }
+  
+  .action-btn-start {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-color: #10b981;
+    color: white;
+  }
+  
+  .action-btn-start:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+  }
+  
+  .action-btn-stop {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border-color: #f59e0b;
+    color: white;
+  }
+  
+  .action-btn-stop:hover {
+    background: linear-gradient(135deg, #d97706, #b45309);
+  }
+  
+  .action-btn-delete {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border-color: #ef4444;
+    color: white;
+  }
+  
+  .action-btn-delete:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+  }
+  
+  .action-btn i {
+    font-size: 12px;
+  }
 </style>
 </head>
 <body>
