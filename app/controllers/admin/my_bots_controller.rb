@@ -126,6 +126,50 @@ module Admin
     def set_purchase
       @purchase = BotPurchase.find(params[:id])
     end
+    
+    def sync_bot_performance(user, bot)
+      Rails.logger.info "=== SYNCHRONISATION PERFORMANCE BOT ==="
+      
+      # Récupérer tous les trades de l'utilisateur avec le magic number du bot
+      trades = Trade.joins(mt5_account: :user)
+                   .where(users: { id: user.id })
+                   .where(magic_number: bot.magic_number_prefix)
+      
+      Rails.logger.info "Trades trouvés pour magic number #{bot.magic_number_prefix}: #{trades.count}"
+      
+      if trades.any?
+        # Calculer les statistiques
+        total_profit = trades.sum(:profit)
+        trades_count = trades.count
+        winning_trades = trades.where('profit > 0').count
+        losing_trades = trades.where('profit < 0').count
+        win_rate = trades_count > 0 ? (winning_trades.to_f / trades_count * 100).round(2) : 0
+        
+        Rails.logger.info "Statistiques calculées:"
+        Rails.logger.info "  - Total profit: #{total_profit}"
+        Rails.logger.info "  - Trades count: #{trades_count}"
+        Rails.logger.info "  - Win rate: #{win_rate}%"
+        
+        # Mettre à jour le bot_purchase
+        bot_purchase = user.bot_purchases.find_by(trading_bot: bot)
+        if bot_purchase
+          bot_purchase.update!(
+            total_profit: total_profit,
+            trades_count: trades_count,
+            current_drawdown: 0, # À calculer si nécessaire
+            max_drawdown_recorded: 0 # À calculer si nécessaire
+          )
+          
+          Rails.logger.info "Bot purchase mis à jour avec les nouvelles statistiques"
+        end
+        
+        Rails.logger.info "Bot purchase mis à jour avec succès"
+      else
+        Rails.logger.info "Aucun trade trouvé pour ce magic number"
+      end
+      
+      Rails.logger.info "=== FIN SYNCHRONISATION ==="
+    end
   end
 end
 

@@ -22,6 +22,27 @@ class User < ApplicationRecord
   scope :mt5_initialized, -> { where(init_mt5: true) }
   scope :mt5_not_initialized, -> { where(init_mt5: false) }
 
+  def debug_bot_purchases
+    Rails.logger.info "=== USER DEBUG BOT PURCHASES ==="
+    Rails.logger.info "User: #{email} (ID: #{id})"
+    
+    # Vérifier directement en base
+    direct_purchases = BotPurchase.where(user_id: id)
+    Rails.logger.info "Direct purchases in DB: #{direct_purchases.count}"
+    direct_purchases.each do |purchase|
+      Rails.logger.info "  - Purchase ID: #{purchase.id}, Bot ID: #{purchase.trading_bot_id}, Status: #{purchase.status}"
+    end
+    
+    # Vérifier via la relation
+    relation_purchases = bot_purchases
+    Rails.logger.info "Relation purchases: #{relation_purchases.count}"
+    relation_purchases.each do |purchase|
+      Rails.logger.info "  - Relation Purchase ID: #{purchase.id}, Bot: #{purchase.trading_bot&.name}"
+    end
+    
+    Rails.logger.info "================================"
+  end
+
   def total_profits
     mt5_accounts.reload.sum { |account| account.net_gains }
   end
