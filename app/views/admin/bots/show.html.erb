@@ -15,8 +15,14 @@
       
       <div class="container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-          <%= link_to admin_bots_path, class: "back-link", style: "margin: 0;" do %>
-            <i class="fa-icon fa-md fa-arrow-left"></i> Retour aux Bots
+          <% if params[:from] == 'client' && params[:client_id].present? %>
+            <%= link_to admin_client_path(params[:client_id]), class: "back-link", style: "margin: 0;" do %>
+              <i class="fa-icon fa-md fa-arrow-left"></i> Retour au Client
+            <% end %>
+          <% else %>
+            <%= link_to admin_bots_path, class: "back-link", style: "margin: 0;" do %>
+              <i class="fa-icon fa-md fa-arrow-left"></i> Retour aux Bots
+            <% end %>
           <% end %>
           <div style="display: flex; gap: 12px;">
             <%= link_to edit_admin_bot_path(@bot), class: "btn btn-primary" do %>
@@ -85,7 +91,7 @@
               <div class="info-item">
                 <div class="info-label">Drawdown Max</div>
                 <div class="info-value negative">
-                  <%= number_to_currency(@bot.max_drawdown_limit, unit: "€", format: "%n %u") %>
+                  <%= number_to_percentage(@bot.max_drawdown_limit, precision: 1) %>%
                 </div>
               </div>
             </div>
@@ -151,6 +157,226 @@
             </ul>
           </div>
         <% end %>
+
+        <div class="card">
+          <h3>
+            <i class="fa-icon fa-md fa-chart-bar"></i>
+            Analyse des Performances
+          </h3>
+          <% if @purchases.any? %>
+            <% 
+              # Analyser les statistiques des meilleurs purchases
+              best_purchase = @purchases.max_by { |p| p.total_profit || 0 }
+              most_active_purchase = @purchases.max_by { |p| p.trades_count || 0 }
+            %>
+            
+            <% if best_purchase && best_purchase.associated_trades.any? %>
+              <div class="info-grid" style="margin-bottom: 24px;">
+                <div class="info-item">
+                  <div class="info-label">Meilleur Jour (profit)</div>
+                  <% best_day = best_purchase.get_best_performing_day %>
+                  <% if best_day %>
+                    <div class="info-value positive"><%= best_day[:day_name] %></div>
+                    <div class="help-text">
+                      <%= number_to_currency(best_day[:total_profit], unit: "€", format: "%n %u") %> 
+                      (<%= best_day[:total_trades] %> trades)
+                    </div>
+                  <% else %>
+                    <div class="info-value">N/A</div>
+                  <% end %>
+                </div>
+                
+                <div class="info-item">
+                  <div class="info-label">Jour le Plus Actif</div>
+                  <% active_day = best_purchase.get_most_active_day %>
+                  <% if active_day %>
+                    <div class="info-value"><%= active_day[:day_name] %></div>
+                    <div class="help-text">
+                      <%= active_day[:total_trades] %> trades
+                      (<%= number_to_currency(active_day[:total_profit], unit: "€", format: "%n %u") %>)
+                    </div>
+                  <% else %>
+                    <div class="info-value">N/A</div>
+                  <% end %>
+                </div>
+                
+                <div class="info-item">
+                  <div class="info-label">Jour le Plus Risqué</div>
+                  <% risk_day = best_purchase.get_riskiest_day %>
+                  <% if risk_day %>
+                    <div class="info-value <%= risk_day[:total_profit] > 0 ? 'positive' : 'negative' %>">
+                      <%= risk_day[:day_name] %>
+                    </div>
+                    <div class="help-text">
+                      <%= risk_day[:losing_trades] %> trades perdants
+                    </div>
+                  <% else %>
+                    <div class="info-value">N/A</div>
+                  <% end %>
+                </div>
+                
+                <div class="info-item">
+                  <div class="info-label">Meilleure Heure</div>
+                  <% best_hour = best_purchase.get_best_performing_hour %>
+                  <% if best_hour %>
+                    <div class="info-value positive"><%= best_hour[:hour] %>h</div>
+                    <div class="help-text">
+                      <%= number_to_currency(best_hour[:total_profit], unit: "€", format: "%n %u") %>
+                      (<%= best_hour[:total_trades] %> trades)
+                    </div>
+                  <% else %>
+                    <div class="info-value">N/A</div>
+                  <% end %>
+                </div>
+              </div>
+              
+              <div class="info-grid" style="margin-bottom: 24px;">
+                <div class="info-item">
+                  <div class="info-label">Heure la Plus Active</div>
+                  <% active_hour = best_purchase.get_most_active_hour %>
+                  <% if active_hour %>
+                    <div class="info-value"><%= active_hour[:hour] %>h</div>
+                    <div class="help-text">
+                      <%= active_hour[:total_trades] %> trades
+                      (<%= number_to_currency(active_hour[:total_profit], unit: "€", format: "%n %u") %>)
+                    </div>
+                  <% else %>
+                    <div class="info-value">N/A</div>
+                  <% end %>
+                </div>
+                
+                <div class="info-item">
+                  <div class="info-label">Durée Moyenne des Trades</div>
+                  <% duration = best_purchase.analyze_trade_duration %>
+                  <div class="info-value">
+                    <% if duration[:avg_duration_hours] > 0 %>
+                      <%= duration[:avg_duration_hours] %>h
+                    <% else %>
+                      <%= duration[:avg_duration_minutes] %> min
+                    <% end %>
+                  </div>
+                  <div class="help-text">
+                    Min: <%= duration[:min_duration_minutes] %> min
+                    | Max: <%= duration[:max_duration_minutes] %> min
+                  </div>
+                </div>
+                
+                <div class="info-item">
+                  <div class="info-label">Taux de Réussite Global</div>
+                  <% 
+                    all_trades = best_purchase.associated_trades
+                    winning = all_trades.count { |t| (t.profit || 0) > 0 }
+                    win_rate = all_trades.any? ? (winning.to_f / all_trades.count * 100).round(2) : 0
+                  %>
+                  <div class="info-value positive"><%= win_rate %>%</div>
+                  <div class="help-text">
+                    <%= winning %> gagnants / <%= all_trades.count %> total
+                  </div>
+                </div>
+                
+                <div class="info-item">
+                  <div class="info-label">Drawdown Actuel</div>
+                  <% 
+                    drawdown_pct = best_purchase.drawdown_percentage
+                    drawdown_amount = best_purchase.current_drawdown || 0
+                  %>
+                  <div class="info-value <%= drawdown_pct <= 80 ? 'positive' : drawdown_pct <= 95 ? '' : 'negative' %>">
+                    <%= number_to_percentage(drawdown_pct, precision: 1) %>%
+                  </div>
+                  <div class="help-text">
+                    <%= number_to_currency(drawdown_amount, unit: "€", format: "%n %u") %>
+                    sur <%= number_to_currency(best_purchase.trading_bot.max_drawdown_limit, unit: "€", format: "%n %u") %>
+                  </div>
+                </div>
+              </div>
+              
+              <% 
+                day_stats = best_purchase.analyze_by_day_of_week 
+                hour_stats = best_purchase.analyze_by_hour 
+              %>
+              
+              <% if day_stats.any? %>
+                <h4 style="margin-bottom: 16px;">📊 Analyse par Jour de la Semaine</h4>
+                <div class="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Jour</th>
+                        <th>Trades</th>
+                        <th>Profit Total</th>
+                        <th>Profit Moyen</th>
+                        <th>Gagnants</th>
+                        <th>Perdants</th>
+                        <th>Commission</th>
+                        <th>Swap</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% day_stats.sort_by { |d| d[:wday] }.each do |day| %>
+                        <tr>
+                          <td><strong><%= day[:day_name] %></strong></td>
+                          <td><%= day[:total_trades] %></td>
+                          <td class="<%= day[:total_profit] >= 0 ? 'positive' : 'negative' %>">
+                            <%= number_to_currency(day[:total_profit], unit: "€", format: "%n %u") %>
+                          </td>
+                          <td class="<%= day[:avg_profit] >= 0 ? 'positive' : 'negative' %>">
+                            <%= number_to_currency(day[:avg_profit], unit: "€", format: "%n %u") %>
+                          </td>
+                          <td style="color: #10b981;"><%= day[:winning_trades] %></td>
+                          <td style="color: #ef4444;"><%= day[:losing_trades] %></td>
+                          <td><%= number_to_currency(day[:total_commission], unit: "€", format: "%n %u") %></td>
+                          <td><%= number_to_currency(day[:total_swap], unit: "€", format: "%n %u") %></td>
+                        </tr>
+                      <% end %>
+                    </tbody>
+                  </table>
+                </div>
+              <% end %>
+              
+              <% if hour_stats.any? %>
+                <h4 style="margin-top: 24px; margin-bottom: 16px;">⏰ Analyse par Heure</h4>
+                <div class="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Heure</th>
+                        <th>Trades</th>
+                        <th>Profit Total</th>
+                        <th>Profit Moyen</th>
+                        <th>Gagnants</th>
+                        <th>Perdants</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% hour_stats.each do |hour| %>
+                        <tr>
+                          <td><strong><%= hour[:hour] %>h</strong></td>
+                          <td><%= hour[:total_trades] %></td>
+                          <td class="<%= hour[:total_profit] >= 0 ? 'positive' : 'negative' %>">
+                            <%= number_to_currency(hour[:total_profit], unit: "€", format: "%n %u") %>
+                          </td>
+                          <td class="<%= hour[:avg_profit] >= 0 ? 'positive' : 'negative' %>">
+                            <%= number_to_currency(hour[:avg_profit], unit: "€", format: "%n %u") %>
+                          </td>
+                          <td style="color: #10b981;"><%= hour[:winning_trades] %></td>
+                          <td style="color: #ef4444;"><%= hour[:losing_trades] %></td>
+                        </tr>
+                      <% end %>
+                    </tbody>
+                  </table>
+                </div>
+              <% end %>
+            <% else %>
+              <p style="text-align: center; color: var(--text-muted); padding: 20px;">
+                Aucune donnée de trading disponible pour l'analyse
+              </p>
+            <% end %>
+          <% else %>
+            <p style="text-align: center; color: var(--text-muted); padding: 20px;">
+              Aucun client n'utilise ce bot pour le moment
+            </p>
+          <% end %>
+        </div>
 
         <div class="card">
           <h3>

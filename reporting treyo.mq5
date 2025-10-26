@@ -5,8 +5,8 @@
 #property copyright "Trayo"
 #property version   "1.00"
 
-input string API_URL = "http://127.0.0.1:3000/api/v1/mt5/sync";
-input string API_COMPLETE_HISTORY_URL = "http://127.0.0.1:3000/api/v1/mt5/sync_complete_history";
+input string API_URL = "https://treyo.omrender.com/api/v1/mt5/sync";
+input string API_COMPLETE_HISTORY_URL = "https://treyo.omrender.com/api/v1/mt5/sync_complete_history";
 input string API_KEY = "mt5_secret_key_change_in_production";
 input string MT5_API_TOKEN = "your_mt5_api_token_here";
 input string CLIENT_EMAIL = "client@example.com";

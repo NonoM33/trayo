@@ -396,6 +396,15 @@
         </div>
         
         <% if recent_trades.any? %>
+          <div style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #2196F3;">
+            <div style="font-size: 13px; color: #1976D2;">
+              <strong>💡 Calcul du Profit :</strong><br>
+              • <strong>Profit Net</strong> : Profit final (déjà net des commissions et swap)<br>
+              • <strong>Commission</strong> : Commission du broker pour ce trade<br>
+              • <strong>Swap</strong> : Frais de report (positif ou négatif)<br>
+              • Les données MT5 arrivent déjà avec le profit net calculé
+            </div>
+          </div>
           <h4>
             <%= stat_icon(:trades, size: 'md') %>
             Derniers Trades
@@ -422,7 +431,15 @@
                   </th>
                   <th>
                     <%= stat_icon(:profit, size: 'sm') %>
-                    Profit
+                    Profit Net
+                  </th>
+                  <th>
+                    <%= stat_icon(:profit, size: 'sm') %>
+                    Commission
+                  </th>
+                  <th>
+                    <%= stat_icon(:profit, size: 'sm') %>
+                    Swap
                   </th>
                   <th>
                     <%= stat_icon(:bots, size: 'sm') %>
@@ -443,6 +460,12 @@
                     <td><%= trade.volume %></td>
                     <td class="<%= trade.profit >= 0 ? 'positive' : 'negative' %>">
                       <%= number_to_currency(trade.profit, unit: "€", format: "%n %u") %>
+                    </td>
+                    <td>
+                      <%= number_to_currency(trade.commission || 0, unit: "€", format: "%n %u") %>
+                    </td>
+                    <td>
+                      <%= number_to_currency(trade.swap || 0, unit: "€", format: "%n %u") %>
                     </td>
                     <td>
                       <% if trade.magic_number.present? %>
@@ -725,6 +748,17 @@
       
       <% client_bots = @client.bot_purchases.includes(:trading_bot).order(created_at: :desc) %>
       
+      <div style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #2196F3;">
+        <div style="font-size: 13px; color: #1976D2;">
+          <strong>💡 Analyse des Performances :</strong><br>
+          • <strong>Profit Net</strong> : Profit après déduction de toutes les commissions et swaps<br>
+          • <strong>Commissions</strong> : Total des commissions broker payées<br>
+          • <strong>Swaps</strong> : Total des frais de report (peuvent être positifs ou négatifs)<br>
+          • <strong>Total Coûts</strong> : Somme des commissions + swaps<br>
+          • <strong>ROI</strong> : Retour sur investissement calculé sur le profit net
+        </div>
+      </div>
+      
       <% if client_bots.any? %>
         <table>
           <thead>
@@ -733,7 +767,11 @@
               <th>Prix Payé</th>
               <th>Date d'Achat</th>
               <th>Statut</th>
-              <th>Profit Total</th>
+              <th>Profit Net</th>
+              <th>ROI</th>
+              <th>Commissions</th>
+              <th>Swaps</th>
+              <th>Total Coûts</th>
               <th>Trades</th>
               <th>Drawdown Max</th>
               <th>Actions</th>
@@ -741,11 +779,9 @@
           </thead>
           <tbody>
             <% client_bots.each do |purchase| %>
-              <tr>
+              <tr onclick="window.location.href='<%= admin_bot_path(purchase.trading_bot, from: 'client', client_id: @client.id) %>'" style="cursor: pointer;">
                 <td>
-                  <%= link_to admin_bot_path(purchase.trading_bot) do %>
-                    <strong><%= purchase.trading_bot.name %></strong>
-                  <% end %>
+                  <strong style="color: white;"><%= purchase.trading_bot.name %></strong>
                   <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
                     <span style="background: <%= purchase.trading_bot.risk_badge_color %>; color: white; padding: 2px 8px; border-radius: 8px; font-size: 11px;">
                       <%= purchase.trading_bot.risk_label %>
@@ -765,14 +801,26 @@
                 <td class="<%= purchase.total_profit > 0 ? 'positive' : 'negative' %>">
                   <%= number_to_currency(purchase.total_profit, unit: "€", format: "%n %u") %>
                 </td>
+                <td class="<%= purchase.roi_percentage > 0 ? 'positive' : 'negative' %>">
+                  <%= number_to_percentage(purchase.roi_percentage, precision: 1) %>%
+                </td>
+                <td>
+                  <%= number_to_currency(purchase.total_commission, unit: "€", format: "%n %u") %>
+                </td>
+                <td>
+                  <%= number_to_currency(purchase.total_swap, unit: "€", format: "%n %u") %>
+                </td>
+                <td class="negative">
+                  <%= number_to_currency(purchase.total_costs, unit: "€", format: "%n %u") %>
+                </td>
                 <td><%= purchase.trades_count %></td>
                 <td class="<%= purchase.within_drawdown_limit? ? '' : 'negative' %>">
-                  <%= number_to_currency(purchase.max_drawdown_recorded, unit: "€", format: "%n %u") %>
+                  <%= number_to_percentage(purchase.drawdown_percentage, precision: 1) %>%
                   <% unless purchase.within_drawdown_limit? %>
                     <span style="color: #F44336; font-size: 12px;"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Limite dépassée</span>
                   <% end %>
                 </td>
-                <td>
+                <td onclick="event.stopPropagation();">
                   <%= button_to purchase.is_running? ? "Arrêter" : "Démarrer",
                       toggle_status_admin_my_bot_path(purchase),
                       method: :post,
@@ -812,7 +860,7 @@
                 options_from_collection_for_select(TradingBot.available.order(:name), :id, :name),
                 prompt: 'Choisir un bot...',
                 required: true,
-                style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" %>
+                class: "filter-select" %>
           </div>
           
           <div class="form-group" style="flex: 0 0 200px; margin-bottom: 0;">
@@ -960,7 +1008,7 @@
                   ['Autre', 'other']
                 ]), 
                 { prompt: 'Sélectionner la méthode' },
-                { style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" } 
+                { class: "filter-select" } 
             %>
           </div>
 
@@ -997,7 +1045,18 @@
 
           <div class="form-group">
             <%= f.label :reason, "Raison" %>
-            <%= f.text_area :reason %>
+            <%= f.select :reason, 
+                options_for_select([
+                  ['Bonus de bienvenue', 'welcome_bonus'],
+                  ['Compensation', 'compensation'],
+                  ['Promotion', 'promotion'],
+                  ['Erreur système', 'system_error'],
+                  ['Remboursement', 'refund'],
+                  ['Autre', 'other']
+                ]), 
+                { prompt: 'Sélectionner une raison' },
+                { class: "filter-select" } 
+            %>
           </div>
 
           <%= f.submit "Créer le Crédit", class: "btn" do %>
@@ -1157,5 +1216,61 @@
   </div>
 </body>
 </html>
+
+<!-- Debug JavaScript pour les dropdowns -->
+<script>
+console.log('=== CLIENT SHOW PAGE DROPDOWN DEBUG ===');
+console.log('Page des détails client chargée');
+
+// Vérifier que les styles sont chargés
+const adminStyles = document.querySelector('link[href*="admin"]');
+console.log('Styles admin chargés:', adminStyles !== null);
+
+// Vérifier les selects avec la classe filter-select
+const filterSelects = document.querySelectorAll('.filter-select');
+console.log('Nombre de selects avec classe filter-select:', filterSelects.length);
+
+filterSelects.forEach((select, index) => {
+  console.log(`Select ${index}:`, select);
+  console.log(`  Classes:`, select.className);
+  console.log(`  ID:`, select.id);
+  console.log(`  Name:`, select.name);
+  console.log(`  Options count:`, select.options.length);
+  
+  const computedStyle = window.getComputedStyle(select);
+  console.log(`  Computed styles:`);
+  console.log(`    Display:`, computedStyle.display);
+  console.log(`    Visibility:`, computedStyle.visibility);
+  console.log(`    Opacity:`, computedStyle.opacity);
+  console.log(`    Background:`, computedStyle.backgroundColor);
+  console.log(`    Border:`, computedStyle.border);
+  console.log(`    Padding:`, computedStyle.padding);
+});
+
+// Vérifier les dropdowns personnalisés
+const customDropdowns = document.querySelectorAll('.dropdown');
+console.log('Nombre de dropdowns personnalisés:', customDropdowns.length);
+
+customDropdowns.forEach((dropdown, index) => {
+  console.log(`Dropdown ${index}:`, dropdown);
+  const toggle = dropdown.querySelector('.dropdown-toggle');
+  const menu = dropdown.querySelector('.dropdown-menu');
+  console.log(`  Toggle:`, toggle);
+  console.log(`  Menu:`, menu);
+});
+
+// Vérifier tous les selects sur la page
+const allSelects = document.querySelectorAll('select');
+console.log('Nombre total de selects:', allSelects.length);
+
+allSelects.forEach((select, index) => {
+  console.log(`Select ${index}:`, select);
+  console.log(`  Classes:`, select.className);
+  console.log(`  Style:`, select.style.cssText);
+  console.log(`  Computed display:`, window.getComputedStyle(select).display);
+});
+
+console.log('=== END CLIENT SHOW PAGE DROPDOWN DEBUG ===');
+</script>
 
 

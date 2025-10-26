@@ -290,7 +290,7 @@
           <div class="stat-card">
             <div class="stat-icon"><i class="fa-icon fa-md fa-shield-alt"></i></div>
             <div class="stat-value">
-              <%= number_to_currency(@bot.max_drawdown_limit, unit: "€", format: "%n %u", precision: 0) %>
+              <%= number_to_percentage(@bot.max_drawdown_limit, precision: 1) %>%
             </div>
             <div class="stat-label">Drawdown Max</div>
           </div>

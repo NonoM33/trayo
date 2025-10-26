@@ -250,7 +250,7 @@
               <div style="background: var(--bg-hover); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                   <span style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">
-                    Drawdown : <%= number_to_currency(purchase.current_drawdown, unit: "€", format: "%n %u") %> / <%= number_to_currency(bot.max_drawdown_limit, unit: "€", format: "%n %u") %>
+                    Drawdown : <%= number_to_percentage(purchase.drawdown_percentage, precision: 1) %>% / <%= number_to_percentage(bot.max_drawdown_limit, precision: 1) %>%
                   </span>
                   <span style="font-size: 13px; font-weight: 700; color: <%= purchase.within_drawdown_limit? ? 'var(--color-success)' : 'var(--color-danger)' %>;">
                     <%= purchase.drawdown_percentage.round(1) %>%

@@ -1,6 +1,6 @@
 module Admin
   class ClientsController < BaseController
-    before_action :require_admin, except: [:show]
+    before_action :require_admin, except: [:show, :test_dropdowns, :debug]
     before_action :ensure_own_profile_or_admin, only: [:show]
     
     def index
@@ -30,6 +30,16 @@ module Admin
       
       # Précharger les bots pour optimiser les performances
       @bots_cache = TradingBot.where.not(magic_number_prefix: nil)
+    end
+
+    def test_dropdowns
+      # Page de test pour les dropdowns de la page client
+      render 'admin/test_client_dropdowns'
+    end
+
+    def debug
+      # Page de debug pour l'accès aux clients
+      render 'admin/client_access_debug'
     end
 
     def edit
@@ -232,8 +242,8 @@ module Admin
         losing_trades = bot_trades.count { |t| t.profit < 0 }
         win_rate = bot_trades.count > 0 ? (winning_trades.to_f / bot_trades.count * 100).round(2) : 0
         
-        # Calculer le drawdown
-        drawdown = calculate_drawdown(bot_trades)
+        # Calculer le drawdown en pourcentage
+        drawdown_percentage = calculate_drawdown_percentage(bot_trades, bot)
         
         # Calculer le profit moyen
         avg_profit = bot_trades.count > 0 ? (total_profit / bot_trades.count).round(2) : 0
@@ -251,7 +261,7 @@ module Admin
           winning_trades: winning_trades,
           losing_trades: losing_trades,
           win_rate: win_rate,
-          drawdown: drawdown,
+          drawdown_percentage: drawdown_percentage,
           avg_profit: avg_profit,
           trading_hours: trading_hours,
           trading_weekdays: trading_weekdays,
@@ -279,19 +289,62 @@ module Admin
       }
     end
 
-    def calculate_drawdown(trades)
-      return 0 if trades.empty?
+    def calculate_drawdown_percentage(trades, bot)
+      return 0 if trades.empty? || bot.max_drawdown_limit.zero?
+      
+      # Trier les trades par close_time pour avoir l'ordre chronologique
+      sorted_trades = trades.sort_by { |t| t.close_time || t.open_time || Time.current }
       
       running_balance = 0
       peak_balance = 0
       max_drawdown = 0
       
-      trades.sort_by(&:close_time).each do |trade|
+      sorted_trades.each do |trade|
         running_balance += trade.profit
         peak_balance = [peak_balance, running_balance].max
         current_drawdown = peak_balance - running_balance
         max_drawdown = [max_drawdown, current_drawdown].max
       end
+      
+      # Convertir le drawdown en pourcentage par rapport à la limite
+      drawdown_percentage = (max_drawdown / bot.max_drawdown_limit * 100).round(2)
+      
+      Rails.logger.info "=== DRAWDOWN PERCENTAGE CALCULATION ==="
+      Rails.logger.info "Total trades: #{trades.count}"
+      Rails.logger.info "Max drawdown (€): #{max_drawdown.round(2)}"
+      Rails.logger.info "Bot drawdown limit (€): #{bot.max_drawdown_limit}"
+      Rails.logger.info "Drawdown percentage: #{drawdown_percentage}%"
+      Rails.logger.info "====================================="
+      
+      drawdown_percentage
+    end
+
+    def calculate_drawdown(trades)
+      return 0 if trades.empty?
+      
+      # Trier les trades par close_time pour avoir l'ordre chronologique
+      sorted_trades = trades.sort_by { |t| t.close_time || t.open_time || Time.current }
+      
+      running_balance = 0
+      peak_balance = 0
+      max_drawdown = 0
+      
+      sorted_trades.each do |trade|
+        running_balance += trade.profit
+        peak_balance = [peak_balance, running_balance].max
+        current_drawdown = peak_balance - running_balance
+        max_drawdown = [max_drawdown, current_drawdown].max
+        
+        # Debug log pour tracer le calcul
+        Rails.logger.info "Trade #{trade.id}: profit=#{trade.profit}, running_balance=#{running_balance}, peak_balance=#{peak_balance}, current_drawdown=#{current_drawdown}, max_drawdown=#{max_drawdown}"
+      end
+      
+      Rails.logger.info "=== DRAWDOWN CALCULATION RESULT ==="
+      Rails.logger.info "Total trades: #{trades.count}"
+      Rails.logger.info "Final running_balance: #{running_balance}"
+      Rails.logger.info "Final peak_balance: #{peak_balance}"
+      Rails.logger.info "Final max_drawdown: #{max_drawdown}"
+      Rails.logger.info "================================"
       
       max_drawdown.round(2)
     end

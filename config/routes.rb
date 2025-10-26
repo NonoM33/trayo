@@ -13,6 +13,13 @@ Rails.application.routes.draw do
 
     get "dashboard", to: "dashboard#index"
 
+    # Routes pour les pages de test (AVANT les resources pour éviter les conflits)
+    get "test/client_dropdowns", to: "test#client_dropdowns"
+    get "test/debug", to: "test#debug"
+    get "test/routes", to: "test#routes_test"
+    get "test/routes_and_drawdown", to: "test#routes_and_drawdown_test"
+    get "test/drawdown_percentage", to: "test#drawdown_percentage_test"
+
     resources :clients, only: [:index, :new, :create, :show, :edit, :update, :destroy] do
       member do
         post :reset_password

@@ -34,6 +34,24 @@ class BotPurchase < ApplicationRecord
     
     save
   end
+  
+  def total_commission
+    result = associated_trades.sum(:commission)
+    result.nil? ? 0.0 : result.round(2)
+  end
+  
+  def total_swap
+    result = associated_trades.sum(:swap)
+    result.nil? ? 0.0 : result.round(2)
+  end
+  
+  def gross_profit_before_costs
+    (total_profit.to_f + total_commission + total_swap).round(2)
+  end
+  
+  def total_costs
+    (total_commission + total_swap).round(2)
+  end
 
   def start!
     update(
@@ -102,6 +120,97 @@ class BotPurchase < ApplicationRecord
   def within_drawdown_limit?
     return true if trading_bot.max_drawdown_limit.zero?
     current_drawdown <= trading_bot.max_drawdown_limit
+  end
+  
+  def analyze_by_day_of_week
+    trades = associated_trades
+    return {} unless trades.any?
+    
+    days_map = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+    
+    by_day = trades.group_by { |t| t.close_time&.wday }
+    
+    by_day.map do |wday, day_trades|
+      {
+        day_name: days_map[wday],
+        wday: wday,
+        total_trades: day_trades.count,
+        total_profit: day_trades.sum { |t| t.profit || 0 },
+        winning_trades: day_trades.count { |t| (t.profit || 0) > 0 },
+        losing_trades: day_trades.count { |t| (t.profit || 0) < 0 },
+        avg_profit: day_trades.any? ? (day_trades.sum { |t| t.profit || 0 } / day_trades.count).round(2) : 0,
+        total_commission: day_trades.sum { |t| t.commission || 0 },
+        total_swap: day_trades.sum { |t| t.swap || 0 }
+      }
+    end
+  end
+  
+  def analyze_by_hour
+    trades = associated_trades
+    return {} unless trades.any?
+    
+    by_hour = trades.group_by { |t| t.close_time&.hour }
+    
+    by_hour.map do |hour, hour_trades|
+      {
+        hour: hour,
+        total_trades: hour_trades.count,
+        total_profit: hour_trades.sum { |t| t.profit || 0 },
+        winning_trades: hour_trades.count { |t| (t.profit || 0) > 0 },
+        losing_trades: hour_trades.count { |t| (t.profit || 0) < 0 },
+        avg_profit: hour_trades.any? ? (hour_trades.sum { |t| t.profit || 0 } / hour_trades.count).round(2) : 0
+      }
+    end.sort_by { |h| h[:hour] }
+  end
+  
+  def analyze_trade_duration
+    trades = associated_trades.where.not(open_time: nil, close_time: nil)
+    return { avg_duration_minutes: 0, avg_duration_hours: 0 } unless trades.any?
+    
+    durations = trades.map do |t|
+      ((t.close_time - t.open_time) / 60) if t.close_time && t.open_time
+    end.compact
+    
+    return { avg_duration_minutes: 0, avg_duration_hours: 0 } if durations.empty?
+    
+    avg_minutes = (durations.sum / durations.count).round(1)
+    
+    {
+      avg_duration_minutes: avg_minutes,
+      avg_duration_hours: (avg_minutes / 60).round(2),
+      min_duration_minutes: durations.min.round(1),
+      max_duration_minutes: durations.max.round(1)
+    }
+  end
+  
+  def get_best_performing_day
+    days = analyze_by_day_of_week
+    return nil if days.empty?
+    days.max_by { |d| d[:total_profit] }
+  end
+  
+  def get_most_active_day
+    days = analyze_by_day_of_week
+    return nil if days.empty?
+    days.max_by { |d| d[:total_trades] }
+  end
+  
+  def get_riskiest_day
+    days = analyze_by_day_of_week
+    return nil if days.empty?
+    days.max_by { |d| d[:losing_trades] }
+  end
+  
+  def get_best_performing_hour
+    hours = analyze_by_hour
+    return nil if hours.empty?
+    hours.max_by { |h| h[:total_profit] }
+  end
+  
+  def get_most_active_hour
+    hours = analyze_by_hour
+    return nil if hours.empty?
+    hours.max_by { |h| h[:total_trades] }
   end
 
   private

@@ -126,7 +126,7 @@
               <div class="bot-stat">
                 <div class="stat-label">Drawdown Max</div>
                 <div class="stat-value negative">
-                  <%= number_to_currency(performance[:drawdown], unit: "€", format: "%n %u") %>
+                  <%= number_to_percentage(performance[:drawdown_percentage], precision: 1) %>
                 </div>
               </div>
               

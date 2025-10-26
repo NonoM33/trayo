@@ -1,0 +1,86 @@
+<div class="main-content">
+  <div class="container">
+    <div class="card">
+      <h2>🔧 Debug - Accès aux Clients</h2>
+      <p>Cette page vous permet d'accéder aux détails des clients pour tester les dropdowns.</p>
+      
+      <div style="margin: 20px 0;">
+        <h3>📋 Instructions</h3>
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+          <p><strong>Pour accéder aux détails d'un client :</strong></p>
+          <ol>
+            <li>Allez sur <code>/admin/clients</code> pour voir la liste des clients</li>
+            <li>Cliquez sur un client pour voir ses détails</li>
+            <li>Ou utilisez directement l'URL : <code>/admin/clients/:id</code> (remplacez :id par l'ID du client)</li>
+          </ol>
+        </div>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h3>🧪 Pages de Test</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+          <div style="padding: 16px; border: 1px solid var(--border-color); border-radius: 8px;">
+            <h4>Test Dropdowns Client</h4>
+            <p>Page de test spécifique aux dropdowns de la page client</p>
+            <a href="/admin/clients/test_dropdowns" class="btn btn-primary">Tester les Dropdowns</a>
+          </div>
+          
+          <div style="padding: 16px; border: 1px solid var(--border-color); border-radius: 8px;">
+            <h4>Test Dropdowns Dashboard</h4>
+            <p>Page de test pour les dropdowns du dashboard</p>
+            <a href="/admin/test_dashboard_dropdowns" class="btn btn-primary">Tester Dashboard</a>
+          </div>
+          
+          <div style="padding: 16px; border: 1px solid var(--border-color); border-radius: 8px;">
+            <h4>Test Dropdowns Général</h4>
+            <p>Page de test générale pour tous les dropdowns</p>
+            <a href="/admin/test_dropdowns" class="btn btn-primary">Tester Général</a>
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h3>🔗 Liens Utiles</h3>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <a href="/admin/clients" class="btn btn-outline">Liste des Clients</a>
+          <a href="/admin/dashboard" class="btn btn-outline">Dashboard</a>
+          <a href="/admin/bots" class="btn btn-outline">Bots Trading</a>
+          <a href="/admin/trades" class="btn btn-outline">Trades</a>
+        </div>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h3>🐛 Debug Information</h3>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace;">
+          <p><strong>Erreur rencontrée :</strong></p>
+          <p><code>ActiveRecord::RecordNotFound in Admin::ClientsController#show</code></p>
+          <p><code>Couldn't find User with 'id'="show"</code></p>
+          <br>
+          <p><strong>Cause :</strong></p>
+          <p>L'URL <code>/admin/clients/show</code> n'existe pas.</p>
+          <p>Utilisez <code>/admin/clients/:id</code> où :id est l'ID d'un client.</p>
+          <br>
+          <p><strong>Solution :</strong></p>
+          <p>1. Allez sur <code>/admin/clients</code> pour voir la liste</p>
+          <p>2. Cliquez sur un client pour voir ses détails</p>
+          <p>3. Ou utilisez <code>/admin/clients/test_dropdowns</code> pour tester</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+console.log('=== CLIENT ACCESS DEBUG PAGE ===');
+console.log('Page de debug pour l\'accès aux clients chargée');
+
+// Vérifier les routes disponibles
+console.log('URLs de test disponibles:');
+console.log('- /admin/clients (liste des clients)');
+console.log('- /admin/clients/:id (détails d\'un client)');
+console.log('- /admin/clients/test_dropdowns (test des dropdowns)');
+console.log('- /admin/test_dashboard_dropdowns (test dashboard)');
+console.log('- /admin/test_dropdowns (test général)');
+
+console.log('=== END CLIENT ACCESS DEBUG PAGE ===');
+</script>
