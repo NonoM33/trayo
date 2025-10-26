@@ -41,6 +41,68 @@
   <div class="main-content">
     <%= yield %>
   </div>
+
+  <!-- Dropdown JavaScript -->
+  <script>
+    // Gestionnaire de dropdowns personnalisé
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeDropdowns();
+    });
+    
+    document.addEventListener('turbo:load', function() {
+      initializeDropdowns();
+    });
+    
+    document.addEventListener('turbo:render', function() {
+      initializeDropdowns();
+    });
+    
+    function initializeDropdowns() {
+      // Fermer tous les dropdowns ouverts
+      document.querySelectorAll('.dropdown.active').forEach(dropdown => {
+        dropdown.classList.remove('active');
+      });
+      
+      // Ajouter les event listeners aux dropdowns
+      document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const dropdown = this.closest('.dropdown');
+          const isActive = dropdown.classList.contains('active');
+          
+          // Fermer tous les autres dropdowns
+          document.querySelectorAll('.dropdown.active').forEach(activeDropdown => {
+            if (activeDropdown !== dropdown) {
+              activeDropdown.classList.remove('active');
+            }
+          });
+          
+          // Toggle le dropdown actuel
+          dropdown.classList.toggle('active', !isActive);
+        });
+      });
+      
+      // Fermer les dropdowns quand on clique ailleurs
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+          document.querySelectorAll('.dropdown.active').forEach(dropdown => {
+            dropdown.classList.remove('active');
+          });
+        }
+      });
+      
+      // Gérer les touches clavier
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.dropdown.active').forEach(dropdown => {
+            dropdown.classList.remove('active');
+          });
+        }
+      });
+    }
+  </script>
 </body>
 </html>
 

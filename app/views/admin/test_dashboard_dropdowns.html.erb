@@ -1,0 +1,147 @@
+<div class="main-content">
+  <div class="container">
+    <div class="card">
+      <h2>🧪 Test des Dropdowns du Dashboard</h2>
+      <p>Cette page simule les filtres du dashboard pour tester les dropdowns.</p>
+      
+      <!-- Simulation des filtres du dashboard -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <h3>
+            <i class="fa-solid fa-filter"></i>
+            Filtres du Dashboard (Simulation)
+          </h3>
+        </div>
+        
+        <form class="filters-form">
+          <div class="filters-grid">
+            <div class="filter-group">
+              <label class="filter-label">Période</label>
+              <select class="filter-select">
+                <option value="7_days">7 derniers jours</option>
+                <option value="30_days" selected>30 derniers jours</option>
+                <option value="3_months">3 derniers mois</option>
+                <option value="6_months">6 derniers mois</option>
+                <option value="1_year">1 an</option>
+                <option value="all">Tout</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label class="filter-label">Bot</label>
+              <select class="filter-select">
+                <option value="">Tous les bots</option>
+                <option value="1234">Petrole (1234)</option>
+                <option value="5678">OR (5678)</option>
+                <option value="9012">BTC (9012)</option>
+                <option value="3456">GBP (3456)</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label class="filter-label">Type de données</label>
+              <select class="filter-select">
+                <option value="all" selected>Toutes les données</option>
+                <option value="profits">Profits seulement</option>
+                <option value="trades">Trades seulement</option>
+                <option value="stats">Statistiques seulement</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label class="filter-label">Type de graphique</label>
+              <select class="filter-select">
+                <option value="combined" selected>Graphique combiné</option>
+                <option value="separate">Graphique séparé</option>
+                <option value="simple">Graphique simple</option>
+              </select>
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 12px; margin-top: 16px;">
+            <button type="button" class="btn btn-primary" onclick="alert('Filtres appliqués !')">Appliquer les filtres</button>
+            <button type="button" class="btn btn-outline" onclick="alert('Filtres réinitialisés !')">Réinitialiser</button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Test des dropdowns personnalisés -->
+      <div class="card">
+        <h3>🎯 Test des Dropdowns Personnalisés</h3>
+        
+        <div style="margin: 20px 0;">
+          <h4>Dropdown d'Actions</h4>
+          <div class="dropdown">
+            <button class="dropdown-toggle" type="button">
+              Actions sur les données
+            </button>
+            <ul class="dropdown-menu">
+              <li><button class="dropdown-item" onclick="alert('Export CSV')">📊 Export CSV</button></li>
+              <li><button class="dropdown-item" onclick="alert('Export PDF')">📄 Export PDF</button></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><button class="dropdown-item" onclick="alert('Actualiser')">🔄 Actualiser</button></li>
+              <li><button class="dropdown-item" onclick="alert('Réinitialiser')">🔄 Réinitialiser</button></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+          <h4>Dropdown de Sélection</h4>
+          <div class="dropdown">
+            <button class="dropdown-toggle" type="button">
+              Sélectionner un bot
+            </button>
+            <ul class="dropdown-menu">
+              <li><button class="dropdown-item" onclick="alert('Bot Petrole sélectionné')">🤖 Petrole</button></li>
+              <li><button class="dropdown-item" onclick="alert('Bot OR sélectionné')">🥇 OR</button></li>
+              <li><button class="dropdown-item" onclick="alert('Bot BTC sélectionné')">₿ BTC</button></li>
+              <li><button class="dropdown-item" onclick="alert('Bot GBP sélectionné')">💷 GBP</button></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h3>📋 Instructions de Test</h3>
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+          <p><strong>Testez les fonctionnalités suivantes :</strong></p>
+          <ul>
+            <li>✅ <strong>Filtres du dashboard</strong> : Les selects HTML natifs fonctionnent-ils ?</li>
+            <li>✅ <strong>Dropdowns personnalisés</strong> : Les boutons avec menus déroulants s'ouvrent-ils ?</li>
+            <li>✅ <strong>Animations</strong> : Les transitions sont-elles fluides ?</li>
+            <li>✅ <strong>Mode sombre</strong> : Les couleurs s'adaptent-elles au thème ?</li>
+            <li>✅ <strong>Fermeture automatique</strong> : Les dropdowns se ferment-ils en cliquant ailleurs ?</li>
+            <li>✅ <strong>Touche Échap</strong> : Fonctionne-t-elle pour fermer les dropdowns ?</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+console.log('=== DASHBOARD DROPDOWN TEST PAGE ===');
+console.log('Page de test des dropdowns du dashboard chargée');
+
+// Vérifier que les styles sont chargés
+const filterStyles = document.querySelector('style, link[href*="admin"]');
+console.log('Styles admin chargés:', filterStyles !== null);
+
+// Vérifier les filtres
+const filterSelects = document.querySelectorAll('.filter-select');
+console.log('Nombre de filtres trouvés:', filterSelects.length);
+
+// Vérifier les dropdowns personnalisés
+const customDropdowns = document.querySelectorAll('.dropdown');
+console.log('Nombre de dropdowns personnalisés trouvés:', customDropdowns.length);
+
+customDropdowns.forEach((dropdown, index) => {
+  console.log(`Dropdown ${index}:`, dropdown);
+  const toggle = dropdown.querySelector('.dropdown-toggle');
+  const menu = dropdown.querySelector('.dropdown-menu');
+  console.log(`  Toggle:`, toggle);
+  console.log(`  Menu:`, menu);
+});
+
+console.log('=== END DASHBOARD DROPDOWN TEST PAGE ===');
+</script>

@@ -1,0 +1,117 @@
+<div class="main-content">
+  <div class="container">
+    <div class="card">
+      <h2>📊 Test des Drawdowns en Pourcentage</h2>
+      <p>Cette page confirme que tous les drawdowns sont maintenant affichés en pourcentage sur tout le site.</p>
+      
+      <div style="margin: 20px 0;">
+        <h3>✅ Modifications Appliquées</h3>
+        <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;">
+          <p><strong>Drawdowns convertis en pourcentage :</strong></p>
+          <ul>
+            <li>✅ Page des détails client (`/admin/clients/:id`)</li>
+            <li>✅ Page des bots personnels (`/admin/my_bots`)</li>
+            <li>✅ Page des détails de bot (`/admin/bots/:id`)</li>
+            <li>✅ Page de la boutique (`/admin/shop/:id`)</li>
+            <li>✅ Page des numéros magiques (`/admin/magic_numbers`)</li>
+            <li>✅ Formulaire de création/modification de bot</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h3>🔧 Calcul du Drawdown</h3>
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+          <p><strong>Nouvelle méthode de calcul :</strong></p>
+          <ul>
+            <li><strong>Ancien :</strong> Drawdown en euros (ex: 35€)</li>
+            <li><strong>Nouveau :</strong> Drawdown en pourcentage (ex: 35.0%)</li>
+            <li><strong>Formule :</strong> (drawdown_actuel / limite_maximale) × 100</li>
+            <li><strong>Logs :</strong> Calcul détaillé dans les logs Rails</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h3>📋 Exemples d'Affichage</h3>
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+          <p><strong>Avant (en euros) :</strong></p>
+          <ul>
+            <li>Drawdown Max: 35,00 €</li>
+            <li>Drawdown actuel: 12,50 €</li>
+          </ul>
+          
+          <p><strong>Maintenant (en pourcentage) :</strong></p>
+          <ul>
+            <li>Drawdown Max: 35.0%</li>
+            <li>Drawdown actuel: 12.5%</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h3>🧪 Pages à Tester</h3>
+        <p>Vérifiez que les drawdowns sont maintenant en pourcentage sur ces pages :</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin: 16px 0;">
+          <a href="/admin/clients" class="btn btn-primary">
+            <i class="fa-solid fa-users"></i> Liste des Clients
+          </a>
+          <a href="/admin/my_bots" class="btn btn-outline">
+            <i class="fa-solid fa-robot"></i> Mes Bots
+          </a>
+          <a href="/admin/bots" class="btn btn-outline">
+            <i class="fa-solid fa-cogs"></i> Gestion des Bots
+          </a>
+          <a href="/admin/shop" class="btn btn-outline">
+            <i class="fa-solid fa-shopping-cart"></i> Boutique
+          </a>
+        </div>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h3>🔍 Debug et Logs</h3>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #6c757d;">
+          <p><strong>Pour vérifier les calculs :</strong></p>
+          <ol>
+            <li>Ouvrez les logs Rails : <code>tail -f log/development.log</code></li>
+            <li>Naviguez vers une page avec des bots</li>
+            <li>Cherchez les logs "DRAWDOWN PERCENTAGE CALCULATION"</li>
+            <li>Vérifiez que le calcul est correct</li>
+          </ol>
+        </div>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h3>📊 Résultat Attendu</h3>
+        <div style="background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
+          <p><strong>Le bot "petrole" devrait maintenant afficher :</strong></p>
+          <ul>
+            <li>Drawdown Max: 35.0% (au lieu de 35,00 €)</li>
+            <li>Drawdown actuel: Calculé en pourcentage</li>
+            <li>Barre de progression: Fonctionne avec les pourcentages</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+console.log('=== DRAWDOWN PERCENTAGE TEST PAGE ===');
+console.log('Page de test des drawdowns en pourcentage chargée !');
+
+// Vérifier que nous sommes sur la bonne page
+console.log('URL actuelle:', window.location.href);
+console.log('Path:', window.location.pathname);
+
+// Vérifier les liens disponibles
+const testLinks = document.querySelectorAll('a[href*="admin/"]');
+console.log('Liens de test trouvés:', testLinks.length);
+
+testLinks.forEach((link, index) => {
+  console.log(`Lien ${index}:`, link.href);
+});
+
+console.log('=== END DRAWDOWN PERCENTAGE TEST PAGE ===');
+</script>

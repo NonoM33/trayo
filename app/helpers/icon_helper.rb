@@ -39,7 +39,9 @@ module IconHelper
     total: 'fa-calculator',
     average: 'fa-chart-pie',
     max: 'fa-arrow-up',
-    min: 'fa-arrow-down'
+    min: 'fa-arrow-down',
+    analysis: 'fa-search',
+    filter: 'fa-filter'
   }.freeze
 
   # Icônes pour les actions et boutons
