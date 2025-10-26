@@ -147,17 +147,18 @@ class Mt5Account < ApplicationRecord
   end
 
   def apply_trade_defender_penalty(profit_amount)
-    new_watermark = high_watermark + profit_amount
+    new_watermark = high_watermark - profit_amount.abs
     update(high_watermark: new_watermark)
   end
 
   def unauthorized_manual_trades_total
-    trades.unauthorized_manual.sum(:profit)
+    trades.unauthorized_manual.sum { |t| t.profit.abs }
   end
 
   def recalculate_watermark_with_penalties
-    unauthorized_loss = trades.unauthorized_manual.sum(:profit)
-    adjusted_watermark = balance - unauthorized_loss
+    unauthorized_trades = trades.unauthorized_manual
+    total_penalty = unauthorized_trades.sum { |t| t.profit.abs }
+    adjusted_watermark = balance - total_penalty
     update(high_watermark: adjusted_watermark)
   end
 end
