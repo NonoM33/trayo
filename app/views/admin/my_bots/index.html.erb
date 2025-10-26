@@ -169,20 +169,6 @@
           <div class="alert"><%= flash[:alert] %></div>
         <% end %>
 
-        <!-- DEBUG: Logs pour diagnostiquer le problème -->
-        <div style="background: #333; color: #fff; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px;">
-          <strong>DEBUG MY BOTS VIEW:</strong><br>
-          Current user: <%= current_user.email %><br>
-          Current user ID: <%= current_user.id %><br>
-          Is admin: <%= current_user.is_admin? %><br>
-          @purchases class: <%= @purchases.class %><br>
-          @purchases count: <%= @purchases.count %><br>
-          @purchases any?: <%= @purchases.any? %><br>
-          @purchases empty?: <%= @purchases.empty? %><br>
-          <% @purchases.each_with_index do |purchase, index| %>
-            Purchase <%= index + 1 %>: ID=<%= purchase.id %>, Bot=<%= purchase.trading_bot&.name %>, Status=<%= purchase.status %><br>
-          <% end %>
-        </div>
 
         <% if @purchases.any? %>
           <% @purchases.each do |purchase| %>

@@ -3,26 +3,26 @@ module Admin
     before_action :set_purchase, only: [:show, :toggle_status]
 
     def index
-      Rails.logger.info "=== MY BOTS CONTROLLER DEBUG ==="
-      Rails.logger.info "Current user: #{current_user.email}"
-      Rails.logger.info "Current user ID: #{current_user.id}"
-      Rails.logger.info "Is admin: #{current_user.is_admin?}"
+ "=== MY BOTS CONTROLLER DEBUG ==="
+ "Current user: #{current_user.email}"
+ "Current user ID: #{current_user.id}"
+ "Is admin: #{current_user.is_admin?}"
       
       if current_user.is_admin?
-        Rails.logger.info "User is admin, redirecting to admin_bots_path"
+ "User is admin, redirecting to admin_bots_path"
         redirect_to admin_bots_path
       else
-        Rails.logger.info "User is client, fetching bot purchases..."
+ "User is client, fetching bot purchases..."
         
         # DÉTECTION AUTOMATIQUE : Scanner tous les bots enregistrés et vérifier si le client a des trades
-        Rails.logger.info "Détection automatique de tous les bots pour l'utilisateur connecté"
+ "Détection automatique de tous les bots pour l'utilisateur connecté"
         
         # Récupérer tous les bots enregistrés avec leur magic number
         registered_bots = TradingBot.where.not(magic_number_prefix: nil)
-        Rails.logger.info "Bots enregistrés trouvés: #{registered_bots.count}"
+ "Bots enregistrés trouvés: #{registered_bots.count}"
         
         registered_bots.each do |bot|
-          Rails.logger.info "Vérification du bot: #{bot.name} (magic: #{bot.magic_number_prefix})"
+ "Vérification du bot: #{bot.name} (magic: #{bot.magic_number_prefix})"
           
           # Vérifier si le client a des trades avec ce magic number
           client_trades = Trade.joins(mt5_account: :user)
