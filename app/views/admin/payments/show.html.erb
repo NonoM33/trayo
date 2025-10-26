@@ -310,17 +310,14 @@
           </div>
         <% end %>
 
-        <div class="card" style="margin-top: 24px;">
-          <h2>Notes</h2>
-          <% if @payment.notes.present? %>
-            <p style="white-space: pre-wrap;"><%= @payment.notes %></p>
-          <% else %>
-            <p style="color: var(--text-muted); font-style: italic;">Aucune note</p>
-          <% end %>
-        </div>
+        <% if @payment.notes.present? %>
+          <div class="apple-style-card">
+            <h2 style="font-size: 22px; font-weight: 600; letter-spacing: -0.3px; color: #f5f5f7; margin-bottom: 24px;">Notes</h2>
+            <p style="font-size: 15px; color: #f5f5f7; line-height: 1.6; white-space: pre-wrap;"><%= @payment.notes %></p>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>
 </body>
 </html>
-
