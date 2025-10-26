@@ -96,6 +96,9 @@ Rails.application.routes.draw do
     get "maintenance", to: "maintenance#show"
     patch "maintenance", to: "maintenance#update"
     patch "maintenance/toggle", to: "maintenance#toggle"
+    
+    # Test page for icons
+    get "test_icons", to: "dashboard#test_icons"
   end
 
   namespace :api do
