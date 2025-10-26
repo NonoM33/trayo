@@ -1,4 +1,4 @@
-<%= form_with model: bot, url: bot.new_record? ? admin_bots_path : admin_bot_path(bot), method: bot.new_record? ? :post : :patch, local: true do |f| %>
+<%= form_with model: bot, url: bot.new_record? ? admin_bots_path : admin_bot_path(bot), method: bot.new_record? ? :post : :patch, local: true, multipart: true do |f| %>
   <% if bot.errors.any? %>
     <div class="error-messages" style="background: #f44336; color: white; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
       <strong><%= pluralize(bot.errors.count, "erreur") %> :</strong>

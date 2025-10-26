@@ -174,12 +174,10 @@
           <% @purchases.each do |purchase| %>
             <% bot = purchase.trading_bot %>
             <div class="my-bot-card" onclick="window.location.href='<%= admin_bot_path(bot, from: 'my_bots') %>'" style="cursor: pointer;">
-              <div class="bot-header" onclick="event.stopPropagation();">
+              <div class="bot-header">
                 <div class="bot-info">
                   <div class="bot-avatar">
-                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover)); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white;">
-                      <i class="fa-icon fa-md fa-robot"></i>
-                    </div>
+                    <i class="fa-icon fa-md fa-robot" style="color: white;"></i>
                   </div>
                   <div class="bot-details">
                     <h3><%= bot.name %></h3>
@@ -199,9 +197,9 @@
                     <%= button_to toggle_status_admin_my_bot_path(purchase), method: :post, 
                         class: "toggle-btn #{purchase.is_running? ? 'toggle-btn-stop' : 'toggle-btn-start'}" do %>
                       <% if purchase.is_running? %>
-                        <i class="fa-icon fa-md fa-pause"></i> Arrêter le Bot
+                        <i class="fa-icon fa-md fa-pause"></i> Arrêter
                       <% else %>
-                        <i class="fa-icon fa-md fa-play"></i> Démarrer le Bot
+                        <i class="fa-icon fa-md fa-play"></i> Démarrer
                       <% end %>
                     <% end %>
                   </div>
@@ -211,15 +209,10 @@
                       Gestion du bot
                     </div>
                     <div style="font-size: 12px; padding: 8px 16px; background: var(--bg-hover); border-radius: 8px;">
-                      Contactez l'admin pour activer/désactiver
+                      Contactez l'admin
                     </div>
                   </div>
                 <% end %>
-                <div onclick="event.stopPropagation();" style="margin-top: 12px;">
-                  <%= link_to admin_bot_path(bot, from: 'my_bots'), class: "btn", style: "background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover)); color: white; padding: 10px 24px; font-size: 14px;" do %>
-                    <i class="fa-icon fa-md fa-eye"></i> Voir les Détails
-                  <% end %>
-                </div>
               </div>
               
               <div class="bot-stats-grid">
@@ -292,11 +285,10 @@
                 <% end %>
               </div>
               
-              <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); text-align: center; opacity: 0.7;">
-                <i class="fa-icon fa-md fa-mouse-pointer"></i>
-                <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">
-                  Cliquez pour voir les détails et l'analyse complète du bot
-                </span>
+              <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); text-align: center;" onclick="event.stopPropagation();">
+                <%= link_to admin_bot_path(bot, from: 'my_bots'), class: "btn", style: "background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover)); color: white; padding: 10px 32px; font-size: 14px; text-decoration: none; display: inline-block;" do %>
+                  <i class="fa-icon fa-md fa-eye"></i> Voir les Détails Complets
+                <% end %>
               </div>
             </div>
           <% end %>

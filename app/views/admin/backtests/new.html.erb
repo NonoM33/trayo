@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nouveau Backtest - <%= @bot.name %></title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "Nouveau Backtest" %>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.querySelector('form');
+      const fileInput = document.querySelector('input[type="file"]');
+      const submitButtons = document.querySelectorAll('input[type="submit"]');
+      
+      console.log('🔍 DEBUG: Formulaire chargé');
+      console.log('📝 Nombre de champs de fichier:', fileInput);
+      console.log('📤 Nombre de boutons submit:', submitButtons.length);
+      
+      // Logger quand un fichier est sélectionné
+      if (fileInput) {
+        fileInput.addEventListener('change', function() {
+          console.log('📁 Fichier sélectionné:', this.files[0].name);
+          console.log('📊 Taille du fichier:', this.files[0].size, 'bytes');
+        });
+      }
+      
+      // Logger avant soumission
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          console.log('🚀 SOUMISSION DU FORMULAIRE');
+          console.log('📋 Données du formulaire:', new FormData(form));
+          
+          if (fileInput && fileInput.files.length > 0) {
+            console.log('✅ Fichier uploadé:', fileInput.files[0].name);
+          } else {
+            console.log('⚠️ Aucun fichier sélectionné');
+          }
+        });
+      }
+      
+      // Logger au clic sur les boutons submit
+      submitButtons.forEach(function(button, index) {
+        button.addEventListener('click', function() {
+          console.log(`🖱️ Clic sur bouton submit #${index}`);
+        });
+      });
+    });
+  </script>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <%= link_to admin_bot_backtests_path(@bot), class: "back-link" do %>
+          <i class="fa-icon fa-md fa-arrow-left"></i> Retour aux backtests
+        <% end %>
+        
+        <h1 style="margin: 24px 0;">Ajouter un Backtest</h1>
+        
+        <div class="card">
+          <%= form_with model: [@bot, @backtest], url: admin_bot_backtests_path(@bot), local: true, multipart: true do |f| %>
+            
+            <div class="form-group" style="margin-bottom: 32px; padding: 24px; background: var(--bg-success-box); border-radius: 12px; border-left: 4px solid var(--color-success);">
+              <label style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">
+                <i class="fa-icon fa-md fa-upload" style="color: var(--color-success);"></i> Upload de fichier MT5
+              </label>
+              <%= f.file_field :file, accept: '.xlsx,.xls', class: "form-control" %>
+              <div class="help-text" style="margin-top: 8px;">
+                Téléversez un rapport MT5 Excel (ReportTester-*.xlsx) pour importer automatiquement toutes les données
+              </div>
+              
+              <div style="margin-top: 20px; padding: 16px; background: white; border-radius: 8px; border: 2px dashed var(--color-success); text-align: center;">
+                <button type="submit" class="btn btn-success" style="width: 100%; font-size: 16px; padding: 12px 24px;" onclick="console.log('🔘 Bouton haut cliqué'); return true;">
+                  <i class="fa-icon fa-md fa-check-circle"></i> Valider et Créer le Backtest
+                </button>
+                <div class="help-text" style="margin-top: 12px; font-size: 12px; color: var(--text-muted);">
+                  Le fichier sera parsé et toutes les données seront extraites automatiquement
+                </div>
+              </div>
+              
+              <div style="margin-top: 16px; font-size: 13px; color: var(--text-secondary);">
+                <strong>OU remplissez manuellement ci-dessous :</strong>
+              </div>
+            </div>
+            
+            <div style="margin: 32px 0; border-top: 2px solid var(--border-color);"></div>
+            
+            <div class="two-col">
+              <div class="form-group">
+                <%= f.label :start_date, "Date de début" %>
+                <%= f.datetime_field :start_date, class: "form-control" %>
+                <div class="help-text">Date de début du backtest</div>
+              </div>
+              
+              <div class="form-group">
+                <%= f.label :end_date, "Date de fin" %>
+                <%= f.datetime_field :end_date, class: "form-control" %>
+                <div class="help-text">Date de fin du backtest</div>
+              </div>
+            </div>
+            
+            <div class="two-col">
+              <div class="form-group">
+                <%= f.label :total_trades, "Total Trades" %>
+                <%= f.number_field :total_trades, class: "form-control", min: 0 %>
+              </div>
+              
+              <div class="form-group">
+                <%= f.label :winning_trades, "Trades Gagnants" %>
+                <%= f.number_field :winning_trades, class: "form-control", min: 0 %>
+              </div>
+            </div>
+            
+            <div class="two-col">
+              <div class="form-group">
+                <%= f.label :losing_trades, "Trades Perdants" %>
+                <%= f.number_field :losing_trades, class: "form-control", min: 0 %>
+              </div>
+              
+              <div class="form-group">
+                <%= f.label :total_profit, "Profit Total (€)" %>
+                <%= f.number_field :total_profit, class: "form-control", step: 0.01 %>
+              </div>
+            </div>
+            
+            <div class="two-col">
+              <div class="form-group">
+                <%= f.label :win_rate, "Taux de Réussite (%)" %>
+                <%= f.number_field :win_rate, class: "form-control", min: 0, max: 100, step: 0.01 %>
+              </div>
+              
+              <div class="form-group">
+                <%= f.label :max_drawdown, "Drawdown Max (€)" %>
+                <%= f.number_field :max_drawdown, class: "form-control", step: 0.01 %>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <%= f.label :average_profit, "Profit Moyen par Trade (€)" %>
+              <%= f.number_field :average_profit, class: "form-control", step: 0.01 %>
+              <div class="help-text">Total profit / Total trades</div>
+            </div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+              <%= f.submit "Créer le Backtest", class: "btn btn-primary" %>
+              <%= link_to "Annuler", admin_bot_backtests_path(@bot), class: "btn btn-outline" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

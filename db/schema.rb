@@ -10,9 +10,32 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_23_000021) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_26_133305) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "backtests", force: :cascade do |t|
+    t.bigint "trading_bot_id", null: false
+    t.datetime "start_date"
+    t.datetime "end_date"
+    t.integer "total_trades"
+    t.integer "winning_trades"
+    t.integer "losing_trades"
+    t.decimal "total_profit", precision: 15, scale: 2
+    t.decimal "max_drawdown", precision: 10, scale: 2
+    t.decimal "win_rate", precision: 5, scale: 2
+    t.decimal "average_profit", precision: 15, scale: 2
+    t.decimal "projection_monthly_min", precision: 15, scale: 2
+    t.decimal "projection_monthly_max", precision: 15, scale: 2
+    t.decimal "projection_yearly", precision: 15, scale: 2
+    t.string "file_path"
+    t.boolean "is_active", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "original_filename"
+    t.index ["is_active"], name: "index_backtests_on_is_active"
+    t.index ["trading_bot_id"], name: "index_backtests_on_trading_bot_id"
+  end
 
   create_table "bonus_deposits", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -264,6 +287,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_23_000021) do
     t.index ["withdrawal_date"], name: "index_withdrawals_on_withdrawal_date"
   end
 
+  add_foreign_key "backtests", "trading_bots"
   add_foreign_key "bonus_deposits", "users"
   add_foreign_key "bonus_periods", "campaigns"
   add_foreign_key "bot_purchases", "trading_bots"

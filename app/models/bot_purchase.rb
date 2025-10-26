@@ -131,9 +131,9 @@ class BotPurchase < ApplicationRecord
   end
   
   def drawdown_percentage
-    return 0 if trading_bot.max_drawdown_limit.zero?
+    return 0 if price_paid.zero?
     current_dd = calculate_current_drawdown
-    ((current_dd / trading_bot.max_drawdown_limit) * 100).round(2)
+    ((current_dd / price_paid) * 100).round(2)
   end
   
   def get_current_drawdown

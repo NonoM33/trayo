@@ -891,7 +891,6 @@
                 <th>Statut</th>
                 <th>Coûts</th>
                 <th>Détails</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -935,18 +934,25 @@
                     </div>
                   </td>
                   <td>
-                    <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
-                      <div>Comm: <%= number_to_currency(purchase.total_commission, unit: "€", format: "%n %u") %></div>
-                      <div>Swap: <%= number_to_currency(purchase.total_swap, unit: "€", format: "%n %u") %></div>
+                    <div style="font-size: 11px; line-height: 1.4;">
+                      <div style="color: var(--text-muted);">
+                        Comm: <span style="color: <%= purchase.total_commission >= 0 ? '#10b981' : '#ef4444' %>"><%= format_cost_with_sign(purchase.total_commission) %></span>
+                      </div>
+                      <div style="color: var(--text-muted);">
+                        Swap: <span style="color: <%= purchase.total_swap >= 0 ? '#10b981' : '#ef4444' %>"><%= format_cost_with_sign(purchase.total_swap) %></span>
+                      </div>
                       <div style="margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--border-color);">
-                        <strong>Total: <%= number_to_currency(purchase.total_costs.abs, unit: "€", format: "%n %u") %></strong>
+                        <span style="color: var(--text-muted);"><strong>Total:</strong></span> <strong style="color: <%= purchase.total_costs >= 0 ? '#10b981' : '#ef4444' %>;"><%= format_cost_with_sign(purchase.total_costs) %></strong>
                       </div>
                     </div>
                   </td>
                   <td>
                     <div style="font-size: 11px; color: var(--text-muted);">
-                      <div class="<%= purchase.within_drawdown_limit? ? '' : 'negative' %>" style="margin-bottom: 4px;">
+                      <div class="<%= purchase.within_drawdown_limit? ? '' : 'negative' %>" style="margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
                         DD: <%= number_to_percentage(purchase.drawdown_percentage, precision: 1) %>%
+                        <span class="help-icon" title="Drawdown: Perte maximale depuis le pic de capital. Un drawdown trop élevé (>80%) indique un risque important.">
+                          <i class="fa-icon fa-sm fa-info-circle" style="color: #9ca3af; cursor: help; margin-left: 4px;"></i>
+                        </span>
                         <% unless purchase.within_drawdown_limit? %>
                           <i class="fa-icon fa-md fa-exclamation-triangle" style="color: #F44336;"></i>
                         <% end %>
@@ -954,25 +960,6 @@
                       <div style="font-size: 10px; opacity: 0.7;">
                         Limite: <%= number_to_percentage(purchase.trading_bot.max_drawdown_limit / purchase.price_paid * 100, precision: 1) %>%
                       </div>
-                    </div>
-                  </td>
-                  <td onclick="event.stopPropagation();">
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                      <%= form_with url: toggle_status_admin_my_bot_path(purchase), method: :post, style: "margin: 0;", data: { turbo_method: :post } do |f| %>
-                        <button type="submit" 
-                                class="<%= purchase.is_running? ? 'action-btn action-btn-stop' : 'action-btn action-btn-start' %>"
-                                title="<%= purchase.is_running? ? 'Arrêter le bot' : 'Démarrer le bot' %>">
-                          <i class="fa-icon fa-sm <%= purchase.is_running? ? 'fa-pause' : 'fa-play' %>"></i>
-                        </button>
-                      <% end %>
-                      
-                      <%= form_with url: remove_from_user_admin_bot_path(purchase.trading_bot, purchase_id: purchase.id), method: :delete, style: "margin: 0;", data: { turbo_method: :delete, turbo_confirm: "Retirer ce bot ?" } do |f| %>
-                        <button type="submit" 
-                                class="action-btn action-btn-delete"
-                                title="Retirer le bot">
-                          <i class="fa-icon fa-sm fa-trash"></i>
-                        </button>
-                      <% end %>
                     </div>
                   </td>
                 </tr>

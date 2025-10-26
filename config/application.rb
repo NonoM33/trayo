@@ -28,10 +28,11 @@ module Trayo
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
     
-    # Add middleware directory to autoload paths (only in development/test)
+    # Add middleware and services directories to autoload paths
     unless Rails.env.production?
       config.autoload_paths << Rails.root.join('app', 'middleware')
     end
+    config.autoload_paths << Rails.root.join('app', 'services')
 
     # Configuration for the application, engines, and railties goes here.
     #

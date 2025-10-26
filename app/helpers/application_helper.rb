@@ -23,8 +23,16 @@ module ApplicationHelper
     if hours >= 24
       days = hours.round(1)
       "#{days} #{days > 1 ? 'jours' : 'jour'}"
+    end
+  end
+  
+  def format_cost_with_sign(amount)
+    return "0,00 €" if amount.nil? || amount == 0
+    
+    if amount > 0
+      "+#{number_to_currency(amount, unit: "€", format: "%n %u")}"
     else
-      "#{hours.round(1)}h"
+      number_to_currency(amount, unit: "€", format: "%n %u")
     end
   end
 end
