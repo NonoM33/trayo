@@ -54,18 +54,20 @@
     }
     
     .bot-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+      backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
       overflow: hidden;
-      transition: all 0.15s;
-      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     }
     
     .bot-card:hover {
-      border-color: var(--color-accent);
-      box-shadow: var(--shadow-md);
+      border-color: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       transform: translateY(-4px);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%);
     }
     
     .bot-card-image {
@@ -129,9 +131,10 @@
       gap: 1rem;
       margin: 1rem 0;
       padding: 1rem;
-      background: var(--bg-hover);
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-color);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+      backdrop-filter: blur(20px);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     .bot-stat {
@@ -189,13 +192,17 @@
     }
     
     .bot-card-cta-secondary {
-      background: transparent;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+      backdrop-filter: blur(30px);
       color: var(--text-primary);
-      border: 1px solid var(--border-color);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
     
     .bot-card-cta-secondary:hover {
-      background: var(--bg-hover);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%);
+      border-color: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
     
     .bot-card-cta-owned {
@@ -231,12 +238,13 @@
       gap: 0.5rem;
       margin-top: 0.75rem;
       padding: 0.5rem 0.75rem;
-      background: var(--bg-hover);
-      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+      backdrop-filter: blur(20px);
+      border-radius: 10px;
       font-size: 0.75rem;
       color: var(--text-muted);
       font-weight: 600;
-      border: 1px solid var(--border-color);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     @media (max-width: 768px) {
@@ -411,11 +419,11 @@
             <% end %>
           </div>
         <% else %>
-          <div class="card" style="text-align: center; padding: 4rem 2rem;">
+          <div class="card" style="text-align: center; padding: 4rem 2rem; background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 18px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);">
             <div style="margin-bottom: 1.5rem; color: var(--text-muted);">
               <i class="fa-icon fa-md fa-robot"></i>
             </div>
-            <h2 style="margin: 0 0 0.75rem 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em;">Aucun Bot Disponible</h2>
+            <h2 style="margin: 0 0 0.75rem 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; color: var(--text-primary);">Aucun Bot Disponible</h2>
             <p style="margin: 0; color: var(--text-muted); font-size: 0.875rem;">Revenez bientôt pour découvrir nos bots de trading</p>
           </div>
         <% end %>
