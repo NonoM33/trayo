@@ -30,21 +30,21 @@ module Admin
                               .where(magic_number: bot.magic_number_prefix)
           
           if client_trades.any?
-            Rails.logger.info "Client a #{client_trades.count} trades avec le bot #{bot.name}"
+ "Client a #{client_trades.count} trades avec le bot #{bot.name}"
             
             # Vérifier si le bot_purchase existe déjà
             existing_purchase = current_user.bot_purchases.find_by(trading_bot: bot)
             
             if existing_purchase
-              Rails.logger.info "Bot #{bot.name} déjà assigné, synchronisation des performances"
+ "Bot #{bot.name} déjà assigné, synchronisation des performances"
               sync_bot_performance(current_user, bot)
             else
-              Rails.logger.info "Création du bot_purchase pour #{bot.name}"
+ "Création du bot_purchase pour #{bot.name}"
               
               # Calculer la date d'achat basée sur le premier trade
               first_trade = client_trades.order(:open_time).first
               purchase_date = first_trade&.open_time || Time.current
-              Rails.logger.info "Date d'achat calculée: #{purchase_date}"
+ "Date d'achat calculée: #{purchase_date}"
               
               # Calculer les performances actuelles
               total_profit = client_trades.sum(:profit)
@@ -67,22 +67,22 @@ module Admin
                 updated_at: Time.current
               )
               
-              Rails.logger.info "Bot #{bot.name} créé avec ID #{new_purchase.id}, profit: #{total_profit}€, trades: #{trades_count}"
+ "Bot #{bot.name} créé avec ID #{new_purchase.id}, profit: #{total_profit}€, trades: #{trades_count}"
             end
           else
-            Rails.logger.info "Client n'a pas de trades avec le bot #{bot.name}"
+ "Client n'a pas de trades avec le bot #{bot.name}"
           end
         end
         
         # Debug: Vérifier les bot_purchases en base
         all_purchases = BotPurchase.where(user_id: current_user.id)
-        Rails.logger.info "Bot purchases in DB for user #{current_user.id}: #{all_purchases.count}"
+ "Bot purchases in DB for user #{current_user.id}: #{all_purchases.count}"
         all_purchases.each do |purchase|
-          Rails.logger.info "  - Purchase ID: #{purchase.id}, Bot ID: #{purchase.trading_bot_id}, Status: #{purchase.status}"
+ "  - Purchase ID: #{purchase.id}, Bot ID: #{purchase.trading_bot_id}, Status: #{purchase.status}"
         end
         
         # Synchroniser les performances de tous les bots de l'utilisateur
-        Rails.logger.info "Synchronisation des performances de tous les bots..."
+ "Synchronisation des performances de tous les bots..."
         current_user.bot_purchases.includes(:trading_bot).each do |purchase|
           sync_bot_performance(current_user, purchase.trading_bot)
         end
@@ -91,14 +91,14 @@ module Admin
         current_user.debug_bot_purchases
         
         @purchases = current_user.bot_purchases.includes(:trading_bot).order(created_at: :desc)
-        Rails.logger.info "Purchases loaded: #{@purchases.count}"
+ "Purchases loaded: #{@purchases.count}"
         @purchases.each do |purchase|
-          Rails.logger.info "  - Loaded: #{purchase.trading_bot&.name} (#{purchase.status})"
+ "  - Loaded: #{purchase.trading_bot&.name} (#{purchase.status})"
         end
         
-        Rails.logger.info "Purchases any?: #{@purchases.any?}"
-        Rails.logger.info "Purchases empty?: #{@purchases.empty?}"
-        Rails.logger.info "================================"
+ "Purchases any?: #{@purchases.any?}"
+ "Purchases empty?: #{@purchases.empty?}"
+ "================================"
       end
     end
 
@@ -130,14 +130,10 @@ module Admin
     end
     
     def sync_bot_performance(user, bot)
-      Rails.logger.info "=== SYNCHRONISATION PERFORMANCE BOT ==="
-      
       # Récupérer tous les trades de l'utilisateur avec le magic number du bot
       trades = Trade.joins(mt5_account: :user)
                    .where(users: { id: user.id })
                    .where(magic_number: bot.magic_number_prefix)
-      
-      Rails.logger.info "Trades trouvés pour magic number #{bot.magic_number_prefix}: #{trades.count}"
       
       if trades.any?
         # Calculer les statistiques
@@ -146,11 +142,6 @@ module Admin
         winning_trades = trades.where('profit > 0').count
         losing_trades = trades.where('profit < 0').count
         win_rate = trades_count > 0 ? (winning_trades.to_f / trades_count * 100).round(2) : 0
-        
-        Rails.logger.info "Statistiques calculées:"
-        Rails.logger.info "  - Total profit: #{total_profit}"
-        Rails.logger.info "  - Trades count: #{trades_count}"
-        Rails.logger.info "  - Win rate: #{win_rate}%"
         
         # Mettre à jour le bot_purchase
         bot_purchase = user.bot_purchases.find_by(trading_bot: bot)
@@ -167,16 +158,8 @@ module Admin
             started_at: purchase_date,
             created_at: purchase_date
           )
-          
-          Rails.logger.info "Bot purchase mis à jour avec les nouvelles statistiques et date d'achat: #{purchase_date}"
         end
-        
-        Rails.logger.info "Bot purchase mis à jour avec succès"
-      else
-        Rails.logger.info "Aucun trade trouvé pour ce magic number"
       end
-      
-      Rails.logger.info "=== FIN SYNCHRONISATION ==="
     end
   end
 end

@@ -74,10 +74,10 @@ module Admin
       begin
         @current_campaign = Campaign.active_current.first
         puts "Campaign found via ActiveRecord: #{@current_campaign&.title}"
-        Rails.logger.info "Campaign found via ActiveRecord: #{@current_campaign&.title}"
+ "Campaign found via ActiveRecord: #{@current_campaign&.title}"
       rescue => e
         # Fallback: direct SQL query
-        Rails.logger.info "Campaign model not loaded, using SQL fallback: #{e.message}"
+ "Campaign model not loaded, using SQL fallback: #{e.message}"
         puts "Campaign model not loaded, using SQL fallback: #{e.message}"
         campaign_data = ActiveRecord::Base.connection.execute(
           "SELECT * FROM campaigns WHERE is_active = true AND end_date >= NOW() LIMIT 1"
@@ -316,15 +316,15 @@ module Admin
         trading_hours = analyze_trading_hours(bot_trades)
         trading_days = analyze_trading_days(bot_trades)
         
-        # Générer les prédictions
-        next_2_days = generate_next_2_days_predictions(trading_hours, trading_days)
+        # Générer les prédictions pour aujourd'hui seulement
+        today_predictions = generate_today_predictions(trading_hours, trading_days)
         
         predictions << {
           bot: bot,
           purchase: purchase,
           trading_hours: trading_hours,
           trading_days: trading_days,
-          predictions: next_2_days,
+          predictions: today_predictions,
           total_trades: bot_trades.count,
           success_rate: calculate_success_rate(bot_trades)
         }
@@ -368,35 +368,33 @@ module Admin
       end
     end
 
-    # Générer les prédictions pour les 2 prochains jours
-    def generate_next_2_days_predictions(trading_hours, trading_days)
+    # Générer les prédictions pour aujourd'hui seulement
+    def generate_today_predictions(trading_hours, trading_days)
       predictions = []
       
-      # Prochains 2 jours
-      (0..1).each do |day_offset|
-        target_date = Date.current + day_offset.days
-        target_wday = target_date.wday
+      # Aujourd'hui seulement
+      today = Date.current
+      today_wday = today.wday
+      
+      # Vérifier si aujourd'hui est dans les jours optimaux
+      optimal_day = trading_days.find { |d| d[:day] == today_wday }
+      
+      if optimal_day
+        # Ce jour est optimal, prédire les heures optimales
+        optimal_hours = trading_hours.select { |h| h[:percentage] >= 10 } # Heures avec au moins 10% des trades
         
-        # Vérifier si ce jour est dans les jours optimaux
-        optimal_day = trading_days.find { |d| d[:day] == target_wday }
-        
-        if optimal_day
-          # Ce jour est optimal, prédire les heures optimales
-          optimal_hours = trading_hours.select { |h| h[:percentage] >= 10 } # Heures avec au moins 10% des trades
-          
-          optimal_hours.each do |hour_data|
-            predictions << {
-              date: target_date,
-              day_name: optimal_day[:day_name],
-              hour: hour_data[:hour],
-              confidence: (optimal_day[:percentage] + hour_data[:percentage]) / 2,
-              probability: calculate_trading_probability(optimal_day, hour_data)
-            }
-          end
+        optimal_hours.each do |hour_data|
+          predictions << {
+            date: today,
+            day_name: optimal_day[:day_name],
+            hour: hour_data[:hour],
+            confidence: (optimal_day[:percentage] + hour_data[:percentage]) / 2,
+            probability: calculate_trading_probability(optimal_day, hour_data)
+          }
         end
       end
       
-      predictions.sort_by { |p| [p[:date], p[:hour]] }
+      predictions.sort_by { |p| p[:hour] }
     end
 
     # Calculer la probabilité de trading

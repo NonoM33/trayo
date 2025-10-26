@@ -23,24 +23,24 @@ class User < ApplicationRecord
   scope :mt5_not_initialized, -> { where(init_mt5: false) }
 
   def debug_bot_purchases
-    Rails.logger.info "=== USER DEBUG BOT PURCHASES ==="
-    Rails.logger.info "User: #{email} (ID: #{id})"
+ "=== USER DEBUG BOT PURCHASES ==="
+ "User: #{email} (ID: #{id})"
     
     # Vérifier directement en base
     direct_purchases = BotPurchase.where(user_id: id)
-    Rails.logger.info "Direct purchases in DB: #{direct_purchases.count}"
+ "Direct purchases in DB: #{direct_purchases.count}"
     direct_purchases.each do |purchase|
-      Rails.logger.info "  - Purchase ID: #{purchase.id}, Bot ID: #{purchase.trading_bot_id}, Status: #{purchase.status}"
+ "  - Purchase ID: #{purchase.id}, Bot ID: #{purchase.trading_bot_id}, Status: #{purchase.status}"
     end
     
     # Vérifier via la relation
     relation_purchases = bot_purchases
-    Rails.logger.info "Relation purchases: #{relation_purchases.count}"
+ "Relation purchases: #{relation_purchases.count}"
     relation_purchases.each do |purchase|
-      Rails.logger.info "  - Relation Purchase ID: #{purchase.id}, Bot: #{purchase.trading_bot&.name}"
+ "  - Relation Purchase ID: #{purchase.id}, Bot: #{purchase.trading_bot&.name}"
     end
     
-    Rails.logger.info "================================"
+ "================================"
   end
 
   def total_profits
@@ -103,7 +103,7 @@ class User < ApplicationRecord
       purchase_type: 'auto_detected' # Nouveau champ pour distinguer les achats automatiques
     )
     
-    Rails.logger.info "Bot automatiquement assigné: #{trading_bot.name} (#{magic_number}) pour l'utilisateur #{email} - Date d'achat: #{purchase_date}"
+ "Bot automatiquement assigné: #{trading_bot.name} (#{magic_number}) pour l'utilisateur #{email} - Date d'achat: #{purchase_date}"
     bot_purchase
   end
 
@@ -154,7 +154,7 @@ class User < ApplicationRecord
       used_at: Time.current
     )
     
-    Rails.logger.info "Utilisateur auto-créé: #{user.email} (#{user.first_name} #{user.last_name})"
+ "Utilisateur auto-créé: #{user.email} (#{user.first_name} #{user.last_name})"
     user
   end
 
