@@ -173,8 +173,8 @@
         <% if @purchases.any? %>
           <% @purchases.each do |purchase| %>
             <% bot = purchase.trading_bot %>
-            <div class="my-bot-card">
-              <div class="bot-header">
+            <div class="my-bot-card" onclick="window.location.href='<%= admin_bot_path(bot, from: 'my_bots') %>'" style="cursor: pointer;">
+              <div class="bot-header" onclick="event.stopPropagation();">
                 <div class="bot-info">
                   <div class="bot-avatar">
                     <div style="width: 100%; height: 100%; background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover)); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white;">
@@ -195,7 +195,7 @@
                 </div>
                 
                 <% if current_user.is_admin? %>
-                  <div class="bot-controls">
+                  <div class="bot-controls" onclick="event.stopPropagation();">
                     <%= button_to toggle_status_admin_my_bot_path(purchase), method: :post, 
                         class: "toggle-btn #{purchase.is_running? ? 'toggle-btn-stop' : 'toggle-btn-start'}" do %>
                       <% if purchase.is_running? %>
@@ -215,6 +215,11 @@
                     </div>
                   </div>
                 <% end %>
+                <div onclick="event.stopPropagation();" style="margin-top: 12px;">
+                  <%= link_to admin_bot_path(bot, from: 'my_bots'), class: "btn", style: "background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover)); color: white; padding: 10px 24px; font-size: 14px;" do %>
+                    <i class="fa-icon fa-md fa-eye"></i> Voir les Détails
+                  <% end %>
+                </div>
               </div>
               
               <div class="bot-stats-grid">
@@ -285,6 +290,13 @@
                     </div>
                   </div>
                 <% end %>
+              </div>
+              
+              <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); text-align: center; opacity: 0.7;">
+                <i class="fa-icon fa-md fa-mouse-pointer"></i>
+                <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">
+                  Cliquez pour voir les détails et l'analyse complète du bot
+                </span>
               </div>
             </div>
           <% end %>

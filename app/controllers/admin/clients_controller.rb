@@ -1,7 +1,7 @@
 module Admin
   class ClientsController < BaseController
-    before_action :require_admin, except: [:show, :test_dropdowns, :debug]
-    before_action :ensure_own_profile_or_admin, only: [:show]
+    before_action :require_admin, except: [:show, :edit, :update, :test_dropdowns, :debug]
+    before_action :ensure_own_profile_or_admin, only: [:show, :edit, :update]
     
     def index
       @clients = User.clients.order(:email)
@@ -48,7 +48,14 @@ module Admin
 
     def update
       @client = User.find(params[:id])
-      if @client.update(user_update_params)
+      
+      update_params = if current_user.is_admin?
+        user_update_params
+      else
+        user_update_params.except(:is_admin, :commission_rate)
+      end
+      
+      if @client.update(update_params)
         redirect_to admin_client_path(@client), notice: "User updated successfully"
       else
         render :edit, status: :unprocessable_entity

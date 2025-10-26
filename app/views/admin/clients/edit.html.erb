@@ -52,75 +52,79 @@
               </div>
             </div>
             
-            <div class="form-group">
-              <%= f.label :commission_rate, "Commission Rate (%)" %>
-              <%= f.number_field :commission_rate, step: 0.1, min: 0, max: 100 %>
-              <div class="help-text">Current: <%= number_to_percentage(@client.commission_rate, precision: 1) %></div>
-            </div>
-            
-            <div class="form-group">
-              <label>
-                <%= f.check_box :is_admin %>
-                Administrator Account
-              </label>
-              <div class="help-text"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Admin users have full access to the back office</div>
-            </div>
+            <% if current_user.is_admin? %>
+              <div class="form-group">
+                <%= f.label :commission_rate, "Commission Rate (%)" %>
+                <%= f.number_field :commission_rate, step: 0.1, min: 0, max: 100 %>
+                <div class="help-text">Current: <%= number_to_percentage(@client.commission_rate, precision: 1) %></div>
+              </div>
+              
+              <div class="form-group">
+                <label>
+                  <%= f.check_box :is_admin %>
+                  Administrator Account
+                </label>
+                <div class="help-text"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Admin users have full access to the back office</div>
+              </div>
+            <% end %>
             
             <%= f.submit "💾 Sauvegarder les Modifications", class: "btn btn-success" %>
           <% end %>
         </div>
         
-        <div class="card">
-          <h2>🔐 Password Management</h2>
-          
-          <%= form_with url: reset_password_admin_client_path(@client), method: :post, local: true do |f| %>
-            <div class="info-box info-box-warning" style="margin-bottom: 20px;">
-              <div class="info-box-title"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Password Reset</div>
-              <p style="margin: 0;">A new temporary password will be generated and sent to the user's email address.</p>
-            </div>
+        <% if current_user.is_admin? %>
+          <div class="card">
+            <h2>🔐 Password Management</h2>
             
-            <div class="form-group">
-              <%= f.label :new_password, "Or set a custom password" %>
-              <%= f.password_field :new_password, placeholder: "Leave empty for auto-generated password" %>
-              <div class="help-text">Must be at least 6 characters. If empty, a random password will be generated.</div>
-            </div>
-            
-            <div class="form-group">
-              <label>
-                <%= f.check_box :send_email, checked: true %>
-                Send password reset email to user
-              </label>
-            </div>
-            
-            <%= f.submit "🔄 Reset Password", class: "btn btn-warning", data: { confirm: "Are you sure you want to reset this user's password?" } %>
-          <% end %>
-        </div>
-        
-        <div class="card">
-          <h2>🔑 API Token</h2>
-          
-          <div class="info-box info-box-info">
-            <div class="info-box-title">MT5 API Token</div>
-            <div style="font-family: monospace; font-size: 13px; word-break: break-all; margin: 10px 0;">
-              <%= @client.mt5_api_token || "Not generated yet" %>
-            </div>
+            <%= form_with url: reset_password_admin_client_path(@client), method: :post, local: true do |f| %>
+              <div class="info-box info-box-warning" style="margin-bottom: 20px;">
+                <div class="info-box-title"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Password Reset</div>
+                <p style="margin: 0;">A new temporary password will be generated and sent to the user's email address.</p>
+              </div>
+              
+              <div class="form-group">
+                <%= f.label :new_password, "Or set a custom password" %>
+                <%= f.password_field :new_password, placeholder: "Leave empty for auto-generated password" %>
+                <div class="help-text">Must be at least 6 characters. If empty, a random password will be generated.</div>
+              </div>
+              
+              <div class="form-group">
+                <label>
+                  <%= f.check_box :send_email, checked: true %>
+                  Send password reset email to user
+                </label>
+              </div>
+              
+              <%= f.submit "🔄 Reset Password", class: "btn btn-warning", data: { confirm: "Are you sure you want to reset this user's password?" } %>
+            <% end %>
           </div>
           
-          <%= form_with url: regenerate_token_admin_client_path(@client), method: :post, local: true do |f| %>
-            <%= f.submit "🔄 Regenerate API Token", class: "btn btn-primary", data: { confirm: "This will invalidate the current token. The MT5 script will need to be updated. Continue?" } %>
-          <% end %>
-        </div>
-        
-        <div class="card">
-          <h2><i class="fa-icon fa-md fa-trash"></i> Danger Zone</h2>
-          
-          <div class="info-box-warning" style="margin-bottom: 20px;">
-            <div class="info-box-title"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Supprimer le Compte Utilisateur</div>
-            <p style="margin: 0;">Cette action ne peut pas être annulée. Tous les comptes MT5 associés, trades, paiements et crédits seront définitivement supprimés.</p>
+          <div class="card">
+            <h2>🔑 API Token</h2>
+            
+            <div class="info-box info-box-info">
+              <div class="info-box-title">MT5 API Token</div>
+              <div style="font-family: monospace; font-size: 13px; word-break: break-all; margin: 10px 0;">
+                <%= @client.mt5_api_token || "Not generated yet" %>
+              </div>
+            </div>
+            
+            <%= form_with url: regenerate_token_admin_client_path(@client), method: :post, local: true do |f| %>
+              <%= f.submit "🔄 Regenerate API Token", class: "btn btn-primary", data: { confirm: "This will invalidate the current token. The MT5 script will need to be updated. Continue?" } %>
+            <% end %>
           </div>
           
-          <%= button_to "<i class='fa-icon fa-md fa-trash'></i> Supprimer le Compte Utilisateur".html_safe, admin_client_path(@client), method: :delete, class: "btn btn-danger", data: { confirm: "Êtes-vous ABSOLUMENT sûr ? Tapez SUPPRIMER pour confirmer.\n\nCela supprimera définitivement :\n- Le compte utilisateur\n- Tous les comptes MT5\n- Tous les trades\n- Tous les paiements\n- Tous les crédits\n\nCette action NE PEUT PAS être annulée !" } %>
-        </div>
+          <div class="card">
+            <h2><i class="fa-icon fa-md fa-trash"></i> Danger Zone</h2>
+            
+            <div class="info-box-warning" style="margin-bottom: 20px;">
+              <div class="info-box-title"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Supprimer le Compte Utilisateur</div>
+              <p style="margin: 0;">Cette action ne peut pas être annulée. Tous les comptes MT5 associés, trades, paiements et crédits seront définitivement supprimés.</p>
+            </div>
+            
+            <%= button_to "<i class='fa-icon fa-md fa-trash'></i> Supprimer le Compte Utilisateur".html_safe, admin_client_path(@client), method: :delete, class: "btn btn-danger", data: { confirm: "Êtes-vous ABSOLUMENT sûr ? Tapez SUPPRIMER pour confirmer.\n\nCela supprimera définitivement :\n- Le compte utilisateur\n- Tous les comptes MT5\n- Tous les trades\n- Tous les paiements\n- Tous les crédits\n\nCette action NE PEUT PAS être annulée !" } %>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>
