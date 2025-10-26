@@ -141,6 +141,28 @@
       </button>
     </div>
   </div>
+  
+  <% unless bot.new_record? %>
+    <div class="card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); border: 2px solid var(--color-success);">
+      <h3><i class="fa-icon fa-md fa-chart-line"></i> Upload de Backtest MT5</h3>
+      
+      <div style="padding: 20px; background: white; border-radius: 8px; margin-bottom: 20px;">
+        <label style="font-size: 16px; font-weight: 700; margin-bottom: 12px; display: block;">
+          <i class="fa-icon fa-md fa-file-excel" style="color: var(--color-success);"></i> Fichier Rapport MT5 (.xlsx)
+        </label>
+        <input type="file" name="backtest_file" accept=".xlsx,.xls" class="form-control" />
+        <div class="help-text" style="margin-top: 8px;">
+          Téléversez un fichier Excel de rapport MT5 (ReportTester-*.xlsx). Les données seront extraites automatiquement.
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <%= link_to admin_bot_backtests_path(bot), class: "btn btn-outline", style: "flex: 1;" do %>
+          <i class="fa-icon fa-md fa-list"></i> Gérer les Backtests Existants
+        <% end %>
+      </div>
+    </div>
+  <% end %>
 
   <div style="display: flex; gap: 12px; margin-top: 24px;">
     <%= f.submit bot.new_record? ? "🚀 Créer le Bot" : "💾 Enregistrer les Modifications", 
