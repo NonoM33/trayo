@@ -379,6 +379,12 @@
                 </td>
                 <% if current_user.is_admin? %>
                   <td>
+                    <% unauthorized_count = account.trades.unauthorized_manual.count %>
+                    <% if unauthorized_count > 0 %>
+                      <div class="warning-badge" style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; margin-bottom: 4px;">
+                        ⚠️ <%= unauthorized_count %> trade(s) manuel(s)
+                      </div>
+                    <% end %>
                     <div class="action-buttons">
                       <button onclick="document.getElementById('edit-account-<%= account.id %>').style.display='block'" class="btn btn-outline btn-sm">
                         Modifier
@@ -789,6 +795,16 @@
                       </div>
                       <div class="help-text">
                         Montant total des retraits effectués
+                      </div>
+                    </div>
+                    
+                    <div class="input-field">
+                      <div class="checkbox-container" style="margin-top: 20px;">
+                        <%= f.check_box :is_admin_account, class: "form-checkbox" %>
+                        <%= f.label :is_admin_account, "Compte Admin (trades manuels autorisés)", class: "form-label", style: "margin-left: 8px;" %>
+                      </div>
+                      <div class="help-text">
+                        ✓ Compte autorisé pour les trades manuels (hedging). Les trades sur ce compte ne seront pas sanctionnés.
                       </div>
                     </div>
                   </div>
