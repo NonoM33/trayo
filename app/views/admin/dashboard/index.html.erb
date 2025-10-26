@@ -311,6 +311,65 @@
       <p>Voici un aperçu de vos performances de trading</p>
     </div>
     
+    <!-- Filtres Dashboard -->
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <div class="card-header">
+        <h3>
+          <%= stat_icon(:filter, size: 'md') %>
+          Filtres du Dashboard
+        </h3>
+      </div>
+      
+      <%= form_with url: admin_dashboard_path, method: :get, local: true, class: "filters-form" do |form| %>
+        <div class="filters-grid">
+          <div class="filter-group">
+            <%= form.label :period, "Période", class: "filter-label" %>
+            <%= form.select :period, options_for_select([
+              ["7 derniers jours", "7_days"],
+              ["30 derniers jours", "30_days"],
+              ["3 derniers mois", "3_months"],
+              ["6 derniers mois", "6_months"],
+              ["1 an", "1_year"],
+              ["Tout", "all"]
+            ], params[:period] || "30_days"), {}, { class: "filter-select" } %>
+          </div>
+          
+          <div class="filter-group">
+            <%= form.label :bot_filter, "Bot", class: "filter-label" %>
+            <%= form.select :bot_filter, options_for_select([
+              ["Tous les bots", ""]
+            ] + (@client.bot_purchases.includes(:trading_bot).map { |bp| 
+              ["#{bp.trading_bot.name} (#{bp.magic_number})", bp.magic_number] 
+            }), params[:bot_filter]), {}, { class: "filter-select" } %>
+          </div>
+          
+          <div class="filter-group">
+            <%= form.label :data_type, "Type de données", class: "filter-label" %>
+            <%= form.select :data_type, options_for_select([
+              ["Toutes les données", "all"],
+              ["Profits seulement", "profits"],
+              ["Trades seulement", "trades"],
+              ["Statistiques seulement", "stats"]
+            ], params[:data_type] || "all"), {}, { class: "filter-select" } %>
+          </div>
+          
+          <div class="filter-group">
+            <%= form.label :chart_type, "Type de graphique", class: "filter-label" %>
+            <%= form.select :chart_type, options_for_select([
+              ["Graphique combiné", "combined"],
+              ["Graphique séparé", "separate"],
+              ["Graphique simple", "simple"]
+            ], params[:chart_type] || "combined"), {}, { class: "filter-select" } %>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; margin-top: 16px;">
+          <%= form.submit "Appliquer les filtres", class: "btn btn-primary" %>
+          <%= link_to "Réinitialiser", admin_dashboard_path, class: "btn btn-outline" %>
+        </div>
+      <% end %>
+    </div>
+    
     <div class="info-grid" style="margin-bottom: 1.5rem;">
       <div class="info-item">
         <div class="info-label">

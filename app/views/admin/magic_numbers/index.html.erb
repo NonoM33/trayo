@@ -62,7 +62,7 @@
                 <td>
                   <% unless assigned_bot %>
                     <div class="dropdown">
-                      <button class="btn btn-outline btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                      <button class="dropdown-toggle" type="button">
                         Assigner à un bot
                       </button>
                       <ul class="dropdown-menu">
@@ -135,7 +135,7 @@
                     <div class="stat-item">
                       <span class="stat-label">Drawdown:</span>
                       <span class="stat-value negative">
-                        <%= number_to_currency(performance[:drawdown], unit: "€", format: "%n %u") %>
+                        <%= number_to_percentage(performance[:drawdown_percentage], precision: 1) %>%
                       </span>
                     </div>
                     <div class="stat-item">

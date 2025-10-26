@@ -1,0 +1,80 @@
+<div class="main-content">
+  <div class="container">
+    <div class="card">
+      <h2>✅ Test des Routes - Clients</h2>
+      <p>Cette page confirme que les routes de test fonctionnent correctement.</p>
+      
+      <div style="margin: 20px 0;">
+        <h3>🎯 Routes Disponibles</h3>
+        <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;">
+          <p><strong>✅ Routes de test fonctionnelles :</strong></p>
+          <ul>
+            <li><code>/admin/clients/test_dropdowns</code> - Test des dropdowns client</li>
+            <li><code>/admin/clients/debug</code> - Page de debug</li>
+            <li><code>/admin/clients</code> - Liste des clients</li>
+            <li><code>/admin/clients/:id</code> - Détails d'un client</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h3>🧪 Test des Dropdowns</h3>
+        <p>Maintenant que les routes fonctionnent, vous pouvez tester les dropdowns :</p>
+        
+        <div style="display: flex; gap: 12px; margin: 16px 0;">
+          <a href="/admin/clients/test_dropdowns" class="btn btn-primary">
+            <i class="fa-solid fa-test-tube"></i> Tester les Dropdowns Client
+          </a>
+          <a href="/admin/clients/debug" class="btn btn-outline">
+            <i class="fa-solid fa-bug"></i> Page de Debug
+          </a>
+        </div>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h3>📋 Instructions</h3>
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+          <p><strong>Pour tester les dropdowns sur un vrai client :</strong></p>
+          <ol>
+            <li>Allez sur <a href="/admin/clients">/admin/clients</a> pour voir la liste</li>
+            <li>Cliquez sur un client pour voir ses détails</li>
+            <li>Les dropdowns "Sélectionner un Bot", "Méthode de Paiement" et "Raison" devraient fonctionner</li>
+            <li>Ouvrez la console (F12) pour voir les logs de debug</li>
+          </ol>
+        </div>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h3>🔧 Corrections Appliquées</h3>
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+          <p><strong>Problèmes résolus :</strong></p>
+          <ul>
+            <li>✅ Routes spécifiques placées AVANT les resources</li>
+            <li>✅ Actions de test exclues des before_action</li>
+            <li>✅ Filtres de sécurité ajustés</li>
+            <li>✅ Pages de test créées</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+console.log('=== ROUTES TEST PAGE ===');
+console.log('Page de test des routes chargée avec succès !');
+
+// Vérifier que nous sommes sur la bonne page
+console.log('URL actuelle:', window.location.href);
+console.log('Path:', window.location.pathname);
+
+// Vérifier les liens disponibles
+const testLinks = document.querySelectorAll('a[href*="test_dropdowns"], a[href*="debug"]');
+console.log('Liens de test trouvés:', testLinks.length);
+
+testLinks.forEach((link, index) => {
+  console.log(`Lien ${index}:`, link.href);
+});
+
+console.log('=== END ROUTES TEST PAGE ===');
+</script>

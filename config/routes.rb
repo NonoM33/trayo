@@ -98,7 +98,10 @@ Rails.application.routes.draw do
     patch "maintenance/toggle", to: "maintenance#toggle"
     
     # Test page for icons
-    get "test_icons", to: "dashboard#test_icons"
+      get "test_icons", to: "dashboard#test_icons"
+      get "test_dropdowns", to: "dashboard#test_dropdowns"
+      get "test_dashboard_dropdowns", to: "dashboard#test_dashboard_dropdowns"
+      get "test_client_dropdowns", to: "dashboard#test_client_dropdowns"
   end
 
   namespace :api do

@@ -1,0 +1,214 @@
+<div class="main-content">
+  <div class="container">
+    <div class="card">
+      <h2>🧪 Test des Dropdowns - Page Client</h2>
+      <p>Cette page simule les dropdowns de la page des détails client pour tester leur fonctionnement.</p>
+      
+      <!-- Simulation de la section "Assigner un Nouveau Bot" -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h3>🤖 Assigner un Nouveau Bot</h3>
+        
+        <form style="display: flex; gap: 12px; align-items: end;">
+          <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label>Sélectionner un Bot</label>
+            <select class="filter-select" required>
+              <option value="">Choisir un bot...</option>
+              <option value="1">Petrole</option>
+              <option value="2">OR</option>
+              <option value="3">BTC</option>
+              <option value="4">GBP</option>
+            </select>
+          </div>
+          
+          <div class="form-group" style="flex: 0 0 200px; margin-bottom: 0;">
+            <label>Prix (€)</label>
+            <input type="number" step="0.01" min="0" placeholder="Optionnel" class="filter-input">
+          </div>
+          
+          <button type="button" class="btn btn-success" style="margin-top: 27px;" onclick="alert('Bot assigné !')">
+            <i class="fa-solid fa-plus"></i> Assigner
+          </button>
+        </form>
+      </div>
+      
+      <!-- Simulation de la section "Ajouter un Paiement" -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h3>💰 Ajouter un Paiement</h3>
+        
+        <form>
+          <div class="form-group">
+            <label>Montant (€)</label>
+            <input type="number" step="0.01" min="0" required value="369.39" placeholder="Entrer le montant" class="filter-input">
+            <div class="help-text">Pré-rempli avec le solde actuel dû</div>
+          </div>
+
+          <div class="form-group">
+            <label>Méthode de Paiement</label>
+            <select class="filter-select">
+              <option value="">Sélectionner la méthode</option>
+              <option value="bank_transfer">Virement Bancaire</option>
+              <option value="cash">Espèces</option>
+              <option value="paypal">PayPal</option>
+              <option value="credit_card">Carte de Crédit</option>
+              <option value="check">Chèque</option>
+              <option value="other">Autre</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Date de Paiement</label>
+            <input type="date" value="<%= Date.today %>" required class="filter-input">
+          </div>
+
+          <div class="form-group">
+            <label>Référence / ID Transaction</label>
+            <input type="text" placeholder="ex. VIREMENT123456" class="filter-input">
+          </div>
+
+          <div class="form-group">
+            <label>Notes</label>
+            <textarea placeholder="Informations supplémentaires..." class="filter-input"></textarea>
+          </div>
+
+          <button type="button" class="btn btn-primary" onclick="alert('Paiement ajouté !')">
+            <i class="fa-solid fa-plus"></i> Ajouter un Paiement
+          </button>
+        </form>
+      </div>
+      
+      <!-- Simulation de la section "Ajouter un Crédit" -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h3>🎁 Ajouter un Crédit</h3>
+        
+        <form>
+          <div class="form-group">
+            <label>Montant (€)</label>
+            <input type="number" step="0.01" min="0" required class="filter-input">
+          </div>
+
+          <div class="form-group">
+            <label>Raison</label>
+            <select class="filter-select">
+              <option value="">Sélectionner une raison</option>
+              <option value="welcome_bonus">Bonus de bienvenue</option>
+              <option value="compensation">Compensation</option>
+              <option value="promotion">Promotion</option>
+              <option value="system_error">Erreur système</option>
+              <option value="refund">Remboursement</option>
+              <option value="other">Autre</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn btn-success" onclick="alert('Crédit créé !')">
+            <i class="fa-solid fa-plus"></i> Créer le Crédit
+          </button>
+        </form>
+      </div>
+      
+      <!-- Test des dropdowns personnalisés -->
+      <div class="card">
+        <h3>🎯 Test des Dropdowns Personnalisés</h3>
+        
+        <div style="margin: 20px 0;">
+          <h4>Dropdown d'Actions</h4>
+          <div class="dropdown">
+            <button class="dropdown-toggle" type="button">
+              Actions sur le Client
+            </button>
+            <ul class="dropdown-menu">
+              <li><button class="dropdown-item" onclick="alert('Modifier profil')">✏️ Modifier Profil</button></li>
+              <li><button class="dropdown-item" onclick="alert('Réinitialiser MT5')">🔄 Réinitialiser MT5</button></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><button class="dropdown-item" onclick="alert('Exporter données')">📊 Exporter Données</button></li>
+              <li><button class="dropdown-item" onclick="alert('Envoyer email')">📧 Envoyer Email</button></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+          <h4>Dropdown de Sélection</h4>
+          <div class="dropdown">
+            <button class="dropdown-toggle" type="button">
+              Actions Rapides
+            </button>
+            <ul class="dropdown-menu">
+              <li><button class="dropdown-item" onclick="alert('Ajouter paiement')">💰 Ajouter Paiement</button></li>
+              <li><button class="dropdown-item" onclick="alert('Ajouter crédit')">🎁 Ajouter Crédit</button></li>
+              <li><button class="dropdown-item" onclick="alert('Créer VPS')">🖥️ Créer VPS</button></li>
+              <li><button class="dropdown-item" onclick="alert('Assigner bot')">🤖 Assigner Bot</button></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h3>📋 Instructions de Test</h3>
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+          <p><strong>Testez les fonctionnalités suivantes :</strong></p>
+          <ul>
+            <li>✅ <strong>Selects HTML natifs</strong> : Les dropdowns de sélection s'ouvrent-ils ?</li>
+            <li>✅ <strong>Styles appliqués</strong> : Les classes "filter-select" sont-elles visibles ?</li>
+            <li>✅ <strong>Dropdowns personnalisés</strong> : Les boutons avec menus déroulants fonctionnent-ils ?</li>
+            <li>✅ <strong>Mode sombre</strong> : Les couleurs s'adaptent-elles au thème ?</li>
+            <li>✅ <strong>Console logs</strong> : Vérifiez la console pour les logs de debug</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+console.log('=== CLIENT DROPDOWN TEST PAGE ===');
+console.log('Page de test des dropdowns client chargée');
+
+// Vérifier que les styles sont chargés
+const adminStyles = document.querySelector('link[href*="admin"]');
+console.log('Styles admin chargés:', adminStyles !== null);
+
+// Vérifier les selects avec la classe filter-select
+const filterSelects = document.querySelectorAll('.filter-select');
+console.log('Nombre de selects avec classe filter-select:', filterSelects.length);
+
+filterSelects.forEach((select, index) => {
+  console.log(`Select ${index}:`, select);
+  console.log(`  Classes:`, select.className);
+  console.log(`  ID:`, select.id);
+  console.log(`  Name:`, select.name);
+  console.log(`  Options count:`, select.options.length);
+  
+  const computedStyle = window.getComputedStyle(select);
+  console.log(`  Computed styles:`);
+  console.log(`    Display:`, computedStyle.display);
+  console.log(`    Visibility:`, computedStyle.visibility);
+  console.log(`    Opacity:`, computedStyle.opacity);
+  console.log(`    Background:`, computedStyle.backgroundColor);
+  console.log(`    Border:`, computedStyle.border);
+  console.log(`    Padding:`, computedStyle.padding);
+});
+
+// Vérifier les dropdowns personnalisés
+const customDropdowns = document.querySelectorAll('.dropdown');
+console.log('Nombre de dropdowns personnalisés:', customDropdowns.length);
+
+customDropdowns.forEach((dropdown, index) => {
+  console.log(`Dropdown ${index}:`, dropdown);
+  const toggle = dropdown.querySelector('.dropdown-toggle');
+  const menu = dropdown.querySelector('.dropdown-menu');
+  console.log(`  Toggle:`, toggle);
+  console.log(`  Menu:`, menu);
+});
+
+// Vérifier tous les selects sur la page
+const allSelects = document.querySelectorAll('select');
+console.log('Nombre total de selects:', allSelects.length);
+
+allSelects.forEach((select, index) => {
+  console.log(`Select ${index}:`, select);
+  console.log(`  Classes:`, select.className);
+  console.log(`  Style:`, select.style.cssText);
+  console.log(`  Computed display:`, window.getComputedStyle(select).display);
+});
+
+console.log('=== END CLIENT DROPDOWN TEST PAGE ===');
+</script>
