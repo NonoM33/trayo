@@ -313,28 +313,40 @@
     
     <div class="info-grid" style="margin-bottom: 1.5rem;">
       <div class="info-item">
-        <div class="info-label">Balance Totale</div>
+        <div class="info-label">
+          <%= stat_icon(:balance, size: 'sm') %>
+          Balance Totale
+        </div>
         <div class="info-value">
           <%= number_to_currency(@client.mt5_accounts.sum(:balance), unit: "€", format: "%n %u") %>
         </div>
       </div>
       
       <div class="info-item">
-        <div class="info-label">Gains Totaux</div>
+        <div class="info-label">
+          <%= profit_icon(@client.total_profits) %>
+          Gains Totaux
+        </div>
         <div class="info-value <%= @client.total_profits > 0 ? 'positive' : 'negative' %>">
           <%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %>
         </div>
       </div>
       
       <div class="info-item">
-        <div class="info-label">Commission Due</div>
+        <div class="info-label">
+          <%= stat_icon(:commission, size: 'sm') %>
+          Commission Due
+        </div>
         <div class="info-value">
           <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %>
         </div>
       </div>
       
       <div class="info-item">
-        <div class="info-label">Solde à Payer</div>
+        <div class="info-label">
+          <%= stat_icon(:balance, size: 'sm', color: @client.balance_due > 0 ? 'danger' : 'success') %>
+          Solde à Payer
+        </div>
         <div class="info-value <%= @client.balance_due > 0 ? 'negative' : 'positive' %>">
           <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
         </div>
@@ -345,8 +357,14 @@
     <% if @bot_predictions&.any? %>
       <div class="card">
         <div class="card-header">
-          <h2>🤖 Prédictions de Mes Bots - Aujourd'hui</h2>
-          <span class="badge badge-info">Prédictions pour le jour J</span>
+          <h2>
+            <%= nav_icon(:my_bots, size: 'lg') %>
+            Prédictions de Mes Bots - Aujourd'hui
+          </h2>
+          <span class="badge badge-info">
+            <%= stat_icon(:projection, size: 'sm') %>
+            Prédictions pour le jour J
+          </span>
         </div>
         
         <% bots_with_predictions = @bot_predictions.select { |prediction| prediction[:predictions]&.select { |pred| pred[:date] == Date.current }&.any? } %>
@@ -424,8 +442,14 @@
     <!-- Graphique des Performances des Bots -->
     <div class="card">
       <div class="card-header">
-        <h2>📊 Performances des Bots</h2>
-        <p>Analyse des performances de tous vos bots</p>
+        <h2>
+          <%= stat_icon(:performance, size: 'lg') %>
+          Performances des Bots
+        </h2>
+        <p>
+          <%= stat_icon(:analysis, size: 'sm') %>
+          Analyse des performances de tous vos bots
+        </p>
       </div>
       
       <div class="chart-container" style="height: 400px;">
@@ -441,15 +465,24 @@
     
     <!-- Profits Mensuels & Projection -->
     <div class="card">
-      <h2>Profits Mensuels & Projection</h2>
+      <h2>
+        <%= stat_icon(:monthly, size: 'lg') %>
+        Profits Mensuels & Projection
+      </h2>
       
       <div class="two-col" style="margin-bottom: 24px;">
         <div class="info-box info-box-info">
-          <div class="info-box-title"><i class="fa-icon fa-md fa-chart-bar"></i> Performance Historique</div>
+          <div class="info-box-title">
+            <%= stat_icon(:performance, size: 'md') %>
+            Performance Historique
+          </div>
           <p style="margin: 0;">Vos profits réels des 12 derniers mois</p>
         </div>
         <div class="info-box info-box-success">
-          <div class="info-box-title"><i class="fa-icon fa-md fa-bullhorn"></i> Projection (6 mois)</div>
+          <div class="info-box-title">
+            <%= stat_icon(:projection, size: 'md') %>
+            Projection (6 mois)
+          </div>
           <p style="margin: 0;">Basée sur votre moyenne mensuelle: <strong><%= number_to_currency((@projection_data&.last&.dig(:balance) || 0 - current_user.mt5_accounts.sum(:balance)) / 6, unit: "€", format: "%n %u") %>/mois</strong></p>
         </div>
       </div>
@@ -468,14 +501,26 @@
     <!-- Comptes MT5 et Activité Récente -->
     <div class="two-col">
       <div class="card">
-        <h2>Comptes MT5</h2>
+        <h2>
+          <%= stat_icon(:accounts, size: 'lg') %>
+          Comptes MT5
+        </h2>
         <% if @mt5_accounts&.any? %>
           <table>
             <thead>
               <tr>
-                <th>Compte</th>
-                <th>Balance</th>
-                <th>Gains</th>
+                <th>
+                  <%= stat_icon(:accounts, size: 'sm') %>
+                  Compte
+                </th>
+                <th>
+                  <%= stat_icon(:balance, size: 'sm') %>
+                  Balance
+                </th>
+                <th>
+                  <%= stat_icon(:profit, size: 'sm') %>
+                  Gains
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -491,20 +536,35 @@
             </tbody>
           </table>
         <% else %>
-          <p style="text-align: center; color: var(--text-muted); padding: 40px;">Aucun compte MT5</p>
+          <p style="text-align: center; color: var(--text-muted); padding: 40px;">
+            <%= stat_icon(:accounts, size: 'lg', color: 'muted') %>
+            Aucun compte MT5
+          </p>
         <% end %>
       </div>
       
       <div class="card">
-        <h2>Activité Récente</h2>
+        <h2>
+          <%= stat_icon(:trades, size: 'lg') %>
+          Activité Récente
+        </h2>
         <% recent_trades = @client.trades.order(close_time: :desc).limit(5) %>
         <% if recent_trades.any? %>
           <table>
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Symbole</th>
-                <th>Profit</th>
+                <th>
+                  <%= stat_icon(:monthly, size: 'sm') %>
+                  Date
+                </th>
+                <th>
+                  <%= stat_icon(:symbols, size: 'sm') %>
+                  Symbole
+                </th>
+                <th>
+                  <%= stat_icon(:profit, size: 'sm') %>
+                  Profit
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -520,7 +580,10 @@
             </tbody>
           </table>
         <% else %>
-          <p style="text-align: center; color: var(--text-muted); padding: 40px;">Aucune transaction récente</p>
+          <p style="text-align: center; color: var(--text-muted); padding: 40px;">
+            <%= stat_icon(:trades, size: 'lg', color: 'muted') %>
+            Aucune transaction récente
+          </p>
         <% end %>
       </div>
     </div>
