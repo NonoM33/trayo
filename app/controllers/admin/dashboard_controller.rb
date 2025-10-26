@@ -67,6 +67,24 @@ end
 module Admin
   class DashboardController < BaseController
     def index
+      # Récupérer les paramètres de filtres
+      @period = params[:period] || '30_days'
+      @bot_filter = params[:bot_filter]
+      @data_type = params[:data_type] || 'all'
+      @chart_type = params[:chart_type] || 'combined'
+      
+      # Calculer les dates selon la période sélectionnée
+      @date_range = calculate_date_range(@period)
+      
+      # Debug
+      puts "=== DASHBOARD FILTERS DEBUG ==="
+      puts "Period: #{@period}"
+      puts "Bot filter: #{@bot_filter}"
+      puts "Data type: #{@data_type}"
+      puts "Chart type: #{@chart_type}"
+      puts "Date range: #{@date_range}"
+      puts "==============================="
+      
       puts "=== DASHBOARD CONTROLLER CALLED ==="
       Rails.logger.info "=== DASHBOARD CONTROLLER CALLED ==="
       
@@ -190,7 +208,44 @@ module Admin
     render 'admin/test_icons'
   end
 
+  def test_dropdowns
+    # Page de test pour les dropdowns
+    render 'admin/test_dropdowns'
+  end
+
+  def test_dashboard_dropdowns
+    # Page de test pour les dropdowns du dashboard
+    render 'admin/test_dashboard_dropdowns'
+  end
+
+  def test_client_dropdowns
+    # Page de test pour les dropdowns de la page client
+    render 'admin/test_client_dropdowns'
+  end
+
+  def routes_test
+    # Page de test pour vérifier que les routes fonctionnent
+    render 'admin/routes_test'
+  end
+
   private
+
+  def calculate_date_range(period)
+    case period
+    when '7_days'
+      { from: 7.days.ago, to: Time.current }
+    when '30_days'
+      { from: 30.days.ago, to: Time.current }
+    when '3_months'
+      { from: 3.months.ago, to: Time.current }
+    when '6_months'
+      { from: 6.months.ago, to: Time.current }
+    when '1_year'
+      { from: 1.year.ago, to: Time.current }
+    else
+      { from: 1.year.ago, to: Time.current }
+    end
+  end
 
     def campaign_data_to_object(data)
       CampaignData.new(
