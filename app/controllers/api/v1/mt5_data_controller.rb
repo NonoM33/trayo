@@ -50,8 +50,6 @@ module Api
           }, status: :ok
           return
         end
-
-        mt5_account = Mt5Account.find_or_initialize_by(mt5_id: sync_params[:mt5_id])
         
         # Assigner l'utilisateur si nécessaire
         if mt5_account.new_record? || mt5_account.user.nil?
