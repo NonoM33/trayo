@@ -375,5 +375,147 @@
       </div>
     </div>
   </div>
+
+  <script data-turbo-track="reload">
+    function loadChartJS() {
+      return new Promise((resolve, reject) => {
+        if (typeof Chart !== 'undefined') {
+          resolve(Chart);
+          return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+        script.onload = () => resolve(Chart);
+        script.onerror = () => reject(new Error('Failed to load Chart.js'));
+        document.head.appendChild(script);
+      });
+    }
+
+    async function initializeCapitalChart() {
+      try {
+        await loadChartJS();
+        
+        const ctx = document.getElementById('capitalEvolutionChart');
+        if (!ctx) return;
+        
+        const loadingDiv = document.getElementById('chart-loading-capital');
+        if (loadingDiv) loadingDiv.style.display = 'none';
+        
+        const evolutionData = <%= raw @capital_evolution.to_json %>;
+        
+        if (evolutionData.length === 0) {
+          ctx.style.display = 'none';
+          if (loadingDiv) {
+            loadingDiv.innerHTML = '<div class="empty-state"><p style="color: #86868b;">Aucune donnée d\'évolution disponible</p></div>';
+            loadingDiv.style.display = 'flex';
+          }
+          return;
+        }
+        
+        const labels = evolutionData.map((d, i) => {
+          if (i === 0 || i === evolutionData.length - 1) {
+            return new Date(d.date).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' });
+          } else if (evolutionData.length > 10 && (i % Math.ceil(evolutionData.length / 5) === 0)) {
+            return new Date(d.date).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' });
+          }
+          return '';
+        });
+        
+        const dataPoints = evolutionData.map(d => d.balance);
+        
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Montant du Capital (€)',
+                data: dataPoints,
+                borderColor: '#007aff',
+                backgroundColor: 'rgba(0, 122, 255, 0.1)',
+                borderWidth: 3,
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                tension: 0.4,
+                fill: true
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                padding: 12,
+                titleColor: '#fff',
+                bodyColor: '#f5f5f7',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                borderWidth: 1,
+                titleFont: {
+                  size: 13,
+                  weight: 600
+                },
+                bodyFont: {
+                  size: 13
+                },
+                callbacks: {
+                  label: function(context) {
+                    return 'Capital: ' + new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                grid: {
+                  display: false
+                },
+                ticks: {
+                  color: '#86868b',
+                  font: {
+                    size: 11
+                  },
+                  maxRotation: 0,
+                  padding: 12
+                }
+              },
+              y: {
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.08)'
+                },
+                ticks: {
+                  color: '#86868b',
+                  font: {
+                    size: 11
+                  },
+                  callback: function(value) {
+                    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', notation: 'compact' }).format(value);
+                  }
+                }
+              }
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Error initializing chart:', error);
+        const loadingDiv = document.getElementById('chart-loading-capital');
+        if (loadingDiv) {
+          loadingDiv.innerHTML = '<div class="empty-state"><p style="color: #ff3b30;">Erreur lors du chargement du graphique</p></div>';
+          loadingDiv.style.display = 'flex';
+        }
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeCapitalChart);
+    } else {
+      initializeCapitalChart();
+    }
+  </script>
 </body>
 </html>
