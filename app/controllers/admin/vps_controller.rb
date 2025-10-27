@@ -87,7 +87,7 @@ module Admin
     def vps_params
       params.require(:vps).permit(
         :user_id, :name, :ip_address, :server_location,
-        :status, :monthly_price, :access_credentials, :notes
+        :status, :monthly_price, :access_credentials, :notes, :renewal_date
       )
     end
   end

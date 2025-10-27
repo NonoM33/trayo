@@ -280,6 +280,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_27_110644) do
     t.datetime "activated_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.date "renewal_date"
     t.index ["status"], name: "index_vps_on_status"
     t.index ["user_id"], name: "index_vps_on_user_id"
   end

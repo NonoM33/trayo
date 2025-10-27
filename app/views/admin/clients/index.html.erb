@@ -154,7 +154,7 @@
           </div>
           <div class="info-item">
             <div class="info-label">Commissions</div>
-            <div class="info-value <%= @clients.sum(&:total_commission_due) > 0 ? 'negative' : 'positive' %>">
+            <div class="info-value <%= @clients.sum(&:total_commission_due) < 0 ? 'negative' : 'positive' %>">
               <%= number_to_currency(@clients.sum(&:total_commission_due), unit: "€", format: "%n %u") %>
             </div>
           </div>
@@ -210,16 +210,16 @@
                     <td class="<%= client.total_profits >= 0 ? 'positive' : 'negative' %>" style="font-weight: 600; font-size: 0.875rem;">
                       <%= number_to_currency(client.total_profits, unit: "€", format: "%n %u") %>
                     </td>
-                    <td class="<%= client.total_commission_due > 0 ? 'negative' : 'positive' %>" style="font-weight: 600; font-size: 0.875rem;">
+                    <td class="<%= client.total_commission_due < 0 ? 'negative' : 'positive' %>" style="font-weight: 600; font-size: 0.875rem;">
                       <%= number_to_currency(client.total_commission_due, unit: "€", format: "%n %u") %>
                     </td>
                     <td>
                       <% if client.balance_due > 0 %>
-                        <span class="status-badge status-rejected">
+                        <span class="status-badge status-pending">
                           <%= number_to_currency(client.balance_due, unit: "€", format: "%n %u") %>
                         </span>
                       <% elsif client.balance_due < 0 %>
-                        <span class="status-badge status-validated">
+                        <span class="status-badge status-rejected">
                           Crédit: <%= number_to_currency(client.balance_due.abs, unit: "€", format: "%n %u") %>
                         </span>
                       <% else %>

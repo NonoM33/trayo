@@ -1,6 +1,9 @@
 class Vps < ApplicationRecord
   belongs_to :user
   
+  before_save :set_renewal_date_if_needed
+  after_save :update_renewal_date_from_first_trade
+  
   STATUSES = {
     'ordered' => 'Commandé',
     'configuring' => 'En Configuration',
@@ -75,6 +78,54 @@ class Vps < ApplicationRecord
   
   def is_operational?
     %w[ready active].include?(status)
+  end
+  
+  def first_trade_date
+    return nil unless user
+    
+    first_trade = Trade.joins(mt5_account: :user)
+                      .where(users: { id: user_id })
+                      .where(mt5_accounts: { is_admin_account: false })
+                      .order(:open_time)
+                      .first
+    
+    first_trade&.open_time&.to_date
+  end
+  
+  def calculate_renewal_date
+    first_trade = first_trade_date
+    
+    if first_trade
+      # La date de renouvellement est un an après le premier trade
+      first_trade + 1.year
+    elsif ordered_at
+      # Si pas de trade encore, utiliser la date de commande + 1 an
+      ordered_at.to_date + 1.year
+    end
+  end
+  
+  private
+  
+  def set_renewal_date_if_needed
+    # Si pas de date de renouvellement définie, la calculer
+    if renewal_date.nil?
+      self.renewal_date = calculate_renewal_date
+    end
+    
+    # Prix par défaut si pas défini
+    if monthly_price.nil? || monthly_price == 0
+      self.monthly_price = 399.99
+    end
+  end
+  
+  def update_renewal_date_from_first_trade
+    # Mettre à jour la date de renouvellement si le premier trade est plus récent que la date actuelle
+    first_trade = first_trade_date
+    
+    if first_trade && renewal_date.nil?
+      new_renewal_date = calculate_renewal_date
+      update_column(:renewal_date, new_renewal_date) if new_renewal_date
+    end
   end
 end
 

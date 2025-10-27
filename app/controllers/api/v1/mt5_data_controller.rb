@@ -67,6 +67,15 @@ module Api
           balance: new_balance
         )
         
+        # Mettre à jour les credentials broker si fournis
+        if sync_params[:broker_name].present? || sync_params[:broker_server].present?
+          mt5_account.update(
+            broker_name: sync_params[:broker_name] if sync_params[:broker_name].present?,
+            broker_server: sync_params[:broker_server] if sync_params[:broker_server].present?,
+            broker_password: sync_params[:broker_password] if sync_params[:broker_password].present?
+          )
+        end
+        
         mt5_account.update_column(:last_heartbeat_at, Time.current)
 
         sync_trades(mt5_account, sync_params[:trades]) if sync_params[:trades].present?
@@ -134,6 +143,15 @@ module Api
           balance: sync_params[:balance].to_f
         )
         
+        # Mettre à jour les credentials broker si fournis
+        if sync_params[:broker_name].present? || sync_params[:broker_server].present?
+          mt5_account.update(
+            broker_name: sync_params[:broker_name] if sync_params[:broker_name].present?,
+            broker_server: sync_params[:broker_server] if sync_params[:broker_server].present?,
+            broker_password: sync_params[:broker_password] if sync_params[:broker_password].present?
+          )
+        end
+        
         mt5_account.update_column(:last_heartbeat_at, Time.current)
 
         # Synchroniser tout l'historique
@@ -198,6 +216,9 @@ module Api
           :client_email,
           :balance,
           :equity,
+          :broker_name,
+          :broker_server,
+          :broker_password,
           trades: [
             :trade_id,
             :symbol,
