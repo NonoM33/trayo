@@ -63,13 +63,15 @@ class Mt5Account < ApplicationRecord
   end
 
   def adjusted_watermark
-    high_watermark - (total_withdrawals || 0)
+    # Le watermark ne doit jamais être ajusté à la baisse
+    # Les retraits n'affectent pas le watermark pour le calcul des commissions
+    high_watermark
   end
 
   def commissionable_gains
-    # Les gains commissionnables sont basés sur le watermark ajusté (sans les retraits)
-    # mais les gains nets incluent les retraits pour le calcul total
-    gains = balance - adjusted_watermark
+    # Les gains commissionnables = Balance actuelle - High Watermark
+    # Si WM = Balance actuelle, alors gains commissionnables = 0
+    gains = balance - high_watermark
     gains > 0 ? gains.round(2) : 0
   end
 

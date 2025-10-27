@@ -1317,13 +1317,31 @@
           </div>
         <% end %>
 
-        <%= form_with model: [:admin, Payment.new], method: :post do |f| %>
+        <%= form_with model: [:admin, Payment.new], method: :post, id: "payment-form" do |f| %>
           <%= f.hidden_field :user_id, value: @client.id %>
           
+          <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+              <%= svg_tag "info", size: "20" %>
+              <h4 style="margin: 0; font-size: 14px; font-weight: 600;">💡 Calcul automatique du montant commissionnable</h4>
+            </div>
+            <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Pour les clients ajoutés au système avec un historique existant, renseignez le High Watermark (WM).<br>
+              <strong>Montant commissionnable = Balance actuelle - High Watermark</strong><br>
+              <small>Exemple: Balance 1000€, WM 700€ → Commissionnable = 300€</small>
+            </p>
+          </div>
+
           <div class="form-group">
-            <%= f.label :amount, "Montant (€)" %>
-            <%= f.number_field :amount, step: 0.01, min: 0, required: true, value: @client.balance_due > 0 ? @client.balance_due : nil, placeholder: "Entrer le montant" %>
-            <div class="help-text">Pré-rempli avec le solde actuel dû</div>
+            <%= f.label :manual_watermark, "High Watermark (€)" %>
+            <%= f.number_field :manual_watermark, step: 0.01, min: 0, id: "manual_watermark_input", placeholder: "Ex: 700.00", oninput: "calculateAmount()" %>
+            <div class="help-text">Le WM sera appliqué au compte lors de la validation du paiement</div>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :amount, "Montant Commission (€)" %>
+            <%= f.number_field :amount, step: 0.01, min: 0, required: true, value: @client.balance_due > 0 ? @client.balance_due : nil, id: "amount_input", placeholder: "Calculé automatiquement" %>
+            <div class="help-text" id="amount_help">Commission facturée au client</div>
           </div>
 
           <div class="form-group">
@@ -1361,6 +1379,30 @@
             <i class="fa-icon fa-md fa-credit-card"></i> Créer le Paiement
           <% end %>
         <% end %>
+        
+        <script>
+        function calculateAmount() {
+          const watermarkInput = document.getElementById('manual_watermark_input');
+          const amountInput = document.getElementById('amount_input');
+          const helpText = document.getElementById('amount_help');
+          
+          const currentBalance = <%= @client.mt5_accounts.sum(:balance) || 0 %>;
+          const commissionRateRaw = <%= @client.commission_rate || 25 %>;
+          // Le taux est stocké en pourcentage (25 pour 25%), on le convertit en décimal (0.25)
+          const commissionRate = commissionRateRaw / 100.0;
+          const watermark = parseFloat(watermarkInput.value) || 0;
+          
+          if (watermark > 0) {
+            const commissionableAmount = currentBalance - watermark;
+            const commission = commissionableAmount * commissionRate;
+            amountInput.value = commission.toFixed(2);
+            helpText.innerHTML = `<strong>Commissionnable:</strong> ${currentBalance.toFixed(2)}€ (balance) - ${watermark.toFixed(2)}€ (WM) = ${commissionableAmount.toFixed(2)}€<br><strong>Commission (${commissionRateRaw.toFixed(1)}%):</strong> ${commission.toFixed(2)}€`;
+          } else {
+            amountInput.value = <%= @client.balance_due || 0 %>;
+            helpText.textContent = 'Pré-rempli avec le solde actuel dû';
+          }
+        }
+        </script>
       </div>
 
       <div class="card">

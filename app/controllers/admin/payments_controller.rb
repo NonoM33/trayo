@@ -52,7 +52,7 @@ module Admin
     private
 
     def payment_params
-      params.require(:payment).permit(:user_id, :amount, :payment_date, :reference, :notes, :payment_method)
+      params.require(:payment).permit(:user_id, :amount, :payment_date, :reference, :notes, :payment_method, :manual_watermark)
     end
   end
 end

@@ -96,10 +96,16 @@ class Payment < ApplicationRecord
   end
 
   def update_watermarks_on_validation
-    user.mt5_accounts.each do |account|
-      # Lors de la validation d'un paiement, on met le watermark à la balance actuelle
-      # pour que la commission due retombe à 0
-      account.set_watermark_to_current_balance!
+    if manual_watermark.present? && manual_watermark > 0
+      # Si un WM manuel est défini, on met le WM à la valeur saisie
+      user.mt5_accounts.each do |account|
+        account.update!(high_watermark: manual_watermark)
+      end
+    else
+      # Sans WM manuel, on met le WM à la balance actuelle (comportement par défaut)
+      user.mt5_accounts.each do |account|
+        account.set_watermark_to_current_balance!
+      end
     end
   end
 end
