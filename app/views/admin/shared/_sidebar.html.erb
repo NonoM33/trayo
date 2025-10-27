@@ -73,6 +73,12 @@
             <% end %>
           </li>
           <li class="sidebar-menu-item">
+            <%= link_to admin_invitations_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/invitations') ? 'active' : ''}" do %>
+              <i class="fa-icon fa-md fa-ticket-alt"></i>
+              <span>Invitations</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
             <%= link_to admin_trades_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/trades') ? 'active' : ''}" do %>
               <%= nav_icon(:trades) %>
               <span>Trades</span>

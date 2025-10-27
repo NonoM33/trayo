@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Invitation - Admin Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "Détails de l'Invitation" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <% if flash[:notice] %>
+          <div class="notice"><%= flash[:notice] %></div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert"><%= flash[:alert] %></div>
+        <% end %>
+
+        <div style="margin-bottom: 24px;">
+          <%= link_to "← Retour", admin_invitations_path, class: "btn btn-sm" %>
+        </div>
+        
+        <div class="card">
+          <h2 style="margin-bottom: 32px;">Détails de l'invitation</h2>
+          
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Code</div>
+              <div class="info-value">
+                <code style="background: var(--bg-hover); padding: 8px 16px; border-radius: 8px; font-size: 18px; font-weight: 700; font-family: monospace;">
+                  <%= @invitation.code %>
+                </code>
+              </div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Statut</div>
+              <div class="info-value">
+                <% if @invitation.is_used? %>
+                  <span class="badge" style="background: #10b981;">✓ Utilisée</span>
+                <% elsif @invitation.is_expired? %>
+                  <span class="badge" style="background: #ef4444;">⏰ Expirée</span>
+                <% else %>
+                  <span class="badge" style="background: var(--color-success);">✓ Active</span>
+                <% end %>
+              </div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Étape actuelle</div>
+              <div class="info-value"><%= @invitation.step %>/4</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Créée le</div>
+              <div class="info-value"><%= @invitation.created_at.strftime('%d/%m/%Y à %H:%M') %></div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Expire le</div>
+              <div class="info-value">
+                <%= @invitation.expires_at.strftime('%d/%m/%Y') %>
+              </div>
+            </div>
+            
+            <% if @invitation.email.present? %>
+              <div class="info-item">
+                <div class="info-label">Email</div>
+                <div class="info-value"><%= @invitation.email %></div>
+              </div>
+            <% end %>
+            
+            <% if @invitation.first_name.present? %>
+              <div class="info-item">
+                <div class="info-label">Prénom</div>
+                <div class="info-value"><%= @invitation.first_name %></div>
+              </div>
+            <% end %>
+            
+            <% if @invitation.last_name.present? %>
+              <div class="info-item">
+                <div class="info-label">Nom</div>
+                <div class="info-value"><%= @invitation.last_name %></div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        
+        <% if !@invitation.is_used? && !@invitation.is_expired? %>
+          <div class="card" style="margin-top: 24px;">
+            <h3 style="font-size: 18px; margin-bottom: 16px;">🔗 URL de l'invitation</h3>
+            <div style="background: var(--bg-hover); padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+              <code style="font-size: 14px; word-break: break-all;">
+                https://join.trayo.fr/join/<%= @invitation.code %>
+              </code>
+            </div>
+            
+            <%= link_to "Ouvrir l'invitation", "https://join.trayo.fr/join/#{@invitation.code}", 
+                target: "_blank", 
+                class: "btn btn-success" %>
+          </div>
+        <% end %>
+        
+        <div class="card" style="margin-top: 24px;">
+          <h3 style="font-size: 18px; margin-bottom: 16px;">⚠️ Actions</h3>
+          <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+            <%= button_to "Supprimer cette invitation", admin_invitation_path(@invitation), 
+                method: :delete, 
+                confirm: "Êtes-vous sûr ? Cette action est irréversible.",
+                class: "btn",
+                style: "background: var(--color-danger);" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

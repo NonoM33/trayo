@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rejoignez Trayo</title>
+  <%= stylesheet_link_tag "onboarding", "data-turbo-track": "reload" %>
+</head>
+<body class="landing-page">
+  <div class="landing-container">
+    <div class="landing-content">
+      <div class="landing-logo">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="url(#gradient)"/>
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          <text x="40" y="52" font-family="-apple-system, BlinkMacSystemFont" font-size="40" font-weight="600" fill="white" text-anchor="middle">T</text>
+        </svg>
+      </div>
+      
+      <h1 class="landing-title">Bienvenue sur Trayo</h1>
+      <p class="landing-subtitle">Saisissez votre code d'invitation pour commencer</p>
+      
+      <%= form_tag onboarding_path(code: ""), method: :get, class: "landing-form" do %>
+        <div class="landing-input-group">
+          <%= text_field_tag :code, "", placeholder: "ENTREZ VOTRE CODE UNIQUE", required: true, class: "landing-input", autocomplete: "off" %>
+          <%= submit_tag "Continuer", class: "landing-button" %>
+        </div>
+      <% end %>
+      
+      <% if params[:invalid] %>
+        <div class="landing-error">
+          Code invalide ou expiré. Vérifiez votre code et réessayez.
+        </div>
+      <% end %>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Invitations - Admin Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "Gestion des Invitations" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <% if flash[:notice] %>
+          <div class="notice"><%= flash[:notice] %></div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert"><%= flash[:alert] %></div>
+        <% end %>
+
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+            <h2 style="margin: 0; border: none; padding: 0;">🎫 Invitations d'Inscription</h2>
+            <%= link_to "Nouvelle Invitation", new_admin_invitation_path, class: "btn btn-success" %>
+          </div>
+          
+          <% if @invitations.any? %>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Email</th>
+                    <th>Étape</th>
+                    <th>Statut</th>
+                    <th>Créée</th>
+                    <th>Expire</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @invitations.each do |invitation| %>
+                    <tr>
+                      <td>
+                        <code style="background: var(--bg-hover); padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: 600;">
+                          <%= invitation.code %>
+                        </code>
+                      </td>
+                      <td>
+                        <% if invitation.email.present? %>
+                          <%= invitation.email %>
+                        <% else %>
+                          <span style="color: var(--text-muted);">-</span>
+                        <% end %>
+                      </td>
+                      <td>
+                        <span style="font-weight: 600; color: var(--color-accent);">
+                          <%= invitation.step %>/4
+                        </span>
+                      </td>
+                      <td>
+                        <% if invitation.is_used? %>
+                          <span class="badge" style="background: #10b981;">✓ Utilisée</span>
+                        <% elsif invitation.is_expired? %>
+                          <span class="badge" style="background: #ef4444;">⏰ Expirée</span>
+                        <% else %>
+                          <span class="badge" style="background: var(--color-success);">✓ Active</span>
+                        <% end %>
+                      </td>
+                      <td>
+                        <div style="font-size: 13px; color: var(--text-muted);">
+                          <%= invitation.created_at.strftime('%d/%m/%Y') %>
+                        </div>
+                      </td>
+                      <td>
+                        <% if invitation.expires_at %>
+                          <div style="font-size: 13px; color: var(--text-muted);">
+                            <%= invitation.expires_at.strftime('%d/%m/%Y') %>
+                          </div>
+                        <% else %>
+                          <span style="color: var(--text-muted);">-</span>
+                        <% end %>
+                      </td>
+                      <td>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                          <%= link_to "Voir", admin_invitation_path(invitation), class: "btn btn-sm" %>
+                          
+                          <% if !invitation.is_used? && !invitation.is_expired? %>
+                            <%= link_to "URL", "https://join.trayo.fr/join/#{invitation.code}", 
+                                target: "_blank", 
+                                class: "btn btn-sm",
+                                style: "background: var(--color-accent);" %>
+                          <% end %>
+                          
+                          <%= button_to "Supprimer", admin_invitation_path(invitation), 
+                              method: :delete, 
+                              confirm: "Êtes-vous sûr de vouloir supprimer cette invitation ?",
+                              class: "btn btn-sm",
+                              style: "background: var(--color-danger);" %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+            
+            <div style="margin-top: 24px;">
+              <%= paginate @invitations if respond_to?(:paginate) %>
+            </div>
+          <% else %>
+            <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+              <p style="font-size: 18px; margin-bottom: 16px;">Aucune invitation créée</p>
+              <%= link_to "Créer votre première invitation", new_admin_invitation_path, class: "btn btn-success" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

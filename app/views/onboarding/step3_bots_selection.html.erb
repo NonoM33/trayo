@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sélection des Bots - Trayo</title>
+  <%= stylesheet_link_tag "onboarding", "data-turbo-track": "reload" %>
+</head>
+<body class="onboarding-slides">
+  <div class="slides-container">
+    <div class="step-indicator" style="max-width: 700px; margin: 0 auto 40px;">
+      <div class="step completed">✓</div>
+      <div class="step completed">✓</div>
+      <div class="step active">3</div>
+      <div class="step">4</div>
+    </div>
+    
+    <div class="prediction-header" style="max-width: 700px; margin: 0 auto 40px;">
+      <% budget = @invitation.budget || 0 %>
+      <h2>Vos projections</h2>
+      <div class="budget-display">
+        <span class="budget-label">Budget :</span>
+        <span class="budget-amount"><%= number_to_currency(budget, unit: "€", format: "%n %u") %></span>
+      </div>
+    </div>
+    
+    <div class="prediction-cards" style="max-width: 700px; margin: 0 auto 40px;">
+      <% @trading_bots.each do |bot| %>
+        <% 
+          bot_price = bot.price
+          budget_multiplier = budget > 0 ? (budget / 10000.0) : 1
+          monthly_min_proj = ((bot.calculate_real_projections[:monthly_min] || 0) * budget_multiplier).round(2)
+          monthly_max_proj = ((bot.calculate_real_projections[:monthly_max] || 0) * budget_multiplier).round(2)
+          yearly_proj = ((bot.calculate_real_projections[:yearly] || 0) * budget_multiplier).round(2)
+        %>
+        <div class="prediction-card" data-bot-id="<%= bot.id %>">
+          <div class="prediction-checkbox"></div>
+          <div class="prediction-info">
+            <h3><%= bot.name %></h3>
+            <div class="prediction-price"><%= number_to_currency(bot_price, unit: "€", format: "%n %u") %></div>
+            <div class="prediction-projections">
+              <div class="projection-item">
+                <span class="projection-label">Mensuel</span>
+                <span class="projection-value"><%= number_to_currency(monthly_min_proj, unit: "€", format: "%n %u") %> - <%= number_to_currency(monthly_max_proj, unit: "€", format: "%n %u") %></span>
+              </div>
+              <div class="projection-item">
+                <span class="projection-label">Annuel</span>
+                <span class="projection-value yearly"><%= number_to_currency(yearly_proj, unit: "€", format: "%n %u") %></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <%= f.check_box "selected_bots[]", { multiple: true }, bot.id, nil %>
+      <% end %>
+    </div>
+    
+    <%= form_with url: onboarding_next_step_path(@invitation.code), method: :post, local: true, id: "botsForm" do |f| %>
+      <div class="bots-grid" style="display: none;">
+        <% @trading_bots.each do |bot| %>
+          <%= f.check_box "selected_bots[]", { multiple: true }, bot.id, nil %>
+        <% end %>
+      </div>
+        
+      <div style="max-width: 700px; margin: 0 auto;">
+        <%= f.submit "Passer au règlement", class: "btn-primary", id: "submitBtn" %>
+      </div>
+    <% end %>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const predictionCards = document.querySelectorAll('.prediction-card');
+      
+      predictionCards.forEach(card => {
+        card.addEventListener('click', function() {
+          this.classList.toggle('selected');
+          
+          const botId = this.dataset.botId;
+          const checkbox = document.querySelector(`input[value="${botId}"]`);
+          
+          if (checkbox) {
+            checkbox.checked = !checkbox.checked;
+          }
+          
+          updateSubmitButton();
+        });
+      });
+      
+      function updateSubmitButton() {
+        const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        const submitBtn = document.getElementById('submitBtn');
+        if (checkedBoxes.length > 0) {
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+        } else {
+          submitBtn.style.opacity = '0.5';
+          submitBtn.style.cursor = 'not-allowed';
+        }
+      }
+      
+      updateSubmitButton();
+    });
+  </script>
+</body>
+</html>
+

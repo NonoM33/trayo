@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenue - Trayo</title>
+  <%= stylesheet_link_tag "onboarding", "data-turbo-track": "reload" %>
+</head>
+<body class="onboarding-page">
+  <div class="onboarding-container">
+    <div class="complete-success">
+      <div class="icon">✓</div>
+      <h2>Votre compte a été créé !</h2>
+      <p>Bienvenue <%= @invitation.first_name %> ! Votre compte Trayo est maintenant actif.</p>
+      
+      <div class="login-info">
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #1e293b;">
+          Vos identifiants de connexion
+        </h3>
+        <div class="credentials">
+          <div style="margin-bottom: 16px;">
+            <strong>Email :</strong>
+            <code><%= @user.email %></code>
+          </div>
+          <div>
+            <strong>Mot de passe :</strong>
+            <code id="password"><%= @password %></code>
+          </div>
+        </div>
+        
+        <button onclick="copyPassword()" class="btn-secondary" style="margin-top: 20px;">
+          Copier le mot de passe
+        </button>
+        
+        <p style="margin-top: 24px; font-size: 14px; color: #64748b; line-height: 1.6;">
+          <strong>Important :</strong> Veuillez sauvegarder ces informations en sécurité. 
+          Vous recevrez également un email avec ces détails de connexion.
+        </p>
+      </div>
+      
+      <div style="margin-top: 40px;">
+        <a href="https://trayo.fr/admin/login" class="btn-primary" style="display: inline-block; text-decoration: none;">
+          Me connecter maintenant
+        </a>
+      </div>
+      
+      <p style="margin-top: 40px; font-size: 14px; color: #64748b;">
+        Des questions ? Contactez-nous à contact@trayo.fr
+      </p>
+    </div>
+  </div>
+  
+  <script>
+    function copyPassword() {
+      const password = document.getElementById('password').textContent;
+      navigator.clipboard.writeText(password).then(function() {
+        alert('Mot de passe copié !');
+      });
+    }
+  </script>
+</body>
+</html>
+

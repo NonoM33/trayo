@@ -65,7 +65,14 @@ class User < ApplicationRecord
   end
 
   def balance_due
-    (total_commission_due - total_credits - total_validated_payments).round(2)
+    # RÈGLE FONDAMENTALE : 
+    # Si on a encaissé une commission et que le client fait une perte ensuite,
+    # le montant encaissé NE peut PAS devenir un crédit pour lui.
+    # Le watermark protège déjà : les commissions sont seulement sur les gains.
+    #
+    # Donc : Solde à payer = MAX(0, Commission due - Crédits - Paiements)
+    result = total_commission_due - total_credits - total_validated_payments
+    result > 0 ? result.round(2) : 0
   end
 
   # Détecter automatiquement les bots basés sur les bots enregistrés
