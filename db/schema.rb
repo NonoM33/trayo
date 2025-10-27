@@ -131,6 +131,26 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_27_115106) do
     t.index ["transaction_id"], name: "index_deposits_on_transaction_id"
   end
 
+  create_table "invitations", force: :cascade do |t|
+    t.string "code", null: false
+    t.string "email"
+    t.string "first_name"
+    t.string "last_name"
+    t.string "phone"
+    t.string "status", default: "pending"
+    t.datetime "used_at"
+    t.datetime "expires_at"
+    t.text "broker_data"
+    t.text "broker_credentials"
+    t.text "selected_bots"
+    t.integer "step", default: 1
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "budget"
+    t.index ["code"], name: "index_invitations_on_code", unique: true
+    t.index ["status"], name: "index_invitations_on_status"
+  end
+
   create_table "maintenance_settings", id: :serial, force: :cascade do |t|
     t.boolean "is_enabled", default: false
     t.string "logo_url", limit: 255
