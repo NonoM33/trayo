@@ -3,14 +3,22 @@ module Admin
     before_action :require_admin
     
     def index
-      @manual_trades = Trade.where(trade_originality: 'manual_pending_review')
-                            .or(Trade.where(trade_originality: 'manual_client'))
-                            .or(Trade.where(trade_originality: 'manual_admin'))
-                            .includes(:mt5_account)
-                            .order(close_time: :desc)
-      
-      if params[:status].present? && params[:status] != 'all'
-        @manual_trades = @manual_trades.where(trade_originality: params[:status])
+      # Par défaut, on n'affiche QUE les trades en attente
+      if params[:status].present? && params[:status] == 'all'
+        # Si "Tous" est sélectionné, afficher tous les trades manuels
+        @manual_trades = Trade.where(trade_originality: ['manual_pending_review', 'manual_client', 'manual_admin'])
+                              .includes(:mt5_account)
+                              .order(close_time: :desc)
+      elsif params[:status].present?
+        # Filtrer par statut spécifique
+        @manual_trades = Trade.where(trade_originality: params[:status])
+                              .includes(:mt5_account)
+                              .order(close_time: :desc)
+      else
+        # Par défaut: afficher UNIQUEMENT les trades en attente
+        @manual_trades = Trade.where(trade_originality: 'manual_pending_review')
+                              .includes(:mt5_account)
+                              .order(close_time: :desc)
       end
       
       if params[:account_id].present?
@@ -60,7 +68,7 @@ module Admin
         mt5_account.update(high_watermark: mt5_account.high_watermark + old_profit)
       end
       
-      redirect_to admin_trade_defenders_path, notice: "Trade marked as admin trade"
+      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "Trade marked as admin trade"
     end
     
     def mark_as_client_trade
@@ -73,7 +81,7 @@ module Admin
       
       @trade.mt5_account.apply_trade_defender_penalty(@trade.profit)
       
-      redirect_to admin_trade_defenders_path, notice: "Trade marked as unauthorized client trade - penalty applied"
+      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "Trade marked as unauthorized client trade - penalty applied"
     end
     
     def recalculate_penalties_for_account
@@ -97,7 +105,7 @@ module Admin
           is_unauthorized_manual: false
         )
         
-        redirect_to admin_trade_defenders_path, notice: "#{trade_ids.count} trades marked as admin"
+        redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "#{trade_ids.count} trades marked as admin"
       else
         redirect_to admin_trade_defenders_path, alert: "No trades selected"
       end
@@ -116,9 +124,9 @@ module Admin
           trade.mt5_account.apply_trade_defender_penalty(trade.profit)
         end
         
-        redirect_to admin_trade_defenders_path, notice: "#{trade_ids.count} trades marked as client - penalties applied"
+        redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "#{trade_ids.count} trades marked as client - penalties applied"
       else
-        redirect_to admin_trade_defenders_path, alert: "No trades selected"
+        redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), alert: "No trades selected"
       end
     end
     
@@ -128,7 +136,7 @@ module Admin
         is_unauthorized_manual: false
       )
       
-      redirect_to admin_trade_defenders_path, notice: "#{count} trades marked as admin"
+      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "#{count} trades marked as admin"
     end
     
     def mark_all_pending_as_client
@@ -142,7 +150,7 @@ module Admin
         trade.mt5_account.apply_trade_defender_penalty(trade.profit)
       end
       
-      redirect_to admin_trade_defenders_path, notice: "#{trades.count} trades marked as client - penalties applied"
+      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "#{trades.count} trades marked as client - penalties applied"
     end
   end
 end

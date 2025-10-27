@@ -85,11 +85,11 @@
               <%= form_with url: admin_trade_defenders_path, method: :get, local: true, style: "display: flex; align-items: center; gap: 10px;" do |f| %>
                 <%= select_tag :status, 
                     options_for_select([
-                      ['Tous', 'all'],
                       ['⏳ En attente', 'manual_pending_review'],
+                      ['Tous les statuts', 'all'],
                       ['✓ Mes trades', 'manual_admin'],
                       ['⚠️ Clients', 'manual_client']
-                    ], params[:status] || 'all'), 
+                    ], params[:status] || 'manual_pending_review'), 
                     { class: "form-select", style: "height: 32px; width: 120px;" } %>
                 
                 <%= select_tag :account_id, 
