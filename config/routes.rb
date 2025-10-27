@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     delete "logout", to: "sessions#destroy"
 
     get "dashboard", to: "dashboard#index"
+    get "dashboard/monitoring_status", to: "dashboard#monitoring_status"
 
     # Routes pour les pages de test (AVANT les resources pour éviter les conflits)
     get "test/client_dropdowns", to: "test#client_dropdowns"

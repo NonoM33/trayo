@@ -203,6 +203,24 @@ module Admin
     end
   end
 
+  def monitoring_status
+    all_accounts = Mt5Account.all
+    online_accounts = all_accounts.where("last_heartbeat_at > ?", 30.seconds.ago)
+    offline_accounts = all_accounts.where("last_heartbeat_at <= ? OR last_heartbeat_at IS NULL", 30.seconds.ago)
+    
+    render json: {
+      online_count: online_accounts.count,
+      offline_count: offline_accounts.count,
+      offline_accounts: offline_accounts.map do |account|
+        {
+          account_name: account.account_name,
+          last_heartbeat_at: account.last_heartbeat_at,
+          time_ago: account.last_heartbeat_at ? time_ago_in_words(account.last_heartbeat_at) : nil
+        }
+      end
+    }
+  end
+
   def test_icons
     # Page de test pour les icônes
     render 'admin/test_icons'
