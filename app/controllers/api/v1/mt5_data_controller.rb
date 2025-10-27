@@ -68,13 +68,12 @@ module Api
         )
         
         # Mettre à jour les credentials broker si fournis
-        if sync_params[:broker_name].present? || sync_params[:broker_server].present?
-          mt5_account.update(
-            broker_name: sync_params[:broker_name] if sync_params[:broker_name].present?,
-            broker_server: sync_params[:broker_server] if sync_params[:broker_server].present?,
-            broker_password: sync_params[:broker_password] if sync_params[:broker_password].present?
-          )
-        end
+        update_params = {}
+        update_params[:broker_name] = sync_params[:broker_name] if sync_params[:broker_name].present?
+        update_params[:broker_server] = sync_params[:broker_server] if sync_params[:broker_server].present?
+        update_params[:broker_password] = sync_params[:broker_password] if sync_params[:broker_password].present?
+        
+        mt5_account.update(update_params) if update_params.any?
         
         mt5_account.update_column(:last_heartbeat_at, Time.current)
 
@@ -144,13 +143,12 @@ module Api
         )
         
         # Mettre à jour les credentials broker si fournis
-        if sync_params[:broker_name].present? || sync_params[:broker_server].present?
-          mt5_account.update(
-            broker_name: sync_params[:broker_name] if sync_params[:broker_name].present?,
-            broker_server: sync_params[:broker_server] if sync_params[:broker_server].present?,
-            broker_password: sync_params[:broker_password] if sync_params[:broker_password].present?
-          )
-        end
+        update_params = {}
+        update_params[:broker_name] = sync_params[:broker_name] if sync_params[:broker_name].present?
+        update_params[:broker_server] = sync_params[:broker_server] if sync_params[:broker_server].present?
+        update_params[:broker_password] = sync_params[:broker_password] if sync_params[:broker_password].present?
+        
+        mt5_account.update(update_params) if update_params.any?
         
         mt5_account.update_column(:last_heartbeat_at, Time.current)
 
