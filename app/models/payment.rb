@@ -99,7 +99,7 @@ class Payment < ApplicationRecord
     user.mt5_accounts.each do |account|
       # Lors de la validation d'un paiement, on met le watermark à la balance actuelle
       # pour que la commission due retombe à 0
-      account.update!(high_watermark: account.balance)
+      account.set_watermark_to_current_balance!
     end
   end
 end

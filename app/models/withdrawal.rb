@@ -12,7 +12,7 @@ class Withdrawal < ApplicationRecord
 
   def adjust_watermark
     mt5_account.increment!(:total_withdrawals, amount)
-    mt5_account.recalculate_watermark!
+    # Le watermark n'est plus mis à jour automatiquement, seulement via les paiements
   end
 end
 

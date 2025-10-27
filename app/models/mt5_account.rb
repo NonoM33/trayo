@@ -8,7 +8,6 @@ class Mt5Account < ApplicationRecord
   validates :account_name, presence: true
   validates :balance, presence: true, numericality: true
 
-  after_update :check_and_update_watermark
   after_save :clear_user_cache
   after_save :recalculate_initial_balance_if_needed
 
@@ -80,8 +79,8 @@ class Mt5Account < ApplicationRecord
     end
   end
 
-  def check_and_update_watermark
-    recalculate_watermark! if saved_change_to_balance?
+  def set_watermark_to_current_balance!
+    update!(high_watermark: balance)
   end
 
   def clear_user_cache
