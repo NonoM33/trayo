@@ -204,6 +204,8 @@ module Admin
   end
 
   def monitoring_status
+    return head :forbidden unless current_user.is_admin?
+    
     all_accounts = Mt5Account.all
     online_accounts = all_accounts.where("last_heartbeat_at > ?", 30.seconds.ago)
     offline_accounts = all_accounts.where("last_heartbeat_at <= ? OR last_heartbeat_at IS NULL", 30.seconds.ago)

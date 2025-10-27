@@ -25,6 +25,9 @@
         total_bots_price = selected_bots.sum(&:price)
         vps_yearly_price = 399.99
         total_price = total_bots_price + vps_yearly_price
+        
+        Rails.logger.debug "Payment page - Bot IDs: #{selected_bot_ids.inspect}"
+        Rails.logger.debug "Payment page - Selected bots count: #{selected_bots.count}"
       %>
       
       <div class="payment-items">

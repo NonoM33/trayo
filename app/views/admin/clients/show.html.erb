@@ -1116,12 +1116,31 @@
                   </div>
                 </div>
                 
-                <div style="background: var(--bg-hover); padding: 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                <div style="background: var(--bg-hover); padding: 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); position: relative;">
                   <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 8px;">
                     Mot de passe
                   </div>
-                  <div style="font-size: 16px; font-weight: 600; color: var(--text-primary);">
-                    <%= account.broker_password.present? ? '••••••••' : '<span style="color: var(--text-muted);">Non défini</span>'.html_safe %>
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div id="password-display-<%= account.id %>" data-has-password="<%= account.broker_password.present? ? 'true' : 'false' %>" style="font-size: 16px; font-weight: 600; color: var(--text-primary);">
+                      <%= account.broker_password.present? ? '••••••••' : '<span style="color: var(--text-muted);">Non défini</span>'.html_safe %>
+                    </div>
+                    <% if account.broker_password.present? %>
+                    <button onclick="togglePassword('<%= account.id %>', '<%= j(account.broker_password) %>')" 
+                            type="button"
+                            style="background: transparent; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.1)'"
+                            onmouseout="this.style.background='transparent'"
+                            title="Afficher/Masquer le mot de passe">
+                      <i class="fa-icon fa-md fa-eye" id="toggle-icon-<%= account.id %>" style="font-size: 18px; color: rgba(255, 255, 255, 0.8);"></i>
+                    </button>
+                    <% else %>
+                    <button type="button"
+                            style="background: transparent; border: none; cursor: not-allowed; padding: 4px 8px; border-radius: 4px; opacity: 0.3;"
+                            title="Aucun mot de passe défini"
+                            disabled>
+                      <i class="fa-icon fa-md fa-eye" style="font-size: 18px; color: rgba(255, 255, 255, 0.3);"></i>
+                    </button>
+                    <% end %>
                   </div>
                 </div>
               </div>
@@ -1174,6 +1193,21 @@
           displayDiv.style.display = 'none';
           editDiv.style.display = 'block';
           btn.textContent = 'Annuler';
+        }
+      }
+      
+      function togglePassword(accountId, password) {
+        const displayDiv = document.getElementById('password-display-' + accountId);
+        const icon = document.getElementById('toggle-icon-' + accountId);
+        
+        if (displayDiv.textContent.trim() === '••••••••' || displayDiv.textContent.trim() === '•'.repeat(8)) {
+          displayDiv.textContent = password;
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+        } else {
+          displayDiv.textContent = '••••••••';
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
         }
       }
       </script>

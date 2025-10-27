@@ -28,6 +28,10 @@ module Admin
       @payments = @client.payments.recent
       @credits = @client.credits.recent
       
+      bot_purchases_count = @client.bot_purchases.count
+      Rails.logger.debug "Client show - Bot purchases count: #{bot_purchases_count}"
+      Rails.logger.debug "Client show - Bot purchases: #{@client.bot_purchases.pluck(:id, :purchase_type, :created_at).inspect}"
+      
       # Précharger les bots pour optimiser les performances
       @bots_cache = TradingBot.where.not(magic_number_prefix: nil)
     end

@@ -15,16 +15,19 @@
       <div class="step">4</div>
     </div>
     
-    <div class="prediction-header" style="max-width: 700px; margin: 0 auto 40px;">
+    <div class="modern-header" style="max-width: 800px; margin: 0 auto 40px; text-align: center;">
       <% budget = @invitation.budget || 0 %>
-      <h2>Vos projections</h2>
-      <div class="budget-display">
-        <span class="budget-label">Budget :</span>
-        <span class="budget-amount"><%= number_to_currency(budget, unit: "€", format: "%n %u") %></span>
+      <div style="margin-bottom: 16px;">
+        <div style="font-size: 13px; color: rgba(255, 255, 255, 0.5); font-weight: 500; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">Choisissez vos bots</div>
+        <h2 style="font-size: 48px; font-weight: 700; color: white; margin: 0; letter-spacing: -1px; margin-bottom: 24px;">Sélectionnez vos stratégies</h2>
+      </div>
+      <div style="display: inline-flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.08); padding: 16px 28px; border-radius: 32px; border: 1px solid rgba(255, 255, 255, 0.1);">
+        <span style="font-size: 14px; color: rgba(255, 255, 255, 0.6); font-weight: 500;">Budget d'investissement</span>
+        <span style="font-size: 28px; font-weight: 700; color: #60a5fa; letter-spacing: -0.5px;"><%= number_to_currency(budget, unit: "€", format: "%n %u") %></span>
       </div>
     </div>
     
-    <div class="prediction-cards" style="max-width: 700px; margin: 0 auto 40px;">
+    <div class="modern-cards-container" style="max-width: 800px; margin: 0 auto 40px;">
       <% @trading_bots.each do |bot| %>
         <% 
           bot_price = bot.price
@@ -33,67 +36,102 @@
           monthly_max_proj = ((bot.calculate_real_projections[:monthly_max] || 0) * budget_multiplier).round(2)
           yearly_proj = ((bot.calculate_real_projections[:yearly] || 0) * budget_multiplier).round(2)
         %>
-        <div class="prediction-card" data-bot-id="<%= bot.id %>">
-          <div class="prediction-checkbox"></div>
-          <div class="prediction-info">
-            <h3><%= bot.name %></h3>
-            <div class="prediction-price"><%= number_to_currency(bot_price, unit: "€", format: "%n %u") %></div>
-            <div class="prediction-projections">
-              <div class="projection-item">
-                <span class="projection-label">Mensuel</span>
-                <span class="projection-value"><%= number_to_currency(monthly_min_proj, unit: "€", format: "%n %u") %> - <%= number_to_currency(monthly_max_proj, unit: "€", format: "%n %u") %></span>
+        <div class="modern-card" data-bot-id="<%= bot.id %>">
+          <div class="modern-card-content">
+            <div class="modern-card-header">
+              <div class="modern-card-icon">🤖</div>
+              <h3 class="modern-card-title"><%= bot.name %></h3>
+              <div class="modern-checkbox-circle">
+                <div class="modern-checkbox-inner"></div>
               </div>
-              <div class="projection-item">
-                <span class="projection-label">Annuel</span>
-                <span class="projection-value yearly"><%= number_to_currency(yearly_proj, unit: "€", format: "%n %u") %></span>
+            </div>
+            
+            <div class="modern-price-section">
+              <span class="modern-price-label">Investissement</span>
+              <div class="modern-price-amount"><%= number_to_currency(bot_price, unit: "€", format: "%n %u") %></div>
+            </div>
+            
+            <div class="modern-projections">
+              <div class="modern-projection-row">
+                <div class="modern-projection-label">
+                  <span class="modern-projection-icon">📈</span>
+                  <span>Mensuel</span>
+                </div>
+                <div class="modern-projection-value">
+                  <%= number_to_currency(monthly_min_proj, unit: "€", format: "%n %u") %> - <%= number_to_currency(monthly_max_proj, unit: "€", format: "%n %u") %>
+                </div>
+              </div>
+              <div class="modern-projection-row highlight">
+                <div class="modern-projection-label">
+                  <span class="modern-projection-icon">💰</span>
+                  <span>Annuel</span>
+                </div>
+                <div class="modern-projection-value highlight-value">
+                  <%= number_to_currency(yearly_proj, unit: "€", format: "%n %u") %>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <%= f.check_box "selected_bots[]", { multiple: true }, bot.id, nil %>
       <% end %>
     </div>
     
     <%= form_with url: onboarding_next_step_path(@invitation.code), method: :post, local: true, id: "botsForm" do |f| %>
       <div class="bots-grid" style="display: none;">
         <% @trading_bots.each do |bot| %>
-          <%= f.check_box "selected_bots[]", { multiple: true }, bot.id, nil %>
+          <%= check_box_tag "selected_bots[]", bot.id, false, id: "bot_#{bot.id}" %>
         <% end %>
       </div>
         
       <div style="max-width: 700px; margin: 0 auto;">
-        <%= f.submit "Passer au règlement", class: "btn-primary", id: "submitBtn" %>
+        <%= f.submit "Passer au règlement", class: "btn-primary modern-submit-btn", id: "submitBtn", disabled: true %>
       </div>
     <% end %>
   
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      const predictionCards = document.querySelectorAll('.prediction-card');
+      const modernCards = document.querySelectorAll('.modern-card');
       
-      predictionCards.forEach(card => {
-        card.addEventListener('click', function() {
+      modernCards.forEach(card => {
+        card.addEventListener('click', function(event) {
+          event.preventDefault();
+          
+          const isSelected = this.classList.contains('selected');
           this.classList.toggle('selected');
           
           const botId = this.dataset.botId;
-          const checkbox = document.querySelector(`input[value="${botId}"]`);
+          const checkbox = document.querySelector(`#bot_${botId}`);
           
           if (checkbox) {
             checkbox.checked = !checkbox.checked;
           }
           
           updateSubmitButton();
+          
+          const priceLabel = this.querySelector('.modern-price-amount');
+          if (priceLabel && !isSelected) {
+            priceLabel.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+              priceLabel.style.transform = 'scale(1)';
+            }, 200);
+          }
         });
       });
       
       function updateSubmitButton() {
         const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
         const submitBtn = document.getElementById('submitBtn');
+        
         if (checkedBoxes.length > 0) {
+          submitBtn.disabled = false;
           submitBtn.style.opacity = '1';
           submitBtn.style.cursor = 'pointer';
+          submitBtn.textContent = `Passer au règlement (${checkedBoxes.length})`;
         } else {
+          submitBtn.disabled = true;
           submitBtn.style.opacity = '0.5';
           submitBtn.style.cursor = 'not-allowed';
+          submitBtn.textContent = 'Passer au règlement';
         }
       }
       
