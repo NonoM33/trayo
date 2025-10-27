@@ -65,7 +65,7 @@
                 </div>
               </div>
               <div class="info-item">
-                <div class="info-label">Prix Mensuel</div>
+                <div class="info-label">Prix Annuel</div>
                 <div class="info-value positive">
                   <%= number_to_currency(@vps.monthly_price, unit: "€", format: "%n %u") %>
                 </div>
@@ -91,6 +91,20 @@
               <div class="info-item">
                 <div class="info-label">Activé</div>
                 <div class="info-value"><%= @vps.activated_at&.strftime("%d/%m/%Y à %H:%M") || '-' %></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Renouvellement</div>
+                <div class="info-value <%= (@vps.renewal_date && @vps.renewal_date < 30.days.from_now.to_date) ? 'value-negative' : '' %>">
+                  <%= @vps.renewal_date&.strftime("%d/%m/%Y") || 'Non défini' %>
+                  <% if @vps.renewal_date %>
+                    <% days_until = (@vps.renewal_date - Date.today).to_i %>
+                    <% if days_until > 0 && days_until <= 30 %>
+                      <br><small style="font-size: 11px; opacity: 0.7;">Dans <%= days_until %> jour<%= days_until > 1 ? 's' : '' %></small>
+                    <% elsif days_until <= 0 %>
+                      <br><small style="font-size: 11px; color: #ef4444;">⚠️ Expiré</small>
+                    <% end %>
+                  <% end %>
+                </div>
               </div>
             </div>
           </div>

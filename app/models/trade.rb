@@ -1,10 +1,18 @@
 class Trade < ApplicationRecord
   belongs_to :mt5_account
+  
+  after_create :auto_create_vps_for_first_trade
 
   validates :trade_id, presence: true, uniqueness: { scope: :mt5_account_id }
 
   scope :closed, -> { where(status: "closed") }
   scope :recent, -> { order(close_time: :desc) }
+  scope :bot_trades, -> { where(trade_originality: 'bot') }
+  scope :manual_trades, -> { where(trade_originality: ['manual_admin', 'manual_client']) }
+  scope :unauthorized_manual, -> { where(is_unauthorized_manual: true) }
+  scope :admin_trades, -> { where(trade_originality: 'manual_admin') }
+  scope :client_manual_trades, -> { where(trade_originality: 'manual_client') }
+
 
   def bot_name
     return nil unless magic_number.present?
@@ -37,6 +45,9 @@ class Trade < ApplicationRecord
       trade_id: trade_data[:trade_id]
     )
 
+    magic_number = trade_data[:magic_number]
+    comment = trade_data[:comment] || ''
+    
     trade.assign_attributes(
       symbol: trade_data[:symbol],
       trade_type: trade_data[:trade_type],
@@ -49,12 +60,76 @@ class Trade < ApplicationRecord
       open_time: trade_data[:open_time],
       close_time: trade_data[:close_time],
       status: trade_data[:status],
-      magic_number: trade_data[:magic_number],
-      comment: trade_data[:comment]
+      magic_number: magic_number,
+      comment: comment
     )
 
+    trade.detect_trade_originality!
+    
     trade.save!
+    
     trade
+  end
+
+  def detect_trade_originality!
+    return if magic_number.nil?
+    
+    if magic_number == 0
+      self.trade_originality = 'manual_pending_review'
+      self.is_unauthorized_manual = false
+    else
+      self.trade_originality = 'bot'
+      self.is_unauthorized_manual = false
+    end
+  end
+
+  def manual_client_trade?
+    trade_originality == 'manual_client'
+  end
+
+  def manual_admin_trade?
+    trade_originality == 'manual_admin'
+  end
+
+  def bot_trade?
+    trade_originality == 'bot'
+  end
+
+  def apply_trade_defender_penalty
+    return unless manual_client_trade? && is_unauthorized_manual?
+    
+    mt5_account.apply_trade_defender_penalty(profit)
+    
+    Rails.logger.warn "Trade Defender: Penalty applied to trade #{trade_id} - Profit: #{profit} deducted from watermark"
+  end
+  
+  private
+  
+  def auto_create_vps_for_first_trade
+    return unless mt5_account&.user
+    return if mt5_account.user.is_admin?
+    return if mt5_account.user.vps.any?
+    
+    first_trade_date = Trade.joins(mt5_account: :user)
+                           .where(users: { id: mt5_account.user_id })
+                           .where(mt5_accounts: { is_admin_account: false })
+                           .order(:open_time)
+                           .first&.open_time
+    
+    return unless first_trade_date
+    
+    vps = mt5_account.user.vps.create!(
+      name: "VPS #{mt5_account.account_name}",
+      server_location: "Standard",
+      status: 'active',
+      monthly_price: 399.99,
+      renewal_date: first_trade_date.to_date + 1.year,
+      ordered_at: first_trade_date,
+      activated_at: Time.current,
+      notes: "Créé automatiquement lors du premier trade"
+    )
+    
+    Rails.logger.info "VPS créé automatiquement pour #{mt5_account.user.email} - Date renouvellement: #{vps.renewal_date}"
   end
 end
 

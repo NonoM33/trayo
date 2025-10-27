@@ -1,0 +1,52 @@
+@media print {
+  body {
+    margin: 0;
+    padding: 20px;
+    background: white;
+  }
+  
+  .app-layout,
+  .sidebar,
+  .main-content > :first-child {
+    display: none !important;
+  }
+  
+  .container {
+    max-width: 100%;
+    margin: 0;
+    padding: 20px;
+  }
+  
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .info-item {
+    border: 1px solid #ccc;
+    padding: 12px;
+  }
+  
+  .card {
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+  }
+  
+  @page {
+    margin: 1cm;
+  }
+  
+  h1 {
+    color: #000;
+  }
+  
+  h2 {
+    color: #333;
+    border-bottom: 2px solid #000;
+    padding-bottom: 5px;
+  }
+}
+

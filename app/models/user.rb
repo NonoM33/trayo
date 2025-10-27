@@ -65,7 +65,7 @@ class User < ApplicationRecord
   end
 
   def balance_due
-    (total_commission_due - total_credits).round(2)
+    (total_commission_due - total_credits - total_validated_payments).round(2)
   end
 
   # Détecter automatiquement les bots basés sur les bots enregistrés

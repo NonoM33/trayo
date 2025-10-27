@@ -79,6 +79,12 @@
             <% end %>
           </li>
           <li class="sidebar-menu-item">
+            <%= link_to admin_trade_defenders_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/trade_defenders') ? 'active' : ''}" do %>
+              <i class="fa-icon fa-md fa-shield-alt"></i>
+              <span>Trade Defender</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
             <%= link_to admin_withdrawals_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/withdrawals') ? 'active' : ''}" do %>
               <%= nav_icon(:withdrawals) %>
               <span>Retraits</span>

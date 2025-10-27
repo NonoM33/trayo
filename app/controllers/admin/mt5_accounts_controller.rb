@@ -4,6 +4,27 @@ module Admin
       @mt5_account = Mt5Account.find(params[:id])
       @client = @mt5_account.user
       
+      # Gérer la mise à jour du mot de passe broker
+      if params[:new_password].present?
+        @mt5_account.update(broker_password: params[:new_password])
+        redirect_to admin_client_path(@client), notice: "Mot de passe broker mis à jour avec succès !"
+        return
+      end
+      
+      # Gérer la mise à jour du nom du broker
+      if params[:broker_name].present?
+        @mt5_account.update(broker_name: params[:broker_name])
+        redirect_to admin_client_path(@client), notice: "Nom du broker mis à jour avec succès !"
+        return
+      end
+      
+      # Gérer la mise à jour du serveur broker
+      if params[:broker_server].present?
+        @mt5_account.update(broker_server: params[:broker_server])
+        redirect_to admin_client_path(@client), notice: "Serveur broker mis à jour avec succès !"
+        return
+      end
+      
       # Gérer le recalcul de la balance initiale
       if params[:action] == 'recalculate_initial_balance'
         @mt5_account.force_recalculate_initial_balance!
@@ -51,7 +72,7 @@ module Admin
     private
 
     def mt5_account_params
-      params.require(:mt5_account).permit(:high_watermark, :initial_balance, :total_withdrawals)
+      params.require(:mt5_account).permit(:high_watermark, :initial_balance, :total_withdrawals, :is_admin_account, :broker_name, :broker_server, :broker_password)
     end
   end
 end

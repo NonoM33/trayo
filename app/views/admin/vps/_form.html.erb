@@ -44,8 +44,9 @@
     
     <div class="two-col">
       <div class="form-group">
-        <%= f.label :monthly_price, "Prix Mensuel (€)" %>
-        <%= f.number_field :monthly_price, step: 0.01, min: 0, placeholder: "29.99" %>
+        <%= f.label :monthly_price, "Prix Annuel (€)" %>
+        <%= f.number_field :monthly_price, step: 0.01, min: 0, placeholder: "399.99", value: f.object.monthly_price || 399.99 %>
+        <div class="help-text">Prix annuel par défaut: 399,99€. Calculée automatiquement à partir du premier trade.</div>
       </div>
       
       <div class="form-group">
@@ -56,6 +57,21 @@
             { required: true, class: "form-control", style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" } %>
       </div>
     </div>
+    
+    <% if f.object.persisted? && f.object.renewal_date %>
+      <div class="card" style="background: var(--color-info); color: white; padding: 16px; border-radius: 8px;">
+        <p style="margin: 0; font-size: 14px;">
+          <strong>📅 Date de Renouvellement:</strong> <%= f.object.renewal_date.strftime("%d/%m/%Y") %>
+          <br><small>Calculée automatiquement à partir du premier trade du client.</small>
+        </p>
+        <% if current_user.is_admin? %>
+          <div class="form-group" style="margin-top: 12px;">
+            <%= f.label :renewal_date, "Modifier la date manuellement", style: "color: white;" %>
+            <%= f.date_field :renewal_date, class: "form-control" %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
   </div>
 
   <div class="card">

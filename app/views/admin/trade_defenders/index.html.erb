@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Trade Defender - Admin Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+</head>
+<body>
+  <% @page_title = "Trade Defender" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <% if flash[:notice] %>
+          <div class="notice"><%= flash[:notice] %></div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert"><%= flash[:alert] %></div>
+        <% end %>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <h1 style="margin: 0;">Trade Defender</h1>
+          <p style="color: var(--text-muted); margin: 0;">Gestion des trades manuels suspects</p>
+        </div>
+
+        <div class="info-grid" style="margin-bottom: 1.5rem;">
+          <div class="info-item">
+            <div class="info-label">⏳ En attente</div>
+            <div class="info-value" style="color: var(--color-warning);"><%= @pending_trades %></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">✓ Mes trades</div>
+            <div class="info-value positive"><%= @admin_trades %></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">⚠️ Clients (sanctionnés)</div>
+            <div class="info-value" style="color: var(--color-danger);"><%= @client_trades %></div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+              Impact: <%= number_to_currency(@total_penalty, unit: "€", separator: ",", delimiter: " ") %>
+            </div>
+          </div>
+        </div>
+
+        <% if @pending_trades > 0 %>
+          <div style="background: var(--bg-hover); padding: 16px; border-radius: 6px; margin-bottom: 24px; border-left: 4px solid var(--color-warning);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <div style="font-weight: 600; margin-bottom: 4px;">⚠️ <%= @pending_trades %> trades en attente de validation</div>
+                <div style="font-size: 0.875rem; color: var(--text-muted);">
+                  Marquez tous les trades en attente comme vôtres ou comme trades clients
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <%= button_to "TOUS → MIENS (pas de sanction)", mark_all_pending_as_admin_admin_trade_defenders_path, 
+                    method: :post, 
+                    class: "btn btn-sm", 
+                    data: { turbo_confirm: "Marquer TOUS les #{@pending_trades} trades en attente comme vôtres ?" } %>
+                <%= button_to "TOUS → CLIENTS (pénalité)", mark_all_pending_as_client_admin_trade_defenders_path, 
+                    method: :post, 
+                    class: "btn btn-danger btn-sm", 
+                    data: { turbo_confirm: "ATTENTION: Marquer TOUS les #{@pending_trades} trades en attente comme trades clients et appliquer les sanctions immédiatement ?" } %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @manual_trades.any? %>
+          <div class="card">
+            <div class="card-header">
+              <h2>Trades manuels</h2>
+              <div class="card-header-actions">
+                <button onclick="markSelectedAsAdmin()" class="btn btn-primary btn-sm">
+                  Sélectionnés → MIENS
+                </button>
+                <button onclick="markSelectedAsClient()" class="btn btn-danger btn-sm">
+                  Sélectionnés → CLIENTS (pénalité)
+                </button>
+              </div>
+            </div>
+
+            <div style="padding: 12px 16px; background: var(--bg-hover); border-bottom: 1px solid var(--border);">
+              <%= form_with url: admin_trade_defenders_path, method: :get, local: true, style: "display: flex; align-items: center; gap: 10px;" do |f| %>
+                <%= select_tag :status, 
+                    options_for_select([
+                      ['⏳ En attente', 'manual_pending_review'],
+                      ['Tous les statuts', 'all'],
+                      ['✓ Mes trades', 'manual_admin'],
+                      ['⚠️ Clients', 'manual_client']
+                    ], params[:status] || 'manual_pending_review'), 
+                    { class: "form-select", style: "height: 32px; width: 120px;" } %>
+                
+                <%= select_tag :account_id, 
+                    options_from_collection_for_select(@accounts_with_manual_trades, :id, :account_name_with_user, params[:account_id]), 
+                    { include_blank: 'Tous les comptes', class: "form-select", style: "height: 32px; width: 200px;" } %>
+                
+                <%= select_tag :symbol, 
+                    options_for_select(@all_symbols, params[:symbol]), 
+                    { include_blank: 'Symbol', class: "form-select", style: "height: 32px; width: 100px;" } %>
+                
+                <%= date_field_tag :date_from, params[:date_from], class: "form-input", style: "width: 130px; height: 32px;", placeholder: "Début" %>
+                <%= date_field_tag :date_to, params[:date_to], class: "form-input", style: "width: 130px; height: 32px;", placeholder: "Fin" %>
+                
+                <%= submit_tag "Filtrer", class: "btn btn-primary btn-sm", style: "height: 32px;" %>
+                <%= link_to "Reset", admin_trade_defenders_path, class: "btn btn-outline btn-sm", style: "height: 32px;" %>
+              <% end %>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th><input type="checkbox" onchange="toggleAll(this)" /></th>
+                  <th>Statut</th>
+                  <th>Trade ID</th>
+                  <th>Client</th>
+                  <th>Symbol</th>
+                  <th>Volume</th>
+                  <th>Profit/Perte</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @manual_trades.each do |trade| %>
+                  <tr>
+                    <td>
+                      <input type="checkbox" class="trade-checkbox" value="<%= trade.id %>" />
+                    </td>
+                    <td>
+                      <% if trade.trade_originality == 'manual_pending_review' %>
+                        <span class="badge badge-warning">⏳</span>
+                      <% elsif trade.trade_originality == 'manual_admin' %>
+                        <span class="badge badge-success">✓</span>
+                      <% else %>
+                        <span class="badge badge-danger">⚠️</span>
+                      <% end %>
+                    </td>
+                    <td style="font-weight: 600;"><%= trade.trade_id %></td>
+                    <td>
+                      <%= trade.mt5_account.user.email %><br/>
+                      <span style="font-size: 0.75rem; color: var(--text-muted);">
+                        <%= trade.mt5_account.account_name %>
+                      </span>
+                    </td>
+                    <td><%= trade.symbol %></td>
+                    <td><%= trade.volume %></td>
+                    <td class="<%= trade.profit > 0 ? 'positive' : 'negative' %>">
+                      <%= number_to_currency(trade.profit, unit: "€", separator: ",", delimiter: " ") %>
+                    </td>
+                    <td style="font-size: 0.875rem;">
+                      <%= trade.close_time.strftime("%d/%m/%Y %H:%M") %>
+                    </td>
+                    <td>
+                      <div style="display: flex; gap: 4px;">
+                        <% if trade.trade_originality == 'manual_pending_review' %>
+                          <%= button_to "✓", approve_trade_admin_trade_defender_path(trade), 
+                              method: :post, 
+                              class: "btn btn-sm", style: "padding: 4px 8px; font-size: 0.75rem;" %>
+                          <%= button_to "⚠️", mark_as_client_trade_admin_trade_defender_path(trade), 
+                              method: :post, 
+                              data: { turbo_confirm: "Sanctionner ce trade ?" },
+                              class: "btn btn-danger btn-sm", style: "padding: 4px 8px; font-size: 0.75rem;" %>
+                        <% elsif trade.trade_originality == 'manual_admin' %>
+                          <%= button_to "→ Client", mark_as_client_trade_admin_trade_defender_path(trade), 
+                              method: :post, 
+                              data: { turbo_confirm: "Appliquer la sanction ?" },
+                              class: "btn btn-danger btn-sm", style: "padding: 4px 8px; font-size: 0.75rem;" %>
+                        <% else %>
+                          <%= button_to "→ Mien", approve_trade_admin_trade_defender_path(trade), 
+                              method: :post, 
+                              class: "btn btn-sm", style: "padding: 4px 8px; font-size: 0.75rem;" %>
+                        <% end %>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+
+            <div style="border-top: 1px solid var(--border); padding: 16px; display: flex; justify-content: center;">
+              <%= paginate @manual_trades %>
+            </div>
+          </div>
+        <% else %>
+          <div class="card">
+            <div style="text-align: center; padding: 48px;">
+              <i class="fa-icon fa-lg fa-check-circle" style="color: var(--color-success); margin-bottom: 16px;"></i>
+              <h3>Aucun trade manuel détecté</h3>
+              <p style="color: var(--text-muted);">Tous les trades sont conformes aux règles</p>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="card" style="margin-top: 24px;">
+          <h2>Comptes avec trades manuels</h2>
+          <% if @accounts_with_manual_trades.any? %>
+            <div class="info-grid">
+              <% @accounts_with_manual_trades.each do |account| %>
+                <div class="info-item" style="padding: 16px;">
+                  <div style="font-weight: 600; margin-bottom: 8px;"><%= account.user.email %></div>
+                  <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 8px;">
+                    <%= account.account_name %>
+                  </div>
+                  <% pending_count = account.trades.where(trade_originality: 'manual_pending_review').count %>
+                  <% client_count = account.trades.where(trade_originality: 'manual_client').count %>
+                  <% penalty = account.trades.where(trade_originality: 'manual_client').sum(:profit) %>
+                  <div style="font-size: 0.875rem;">
+                    <% if pending_count > 0 %>
+                      <span style="color: var(--color-warning);">⏳ <%= pending_count %> en attente</span>
+                    <% end %>
+                    <% if client_count > 0 %>
+                      <br/><span style="color: var(--color-danger);">⚠️ <%= client_count %> sanctionnés (<%= number_to_currency(penalty, unit: "€") %>)</span>
+                    <% end %>
+                  </div>
+                  <%= link_to "Voir le client", admin_client_path(account.user), 
+                      class: "btn btn-outline btn-sm", style: "margin-top: 12px;" %>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <p style="color: var(--text-muted);">Aucun compte avec des trades manuels</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script>
+  function toggleAll(checkbox) {
+    const checkboxes = document.querySelectorAll('.trade-checkbox');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+  }
+
+  function markSelectedAsAdmin() {
+    const checkboxes = document.querySelectorAll('.trade-checkbox:checked');
+    const tradeIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (tradeIds.length === 0) {
+      alert('Sélectionnez au moins un trade');
+      return;
+    }
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '<%= bulk_mark_as_admin_admin_trade_defenders_path %>';
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'authenticity_token';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+    
+    tradeIds.forEach(id => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'trade_ids[]';
+      input.value = id;
+      form.appendChild(input);
+    });
+    
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  function markSelectedAsClient() {
+    const checkboxes = document.querySelectorAll('.trade-checkbox:checked');
+    const tradeIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (tradeIds.length === 0) {
+      alert('Sélectionnez au moins un trade');
+      return;
+    }
+    
+    if (!confirm('Êtes-vous sûr de vouloir marquer ces trades comme trades clients et appliquer les sanctions ?')) {
+      return;
+    }
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '<%= bulk_mark_as_client_admin_trade_defenders_path %>';
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'authenticity_token';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+    
+    tradeIds.forEach(id => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'trade_ids[]';
+      input.value = id;
+      form.appendChild(input);
+    });
+    
+    document.body.appendChild(form);
+    form.submit();
+  }
+</script>
+</html>

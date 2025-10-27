@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     delete "logout", to: "sessions#destroy"
 
     get "dashboard", to: "dashboard#index"
+    get "dashboard/monitoring_status", to: "dashboard#monitoring_status"
 
     # Routes pour les pages de test (AVANT les resources pour éviter les conflits)
     get "test/client_dropdowns", to: "test#client_dropdowns"
@@ -32,7 +33,11 @@ Rails.application.routes.draw do
       resources :withdrawals, only: [:destroy]
       resources :deposits, only: [:destroy]
     end
-    resources :payments, only: [:index, :create, :update, :destroy]
+    resources :payments, only: [:index, :show, :create, :update, :destroy] do
+      member do
+        get :download_pdf
+      end
+    end
     resources :credits, only: [:index, :create, :destroy]
     resources :mt5_accounts, only: [:update]
     resources :withdrawals, only: [:destroy]
@@ -103,6 +108,20 @@ Rails.application.routes.draw do
     resources :mt5_tokens, only: [:index, :new, :create, :show, :destroy] do
       collection do
         get :show_token
+      end
+    end
+    
+    resources :trade_defenders, only: [:index] do
+      collection do
+        post :bulk_mark_as_admin
+        post :bulk_mark_as_client
+        post :mark_all_pending_as_admin
+        post :mark_all_pending_as_client
+      end
+      member do
+        post :approve_trade
+        post :mark_as_client_trade
+        post :recalculate_penalties_for_account
       end
     end
     
