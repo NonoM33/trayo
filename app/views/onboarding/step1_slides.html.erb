@@ -188,39 +188,105 @@
       nextBtn.textContent = currentSlide === totalSlides ? 'Passer au quiz' : 'Suivant';
     }
     
+    const quizQuestions = [
+      {
+        question: "Quel est le délai pour régler les commissions ?",
+        options: [
+          { text: "Toutes les semaines", correct: false },
+          { text: "Toutes les 2 semaines", correct: true },
+          { text: "Tous les mois", correct: false }
+        ]
+      },
+      {
+        question: "Que se passe-t-il si vous trader manuellement ?",
+        options: [
+          { text: "Rien, c'est autorisé", correct: false },
+          { text: "Des sanctions financières s'appliquent", correct: true },
+          { text: "Un simple avertissement", correct: false }
+        ]
+      },
+      {
+        question: "Les performances passées garantissent-elles les résultats futurs ?",
+        options: [
+          { text: "Oui, absolument", correct: false },
+          { text: "Non, les résultats peuvent varier", correct: true },
+          { text: "Parfois", correct: false }
+        ]
+      }
+    ];
+    
+    let currentQuizQuestion = 0;
+    const quizContinueBtn = document.getElementById('quizContinueBtn');
+    const quizQuestionElement = document.getElementById('quizQuestion');
+    const quizOptionsContainer = document.getElementById('quizOptions');
+    let quizCompleted = false;
+    
+    function displayQuizQuestion() {
+      if (currentQuizQuestion >= quizQuestions.length) {
+        document.querySelector('.mini-quiz').classList.add('hidden');
+        document.querySelector('.slide-form').classList.remove('hidden');
+        return;
+      }
+      
+      quizCompleted = false;
+      const currentQuestion = quizQuestions[currentQuizQuestion];
+      quizQuestionElement.textContent = currentQuestion.question;
+      quizOptionsContainer.innerHTML = '';
+      quizContinueBtn.classList.add('hidden');
+      
+      if (currentQuizQuestion === quizQuestions.length - 1) {
+        quizContinueBtn.textContent = 'Continuer';
+      } else {
+        quizContinueBtn.textContent = 'Question suivante';
+      }
+      
+      currentQuestion.options.forEach((option, index) => {
+        const button = document.createElement('button');
+        button.className = 'quiz-option';
+        button.textContent = option.text;
+        if (option.correct) {
+          button.classList.add('correct');
+        }
+        button.addEventListener('click', () => {
+          if (quizCompleted) return;
+          
+          const correctAnswer = button.classList.contains('correct');
+          
+          quizOptionsContainer.querySelectorAll('.quiz-option').forEach(opt => {
+            if (opt.classList.contains('correct')) {
+              opt.classList.add('show-correct');
+            }
+            opt.disabled = true;
+          });
+          
+          if (correctAnswer) {
+            button.classList.add('correct-answer');
+          } else {
+            button.classList.add('wrong-answer');
+          }
+          
+          quizContinueBtn.classList.remove('hidden');
+          quizCompleted = true;
+        });
+        
+        quizOptionsContainer.appendChild(button);
+      });
+    }
+    
     function showQuiz() {
       document.querySelector('.slides-container').classList.add('hidden');
       document.querySelector('.mini-quiz').classList.remove('hidden');
+      displayQuizQuestion();
     }
     
-    const quizOptions = document.querySelectorAll('.quiz-option');
-    let quizCompleted = false;
-    
-    quizOptions.forEach(option => {
-      option.addEventListener('click', () => {
-        if (quizCompleted) return;
-        
-        const correctAnswer = option.classList.contains('correct');
-        
-        quizOptions.forEach(opt => {
-          if (opt.classList.contains('correct')) {
-            opt.classList.add('show-correct');
-          }
-          opt.disabled = true;
-        });
-        
-        if (correctAnswer) {
-          option.classList.add('correct-answer');
-          setTimeout(() => {
-            document.querySelector('.mini-quiz').classList.add('hidden');
-            document.querySelector('.slide-form').classList.remove('hidden');
-          }, 1500);
-        } else {
-          option.classList.add('wrong-answer');
-        }
-        
-        quizCompleted = true;
-      });
+    quizContinueBtn.addEventListener('click', () => {
+      if (currentQuizQuestion < quizQuestions.length - 1) {
+        currentQuizQuestion++;
+        displayQuizQuestion();
+      } else {
+        document.querySelector('.mini-quiz').classList.add('hidden');
+        document.querySelector('.slide-form').classList.remove('hidden');
+      }
     });
   </script>
 </body>
