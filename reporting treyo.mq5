@@ -84,14 +84,20 @@ void SyncDataToAPI()
    
    string active_experts_json = GetActiveExpertsJSON();
    
+   string broker_name = AccountInfoString(ACCOUNT_COMPANY);
+   string broker_server = AccountInfoString(ACCOUNT_SERVER);
+   string broker_password = ""; // L'utilisateur devra le modifier manuellement
+   
    string json = StringFormat(
-      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"trades\":%s,\"open_positions\":%s,\"active_experts\":%s}}",
+      "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"broker_name\":\"%s\",\"broker_server\":\"%s\",\"trades\":%s,\"open_positions\":%s,\"active_experts\":%s}}",
       account_number,
       MT5_API_TOKEN,
       account_name,
       CLIENT_EMAIL,
       balance,
       equity,
+      broker_name,
+      broker_server,
       trades_json,
       open_positions_json,
       active_experts_json

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_27_104050) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_27_110644) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -158,6 +158,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_27_104050) do
     t.decimal "total_deposits", precision: 15, scale: 2, default: "0.0"
     t.boolean "is_admin_account", default: false
     t.datetime "last_heartbeat_at"
+    t.string "broker_name"
+    t.string "broker_server"
+    t.string "broker_password"
     t.index ["is_admin_account"], name: "index_mt5_accounts_on_is_admin_account"
     t.index ["mt5_id"], name: "index_mt5_accounts_on_mt5_id", unique: true
     t.index ["user_id", "mt5_id"], name: "index_mt5_accounts_on_user_id_and_mt5_id", unique: true
