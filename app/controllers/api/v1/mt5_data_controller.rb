@@ -66,6 +66,8 @@ module Api
           account_name: sync_params[:account_name],
           balance: new_balance
         )
+        
+        mt5_account.update_column(:last_heartbeat_at, Time.current)
 
         sync_trades(mt5_account, sync_params[:trades]) if sync_params[:trades].present?
         sync_open_positions(mt5_account, sync_params[:open_positions]) if sync_params[:open_positions].present?
@@ -131,6 +133,8 @@ module Api
           account_name: sync_params[:account_name],
           balance: sync_params[:balance].to_f
         )
+        
+        mt5_account.update_column(:last_heartbeat_at, Time.current)
 
         # Synchroniser tout l'historique
         sync_trades(mt5_account, sync_params[:trades]) if sync_params[:trades].present?
