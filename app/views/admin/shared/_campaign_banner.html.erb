@@ -330,12 +330,38 @@
 function dismissCampaignBanner() {
   const banner = document.querySelector('.apple-campaign-banner');
   if (banner) {
+    const campaignId = <%= @current_campaign&.id || 'null' %>;
+    const dismissKey = `campaign_${campaignId}_dismissed`;
+    const dismissTime = new Date().getTime() + (24 * 60 * 60 * 1000);
+    
+    localStorage.setItem(dismissKey, dismissTime.toString());
+    
     banner.style.animation = 'slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards';
     setTimeout(() => {
       banner.style.display = 'none';
     }, 400);
   }
 }
+
+function checkAndHideBanner() {
+  <% if @current_campaign %>
+    const campaignId = <%= @current_campaign.id %>;
+    const dismissKey = `campaign_${campaignId}_dismissed`;
+    const dismissedTime = localStorage.getItem(dismissKey);
+    const now = new Date().getTime();
+    
+    if (dismissedTime && parseInt(dismissedTime) > now) {
+      const banner = document.querySelector('.apple-campaign-banner');
+      if (banner) {
+        banner.style.display = 'none';
+      }
+    }
+  <% end %>
+}
+
+document.addEventListener('DOMContentLoaded', checkAndHideBanner);
+document.addEventListener('turbo:load', checkAndHideBanner);
+document.addEventListener('turbo:render', checkAndHideBanner);
 </script>
 <% else %>
 <% if Rails.env.development? %>

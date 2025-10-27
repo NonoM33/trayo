@@ -6,6 +6,70 @@
   <div class="container">
     <%= render 'admin/shared/campaign_banner' %>
     
+    <div class="monitoring-alert-widget">
+      <% all_accounts = Mt5Account.all %>
+      <% online_accounts = all_accounts.where("last_heartbeat_at > ?", 30.seconds.ago) %>
+      <% offline_accounts = all_accounts.where("last_heartbeat_at <= ? OR last_heartbeat_at IS NULL", 30.seconds.ago) %>
+      
+      <div class="monitoring-status <%= offline_accounts.any? ? 'status-error' : 'status-ok' %>">
+        <div class="monitoring-header">
+          <div class="monitoring-icon">
+            <% if offline_accounts.any? %>
+              <%= svg_tag "alert-triangle", size: "24" %>
+            <% else %>
+              <%= svg_tag "check-circle", size: "24" %>
+            <% end %>
+          </div>
+          <div>
+            <h3>Monitoring des Comptes MT5</h3>
+            <p><%= all_accounts.count %> comptes suivis</p>
+          </div>
+        </div>
+        
+        <div class="monitoring-metrics">
+          <div class="metric-card">
+            <div class="metric-icon metric-online">
+              <%= svg_tag "activity", size: "20" %>
+            </div>
+            <div class="metric-content">
+              <div class="metric-value"><%= online_accounts.count %></div>
+              <div class="metric-label">En ligne</div>
+            </div>
+          </div>
+          
+          <div class="metric-card">
+            <div class="metric-icon <%= offline_accounts.any? ? 'metric-offline' : 'metric-online' %>">
+              <%= svg_tag "alert-circle", size: "20" %>
+            </div>
+            <div class="metric-content">
+              <div class="metric-value <%= offline_accounts.any? ? 'value-negative' : 'value-positive' %>"><%= offline_accounts.count %></div>
+              <div class="metric-label">Hors ligne</div>
+            </div>
+          </div>
+        </div>
+        
+        <% if offline_accounts.any? %>
+          <div class="offline-accounts-list">
+            <h4>Comptes sans signal (30+ secondes):</h4>
+            <ul>
+              <% offline_accounts.each do |account| %>
+                <li>
+                  <span class="account-name"><%= account.account_name %></span>
+                  <% if account.last_heartbeat_at %>
+                    <span class="last-seen">
+                      Vu il y a <%= time_ago_in_words(account.last_heartbeat_at) %>
+                    </span>
+                  <% else %>
+                    <span class="last-seen never">Jamais synchronisé</span>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
     <div class="dashboard-hero">
       <div class="hero-content">
         <h1 class="hero-title">Bienvenue, <%= @client.first_name || @client.email.split('@').first %></h1>
@@ -1623,6 +1687,88 @@ document.addEventListener('turbo:render', function() {
   initializeChart();
   initializeBotsChart();
 });
+
+function refreshMonitoringWidget() {
+  const widget = document.querySelector('.monitoring-alert-widget');
+  if (!widget) return;
+  
+  fetch('/admin/dashboard/monitoring_status', {
+    headers: {
+      'Accept': 'application/json'
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    updateMonitoringWidget(data);
+  })
+  .catch(error => {
+    console.error('Error refreshing monitoring widget:', error);
+  });
+}
+
+function updateMonitoringWidget(data) {
+  const statusDiv = document.querySelector('.monitoring-status');
+  if (!statusDiv) return;
+  
+  statusDiv.className = data.offline_count > 0 ? 'monitoring-status status-error' : 'monitoring-status status-ok';
+  
+  const icon = document.querySelector('.monitoring-icon svg');
+  if (icon) {
+    icon.setAttribute('data-icon', data.offline_count > 0 ? 'alert-triangle' : 'check-circle');
+  }
+  
+  const onlineCount = document.querySelector('.metric-card:first-child .metric-value');
+  if (onlineCount) onlineCount.textContent = data.online_count;
+  
+  const offlineCount = document.querySelector('.metric-card:last-child .metric-value');
+  if (offlineCount) {
+    offlineCount.textContent = data.offline_count;
+    offlineCount.className = data.offline_count > 0 ? 'metric-value value-negative' : 'metric-value value-positive';
+  }
+  
+  const accountsList = document.querySelector('.offline-accounts-list');
+  if (data.offline_accounts.length > 0) {
+    if (!accountsList) {
+      const widget = document.querySelector('.monitoring-status');
+      const listHtml = `
+        <div class="offline-accounts-list">
+          <h4>Comptes sans signal (30+ secondes):</h4>
+          <ul>
+            ${data.offline_accounts.map(acc => `
+              <li>
+                <span class="account-name">${acc.account_name}</span>
+                ${acc.last_heartbeat_at 
+                  ? `<span class="last-seen">Vu il y a ${acc.time_ago}</span>`
+                  : '<span class="last-seen never">Jamais synchronisé</span>'
+                }
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      `;
+      widget.insertAdjacentHTML('beforeend', listHtml);
+    } else {
+      accountsList.innerHTML = `
+        <h4>Comptes sans signal (30+ secondes):</h4>
+        <ul>
+          ${data.offline_accounts.map(acc => `
+            <li>
+              <span class="account-name">${acc.account_name}</span>
+              ${acc.last_heartbeat_at 
+                ? `<span class="last-seen">Vu il y a ${acc.time_ago}</span>`
+                : '<span class="last-seen never">Jamais synchronisé</span>'
+              }
+            </li>
+          `).join('')}
+        </ul>
+      `;
+    }
+  } else if (accountsList) {
+    accountsList.remove();
+  }
+}
+
+setInterval(refreshMonitoringWidget, 10000);
 </script>
 
 <%= render 'admin/shared/campaign_popup' %>
