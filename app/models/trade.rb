@@ -1,5 +1,7 @@
 class Trade < ApplicationRecord
   belongs_to :mt5_account
+  
+  after_create :auto_create_vps_for_first_trade
 
   validates :trade_id, presence: true, uniqueness: { scope: :mt5_account_id }
 
@@ -99,6 +101,35 @@ class Trade < ApplicationRecord
     mt5_account.apply_trade_defender_penalty(profit)
     
     Rails.logger.warn "Trade Defender: Penalty applied to trade #{trade_id} - Profit: #{profit} deducted from watermark"
+  end
+  
+  private
+  
+  def auto_create_vps_for_first_trade
+    return unless mt5_account&.user
+    return if mt5_account.user.is_admin?
+    return if mt5_account.user.vps.any?
+    
+    first_trade_date = Trade.joins(mt5_account: :user)
+                           .where(users: { id: mt5_account.user_id })
+                           .where(mt5_accounts: { is_admin_account: false })
+                           .order(:open_time)
+                           .first&.open_time
+    
+    return unless first_trade_date
+    
+    vps = mt5_account.user.vps.create!(
+      name: "VPS #{mt5_account.account_name}",
+      server_location: "Standard",
+      status: 'active',
+      monthly_price: 399.99,
+      renewal_date: first_trade_date.to_date + 1.year,
+      ordered_at: first_trade_date,
+      activated_at: Time.current,
+      notes: "Créé automatiquement lors du premier trade"
+    )
+    
+    Rails.logger.info "VPS créé automatiquement pour #{mt5_account.user.email} - Date renouvellement: #{vps.renewal_date}"
   end
 end
 
