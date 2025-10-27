@@ -128,7 +128,9 @@ class OnboardingController < ApplicationController
     when 3
       if params[:selected_bots].present?
         Rails.logger.debug "Selected bots: #{params[:selected_bots]}"
-        @invitation.update(selected_bots: params[:selected_bots].to_json)
+        update_data = { selected_bots: params[:selected_bots].to_json }
+        update_data[:budget] = params[:budget].to_f if params[:budget].present?
+        @invitation.update(update_data)
       end
     end
   end

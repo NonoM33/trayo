@@ -16,15 +16,29 @@
     </div>
     
     <div class="modern-header" style="max-width: 800px; margin: 0 auto 40px; text-align: center;">
-      <% budget = @invitation.budget || 0 %>
+      <% budget = @invitation.budget || 10000 %>
       <div style="margin-bottom: 16px;">
         <div style="font-size: 13px; color: rgba(255, 255, 255, 0.5); font-weight: 500; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">Choisissez vos bots</div>
         <h2 style="font-size: 48px; font-weight: 700; color: white; margin: 0; letter-spacing: -1px; margin-bottom: 24px;">Sélectionnez vos stratégies</h2>
       </div>
-      <div style="display: inline-flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.08); padding: 16px 28px; border-radius: 32px; border: 1px solid rgba(255, 255, 255, 0.1);">
-        <span style="font-size: 14px; color: rgba(255, 255, 255, 0.6); font-weight: 500;">Budget d'investissement</span>
-        <span style="font-size: 28px; font-weight: 700; color: #60a5fa; letter-spacing: -0.5px;"><%= number_to_currency(budget, unit: "€", format: "%n %u") %></span>
+      <div id="budgetDisplayContainer" style="background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); padding: 32px 48px; border-radius: 32px; border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 24px;">
+        <div style="margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span style="font-size: 14px; color: rgba(255, 255, 255, 0.6); font-weight: 500;">Budget d'investissement</span>
+            <span id="budgetAmount" style="font-size: 32px; font-weight: 700; color: #60a5fa; letter-spacing: -0.5px;"><%= number_to_currency(budget, unit: "€", format: "%n %u") %></span>
+          </div>
+          <input type="range" id="budgetSlider" min="1000" max="100000" step="1000" value="<%= budget %>" style="width: 100%; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.1); outline: none; -webkit-appearance: none;">
+          <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+            <span style="font-size: 12px; color: rgba(255, 255, 255, 0.5);">1 000 €</span>
+            <span style="font-size: 12px; color: rgba(255, 255, 255, 0.5);">100 000 €</span>
+          </div>
+        </div>
       </div>
+    </div>
+    
+    <div id="projectionsChart" style="max-width: 800px; margin: 0 auto 40px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 32px; padding: 40px; display: none;">
+      <h3 style="font-size: 20px; font-weight: 700; color: white; margin-bottom: 24px; text-align: center;">Évolution du capital</h3>
+      <canvas id="projectionsCanvas" width="700" height="400"></canvas>
     </div>
     
     <div class="modern-cards-container" style="max-width: 800px; margin: 0 auto 40px;">
@@ -81,6 +95,7 @@
         <% @trading_bots.each do |bot| %>
           <%= check_box_tag "selected_bots[]", bot.id, false, id: "bot_#{bot.id}" %>
         <% end %>
+        <%= hidden_field_tag :budget, budget, id: "budgetInput" %>
       </div>
         
       <div style="max-width: 700px; margin: 0 auto;">
@@ -89,12 +104,41 @@
     <% end %>
   
   <script>
+    const botsData = [
+      <% @trading_bots.each_with_index do |bot, index| %>
+      {
+        id: <%= bot.id %>,
+        name: '<%= bot.name %>',
+        price: <%= bot.price %>,
+        monthlyMin: <%= bot.calculate_real_projections[:monthly_min] || 0 %>,
+        monthlyMax: <%= bot.calculate_real_projections[:monthly_max] || 0 %>,
+        yearly: <%= bot.calculate_real_projections[:yearly] || 0 %>
+      }<% if index < @trading_bots.count - 1 %>,<% end %>
+      <% end %>
+    ];
+    
+    let currentBudget = <%= budget %>;
+    
     document.addEventListener('DOMContentLoaded', function() {
+      const budgetSlider = document.getElementById('budgetSlider');
+      const budgetAmount = document.getElementById('budgetAmount');
+      
+      budgetSlider.addEventListener('input', function() {
+        currentBudget = parseInt(this.value);
+        budgetAmount.textContent = formatCurrency(currentBudget);
+        document.getElementById('budgetInput').value = currentBudget;
+        updateProjections();
+        updateChart();
+      });
+      
       const modernCards = document.querySelectorAll('.modern-card');
       
-      modernCards.forEach(card => {
+      modernCards.forEach((card, index) => {
+        card.style.cursor = 'pointer';
+        
         card.addEventListener('click', function(event) {
           event.preventDefault();
+          event.stopPropagation();
           
           const isSelected = this.classList.contains('selected');
           this.classList.toggle('selected');
@@ -107,6 +151,7 @@
           }
           
           updateSubmitButton();
+          updateChart();
           
           const priceLabel = this.querySelector('.modern-price-amount');
           if (priceLabel && !isSelected) {
@@ -133,6 +178,185 @@
           submitBtn.style.cursor = 'not-allowed';
           submitBtn.textContent = 'Passer au règlement';
         }
+      }
+      
+      function updateProjections() {
+        const multiplier = currentBudget / 10000;
+        
+        botsData.forEach(bot => {
+          const card = document.querySelector(`[data-bot-id="${bot.id}"]`);
+          if (card) {
+            const yearlyProj = bot.yearly * multiplier;
+            const yearlyDisplay = card.querySelector('.modern-projection-value.highlight-value');
+            if (yearlyDisplay) {
+              yearlyDisplay.textContent = formatCurrency(yearlyProj);
+            }
+            
+            const monthlyMin = bot.monthlyMin * multiplier;
+            const monthlyMax = bot.monthlyMax * multiplier;
+            const monthlyDisplay = card.querySelector('.modern-projection-value:not(.highlight-value)');
+            if (monthlyDisplay) {
+              monthlyDisplay.textContent = `${formatCurrency(monthlyMin)} - ${formatCurrency(monthlyMax)}`;
+            }
+          }
+        });
+      }
+      
+      function updateChart() {
+        const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        const chartContainer = document.getElementById('projectionsChart');
+        const canvas = document.getElementById('projectionsCanvas');
+        
+        if (checkedBoxes.length === 0) {
+          chartContainer.style.display = 'none';
+          return;
+        }
+        
+        chartContainer.style.display = 'block';
+        
+        const ctx = canvas.getContext('2d');
+        const multiplier = currentBudget / 10000;
+        
+        const selectedBots = [];
+        checkedBoxes.forEach(cb => {
+          const botData = botsData.find(b => b.id == cb.value);
+          if (botData) {
+            selectedBots.push({
+              name: botData.name,
+              price: botData.price * multiplier,
+              monthlyAvg: (botData.monthlyMin + botData.monthlyMax) / 2 * multiplier
+            });
+          }
+        });
+        
+        const totalInvestment = selectedBots.reduce((sum, bot) => sum + bot.price, 0);
+        const monthlyReturns = selectedBots.reduce((sum, bot) => sum + bot.monthlyAvg, 0);
+        
+        const capitalEvolution = calculateCapitalEvolution(totalInvestment, monthlyReturns, 12);
+        
+        drawChart(ctx, capitalEvolution, canvas.width, canvas.height);
+      }
+      
+      function calculateCapitalEvolution(initialCapital, monthlyReturn, months) {
+        const evolution = [];
+        let currentCapital = initialCapital;
+        
+        for (let i = 0; i <= months; i++) {
+          if (i === 0) {
+            evolution.push({
+              month: i,
+              capital: currentCapital
+            });
+          } else {
+            const volatility = 0.15;
+            const randomFactor = (Math.random() - 0.5) * 2;
+            const monthlyVariation = monthlyReturn * randomFactor * volatility;
+            
+            currentCapital += monthlyReturn + monthlyVariation;
+            currentCapital = Math.max(currentCapital, initialCapital * 0.85);
+            
+            evolution.push({
+              month: i,
+              capital: currentCapital
+            });
+          }
+        }
+        
+        return evolution;
+      }
+      
+      function drawChart(ctx, data, width, height) {
+        ctx.clearRect(0, 0, width, height);
+        
+        if (data.length === 0) return;
+        
+        const padding = 80;
+        const chartWidth = width - 2 * padding;
+        const chartHeight = height - 2 * padding;
+        const maxValue = Math.max(...data.map(d => d.capital));
+        const minValue = Math.min(...data.map(d => d.capital));
+        const valueRange = maxValue - minValue + (maxValue - minValue) * 0.2;
+        
+        const monthNames = ['Aujourd\'hui', 'Mois 1', 'Mois 2', 'Mois 3', 'Mois 4', 'Mois 5', 'Mois 6', 'Mois 7', 'Mois 8', 'Mois 9', 'Mois 10', 'Mois 11', 'Mois 12'];
+        
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.lineWidth = 1;
+        
+        const gridLines = 5;
+        for (let i = 0; i <= gridLines; i++) {
+          const y = padding + (i * chartHeight / gridLines);
+          ctx.beginPath();
+          ctx.moveTo(padding, y);
+          ctx.lineTo(width - padding, y);
+          ctx.stroke();
+        }
+        
+        const points = data.map((item, index) => {
+          const x = padding + (index * chartWidth / (data.length - 1));
+          const y = padding + ((maxValue - item.capital) / valueRange) * chartHeight;
+          return { x, y, capital: item.capital, month: item.month };
+        });
+        
+        const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
+        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.25)');
+        gradient.addColorStop(0.5, 'rgba(59, 130, 246, 0.15)');
+        gradient.addColorStop(1, 'rgba(59, 130, 246, 0.02)');
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+          ctx.lineTo(points[i].x, points[i].y);
+        }
+        ctx.lineTo(points[points.length - 1].x, height - padding);
+        ctx.lineTo(points[0].x, height - padding);
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+          ctx.lineTo(points[i].x, points[i].y);
+        }
+        ctx.stroke();
+        
+        points.forEach((point, index) => {
+          ctx.fillStyle = '#3b82f6';
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.strokeStyle = 'white';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
+          ctx.stroke();
+          
+          if (index === 0 || index === points.length - 1 || index % 3 === 0) {
+            ctx.fillStyle = 'white';
+            ctx.font = '600 11px sans-serif';
+            ctx.textAlign = 'center';
+            const monthLabel = monthNames[index] || `Mois ${index}`;
+            ctx.fillText(monthLabel, point.x, height - padding + 20);
+            
+            ctx.fillStyle = '#60a5fa';
+            ctx.font = '700 12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(formatCurrency(point.capital), point.x, point.y - 15);
+          }
+        });
+      }
+      
+      function formatCurrency(amount) {
+        return new Intl.NumberFormat('fr-FR', {
+          style: 'currency',
+          currency: 'EUR',
+          minimumFractionDigits: 2
+        }).format(amount);
       }
       
       updateSubmitButton();

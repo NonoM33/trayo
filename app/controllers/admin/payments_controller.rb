@@ -8,6 +8,62 @@ module Admin
     
     def show
       @payment = Payment.find(params[:id])
+      prepare_capital_evolution_data
+      @user_bots = @payment.user.bot_purchases.includes(:trading_bot).order(created_at: :desc)
+    end
+    
+    def prepare_capital_evolution_data
+      user = @payment.user
+      
+      @capital_evolution = []
+      all_trades = []
+      
+      user.mt5_accounts.each do |account|
+        trades = account.trades.closed.where.not(close_time: nil).order(close_time: :asc)
+        
+        trades.each do |trade|
+          all_trades << {
+            date: trade.close_time,
+            profit: trade.profit,
+            account_name: account.account_name,
+            account_mt5_id: account.mt5_id
+          }
+        end
+      end
+      
+      all_trades.sort_by! { |t| t[:date] }
+      
+      if all_trades.any?
+        total_initial_balance = user.mt5_accounts.sum do |account|
+          account.auto_calculated_initial_balance && account.calculated_initial_balance.present? ? 
+            account.calculated_initial_balance : account.initial_balance
+        end
+        
+        running_balance = total_initial_balance
+        
+        all_trades.each do |trade|
+          running_balance += trade[:profit]
+          
+          @capital_evolution << {
+            date: trade[:date],
+            balance: running_balance,
+            account_name: trade[:account_name],
+            account_mt5_id: trade[:account_mt5_id]
+          }
+        end
+      else
+        total_initial_balance = user.mt5_accounts.sum do |account|
+          account.auto_calculated_initial_balance && account.calculated_initial_balance.present? ? 
+            account.calculated_initial_balance : account.initial_balance
+        end
+        
+        @capital_evolution = [{
+          date: @payment.payment_date,
+          balance: total_initial_balance,
+          account_name: "Aucune donnée",
+          account_mt5_id: "N/A"
+        }]
+      end
     end
     
     def download_pdf
