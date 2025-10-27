@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Règles - Trayo</title>
+  <%= stylesheet_link_tag "onboarding", "data-turbo-track": "reload" %>
+</head>
+<body class="onboarding-page">
+  <div class="onboarding-container">
+    <div class="step-indicator">
+      <div class="step active">1</div>
+      <div class="step">2</div>
+      <div class="step">3</div>
+      <div class="step">4</div>
+    </div>
+    
+    <div class="onboarding-card">
+      <h2>Règles du Jeu</h2>
+      <p class="subtitle">Avant de commencer, il est essentiel de comprendre ces principes fondamentaux</p>
+      
+      <ul class="rules-list">
+        <li>
+          <div class="icon">📊</div>
+          <div class="content">
+            <h3>Les performances passées ne préjugent pas des futures</h3>
+            <p>Tous les résultats affichés sont basés sur des données historiques. Le trading comporte des risques et les résultats peuvent varier.</p>
+          </div>
+        </li>
+        
+        <li>
+          <div class="icon">⚠️</div>
+          <div class="content">
+            <h3>Soyez prêt à perdre la totalité</h3>
+            <p>N'investissez jamais plus que ce que vous pouvez vous permettre de perdre. Le trading automatisé comporte des risques financiers.</p>
+          </div>
+        </li>
+        
+        <li>
+          <div class="icon">🚫</div>
+          <div class="content">
+            <h3>Ne trader jamais manuellement</h3>
+            <p>Le compte est exclusivement dédié au bot. Tout trading manuel est strictement interdit et entraînera des sanctions.</p>
+          </div>
+        </li>
+        
+        <li>
+          <div class="icon">⏰</div>
+          <div class="content">
+            <h3>Délai de paiement : 48 heures</h3>
+            <p>Vous avez 48 heures pour régler les commissions. Passé ce délai, vos bots seront désactivés automatiquement.</p>
+          </div>
+        </li>
+        
+        <li>
+          <div class="icon">💰</div>
+          <div class="content">
+            <h3>Frais de remise en service</h3>
+            <p>Si vous ne réglez pas dans les délais, des frais de remise en service (après règlement des commissions dues) seront appliqués.</p>
+          </div>
+        </li>
+      </ul>
+      
+      <%= form_with url: onboarding_next_step_path(@invitation.code), method: :post, local: true do |f| %>
+        <div class="form-group">
+          <%= f.label :first_name, "Prénom" %>
+          <%= f.text_field :first_name, required: true, placeholder: "Jean" %>
+        </div>
+        
+        <div class="form-group">
+          <%= f.label :last_name, "Nom" %>
+          <%= f.text_field :last_name, required: true, placeholder: "Dupont" %>
+        </div>
+        
+        <div class="form-group">
+          <%= f.label :email, "Email" %>
+          <%= f.email_field :email, required: true, placeholder: "jean.dupont@example.com" %>
+        </div>
+        
+        <div class="form-group">
+          <%= f.label :phone, "Téléphone" %>
+          <%= f.telephone_field :phone, required: true, placeholder: "+33612345678" %>
+        </div>
+        
+        <%= f.submit "Continuer", class: "btn-primary" %>
+      <% end %>
+    </div>
+  </div>
+</body>
+</html>
+
