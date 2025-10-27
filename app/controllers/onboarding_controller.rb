@@ -76,11 +76,11 @@ class OnboardingController < ApplicationController
     when 2
       @brokers = [
         {
-          name: "Exness",
-          logo: "🏦",
-          description: "Bénéficiez de spreads serrés et d’une excellente exécution.",
-          affiliate_link: "https://www.exness.com/a/l8cjp5hw8a",
-          advantages: ["Spread serré", "Exécution rapide", "Support 24/7"]
+          name: "Fusion Markets",
+          logo: "🔄",
+          description: "Low cost trading avec commissions à $2.25 par trade et spreads ultra-serrés.",
+          affiliate_link: "https://fusionmarkets.com/",
+          advantages: ["Spread 0.0", "Commission $2.25", "Support dédié"]
         },
         {
           name: "IC Markets",
@@ -127,6 +127,7 @@ class OnboardingController < ApplicationController
       @invitation.update(broker_credentials: credentials.to_json)
     when 3
       if params[:selected_bots].present?
+        Rails.logger.debug "Selected bots: #{params[:selected_bots]}"
         @invitation.update(selected_bots: params[:selected_bots].to_json)
       end
     end
@@ -137,6 +138,9 @@ class OnboardingController < ApplicationController
     
     bot_ids = @invitation.selected_bots_parsed
     broker_creds = @invitation.broker_credentials_parsed
+    
+    Rails.logger.debug "Creating user - Bot IDs: #{bot_ids.inspect}"
+    Rails.logger.debug "Creating user - Selected bots from invitation: #{@invitation.selected_bots.inspect}"
     
     @random_password = SecureRandom.hex(16)
     
@@ -173,17 +177,30 @@ class OnboardingController < ApplicationController
       ordered_at: Time.current
     )
     
-    bot_ids.each do |bot_id|
-      bot = TradingBot.find(bot_id)
-      
-      user.bot_purchases.create!(
-        trading_bot: bot,
-        price_paid: bot.price,
-        status: "active",
-        purchase_type: "onboarding",
-        is_running: false
-      )
+    bot_purchases_created = []
+    if bot_ids.present? && bot_ids.is_a?(Array) && bot_ids.any?
+      bot_ids = bot_ids.map(&:to_i) unless bot_ids.first.is_a?(Integer)
+      bot_ids.each do |bot_id|
+        begin
+          bot = TradingBot.find(bot_id)
+          
+          purchase = user.bot_purchases.create!(
+            trading_bot: bot,
+            price_paid: bot.price,
+            status: "active",
+            purchase_type: "onboarding",
+            is_running: false
+          )
+          bot_purchases_created << purchase.id
+        rescue ActiveRecord::RecordNotFound => e
+          Rails.logger.error "Bot with ID #{bot_id} not found: #{e.message}"
+        end
+      end
+    else
+      Rails.logger.warn "No bot_ids provided or not an array. bot_ids: #{bot_ids.inspect}"
     end
+    
+    Rails.logger.debug "Created #{bot_purchases_created.count} bot purchases: #{bot_purchases_created.inspect}"
     
     @invitation.complete!
     
