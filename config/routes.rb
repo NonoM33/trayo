@@ -5,6 +5,12 @@ Rails.application.routes.draw do
   get "maintenance", to: "maintenance#show"
 
   root "admin/sessions#new"
+  
+  get "join", to: "onboarding#landing"
+  get "join/:code", to: "onboarding#show", as: :onboarding
+  get "join/:code/step/:step", to: "onboarding#step", as: :onboarding_step
+  post "join/:code/next", to: "onboarding#next_step", as: :onboarding_next_step
+  get "join/:code/complete", to: "onboarding#complete", as: :onboarding_complete
 
   namespace :admin do
     get "login", to: "sessions#new"
@@ -96,6 +102,8 @@ Rails.application.routes.draw do
         post :toggle_active
       end
     end
+    
+    resources :invitations, only: [:index, :new, :create, :show, :destroy]
     
     resources :trades, only: [:index, :show] do
       collection do
