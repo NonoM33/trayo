@@ -10,6 +10,7 @@ class Mt5Account < ApplicationRecord
 
   after_save :clear_user_cache
   after_save :recalculate_initial_balance_if_needed
+  after_save :broadcast_balance_updated
 
   def update_from_mt5_data(data)
     # Valider les données avant la mise à jour
@@ -161,6 +162,15 @@ class Mt5Account < ApplicationRecord
     total_penalty = unauthorized_trades.sum { |t| t.profit.abs }
     adjusted_watermark = balance - total_penalty
     update(high_watermark: adjusted_watermark)
+  end
+
+  def broadcast_balance_updated
+    return unless balance_changed? || saved_change_to_balance?
+
+    AccountChannel.broadcast_update(self)
+    TrayoSchema.subscriptions.trigger(:account_balance_updated, {}, self)
+  rescue => e
+    Rails.logger.error "Failed to broadcast balance updated: #{e.message}"
   end
 end
 

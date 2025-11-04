@@ -12,6 +12,8 @@ class Payment < ApplicationRecord
   scope :pending, -> { where(status: "pending") }
   scope :recent, -> { order(payment_date: :desc) }
 
+  after_create :broadcast_payment_created
+
   def validate!
     transaction do
       capture_watermark_snapshot
@@ -107,6 +109,13 @@ class Payment < ApplicationRecord
         account.set_watermark_to_current_balance!
       end
     end
+  end
+
+  def broadcast_payment_created
+    PaymentChannel.broadcast_created(self)
+    TrayoSchema.subscriptions.trigger(:payment_created, {}, self)
+  rescue => e
+    Rails.logger.error "Failed to broadcast payment created: #{e.message}"
   end
 end
 

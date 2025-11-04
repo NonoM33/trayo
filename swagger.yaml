@@ -1,0 +1,3564 @@
+openapi: 3.0.3
+info:
+  title: Trayo API
+  description: |
+    API complète pour la plateforme Trayo - Gestion de trading et synchronisation MT5.
+
+    Cette API permet de :
+    - S'authentifier et gérer les utilisateurs
+    - Synchroniser les données depuis MetaTrader 5
+    - Consulter les balances et trades des comptes
+    - Gérer les bots de trading et leurs performances
+    - Obtenir des projections de gains
+
+    ## API Disponibles
+
+    - **REST v1** : API existante (backward compatibility) - `/api/v1/*`
+    - **REST v2** : API complète avec pagination, filtres et recherche - `/api/v2/*`
+    - **GraphQL** : API flexible avec queries, mutations et subscriptions - `/graphql`
+    - **WebSockets/SSE** : Communication temps réel via Action Cable - `/cable` et `/api/v2/events`
+
+    ## Authentification
+
+    L'API utilise deux systèmes d'authentification :
+
+    1. **JWT Token** (pour les endpoints clients) : Utilisez le header `Authorization: Bearer <token>`
+    2. **MT5 API Key** (pour la synchronisation MT5) : Utilisez le header `X-API-Key: <key>`
+
+  version: 2.0.0
+  contact:
+    name: Trayo Support
+    email: support@trayo.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Serveur de développement local (API v1)
+  - url: https://api.trayo.com/api/v1
+    description: Serveur de production (API v1)
+  - url: http://localhost:3000/api/v2
+    description: Serveur de développement local (API v2)
+  - url: https://api.trayo.com/api/v2
+    description: Serveur de production (API v2)
+  - url: http://localhost:3000
+    description: Serveur de développement local (GraphQL)
+  - url: https://api.trayo.com
+    description: Serveur de production (GraphQL)
+
+tags:
+  - name: Authentication
+    description: Authentification et inscription des utilisateurs (v1)
+  - name: MT5 Sync
+    description: Synchronisation des données depuis MetaTrader 5 (NE PAS MODIFIER)
+  - name: Accounts
+    description: Gestion des comptes MT5 et des balances (v1)
+  - name: Trades
+    description: Consultation des trades (v1)
+  - name: Bots
+    description: Gestion des bots de trading (v1)
+  - name: Users
+    description: Gestion des utilisateurs (v1)
+  - name: API v2
+    description: API REST v2 avec pagination, filtres et recherche avancés
+  - name: GraphQL
+    description: API GraphQL avec queries, mutations et subscriptions temps réel
+  - name: WebSockets
+    description: Communication temps réel via Action Cable et SSE
+
+paths:
+  /register:
+    post:
+      tags:
+        - Authentication
+      summary: Inscription d'un nouvel utilisateur
+      description: |
+        Crée un nouveau compte utilisateur et retourne un token JWT pour l'authentification.
+
+        L'utilisateur reçoit automatiquement un `mt5_api_token` unique qui peut être utilisé
+        pour la synchronisation MT5.
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+            examples:
+              example1:
+                summary: Exemple d'inscription
+                value:
+                  user:
+                    email: user@example.com
+                    password: password123
+                    password_confirmation: password123
+                    first_name: John
+                    last_name: Doe
+      responses:
+        "201":
+          description: Inscription réussie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisterResponse"
+              examples:
+                success:
+                  summary: Réponse de succès
+                  value:
+                    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE2OTk5OTk5OTl9.example
+                    user:
+                      id: 1
+                      email: user@example.com
+                      first_name: John
+                      last_name: Doe
+                      mt5_api_token: abc123def456ghi789
+        "422":
+          description: Erreur de validation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                validation_error:
+                  summary: Erreur de validation
+                  value:
+                    errors:
+                      - Email has already been taken
+                      - Password is too short (minimum is 6 characters)
+
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: Connexion d'un utilisateur
+      description: |
+        Authentifie un utilisateur existant et retourne un token JWT.
+
+        Le token JWT est valide pendant 24 heures par défaut.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            examples:
+              example1:
+                summary: Exemple de connexion
+                value:
+                  email: user@example.com
+                  password: password123
+      responses:
+        "200":
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+              examples:
+                success:
+                  summary: Réponse de succès
+                  value:
+                    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE2OTk5OTk5OTl9.example
+                    user:
+                      id: 1
+                      email: user@example.com
+                      first_name: John
+                      last_name: Doe
+                      mt5_api_token: abc123def456ghi789
+        "401":
+          description: Email ou mot de passe invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalid_credentials:
+                  summary: Identifiants invalides
+                  value:
+                    error: Invalid email or password
+
+  /mt5/sync:
+    post:
+      tags:
+        - MT5 Sync
+      summary: Synchronisation des données MT5
+      description: |
+        Synchronise les données depuis MetaTrader 5 vers la plateforme.
+
+        Cet endpoint est appelé par le script MT5 pour transmettre :
+        - Les informations du compte (balance, equity, etc.)
+        - Les trades fermés
+        - Les positions ouvertes
+        - Les retraits et dépôts
+        - Les experts advisors actifs
+
+        **Authentification requise** : Header `X-API-Key` avec la clé API MT5.
+
+        L'endpoint peut retourner `init_required: true` si une synchronisation complète
+        de l'historique est nécessaire.
+      operationId: syncMt5
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Mt5SyncRequest"
+            examples:
+              example1:
+                summary: Synchronisation standard
+                value:
+                  mt5_data:
+                    mt5_id: "123456789"
+                    mt5_api_token: "abc123def456ghi789"
+                    account_name: "Demo Trading Account"
+                    balance: 10000.50
+                    equity: 10050.25
+                    broker_name: "Broker Name"
+                    broker_server: "Server Name"
+                    broker_password: "password123"
+                    trades:
+                      - trade_id: "987654321"
+                        symbol: "EURUSD"
+                        trade_type: "buy"
+                        volume: 0.1
+                        open_price: 1.1234
+                        close_price: 1.1250
+                        profit: 16.00
+                        commission: -0.50
+                        swap: 0.00
+                        open_time: "2025-10-23T10:00:00Z"
+                        close_time: "2025-10-23T11:00:00Z"
+                        status: "closed"
+                        magic_number: 12345
+                        comment: "EA Trade"
+                    open_positions:
+                      - trade_id: "987654322"
+                        symbol: "GBPUSD"
+                        trade_type: "sell"
+                        volume: 0.2
+                        open_price: 1.2650
+                        close_price: null
+                        profit: 50.00
+                        commission: -1.00
+                        swap: -0.50
+                        open_time: "2025-10-23T12:00:00Z"
+                        close_time: null
+                        status: "open"
+                        magic_number: 12345
+                        comment: "Open Position"
+                    withdrawals:
+                      - transaction_id: "WD001"
+                        amount: 500.00
+                        transaction_date: "2025-10-23T08:00:00Z"
+                        description: "Withdrawal"
+                    deposits:
+                      - transaction_id: "DP001"
+                        amount: 1000.00
+                        transaction_date: "2025-10-23T07:00:00Z"
+                        description: "Deposit"
+                    active_experts:
+                      - magic_number: 12345
+                        source: "EA Name"
+      responses:
+        "200":
+          description: Synchronisation réussie ou init requise
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Mt5SyncResponse"
+                  - $ref: "#/components/schemas/Mt5InitRequiredResponse"
+              examples:
+                success:
+                  summary: Synchronisation réussie
+                  value:
+                    message: Data synchronized successfully
+                    mt5_account:
+                      id: 1
+                      mt5_id: "123456789"
+                      account_name: "Demo Trading Account"
+                      balance: 10000.50
+                      last_sync_at: "2025-10-23T12:00:00Z"
+                      high_watermark: 10500.00
+                      total_withdrawals: 500.00
+                      total_deposits: 1000.00
+                    trades_synced: 1
+                    withdrawals_synced: 1
+                    deposits_synced: 1
+                init_required:
+                  summary: Synchronisation complète requise
+                  value:
+                    init_required: true
+                    send_all_history: true
+                    message: Complete history synchronization required
+        "401":
+          description: Clé API invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalid_key:
+                  summary: Clé API invalide
+                  value:
+                    error: Invalid API key
+        "422":
+          description: Erreur de validation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /mt5/sync_complete_history:
+    post:
+      tags:
+        - MT5 Sync
+      summary: Synchronisation complète de l'historique MT5
+      description: |
+        Synchronise l'historique complet des données MT5.
+
+        Cet endpoint doit être appelé quand `init_required: true` est retourné
+        par `/mt5/sync`. Il synchronise tous les trades historiques, dépôts et retraits.
+
+        Après la synchronisation complète, l'utilisateur est marqué comme `init_mt5: true`
+        et le capital initial est calculé automatiquement.
+      operationId: syncCompleteHistory
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Mt5SyncRequest"
+            examples:
+              example1:
+                summary: Synchronisation complète
+                value:
+                  mt5_data:
+                    mt5_id: "123456789"
+                    mt5_api_token: "abc123def456ghi789"
+                    account_name: "Demo Trading Account"
+                    balance: 10000.50
+                    trades:
+                      - trade_id: "987654321"
+                        symbol: "EURUSD"
+                        trade_type: "buy"
+                        volume: 0.1
+                        open_price: 1.1234
+                        close_price: 1.1250
+                        profit: 16.00
+                        commission: -0.50
+                        swap: 0.00
+                        open_time: "2025-01-01T10:00:00Z"
+                        close_time: "2025-01-01T11:00:00Z"
+                        status: "closed"
+                        magic_number: 12345
+      responses:
+        "200":
+          description: Synchronisation complète réussie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mt5CompleteSyncResponse"
+              examples:
+                success:
+                  summary: Synchronisation complète réussie
+                  value:
+                    message: Complete history synchronized successfully
+                    mt5_account:
+                      id: 1
+                      mt5_id: "123456789"
+                      account_name: "Demo Trading Account"
+                      balance: 10000.50
+                      calculated_initial_balance: 9000.00
+                      auto_calculated_initial_balance: true
+                      last_sync_at: "2025-10-23T12:00:00Z"
+                    trades_synced: 150
+                    withdrawals_synced: 5
+                    deposits_synced: 3
+                    init_completed: true
+        "401":
+          description: Clé API invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Erreur de validation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /accounts/balance:
+    get:
+      tags:
+        - Accounts
+      summary: Récupérer la balance des comptes
+      description: |
+        Retourne la balance de tous les comptes MT5 de l'utilisateur authentifié.
+
+        **Authentification requise** : JWT Token dans le header `Authorization`.
+      operationId: getBalance
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Balance récupérée avec succès
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+              examples:
+                success:
+                  summary: Balance récupérée
+                  value:
+                    accounts:
+                      - id: 1
+                        mt5_id: "123456789"
+                        account_name: "Demo Trading Account"
+                        balance: 10000.50
+                        last_sync_at: "2025-10-23T12:00:00Z"
+                      - id: 2
+                        mt5_id: "987654321"
+                        account_name: "Real Trading Account"
+                        balance: 25000.75
+                        last_sync_at: "2025-10-23T12:05:00Z"
+                    total_balance: 35001.25
+        "401":
+          description: Non autorisé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /accounts/trades:
+    get:
+      tags:
+        - Trades
+      summary: Récupérer les trades récents
+      description: |
+        Retourne les 20 derniers trades fermés de tous les comptes MT5 de l'utilisateur.
+
+        Les trades sont triés par date de fermeture décroissante.
+
+        **Authentification requise** : JWT Token dans le header `Authorization`.
+      operationId: getRecentTrades
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Trades récupérés avec succès
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradesResponse"
+              examples:
+                success:
+                  summary: Liste des trades
+                  value:
+                    trades:
+                      - id: 1
+                        trade_id: "987654321"
+                        account_name: "Demo Trading Account"
+                        symbol: "EURUSD"
+                        trade_type: "buy"
+                        volume: 0.1
+                        open_price: 1.1234
+                        close_price: 1.1250
+                        profit: 16.00
+                        commission: -0.50
+                        swap: 0.00
+                        open_time: "2025-10-23T10:00:00Z"
+                        close_time: "2025-10-23T11:00:00Z"
+                        status: "closed"
+        "401":
+          description: Non autorisé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /accounts/projection:
+    get:
+      tags:
+        - Accounts
+      summary: Calculer la projection de gains
+      description: |
+        Calcule une projection des gains futurs basée sur l'historique des trades.
+
+        La projection utilise les données des 30 derniers jours par défaut.
+        Le niveau de confiance dépend du nombre de jours de trading :
+        - **high** : 20+ jours de trading
+        - **medium** : 10-19 jours de trading
+        - **low** : Moins de 10 jours de trading
+
+        **Authentification requise** : JWT Token dans le header `Authorization`.
+      operationId: getProjection
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: days
+          in: query
+          required: false
+          description: "Nombre de jours pour la projection (défaut: 30)"
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 365
+            default: 30
+          example: 30
+      responses:
+        "200":
+          description: Projection calculée avec succès
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectionResponse"
+              examples:
+                success:
+                  summary: Projection sur 30 jours
+                  value:
+                    projections:
+                      - account_id: 1
+                        mt5_id: "123456789"
+                        account_name: "Demo Trading Account"
+                        current_balance: 10000.50
+                        projected_balance: 11500.75
+                        daily_average: 50.0
+                        projected_profit: 1500.0
+                        confidence: "high"
+                        based_on_days: 25
+                    summary:
+                      total_current_balance: 10000.50
+                      total_projected_balance: 11500.75
+                      projected_difference: 1500.25
+                      projection_days: 30
+        "401":
+          description: Non autorisé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /bots:
+    get:
+      tags:
+        - Bots
+      summary: Lister les bots de l'utilisateur
+      description: |
+        Retourne la liste de tous les bots de trading actifs de l'utilisateur.
+
+        **Authentification requise** : MT5 API Token dans le header `Authorization: Bearer <token>`
+        ou paramètre `api_token`.
+      operationId: listBots
+      security:
+        - BearerAuth: []
+        - ApiTokenAuth: []
+      responses:
+        "200":
+          description: Liste des bots
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotsListResponse"
+              examples:
+                success:
+                  summary: Liste des bots
+                  value:
+                    success: true
+                    bots:
+                      - purchase_id: 1
+                        bot_id: 5
+                        bot_name: "Scalper Pro"
+                        is_running: true
+                        max_drawdown_limit: 10.0
+                        current_drawdown: 2.5
+                        total_profit: 1250.50
+        "401":
+          description: Token invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /bots/{purchase_id}/status:
+    get:
+      tags:
+        - Bots
+      summary: Obtenir le statut d'un bot
+      description: |
+        Retourne le statut détaillé d'un bot spécifique.
+
+        Le statut `is_running` indique si le bot peut trader :
+        - `true` : Bot actif, trading autorisé
+        - `false` : Bot en pause, ne pas trader
+
+        **Authentification requise** : MT5 API Token dans le header `Authorization: Bearer <token>`
+        ou paramètre `api_token`.
+      operationId: getBotStatus
+      security:
+        - BearerAuth: []
+        - ApiTokenAuth: []
+      parameters:
+        - name: purchase_id
+          in: path
+          required: true
+          description: ID de l'achat du bot
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Statut du bot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotStatusResponse"
+              examples:
+                success:
+                  summary: Bot actif
+                  value:
+                    success: true
+                    bot_name: "Scalper Pro"
+                    is_running: true
+                    max_drawdown_limit: 10.0
+                    current_drawdown: 2.5
+                    total_profit: 1250.50
+                    trades_count: 150
+                    message: "Bot active - trading autorisé"
+                inactive:
+                  summary: Bot inactif
+                  value:
+                    success: true
+                    bot_name: "Scalper Pro"
+                    is_running: false
+                    max_drawdown_limit: 10.0
+                    current_drawdown: 12.5
+                    total_profit: -500.00
+                    trades_count: 150
+                    message: "Bot en pause - ne pas trader"
+        "404":
+          description: Bot non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                not_found:
+                  summary: Bot non trouvé
+                  value:
+                    success: false
+                    is_running: false
+                    message: "Bot non trouvé ou non assigné"
+        "401":
+          description: Token invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /bots/{purchase_id}/performance:
+    post:
+      tags:
+        - Bots
+      summary: Mettre à jour les performances d'un bot
+      description: |
+        Met à jour les performances (profit et drawdown) d'un bot.
+
+        Le système recalcule automatiquement le statut `is_running` basé sur
+        le drawdown maximum autorisé.
+
+        **Authentification requise** : MT5 API Token dans le header `Authorization: Bearer <token>`
+        ou paramètre `api_token`.
+      operationId: updateBotPerformance
+      security:
+        - BearerAuth: []
+        - ApiTokenAuth: []
+      parameters:
+        - name: purchase_id
+          in: path
+          required: true
+          description: ID de l'achat du bot
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BotPerformanceUpdateRequest"
+            examples:
+              example1:
+                summary: Mise à jour des performances
+                value:
+                  profit: 1250.50
+                  drawdown: 2.5
+      responses:
+        "200":
+          description: Performances mises à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotPerformanceUpdateResponse"
+              examples:
+                success:
+                  summary: Mise à jour réussie
+                  value:
+                    success: true
+                    message: "Performance mise à jour"
+                    is_running: true
+                    within_drawdown_limit: true
+        "404":
+          description: Bot non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Token invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Lister tous les utilisateurs
+      description: |
+        Retourne la liste de tous les utilisateurs de la plateforme.
+
+        **Note** : Cet endpoint ne nécessite pas d'authentification dans la version actuelle,
+        mais cela peut changer dans le futur.
+      operationId: listUsers
+      responses:
+        "200":
+          description: Liste des utilisateurs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsersListResponse"
+              examples:
+                success:
+                  summary: Liste des utilisateurs
+                  value:
+                    users:
+                      - id: 1
+                        email: user@example.com
+                        first_name: John
+                        last_name: Doe
+                        mt5_api_token: abc123def456ghi789
+                        accounts_count: 2
+                        created_at: "2025-01-01T00:00:00Z"
+                    total: 1
+
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Obtenir les informations de l'utilisateur connecté
+      description: |
+        Retourne les informations détaillées de l'utilisateur authentifié,
+        incluant ses comptes MT5.
+
+        **Authentification requise** : JWT Token dans le header `Authorization`.
+      operationId: getCurrentUser
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Informations utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserMeResponse"
+              examples:
+                success:
+                  summary: Utilisateur connecté
+                  value:
+                    user:
+                      id: 1
+                      email: user@example.com
+                      first_name: John
+                      last_name: Doe
+                      mt5_api_token: abc123def456ghi789
+                      mt5_accounts:
+                        - id: 1
+                          mt5_id: "123456789"
+                          account_name: "Demo Trading Account"
+                          balance: 10000.50
+        "401":
+          description: Non autorisé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users/{id}:
+    delete:
+      tags:
+        - Users
+      summary: Supprimer un utilisateur
+      description: |
+        Supprime un utilisateur. Un utilisateur ne peut supprimer que son propre compte.
+
+        **Authentification requise** : JWT Token dans le header `Authorization`.
+      operationId: deleteUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de l'utilisateur à supprimer
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Utilisateur supprimé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+              examples:
+                success:
+                  summary: Utilisateur supprimé
+                  value:
+                    message: User deleted successfully
+        "401":
+          description: Non autorisé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Utilisateur non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Token JWT obtenu via `/register` ou `/login`.
+        Format : `Authorization: Bearer <token>`
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        Clé API MT5 pour la synchronisation des données.
+        Clé par défaut en développement : `mt5_secret_key_change_in_production`
+        Format : `X-API-Key: <key>`
+    ApiTokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: |
+        Token MT5 API de l'utilisateur (alternative au JWT).
+        Format : `Authorization: Bearer <mt5_api_token>`
+        Peut également être passé en paramètre `api_token`
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          type: object
+          required:
+            - email
+            - password
+            - password_confirmation
+            - first_name
+            - last_name
+          properties:
+            email:
+              type: string
+              format: email
+              example: user@example.com
+              description: Adresse email de l'utilisateur (doit être unique)
+            password:
+              type: string
+              format: password
+              minLength: 6
+              example: password123
+              description: Mot de passe (minimum 6 caractères)
+            password_confirmation:
+              type: string
+              format: password
+              example: password123
+              description: Confirmation du mot de passe
+            first_name:
+              type: string
+              example: John
+              description: Prénom de l'utilisateur
+            last_name:
+              type: string
+              example: Doe
+              description: Nom de l'utilisateur
+
+    RegisterResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token JWT pour l'authentification
+          example: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE2OTk5OTk5OTl9.example
+        user:
+          $ref: "#/components/schemas/UserBasic"
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: password123
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token JWT pour l'authentification
+          example: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE2OTk5OTk5OTl9.example
+        user:
+          $ref: "#/components/schemas/UserBasic"
+
+    UserBasic:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        first_name:
+          type: string
+          example: John
+        last_name:
+          type: string
+          example: Doe
+        mt5_api_token:
+          type: string
+          description: Token unique pour la synchronisation MT5
+          example: abc123def456ghi789
+
+    Mt5SyncRequest:
+      type: object
+      required:
+        - mt5_data
+      properties:
+        mt5_data:
+          type: object
+          required:
+            - mt5_id
+            - mt5_api_token
+            - balance
+          properties:
+            mt5_id:
+              type: string
+              description: Identifiant unique du compte MT5
+              example: "123456789"
+            mt5_api_token:
+              type: string
+              description: Token API MT5 de l'utilisateur
+              example: abc123def456ghi789
+            client_email:
+              type: string
+              format: email
+              description: Email du client (utilisé si token non trouvé)
+              example: user@example.com
+            account_name:
+              type: string
+              description: Nom du compte MT5
+              example: "Demo Trading Account"
+            balance:
+              type: number
+              format: float
+              description: Balance actuelle du compte
+              example: 10000.50
+            equity:
+              type: number
+              format: float
+              description: Equity actuelle du compte
+              example: 10050.25
+            broker_name:
+              type: string
+              description: Nom du broker
+              example: "Broker Name"
+            broker_server:
+              type: string
+              description: Nom du serveur MT5
+              example: "Server Name"
+            broker_password:
+              type: string
+              description: Mot de passe du compte MT5
+              example: "password123"
+            trades:
+              type: array
+              description: Liste des trades fermés à synchroniser
+              items:
+                $ref: "#/components/schemas/TradeData"
+            open_positions:
+              type: array
+              description: Liste des positions ouvertes
+              items:
+                $ref: "#/components/schemas/TradeData"
+            withdrawals:
+              type: array
+              description: Liste des retraits
+              items:
+                $ref: "#/components/schemas/TransactionData"
+            deposits:
+              type: array
+              description: Liste des dépôts
+              items:
+                $ref: "#/components/schemas/TransactionData"
+            active_experts:
+              type: array
+              description: Liste des experts advisors actifs
+              items:
+                $ref: "#/components/schemas/ActiveExpertData"
+
+    TradeData:
+      type: object
+      required:
+        - trade_id
+        - symbol
+        - trade_type
+        - volume
+        - open_price
+        - open_time
+        - status
+      properties:
+        trade_id:
+          type: string
+          description: Identifiant unique du trade
+          example: "987654321"
+        symbol:
+          type: string
+          description: Paire de devises
+          example: "EURUSD"
+        trade_type:
+          type: string
+          enum: [buy, sell]
+          description: Type de trade (achat ou vente)
+          example: "buy"
+        volume:
+          type: number
+          format: float
+          description: Volume du trade en lots
+          example: 0.1
+        open_price:
+          type: number
+          format: float
+          description: Prix d'ouverture
+          example: 1.1234
+        close_price:
+          type: number
+          format: float
+          nullable: true
+          description: Prix de fermeture (null si position ouverte)
+          example: 1.1250
+        profit:
+          type: number
+          format: float
+          description: Profit/Perte du trade
+          example: 16.00
+        commission:
+          type: number
+          format: float
+          description: Commission
+          example: -0.50
+        swap:
+          type: number
+          format: float
+          description: Swap
+          example: 0.00
+        open_time:
+          type: string
+          format: date-time
+          description: Date et heure d'ouverture
+          example: "2025-10-23T10:00:00Z"
+        close_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date et heure de fermeture (null si position ouverte)
+          example: "2025-10-23T11:00:00Z"
+        status:
+          type: string
+          enum: [open, closed]
+          description: Statut du trade
+          example: "closed"
+        magic_number:
+          type: integer
+          description: Numéro magique de l'EA
+          example: 12345
+        comment:
+          type: string
+          description: Commentaire du trade
+          example: "EA Trade"
+
+    TransactionData:
+      type: object
+      required:
+        - transaction_id
+        - amount
+        - transaction_date
+      properties:
+        transaction_id:
+          type: string
+          description: Identifiant unique de la transaction
+          example: "WD001"
+        amount:
+          type: number
+          format: float
+          description: Montant de la transaction
+          example: 500.00
+        transaction_date:
+          type: string
+          format: date-time
+          description: Date de la transaction
+          example: "2025-10-23T08:00:00Z"
+        description:
+          type: string
+          description: Description de la transaction
+          example: "Withdrawal"
+
+    ActiveExpertData:
+      type: object
+      required:
+        - magic_number
+      properties:
+        magic_number:
+          type: integer
+          description: Numéro magique de l'EA
+          example: 12345
+        source:
+          type: string
+          description: Nom ou source de l'EA
+          example: "EA Name"
+
+    Mt5SyncResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Data synchronized successfully
+        mt5_account:
+          $ref: "#/components/schemas/Mt5AccountInfo"
+        trades_synced:
+          type: integer
+          description: Nombre de trades synchronisés
+          example: 1
+        withdrawals_synced:
+          type: integer
+          description: Nombre de retraits synchronisés
+          example: 1
+        deposits_synced:
+          type: integer
+          description: Nombre de dépôts synchronisés
+          example: 1
+
+    Mt5InitRequiredResponse:
+      type: object
+      properties:
+        init_required:
+          type: boolean
+          example: true
+        send_all_history:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Complete history synchronization required
+
+    Mt5AccountInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        mt5_id:
+          type: string
+          example: "123456789"
+        account_name:
+          type: string
+          example: "Demo Trading Account"
+        balance:
+          type: number
+          format: float
+          example: 10000.50
+        last_sync_at:
+          type: string
+          format: date-time
+          example: "2025-10-23T12:00:00Z"
+        high_watermark:
+          type: number
+          format: float
+          nullable: true
+          description: Point haut historique du compte
+          example: 10500.00
+        total_withdrawals:
+          type: number
+          format: float
+          nullable: true
+          description: Total des retraits
+          example: 500.00
+        total_deposits:
+          type: number
+          format: float
+          nullable: true
+          description: Total des dépôts
+          example: 1000.00
+
+    Mt5CompleteSyncResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Complete history synchronized successfully
+        mt5_account:
+          type: object
+          properties:
+            id:
+              type: integer
+            mt5_id:
+              type: string
+            account_name:
+              type: string
+            balance:
+              type: number
+              format: float
+            calculated_initial_balance:
+              type: number
+              format: float
+              description: Capital initial calculé automatiquement
+            auto_calculated_initial_balance:
+              type: boolean
+              description: Indique si le capital initial a été calculé automatiquement
+            last_sync_at:
+              type: string
+              format: date-time
+        trades_synced:
+          type: integer
+        withdrawals_synced:
+          type: integer
+        deposits_synced:
+          type: integer
+        init_completed:
+          type: boolean
+          description: Indique que l'initialisation est complète
+
+    BalanceResponse:
+      type: object
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountInfo"
+        total_balance:
+          type: number
+          format: float
+          description: Balance totale de tous les comptes
+          example: 35001.25
+
+    AccountInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        mt5_id:
+          type: string
+          example: "123456789"
+        account_name:
+          type: string
+          example: "Demo Trading Account"
+        balance:
+          type: number
+          format: float
+          example: 10000.50
+        last_sync_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-10-23T12:00:00Z"
+
+    TradesResponse:
+      type: object
+      properties:
+        trades:
+          type: array
+          items:
+            $ref: "#/components/schemas/TradeInfo"
+
+    TradeInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        trade_id:
+          type: string
+          example: "987654321"
+        account_name:
+          type: string
+          example: "Demo Trading Account"
+        symbol:
+          type: string
+          example: "EURUSD"
+        trade_type:
+          type: string
+          enum: [buy, sell]
+          example: "buy"
+        volume:
+          type: number
+          format: float
+          example: 0.1
+        open_price:
+          type: number
+          format: float
+          example: 1.1234
+        close_price:
+          type: number
+          format: float
+          example: 1.1250
+        profit:
+          type: number
+          format: float
+          example: 16.00
+        commission:
+          type: number
+          format: float
+          example: -0.50
+        swap:
+          type: number
+          format: float
+          example: 0.00
+        open_time:
+          type: string
+          format: date-time
+          example: "2025-10-23T10:00:00Z"
+        close_time:
+          type: string
+          format: date-time
+          example: "2025-10-23T11:00:00Z"
+        status:
+          type: string
+          enum: [open, closed]
+          example: "closed"
+
+    ProjectionResponse:
+      type: object
+      properties:
+        projections:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProjectionData"
+        summary:
+          $ref: "#/components/schemas/ProjectionSummary"
+
+    ProjectionData:
+      type: object
+      properties:
+        account_id:
+          type: integer
+          example: 1
+        mt5_id:
+          type: string
+          example: "123456789"
+        account_name:
+          type: string
+          example: "Demo Trading Account"
+        current_balance:
+          type: number
+          format: float
+          example: 10000.50
+        projected_balance:
+          type: number
+          format: float
+          example: 11500.75
+        daily_average:
+          type: number
+          format: float
+          description: Moyenne quotidienne de profit
+          example: 50.0
+        projected_profit:
+          type: number
+          format: float
+          description: Profit projeté sur la période
+          example: 1500.0
+        confidence:
+          type: string
+          enum: [high, medium, low]
+          description: Niveau de confiance de la projection
+          example: "high"
+        based_on_days:
+          type: integer
+          description: Nombre de jours de trading utilisés pour le calcul
+          example: 25
+
+    ProjectionSummary:
+      type: object
+      properties:
+        total_current_balance:
+          type: number
+          format: float
+          example: 10000.50
+        total_projected_balance:
+          type: number
+          format: float
+          example: 11500.75
+        projected_difference:
+          type: number
+          format: float
+          example: 1500.25
+        projection_days:
+          type: integer
+          example: 30
+
+    BotsListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        bots:
+          type: array
+          items:
+            $ref: "#/components/schemas/BotInfo"
+
+    BotInfo:
+      type: object
+      properties:
+        purchase_id:
+          type: integer
+          description: ID de l'achat du bot
+          example: 1
+        bot_id:
+          type: integer
+          description: ID du bot
+          example: 5
+        bot_name:
+          type: string
+          example: "Scalper Pro"
+        is_running:
+          type: boolean
+          description: Indique si le bot peut trader
+          example: true
+        max_drawdown_limit:
+          type: number
+          format: float
+          description: Limite de drawdown maximum autorisée (%)
+          example: 10.0
+        current_drawdown:
+          type: number
+          format: float
+          description: Drawdown actuel (%)
+          example: 2.5
+        total_profit:
+          type: number
+          format: float
+          description: Profit total du bot
+          example: 1250.50
+
+    BotStatusResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        bot_name:
+          type: string
+          example: "Scalper Pro"
+        is_running:
+          type: boolean
+          description: Indique si le bot peut trader
+          example: true
+        max_drawdown_limit:
+          type: number
+          format: float
+          example: 10.0
+        current_drawdown:
+          type: number
+          format: float
+          example: 2.5
+        total_profit:
+          type: number
+          format: float
+          example: 1250.50
+        trades_count:
+          type: integer
+          description: Nombre total de trades
+          example: 150
+        message:
+          type: string
+          description: Message descriptif du statut
+          example: "Bot active - trading autorisé"
+
+    BotPerformanceUpdateRequest:
+      type: object
+      required:
+        - profit
+        - drawdown
+      properties:
+        profit:
+          type: number
+          format: float
+          description: Profit actuel du bot
+          example: 1250.50
+        drawdown:
+          type: number
+          format: float
+          description: Drawdown actuel du bot (%)
+          example: 2.5
+
+    BotPerformanceUpdateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Performance mise à jour"
+        is_running:
+          type: boolean
+          description: Nouveau statut du bot après mise à jour
+          example: true
+        within_drawdown_limit:
+          type: boolean
+          description: Indique si le bot est dans la limite de drawdown
+          example: true
+
+    UsersListResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserListItem"
+        total:
+          type: integer
+          description: Nombre total d'utilisateur
+          example: 1
+
+    UserListItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        first_name:
+          type: string
+          example: John
+        last_name:
+          type: string
+          example: Doe
+        mt5_api_token:
+          type: string
+          example: abc123def456ghi789
+        accounts_count:
+          type: integer
+          description: Nombre de comptes MT5
+          example: 2
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+
+    UserMeResponse:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+            email:
+              type: string
+              format: email
+            first_name:
+              type: string
+            last_name:
+              type: string
+            mt5_api_token:
+              type: string
+            mt5_accounts:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  mt5_id:
+                    type: string
+                  account_name:
+                    type: string
+                  balance:
+                    type: number
+                    format: float
+
+    SuccessMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          example: User deleted successfully
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Message d'erreur principal
+          example: Invalid email or password
+        errors:
+          type: array
+          description: Liste des erreurs de validation
+          items:
+            type: string
+          example:
+            - Email has already been taken
+            - Password is too short (minimum is 6 characters)
+        details:
+          type: array
+          description: Détails supplémentaires des erreurs
+          items:
+            type: string
+          example:
+            - Mt5 id has already been taken
+
+    # ============================================
+    # API v2 Schemas
+    # ============================================
+
+    V2RegisterRequest:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          type: object
+          required:
+            - email
+            - password
+            - password_confirmation
+          properties:
+            email:
+              type: string
+              format: email
+            password:
+              type: string
+              minLength: 6
+            password_confirmation:
+              type: string
+            first_name:
+              type: string
+            last_name:
+              type: string
+
+    V2LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    V2AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token JWT pour l'authentification
+        user:
+          $ref: "#/components/schemas/V2UserResponse"
+
+    V2UserResponse:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+            email:
+              type: string
+              format: email
+            first_name:
+              type: string
+            last_name:
+              type: string
+            mt5_api_token:
+              type: string
+            commission_rate:
+              type: number
+              format: float
+            is_admin:
+              type: boolean
+            created_at:
+              type: string
+              format: date-time
+
+    V2PaginatedAccountsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/V2AccountResponse"
+        pagination:
+          type: object
+          properties:
+            cursor:
+              type: string
+            next_cursor:
+              type: string
+              nullable: true
+            prev_cursor:
+              type: string
+              nullable: true
+            has_more:
+              type: boolean
+            limit:
+              type: integer
+
+    V2AccountResponse:
+      type: object
+      properties:
+        account:
+          type: object
+          properties:
+            id:
+              type: integer
+            mt5_id:
+              type: string
+            account_name:
+              type: string
+            balance:
+              type: number
+              format: float
+            equity:
+              type: number
+              format: float
+            initial_balance:
+              type: number
+              format: float
+            high_watermark:
+              type: number
+              format: float
+            net_gains:
+              type: number
+              format: float
+            real_gains:
+              type: number
+              format: float
+            commissionable_gains:
+              type: number
+              format: float
+            broker_name:
+              type: string
+            broker_server:
+              type: string
+            last_sync_at:
+              type: string
+              format: date-time
+              nullable: true
+
+    V2AccountBalanceResponse:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: float
+        equity:
+          type: number
+          format: float
+        net_gains:
+          type: number
+          format: float
+        real_gains:
+          type: number
+          format: float
+        commissionable_gains:
+          type: number
+          format: float
+
+    V2PaginatedTradesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/V2TradeResponse"
+        pagination:
+          type: object
+          properties:
+            cursor:
+              type: string
+            next_cursor:
+              type: string
+              nullable: true
+            prev_cursor:
+              type: string
+              nullable: true
+            has_more:
+              type: boolean
+            limit:
+              type: integer
+
+    V2TradeResponse:
+      type: object
+      properties:
+        trade:
+          type: object
+          properties:
+            id:
+              type: integer
+            trade_id:
+              type: string
+            account_id:
+              type: integer
+            symbol:
+              type: string
+            trade_type:
+              type: string
+              enum: [buy, sell]
+            volume:
+              type: number
+              format: float
+            open_price:
+              type: number
+              format: float
+            close_price:
+              type: number
+              format: float
+              nullable: true
+            profit:
+              type: number
+              format: float
+            commission:
+              type: number
+              format: float
+            swap:
+              type: number
+              format: float
+            open_time:
+              type: string
+              format: date-time
+            close_time:
+              type: string
+              format: date-time
+              nullable: true
+            status:
+              type: string
+              enum: [open, closed]
+            magic_number:
+              type: integer
+              nullable: true
+            trade_originality:
+              type: string
+              enum: [bot, manual_admin, manual_client]
+
+    V2PaginatedBotsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/V2BotResponse"
+        pagination:
+          type: object
+          properties:
+            cursor:
+              type: string
+            next_cursor:
+              type: string
+              nullable: true
+            has_more:
+              type: boolean
+            limit:
+              type: integer
+
+    V2BotResponse:
+      type: object
+      properties:
+        bot:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            description:
+              type: string
+            price:
+              type: number
+              format: float
+            status:
+              type: string
+            is_active:
+              type: boolean
+            risk_level:
+              type: string
+            max_drawdown_limit:
+              type: number
+              format: float
+            projection_monthly_min:
+              type: number
+              format: float
+            projection_monthly_max:
+              type: number
+              format: float
+            projection_yearly:
+              type: number
+              format: float
+            win_rate:
+              type: number
+              format: float
+            features:
+              type: object
+
+    V2PaginatedBotPurchasesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/V2BotPurchaseResponse"
+        pagination:
+          type: object
+          properties:
+            cursor:
+              type: string
+            next_cursor:
+              type: string
+              nullable: true
+            has_more:
+              type: boolean
+            limit:
+              type: integer
+
+    V2BotPurchaseResponse:
+      type: object
+      properties:
+        bot_purchase:
+          type: object
+          properties:
+            id:
+              type: integer
+            user_id:
+              type: integer
+            trading_bot_id:
+              type: integer
+            price_paid:
+              type: number
+              format: float
+            status:
+              type: string
+            is_running:
+              type: boolean
+            magic_number:
+              type: integer
+              nullable: true
+            total_profit:
+              type: number
+              format: float
+            trades_count:
+              type: integer
+            current_drawdown:
+              type: number
+              format: float
+            max_drawdown_recorded:
+              type: number
+              format: float
+            started_at:
+              type: string
+              format: date-time
+              nullable: true
+            stopped_at:
+              type: string
+              format: date-time
+              nullable: true
+            trading_bot:
+              $ref: "#/components/schemas/V2BotResponse"
+
+    V2PaginatedVpsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/V2VpsResponse"
+        pagination:
+          type: object
+          properties:
+            cursor:
+              type: string
+            next_cursor:
+              type: string
+              nullable: true
+            has_more:
+              type: boolean
+            limit:
+              type: integer
+
+    V2VpsResponse:
+      type: object
+      properties:
+        vps:
+          type: object
+          properties:
+            id:
+              type: integer
+            user_id:
+              type: integer
+            name:
+              type: string
+            server_location:
+              type: string
+            status:
+              type: string
+            monthly_price:
+              type: number
+              format: float
+            renewal_date:
+              type: string
+              format: date-time
+            ip_address:
+              type: string
+            username:
+              type: string
+            ordered_at:
+              type: string
+              format: date-time
+            configured_at:
+              type: string
+              format: date-time
+              nullable: true
+            ready_at:
+              type: string
+              format: date-time
+              nullable: true
+            activated_at:
+              type: string
+              format: date-time
+              nullable: true
+
+    V2PaginatedPaymentsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/V2PaymentResponse"
+        pagination:
+          type: object
+          properties:
+            cursor:
+              type: string
+            next_cursor:
+              type: string
+              nullable: true
+            has_more:
+              type: boolean
+            limit:
+              type: integer
+
+    V2PaymentResponse:
+      type: object
+      properties:
+        payment:
+          type: object
+          properties:
+            id:
+              type: integer
+            user_id:
+              type: integer
+            amount:
+              type: number
+              format: float
+            status:
+              type: string
+            payment_date:
+              type: string
+              format: date-time
+            description:
+              type: string
+            payment_method:
+              type: string
+
+    V2PaginatedCreditsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/V2CreditResponse"
+        pagination:
+          type: object
+          properties:
+            cursor:
+              type: string
+            next_cursor:
+              type: string
+              nullable: true
+            has_more:
+              type: boolean
+            limit:
+              type: integer
+
+    V2CreditResponse:
+      type: object
+      properties:
+        credit:
+          type: object
+          properties:
+            id:
+              type: integer
+            user_id:
+              type: integer
+            amount:
+              type: number
+              format: float
+            reason:
+              type: string
+            created_at:
+              type: string
+              format: date-time
+
+    V2StatsResponse:
+      type: object
+      properties:
+        total_trades:
+          type: integer
+        winning_trades:
+          type: integer
+        losing_trades:
+          type: integer
+        win_rate:
+          type: number
+          format: float
+        total_profit:
+          type: number
+          format: float
+        average_profit:
+          type: number
+          format: float
+        max_profit:
+          type: number
+          format: float
+        max_loss:
+          type: number
+          format: float
+        profit_factor:
+          type: number
+          format: float
+        sharpe_ratio:
+          type: number
+          format: float
+          nullable: true
+
+  # ============================================
+  # API REST v2 - Endpoints avec pagination, filtres et recherche
+  # ============================================
+
+  /api/v2/auth/register:
+    post:
+      tags:
+        - API v2
+      summary: Inscription (v2)
+      description: Inscription d'un nouvel utilisateur avec retour JWT
+      operationId: v2Register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/V2RegisterRequest"
+      responses:
+        "201":
+          description: Inscription réussie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2AuthResponse"
+        "422":
+          description: Erreur de validation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v2/auth/login:
+    post:
+      tags:
+        - API v2
+      summary: Connexion (v2)
+      description: Connexion utilisateur avec retour JWT
+      operationId: v2Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/V2LoginRequest"
+      responses:
+        "200":
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2AuthResponse"
+        "401":
+          description: Identifiants invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v2/auth/logout:
+    post:
+      tags:
+        - API v2
+      summary: Déconnexion (v2)
+      description: Déconnecte l'utilisateur
+      operationId: v2Logout
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Déconnexion réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logged out successfully
+
+  /api/v2/auth/me:
+    get:
+      tags:
+        - API v2
+      summary: Utilisateur connecté (v2)
+      description: Retourne les informations de l'utilisateur authentifié
+      operationId: v2Me
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Informations utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2UserResponse"
+        "401":
+          description: Non autorisé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v2/auth/refresh:
+    post:
+      tags:
+        - API v2
+      summary: Rafraîchir token (v2)
+      description: Génère un nouveau token JWT
+      operationId: v2Refresh
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Nouveau token généré
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2AuthResponse"
+
+  /api/v2/accounts:
+    get:
+      tags:
+        - API v2
+      summary: Liste des comptes MT5 (v2)
+      description: |
+        Retourne la liste des comptes MT5 avec pagination cursor-based, filtres et recherche.
+
+        **Pagination** : Utilisez `cursor`, `limit` et `direction` pour naviguer.
+        **Filtres** : Utilisez `filters[field][operator]=value` (ex: `filters[account_name][like]=Demo`)
+        **Recherche** : Utilisez `search=term&search_fields=field1,field2`
+      operationId: v2AccountsIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          description: Curseur pour la pagination
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Nombre d'éléments par page (1-100)
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: direction
+          in: query
+          description: Direction de pagination (next ou prev)
+          schema:
+            type: string
+            enum: [next, prev]
+            default: next
+        - name: search
+          in: query
+          description: Terme de recherche full-text
+          schema:
+            type: string
+        - name: search_fields
+          in: query
+          description: Champs à rechercher (séparés par virgule)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Liste des comptes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2PaginatedAccountsResponse"
+        "401":
+          description: Non autorisé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v2/accounts/{id}:
+    get:
+      tags:
+        - API v2
+      summary: Détails d'un compte (v2)
+      description: Retourne les détails d'un compte MT5
+      operationId: v2AccountShow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Détails du compte
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2AccountResponse"
+        "404":
+          description: Compte non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v2/accounts/{id}/balance:
+    get:
+      tags:
+        - API v2
+      summary: Balance d'un compte (v2)
+      description: Retourne la balance et les gains d'un compte
+      operationId: v2AccountBalance
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Balance du compte
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2AccountBalanceResponse"
+
+  /api/v2/accounts/{id}/trades:
+    get:
+      tags:
+        - API v2
+      summary: Trades d'un compte (v2)
+      description: Retourne les trades d'un compte avec pagination et filtres
+      operationId: v2AccountTrades
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Liste des trades
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2PaginatedTradesResponse"
+
+  /api/v2/accounts/{id}/projection:
+    get:
+      tags:
+        - API v2
+      summary: Projection financière (v2)
+      description: Retourne la projection financière d'un compte
+      operationId: v2AccountProjection
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: days
+          in: query
+          description: Nombre de jours pour la projection
+          schema:
+            type: integer
+            default: 30
+            minimum: 1
+            maximum: 365
+      responses:
+        "200":
+          description: Projection financière
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectionData"
+
+  /api/v2/accounts/{id}/stats:
+    get:
+      tags:
+        - API v2
+      summary: Statistiques d'un compte (v2)
+      description: Retourne les statistiques de trading d'un compte
+      operationId: v2AccountStats
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Statistiques du compte
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2StatsResponse"
+
+  /api/v2/trades:
+    get:
+      tags:
+        - API v2
+      summary: Liste des trades (v2)
+      description: Retourne la liste des trades avec pagination, filtres et recherche
+      operationId: v2TradesIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: account_id
+          in: query
+          schema:
+            type: integer
+        - name: bot_id
+          in: query
+          schema:
+            type: integer
+        - name: symbol
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, closed]
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Liste des trades
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2PaginatedTradesResponse"
+
+  /api/v2/trades/{id}:
+    get:
+      tags:
+        - API v2
+      summary: Détails d'un trade (v2)
+      description: Retourne les détails d'un trade
+      operationId: v2TradeShow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Détails du trade
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2TradeResponse"
+        "404":
+          description: Trade non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v2/trades/stats:
+    get:
+      tags:
+        - API v2
+      summary: Statistiques des trades (v2)
+      description: Retourne les statistiques agrégées des trades
+      operationId: v2TradesStats
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: account_id
+          in: query
+          schema:
+            type: integer
+        - name: bot_id
+          in: query
+          schema:
+            type: integer
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Statistiques des trades
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2StatsResponse"
+
+  /api/v2/trades/export:
+    get:
+      tags:
+        - API v2
+      summary: Export CSV des trades (v2)
+      description: Exporte les trades en CSV
+      operationId: v2TradesExport
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: account_id
+          in: query
+          schema:
+            type: integer
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Fichier CSV
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+
+  /api/v2/bots:
+    get:
+      tags:
+        - API v2
+      summary: Liste des bots disponibles (v2)
+      description: Retourne la liste des bots de trading disponibles avec pagination, filtres et recherche
+      operationId: v2BotsIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          description: Curseur pour la pagination
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Nombre d'éléments par page (1-100)
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: direction
+          in: query
+          description: Direction de pagination (next ou prev)
+          schema:
+            type: string
+            enum: [next, prev]
+            default: next
+        - name: filters[status]
+          in: query
+          description: Filtrer par statut
+          schema:
+            type: string
+        - name: filters[risk_level]
+          in: query
+          description: Filtrer par niveau de risque
+          schema:
+            type: string
+        - name: filters[price][gte]
+          in: query
+          description: Prix minimum
+          schema:
+            type: number
+        - name: filters[price][lte]
+          in: query
+          description: Prix maximum
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Liste des bots
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2PaginatedBotsResponse"
+
+  /api/v2/bots/{id}:
+    get:
+      tags:
+        - API v2
+      summary: Détails d'un bot (v2)
+      description: Retourne les détails d'un bot de trading
+      operationId: v2BotShow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Détails du bot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2BotResponse"
+
+  /api/v2/my_bots:
+    get:
+      tags:
+        - API v2
+      summary: Mes bots achetés (v2)
+      description: Retourne les bots achetés par l'utilisateur avec pagination
+      operationId: v2MyBots
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          description: Curseur pour la pagination
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Nombre d'éléments par page (1-100)
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: direction
+          in: query
+          description: Direction de pagination (next ou prev)
+          schema:
+            type: string
+            enum: [next, prev]
+            default: next
+      responses:
+        "200":
+          description: Liste des bots achetés
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2PaginatedBotPurchasesResponse"
+
+  /api/v2/bot_purchases:
+    get:
+      tags:
+        - API v2
+      summary: Liste des achats de bots (v2)
+      description: Retourne la liste des achats de bots avec pagination
+      operationId: v2BotPurchasesIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          description: Curseur pour la pagination
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Nombre d'éléments par page (1-100)
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: direction
+          in: query
+          description: Direction de pagination (next ou prev)
+          schema:
+            type: string
+            enum: [next, prev]
+            default: next
+      responses:
+        "200":
+          description: Liste des achats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2PaginatedBotPurchasesResponse"
+    post:
+      tags:
+        - API v2
+      summary: Acheter un bot (v2)
+      description: Achete un bot de trading
+      operationId: v2BotPurchasesCreate
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bot_id
+              properties:
+                bot_id:
+                  type: integer
+      responses:
+        "201":
+          description: Achat créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2BotPurchaseResponse"
+        "404":
+          description: Bot non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v2/bot_purchases/{id}:
+    get:
+      tags:
+        - API v2
+      summary: Détails d'un achat (v2)
+      description: Retourne les détails d'un achat de bot
+      operationId: v2BotPurchaseShow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Détails de l'achat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2BotPurchaseResponse"
+
+  /api/v2/bot_purchases/{id}/status:
+    get:
+      tags:
+        - API v2
+      summary: Statut d'un achat (v2)
+      description: Retourne le statut d'un achat de bot
+      operationId: v2BotPurchaseStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Statut de l'achat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2BotPurchaseResponse"
+        "404":
+          description: Achat non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v2/bot_purchases/{id}/start:
+    post:
+      tags:
+        - API v2
+      summary: Démarrer un bot (v2)
+      description: Démarre un bot de trading
+      operationId: v2BotPurchaseStart
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Bot démarré
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2BotPurchaseResponse"
+
+  /api/v2/bot_purchases/{id}/stop:
+    post:
+      tags:
+        - API v2
+      summary: Arrêter un bot (v2)
+      description: Arrête un bot de trading
+      operationId: v2BotPurchaseStop
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Bot arrêté
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2BotPurchaseResponse"
+
+  /api/v2/bot_purchases/{id}/performance:
+    post:
+      tags:
+        - API v2
+      summary: Mettre à jour les performances (v2)
+      description: Met à jour les performances d'un bot (pour script MT5)
+      operationId: v2BotPurchasePerformance
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - profit
+              properties:
+                profit:
+                  type: number
+                  format: float
+                drawdown:
+                  type: number
+                  format: float
+                  default: 0
+      responses:
+        "200":
+          description: Performances mises à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2BotPurchaseResponse"
+
+  /api/v2/vps:
+    get:
+      tags:
+        - API v2
+      summary: Liste des VPS (v2)
+      description: Retourne la liste des VPS de l'utilisateur avec pagination
+      operationId: v2VpsIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          description: Curseur pour la pagination
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Nombre d'éléments par page (1-100)
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: direction
+          in: query
+          description: Direction de pagination (next ou prev)
+          schema:
+            type: string
+            enum: [next, prev]
+            default: next
+      responses:
+        "200":
+          description: Liste des VPS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2PaginatedVpsResponse"
+
+  /api/v2/vps/{id}:
+    get:
+      tags:
+        - API v2
+      summary: Détails d'un VPS (v2)
+      description: Retourne les détails d'un VPS
+      operationId: v2VpsShow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Détails du VPS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2VpsResponse"
+
+  /api/v2/payments:
+    get:
+      tags:
+        - API v2
+      summary: Liste des paiements (v2)
+      description: Retourne la liste des paiements avec pagination et filtres
+      operationId: v2PaymentsIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          description: Curseur pour la pagination
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Nombre d'éléments par page (1-100)
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: direction
+          in: query
+          description: Direction de pagination (next ou prev)
+          schema:
+            type: string
+            enum: [next, prev]
+            default: next
+        - name: filters[status]
+          in: query
+          description: Filtrer par statut
+          schema:
+            type: string
+        - name: filters[amount][gte]
+          in: query
+          description: Montant minimum
+          schema:
+            type: number
+        - name: filters[amount][lte]
+          in: query
+          description: Montant maximum
+          schema:
+            type: number
+        - name: start_date
+          in: query
+          description: Date de début (format ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          description: Date de fin (format ISO 8601)
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Liste des paiements
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2PaginatedPaymentsResponse"
+    post:
+      tags:
+        - API v2
+      summary: Créer un paiement (v2)
+      description: Crée un nouveau paiement
+      operationId: v2PaymentsCreate
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - payment
+              properties:
+                payment:
+                  type: object
+                  required:
+                    - amount
+                  properties:
+                    amount:
+                      type: number
+                      format: float
+                    description:
+                      type: string
+                    payment_method:
+                      type: string
+                    payment_date:
+                      type: string
+                      format: date-time
+      responses:
+        "201":
+          description: Paiement créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2PaymentResponse"
+
+  /api/v2/payments/{id}:
+    get:
+      tags:
+        - API v2
+      summary: Détails d'un paiement (v2)
+      description: Retourne les détails d'un paiement
+      operationId: v2PaymentShow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Détails du paiement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2PaymentResponse"
+
+  /api/v2/payments/balance_due:
+    get:
+      tags:
+        - API v2
+      summary: Solde dû (v2)
+      description: Retourne le solde dû par l'utilisateur
+      operationId: v2PaymentsBalanceDue
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Solde dû
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance_due:
+                    type: number
+                    format: float
+                  total_commission_due:
+                    type: number
+                    format: float
+                  total_credits:
+                    type: number
+                    format: float
+
+  /api/v2/credits:
+    get:
+      tags:
+        - API v2
+      summary: Liste des crédits (v2)
+      description: Retourne la liste des crédits de l'utilisateur avec pagination
+      operationId: v2CreditsIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          description: Curseur pour la pagination
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Nombre d'éléments par page (1-100)
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: direction
+          in: query
+          description: Direction de pagination (next ou prev)
+          schema:
+            type: string
+            enum: [next, prev]
+            default: next
+      responses:
+        "200":
+          description: Liste des crédits
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2PaginatedCreditsResponse"
+
+  /api/v2/credits/{id}:
+    get:
+      tags:
+        - API v2
+      summary: Détails d'un crédit (v2)
+      description: Retourne les détails d'un crédit
+      operationId: v2CreditShow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Détails du crédit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2CreditResponse"
+
+  /api/v2/stats/dashboard:
+    get:
+      tags:
+        - API v2
+      summary: Dashboard (v2)
+      description: Retourne les données agrégées du dashboard
+      operationId: v2StatsDashboard
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Données du dashboard
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_balance:
+                    type: number
+                    format: float
+                  total_profits:
+                    type: number
+                    format: float
+                  total_commission_due:
+                    type: number
+                    format: float
+                  total_credits:
+                    type: number
+                    format: float
+                  balance_due:
+                    type: number
+                    format: float
+                  accounts_count:
+                    type: integer
+                  bots_count:
+                    type: integer
+                  active_bots_count:
+                    type: integer
+                  recent_trades_count:
+                    type: integer
+
+  /api/v2/stats/profits:
+    get:
+      tags:
+        - API v2
+      summary: Statistiques de profits (v2)
+      description: Retourne les statistiques de profits avec filtres de période
+      operationId: v2StatsProfits
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7_days, 30_days, 3_months, 6_months, 1_year]
+            default: 30_days
+        - name: account_id
+          in: query
+          schema:
+            type: integer
+        - name: bot_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Statistiques de profits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  period:
+                    type: string
+                  total_profit:
+                    type: number
+                    format: float
+                  total_trades:
+                    type: integer
+                  average_daily_profit:
+                    type: number
+                    format: float
+                  monthly_average:
+                    type: number
+                    format: float
+
+  /api/v2/stats/trades:
+    get:
+      tags:
+        - API v2
+      summary: Statistiques des trades (v2)
+      description: Retourne les statistiques détaillées des trades
+      operationId: v2StatsTrades
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7_days, 30_days, 3_months, 6_months, 1_year]
+            default: 30_days
+        - name: account_id
+          in: query
+          schema:
+            type: integer
+        - name: bot_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Statistiques des trades
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2StatsResponse"
+
+  /api/v2/users/me:
+    get:
+      tags:
+        - API v2
+      summary: Profil utilisateur (v2)
+      description: Retourne le profil de l'utilisateur connecté
+      operationId: v2UsersMe
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Profil utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2UserResponse"
+    patch:
+      tags:
+        - API v2
+      summary: Mettre à jour le profil (v2)
+      description: Met à jour le profil de l'utilisateur
+      operationId: v2UsersUpdate
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+              properties:
+                user:
+                  type: object
+                  properties:
+                    first_name:
+                      type: string
+                    last_name:
+                      type: string
+                    email:
+                      type: string
+                      format: email
+      responses:
+        "200":
+          description: Profil mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2UserResponse"
+    delete:
+      tags:
+        - API v2
+      summary: Supprimer le compte (v2)
+      description: Supprime le compte utilisateur
+      operationId: v2UsersDestroy
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Compte supprimé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /api/v2/users/me/password:
+    patch:
+      tags:
+        - API v2
+      summary: Changer le mot de passe (v2)
+      description: Change le mot de passe de l'utilisateur
+      operationId: v2UsersUpdatePassword
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - current_password
+                - password
+                - password_confirmation
+              properties:
+                current_password:
+                  type: string
+                password:
+                  type: string
+                password_confirmation:
+                  type: string
+      responses:
+        "200":
+          description: Mot de passe changé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "422":
+          description: Mot de passe actuel incorrect
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v2/events:
+    get:
+      tags:
+        - WebSockets
+      summary: Server-Sent Events (SSE)
+      description: |
+        Endpoint SSE pour recevoir des événements temps réel.
+
+        **Paramètres** :
+        - `channels` : Liste des channels à écouter (séparés par virgule) : `account,trade,bot,payment`
+
+        **Format de réponse** : text/event-stream
+
+        **Événements** :
+        - `trade_created` : Nouveau trade créé
+        - `trade_updated` : Trade mis à jour
+        - `account_balance_updated` : Balance mise à jour
+        - `bot_status_changed` : Statut de bot changé
+        - `payment_created` : Nouveau paiement créé
+      operationId: v2Events
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: channels
+          in: query
+          description: Channels à écouter (séparés par virgule)
+          schema:
+            type: string
+            default: account,trade,bot,payment
+      responses:
+        "200":
+          description: Stream SSE
+          content:
+            text/event-stream:
+              schema:
+                type: string
+# Note: Documentation complète API v2 et GraphQL
+#
+# Pour la documentation complète de :
+# - API GraphQL (queries, mutations, subscriptions)
+# - WebSockets Action Cable
+#
+# Consultez le fichier INTEGRATION_GUIDE.md
+

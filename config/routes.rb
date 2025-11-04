@@ -1,5 +1,15 @@
 Rails.application.routes.draw do
+  if Rails.env.development?
+    mount GraphiQL::Rails::Engine, at: "/graphiql", graphql_path: "/graphql"
+  end
+  post "/graphql", to: "graphql#execute"
+  
+  mount ActionCable.server => "/cable"
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # API Documentation
+  get "api-docs", to: "api_documentation#show", as: :api_documentation
+  get "api-docs/swagger.yaml", to: "swagger_yaml#show", as: :swagger_yaml
 
   # Maintenance page
   get "maintenance", to: "maintenance#show"
@@ -164,6 +174,67 @@ Rails.application.routes.draw do
       get "users", to: "users#index"
       get "users/me", to: "users#me"
       delete "users/:id", to: "users#destroy"
+    end
+
+    namespace :v2 do
+      post "auth/register", to: "auth#register"
+      post "auth/login", to: "auth#login"
+      post "auth/logout", to: "auth#logout"
+      post "auth/refresh", to: "auth#refresh"
+      get "auth/me", to: "auth#me"
+
+      resources :accounts, only: [:index, :show] do
+        member do
+          get :balance
+          get :trades
+          get :projection
+          get :stats
+        end
+      end
+
+      resources :trades, only: [:index, :show] do
+        collection do
+          get :stats
+          get :export
+        end
+      end
+
+      resources :bots, only: [:index, :show]
+      get "my_bots", to: "bots#my_bots"
+      
+      resources :bot_purchases, only: [:index, :show, :create] do
+        member do
+          get :status
+          post :start
+          post :stop
+          post :performance
+        end
+      end
+
+      resources :vps, only: [:index, :show]
+
+      resources :payments, only: [:index, :show, :create] do
+        collection do
+          get :balance_due
+        end
+      end
+
+      resources :credits, only: [:index, :show]
+
+      namespace :stats do
+        get :dashboard
+        get :profits
+        get :trades
+      end
+
+      namespace :users do
+        get :me
+        patch :me, to: "users#update"
+        patch "me/password", to: "users#update_password"
+        delete :me, to: "users#destroy"
+      end
+
+      get "events", to: "events#index"
     end
   end
 end

@@ -2,6 +2,8 @@ class Trade < ApplicationRecord
   belongs_to :mt5_account
   
   after_create :auto_create_vps_for_first_trade
+  after_create :broadcast_trade_created
+  after_update :broadcast_trade_updated
 
   validates :trade_id, presence: true, uniqueness: { scope: :mt5_account_id }
 
@@ -130,6 +132,20 @@ class Trade < ApplicationRecord
     )
     
     Rails.logger.info "VPS créé automatiquement pour #{mt5_account.user.email} - Date renouvellement: #{vps.renewal_date}"
+  end
+
+  def broadcast_trade_created
+    TradeChannel.broadcast_created(self)
+    TrayoSchema.subscriptions.trigger(:trade_created, {}, self)
+  rescue => e
+    Rails.logger.error "Failed to broadcast trade created: #{e.message}"
+  end
+
+  def broadcast_trade_updated
+    TradeChannel.broadcast_updated(self)
+    TrayoSchema.subscriptions.trigger(:trade_updated, {}, self)
+  rescue => e
+    Rails.logger.error "Failed to broadcast trade updated: #{e.message}"
   end
 end
 

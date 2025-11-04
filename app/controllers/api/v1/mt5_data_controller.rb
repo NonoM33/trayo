@@ -105,7 +105,13 @@ module Api
           deposits_synced: sync_params[:deposits]&.count || 0
         }, status: :ok
       rescue ActiveRecord::RecordInvalid => e
-        render json: { error: e.message }, status: :unprocessable_entity
+        Rails.logger.error "Sync error: #{e.message}"
+        Rails.logger.error "Mt5Account: #{mt5_account.inspect}" if defined?(mt5_account)
+        render json: { error: e.message, details: e.record.errors.full_messages }, status: :unprocessable_entity
+      rescue => e
+        Rails.logger.error "Unexpected error in sync: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        render json: { error: "Internal server error: #{e.message}" }, status: :internal_server_error
       end
 
       def sync_complete_history

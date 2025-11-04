@@ -26,6 +26,14 @@ gem "rails-i18n"
 gem "kaminari"
 gem "roo", "~> 2.10.1"
 
+# GraphQL
+gem "graphql"
+gem "graphql-batch"
+
+# Filtres avancés et recherche
+gem "ransack"
+gem "pg_search"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
 
@@ -55,6 +63,17 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # Testing
+  gem "rspec-rails"
+  gem "factory_bot_rails"
+  gem "faker"
+end
+
+group :test do
+  gem "simplecov", require: false
+  gem "shoulda-matchers"
+  gem "database_cleaner-active_record"
 end
 
 group :development do
@@ -62,3 +81,4 @@ group :development do
   gem "web-console"
 end
 
+gem "graphiql-rails", group: :development
