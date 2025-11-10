@@ -11,6 +11,7 @@ class BotPurchase < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
 
   after_create :initialize_tracking
+  after_update :broadcast_status_change
   
   def associated_trades
     return Trade.none unless magic_number
@@ -256,6 +257,15 @@ class BotPurchase < ApplicationRecord
   def generate_magic_number
     base = trading_bot.magic_number_prefix || (trading_bot.id * 1000)
     base + user_id
+  end
+
+  def broadcast_status_change
+    return unless is_running_changed? || status_changed? || saved_change_to_is_running? || saved_change_to_status?
+
+    BotChannel.broadcast_status_change(self)
+    TrayoSchema.subscriptions.trigger(:bot_status_changed, {}, self)
+  rescue => e
+    Rails.logger.error "Failed to broadcast bot status change: #{e.message}"
   end
 end
 

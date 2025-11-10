@@ -82,15 +82,18 @@ if mt5_account.trades.empty?
     { symbol: "EURJPY", profit: 10.75, close_time: 2.days.ago }
   ].each do |trade_data|
     mt5_account.trades.create!(
-      mt5_ticket: rand(1000000..9999999),
+      trade_id: rand(1000000..9999999).to_s,
       symbol: trade_data[:symbol],
       volume: 0.1,
       open_price: 1.1000,
       close_price: 1.1050,
       profit: trade_data[:profit],
+      commission: -0.5,
+      swap: 0.0,
       open_time: trade_data[:close_time] - 2.hours,
       close_time: trade_data[:close_time],
-      trade_type: "buy"
+      trade_type: "buy",
+      status: "closed"
     )
   end
   puts "✓ Sample trades created"
