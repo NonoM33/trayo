@@ -24,7 +24,7 @@ gem "jwt"
 gem "rack-cors"
 gem "rails-i18n"
 gem "kaminari"
-gem "roo", "~> 2.10.1"
+gem "roo", "~> 3.0.0"
 
 # GraphQL
 gem "graphql"
