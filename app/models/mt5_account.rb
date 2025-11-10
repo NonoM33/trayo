@@ -169,6 +169,12 @@ class Mt5Account < ApplicationRecord
 
     AccountChannel.broadcast_update(self)
     TrayoSchema.subscriptions.trigger(:account_balance_updated, {}, self)
+  rescue PG::ConnectionBad, PG::Error, ActiveRecord::ConnectionNotEstablished => e
+    if e.message.include?("socket") || e.message.include?("connection")
+      Rails.logger.debug "ActionCable broadcast skipped (connection issue): #{e.class}"
+    else
+      Rails.logger.error "Failed to broadcast balance updated: #{e.message}"
+    end
   rescue => e
     Rails.logger.error "Failed to broadcast balance updated: #{e.message}"
   end

@@ -264,6 +264,12 @@ class BotPurchase < ApplicationRecord
 
     BotChannel.broadcast_status_change(self)
     TrayoSchema.subscriptions.trigger(:bot_status_changed, {}, self)
+  rescue PG::ConnectionBad, PG::Error, ActiveRecord::ConnectionNotEstablished => e
+    if e.message.include?("socket") || e.message.include?("connection")
+      Rails.logger.debug "ActionCable broadcast skipped (connection issue): #{e.class}"
+    else
+      Rails.logger.error "Failed to broadcast bot status change: #{e.message}"
+    end
   rescue => e
     Rails.logger.error "Failed to broadcast bot status change: #{e.message}"
   end

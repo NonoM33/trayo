@@ -114,6 +114,12 @@ class Payment < ApplicationRecord
   def broadcast_payment_created
     PaymentChannel.broadcast_created(self)
     TrayoSchema.subscriptions.trigger(:payment_created, {}, self)
+  rescue PG::ConnectionBad, PG::Error, ActiveRecord::ConnectionNotEstablished => e
+    if e.message.include?("socket") || e.message.include?("connection")
+      Rails.logger.debug "ActionCable broadcast skipped (connection issue): #{e.class}"
+    else
+      Rails.logger.error "Failed to broadcast payment created: #{e.message}"
+    end
   rescue => e
     Rails.logger.error "Failed to broadcast payment created: #{e.message}"
   end

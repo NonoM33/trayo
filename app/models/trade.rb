@@ -137,6 +137,12 @@ class Trade < ApplicationRecord
   def broadcast_trade_created
     TradeChannel.broadcast_created(self)
     TrayoSchema.subscriptions.trigger(:trade_created, {}, self)
+  rescue PG::ConnectionBad, PG::Error, ActiveRecord::ConnectionNotEstablished => e
+    if e.message.include?("socket") || e.message.include?("connection")
+      Rails.logger.debug "ActionCable broadcast skipped (connection issue): #{e.class}"
+    else
+      Rails.logger.error "Failed to broadcast trade created: #{e.message}"
+    end
   rescue => e
     Rails.logger.error "Failed to broadcast trade created: #{e.message}"
   end
@@ -144,6 +150,12 @@ class Trade < ApplicationRecord
   def broadcast_trade_updated
     TradeChannel.broadcast_updated(self)
     TrayoSchema.subscriptions.trigger(:trade_updated, {}, self)
+  rescue PG::ConnectionBad, PG::Error, ActiveRecord::ConnectionNotEstablished => e
+    if e.message.include?("socket") || e.message.include?("connection")
+      Rails.logger.debug "ActionCable broadcast skipped (connection issue): #{e.class}"
+    else
+      Rails.logger.error "Failed to broadcast trade updated: #{e.message}"
+    end
   rescue => e
     Rails.logger.error "Failed to broadcast trade updated: #{e.message}"
   end
