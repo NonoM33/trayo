@@ -2,6 +2,8 @@ module Admin
   class SessionsController < ApplicationController
     layout false
     
+    before_action :redirect_if_authenticated, only: [:new]
+
     def new
     end
 
@@ -23,6 +25,12 @@ module Admin
     def destroy
       session[:user_id] = nil
       redirect_to admin_login_path, notice: "Logged out successfully"
+    end
+
+    private
+
+    def redirect_if_authenticated
+      redirect_to admin_clients_path if session[:user_id].present?
     end
   end
 end
