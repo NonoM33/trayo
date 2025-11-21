@@ -148,6 +148,17 @@ Rails.application.routes.draw do
     patch "maintenance", to: "maintenance#update"
     patch "maintenance/toggle", to: "maintenance#toggle"
     
+    # Database backups
+    resources :backups, only: [:index, :show, :create, :destroy] do
+      member do
+        post :restore
+        get :download
+      end
+      collection do
+        post :upload
+      end
+    end
+    
     # Test page for icons
       get "test_icons", to: "dashboard#test_icons"
       get "test_dropdowns", to: "dashboard#test_dropdowns"

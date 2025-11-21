@@ -25,8 +25,8 @@ module Admin
       @client = User.find(params[:id])
       @client.reload
       @mt5_accounts = @client.mt5_accounts.reload.includes(:trades, :withdrawals)
-      @payments = @client.payments.recent
-      @credits = @client.credits.recent
+      @payments = @client.payments.order(created_at: :asc)
+      @credits = @client.credits.order(created_at: :asc)
       
       bot_purchases_count = @client.bot_purchases.count
       Rails.logger.debug "Client show - Bot purchases count: #{bot_purchases_count}"
