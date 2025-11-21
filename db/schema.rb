@@ -118,6 +118,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_27_143508) do
     t.index ["user_id"], name: "index_credits_on_user_id"
   end
 
+  create_table "database_backups", force: :cascade do |t|
+    t.string "filename", null: false
+    t.bigint "file_size"
+    t.string "status", default: "pending", null: false
+    t.text "error_message"
+    t.text "notes"
+    t.datetime "backup_date", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["backup_date"], name: "index_database_backups_on_backup_date"
+    t.index ["created_at"], name: "index_database_backups_on_created_at"
+    t.index ["status"], name: "index_database_backups_on_status"
+  end
+
   create_table "deposits", force: :cascade do |t|
     t.bigint "mt5_account_id", null: false
     t.decimal "amount", precision: 15, scale: 2, null: false
