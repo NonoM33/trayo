@@ -114,6 +114,12 @@
               <span>Maintenance</span>
             <% end %>
           </li>
+          <li class="sidebar-menu-item">
+            <%= link_to admin_backups_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/backups') ? 'active' : ''}" do %>
+              <i class="fa-icon fa-md fa-database"></i>
+              <span>Backups</span>
+            <% end %>
+          </li>
         <% else %>
           <% Rails.logger.info "=== SIDEBAR DEBUG: Rendering non-admin sidebar ===" %>
           <li class="sidebar-menu-item">

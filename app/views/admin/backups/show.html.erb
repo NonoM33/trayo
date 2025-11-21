@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Backup Details - Admin Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+  <style>
+    .backup-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .detail-card {
+      background: hsl(var(--muted));
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+    }
+    
+    .detail-label {
+      font-size: 0.875rem;
+      color: hsl(var(--muted-foreground));
+      margin-bottom: 0.5rem;
+    }
+    
+    .detail-value {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+    
+    .backup-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .status-completed {
+      background: hsl(142, 76%, 36%);
+      color: white;
+    }
+    
+    .status-pending {
+      background: hsl(45, 93%, 47%);
+      color: white;
+    }
+    
+    .status-failed {
+      background: hsl(0, 84%, 60%);
+      color: white;
+    }
+    
+    .status-restoring {
+      background: hsl(217, 91%, 60%);
+      color: white;
+    }
+    
+    .error-box {
+      background: hsl(0, 84%, 60%);
+      color: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .restore-warning {
+      background: hsl(45, 93%, 47%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .restore-warning h3 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <% @page_title = "Détails du Backup" %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <% if flash[:notice] %>
+          <div class="notice"><%= flash[:notice] %></div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert"><%= flash[:alert] %></div>
+        <% end %>
+
+        <div style="margin-bottom: 1.5rem;">
+          <%= link_to "← Retour à la liste", admin_backups_path, class: "btn btn-outline" %>
+        </div>
+
+        <div class="card">
+          <h2>Détails du Backup</h2>
+          
+          <div class="backup-details">
+            <div class="detail-card">
+              <div class="detail-label">Fichier</div>
+              <div class="detail-value" style="font-family: monospace; font-size: 0.875rem; word-break: break-all;"><%= @backup.filename %></div>
+            </div>
+            
+            <div class="detail-card">
+              <div class="detail-label">Date de création</div>
+              <div class="detail-value"><%= @backup.created_at.strftime("%d/%m/%Y à %H:%M:%S") %></div>
+            </div>
+            
+            <div class="detail-card">
+              <div class="detail-label">Date du backup</div>
+              <div class="detail-value"><%= @backup.backup_date.strftime("%d/%m/%Y à %H:%M:%S") %></div>
+            </div>
+            
+            <div class="detail-card">
+              <div class="detail-label">Taille</div>
+              <div class="detail-value"><%= @backup.file_size_human %></div>
+            </div>
+            
+            <div class="detail-card">
+              <div class="detail-label">Statut</div>
+              <div class="detail-value">
+                <span class="backup-status status-<%= @backup.status %>">
+                  <%= @backup.status.humanize %>
+                </span>
+              </div>
+            </div>
+            
+            <div class="detail-card">
+              <div class="detail-label">Fichier existe</div>
+              <div class="detail-value">
+                <% if @backup.exists? %>
+                  <span style="color: hsl(142, 76%, 36%);">✓ Oui</span>
+                <% else %>
+                  <span style="color: hsl(0, 84%, 60%);">✗ Non</span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <% if @backup.notes.present? %>
+            <div class="detail-card" style="margin-top: 1rem;">
+              <div class="detail-label">Notes</div>
+              <div class="detail-value" style="font-weight: normal; white-space: pre-wrap;"><%= @backup.notes %></div>
+            </div>
+          <% end %>
+
+          <% if @backup.error_message.present? %>
+            <div class="error-box">
+              <strong>Erreur:</strong><br>
+              <%= simple_format(@backup.error_message) %>
+            </div>
+          <% end %>
+
+          <% if @backup.can_restore? %>
+            <div class="restore-warning">
+              <h3>⚠️ Attention - Restauration du Backup</h3>
+              <p>La restauration de ce backup va <strong>remplacer toutes les données actuelles</strong> de la base de données par celles contenues dans ce backup.</p>
+              <p><strong>Date du backup:</strong> <%= @backup.backup_date.strftime("%d/%m/%Y à %H:%M:%S") %></p>
+              <p style="margin-bottom: 0;"><strong>Cette opération est irréversible.</strong> Assurez-vous d'avoir créé un backup récent avant de continuer.</p>
+            </div>
+
+            <%= form_with url: restore_admin_backup_path(@backup), method: :post, local: true do |f| %>
+              <div style="margin-bottom: 1rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                  <%= check_box_tag :confirm, 'yes', false, required: true %>
+                  <span>Je confirme vouloir restaurer ce backup et remplacer toutes les données actuelles</span>
+                </label>
+              </div>
+              <%= f.submit "Restaurer ce Backup", class: "btn btn-danger", data: { turbo_confirm: "Dernière confirmation: Restaurer ce backup et remplacer toutes les données ?" } %>
+            <% end %>
+          <% end %>
+
+          <div class="action-buttons" style="margin-top: 2rem;">
+            <% if @backup.exists? %>
+              <%= link_to "Télécharger", download_admin_backup_path(@backup), class: "btn btn-primary" %>
+            <% end %>
+            <%= button_to "Supprimer", admin_backup_path(@backup), method: :delete, data: { turbo_confirm: "Supprimer ce backup ?" }, class: "btn btn-danger" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

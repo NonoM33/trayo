@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Backups - Admin Trayo</title>
+  <%= stylesheet_link_tag "admin" %>
+  <style>
+    .backup-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .backup-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .status-completed {
+      background: hsl(142, 76%, 36%);
+      color: white;
+    }
+    
+    .status-pending {
+      background: hsl(45, 93%, 47%);
+      color: white;
+    }
+    
+    .status-failed {
+      background: hsl(0, 84%, 60%);
+      color: white;
+    }
+    
+    .status-restoring {
+      background: hsl(217, 91%, 60%);
+      color: white;
+    }
+    
+    .upload-section {
+      background: hsl(var(--muted));
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .upload-section h3 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .form-group input[type="file"],
+    .form-group textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid hsl(var(--border));
+      border-radius: 0.375rem;
+      background: hsl(var(--background));
+      color: hsl(var(--foreground));
+    }
+    
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    
+    .info-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: hsl(var(--muted));
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+  <% @page_title = 'Gestion des Backups' %>
+  
+  <div class="app-layout">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <div class="main-content">
+      <%= render 'admin/shared/navbar' %>
+      
+      <div class="container">
+        <% if flash[:notice] %>
+          <div class="notice"><%= flash[:notice] %></div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert"><%= flash[:alert] %></div>
+        <% end %>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Gestion des Backups</h2>
+            <div class="card-header-actions">
+              <%= form_with url: admin_backups_path, method: :post, local: true, class: "inline-form" do |f| %>
+                <%= f.text_area :notes, placeholder: "Notes (optionnel)", rows: 2, style: "width: 200px; margin-right: 0.5rem;" %>
+                <%= f.submit "Créer un Backup", class: "btn btn-primary", data: { turbo_confirm: "Créer un nouveau backup de la base de données ?" } %>
+              <% end %>
+            </div>
+          </div>
+
+          <div class="upload-section">
+            <h3>Téléverser un Backup</h3>
+            <%= form_with url: upload_admin_backups_path, method: :post, local: true, multipart: true do |f| %>
+              <div class="form-group">
+                <%= f.label :file, "Fichier de backup (.sql)" %>
+                <%= f.file_field :file, accept: ".sql", required: true %>
+              </div>
+              <div class="form-group">
+                <%= f.label :notes, "Notes (optionnel)" %>
+                <%= f.text_area :notes, rows: 2 %>
+              </div>
+              <%= f.submit "Téléverser", class: "btn btn-primary" %>
+            <% end %>
+          </div>
+          
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fichier</th>
+                  <th>Date de création</th>
+                  <th>Date du backup</th>
+                  <th>Taille</th>
+                  <th>Statut</th>
+                  <th>Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if @backups.any? %>
+                  <% @backups.each do |backup| %>
+                    <tr>
+                      <td style="font-family: monospace; font-size: 0.875rem;"><%= backup.filename %></td>
+                      <td><%= backup.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+                      <td><%= backup.backup_date.strftime("%d/%m/%Y %H:%M") %></td>
+                      <td><%= backup.file_size_human %></td>
+                      <td>
+                        <span class="backup-status status-<%= backup.status %>">
+                          <%= backup.status.humanize %>
+                        </span>
+                        <% if backup.error_message.present? %>
+                          <div style="font-size: 0.75rem; color: hsl(var(--destructive)); margin-top: 0.25rem;">
+                            <%= truncate(backup.error_message, length: 50) %>
+                          </div>
+                        <% end %>
+                      </td>
+                      <td style="font-size: 0.875rem;"><%= truncate(backup.notes, length: 30) if backup.notes.present? %></td>
+                      <td>
+                        <div class="backup-actions">
+                          <% if backup.can_restore? %>
+                            <%= link_to "Restaurer", admin_backup_path(backup), class: "btn btn-outline btn-sm" %>
+                          <% end %>
+                          <% if backup.exists? %>
+                            <%= link_to "Télécharger", download_admin_backup_path(backup), class: "btn btn-outline btn-sm" %>
+                          <% end %>
+                          <%= link_to "Voir", admin_backup_path(backup), class: "btn btn-outline btn-sm" %>
+                          <%= button_to "Supprimer", admin_backup_path(backup), method: :delete, data: { turbo_confirm: "Supprimer ce backup ?" }, class: "btn btn-danger btn-sm" %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                <% else %>
+                  <tr>
+                    <td colspan="7" style="text-align: center; padding: 2rem; color: hsl(var(--muted-foreground));">
+                      Aucun backup disponible. Créez votre premier backup maintenant.
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+
+          <% if @backups.respond_to?(:current_page) %>
+            <div style="margin-top: 1.5rem; display: flex; justify-content: center;">
+              <%= paginate @backups %>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="card" style="margin-top: 2rem;">
+          <h3>Informations importantes</h3>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div class="info-badge">
+              <i class="fa-icon fa-info-circle"></i>
+              <span>Les backups contiennent l'intégralité de l'historique de la base de données</span>
+            </div>
+            <div class="info-badge">
+              <i class="fa-icon fa-clock"></i>
+              <span>Les backups sont automatiquement supprimés après 30 jours</span>
+            </div>
+            <div class="info-badge">
+              <i class="fa-icon fa-exclamation-triangle"></i>
+              <span>La restauration d'un backup remplace toutes les données actuelles</span>
+            </div>
+            <div class="info-badge">
+              <i class="fa-icon fa-calendar"></i>
+              <span>Un backup journalier automatique est créé chaque jour à minuit</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const scrollKey = 'backups_scroll_position';
+      
+      window.addEventListener('beforeunload', function() {
+        sessionStorage.setItem(scrollKey, window.scrollY.toString());
+      });
+      
+      window.addEventListener('load', function() {
+        const savedScroll = sessionStorage.getItem(scrollKey);
+        if (savedScroll) {
+          setTimeout(function() {
+            window.scrollTo(0, parseInt(savedScroll, 10));
+            sessionStorage.removeItem(scrollKey);
+          }, 100);
+        }
+      });
+      
+      document.addEventListener('turbo:load', function() {
+        const savedScroll = sessionStorage.getItem(scrollKey);
+        if (savedScroll) {
+          setTimeout(function() {
+            window.scrollTo(0, parseInt(savedScroll, 10));
+            sessionStorage.removeItem(scrollKey);
+          }, 100);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+
