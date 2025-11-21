@@ -26,6 +26,9 @@
 # Ignore storage (uploaded files in development and any SQLite databases).
 /storage/*
 !/storage/.keep
+!/storage/backups/
+!/storage/backups/.gitkeep
+/storage/backups/*.sql
 /tmp/storage/*
 !/tmp/storage/
 !/tmp/storage/.keep

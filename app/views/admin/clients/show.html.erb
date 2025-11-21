@@ -654,140 +654,102 @@
     <% end %>
     
     <% if current_user.is_admin? && @mt5_accounts.any? %>
-      <div class="card">
-        <div class="card-header">
-          <h2>Historique des Retraits</h2>
-          <button onclick="showAddWithdrawalModal()" class="btn btn-outline btn-sm">
-            <i class="fa-icon fa-md fa-plus"></i> Ajouter un retrait
-          </button>
-        </div>
-        
-        <% has_withdrawals = false %>
-        <% @mt5_accounts.each do |account| %>
-          <% if account.withdrawals.any? %>
-            <% has_withdrawals = true %>
-            <h4><%= account.account_name %> (<%= account.mt5_id %>)</h4>
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Montant</th>
-                    <th>Notes</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% account.withdrawals.order(withdrawal_date: :desc).each do |withdrawal| %>
-                    <tr>
-                      <td><%= withdrawal.withdrawal_date.strftime("%d/%m/%Y") %></td>
-                      <td class="negative"><%= number_to_currency(withdrawal.amount, unit: "€", format: "%n %u") %></td>
-                      <td><%= withdrawal.notes.present? ? withdrawal.notes : "-" %></td>
-                      <td>
-                        <div class="action-buttons">
-                          <%= button_to "Supprimer", admin_withdrawal_path(withdrawal), 
-                                method: :delete,
-                                data: { turbo_confirm: "Supprimer ce retrait ?" },
-                                class: "btn btn-danger btn-sm" %>
-                        </div>
-                      </td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
-          <% end %>
-        <% end %>
-        
-        <% unless has_withdrawals %>
-          <div class="empty-state">
-            <div class="empty-state-icon">
-              <i class="fa-icon fa-lg fa-money-bill-wave"></i>
-            </div>
-            <h3>Aucun retrait enregistré</h3>
-            <p>Aucun retrait n'a été détecté pour ce compte. Les retraits peuvent être :</p>
-            <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
-              <li>Détectés automatiquement lors de la synchronisation MT5</li>
-              <li>Importés depuis l'historique MT5 complet</li>
-              <li>Ajoutés manuellement par l'administrateur</li>
-            </ul>
-            <div style="margin-top: 1rem;">
-              <button onclick="showAddWithdrawalModal()" class="btn btn-primary">
-                <i class="fa-icon fa-md fa-plus"></i> Ajouter un retrait manuellement
-              </button>
-            </div>
+      <% has_withdrawals = @mt5_accounts.any? { |account| account.withdrawals.any? } %>
+      <% if has_withdrawals %>
+        <div class="card">
+          <div class="card-header">
+            <h2>Historique des Retraits</h2>
+            <button onclick="showAddWithdrawalModal()" class="btn btn-outline btn-sm">
+              <i class="fa-icon fa-md fa-plus"></i> Ajouter un retrait
+            </button>
           </div>
-        <% end %>
-      </div>
+          
+          <% @mt5_accounts.each do |account| %>
+            <% if account.withdrawals.any? %>
+              <h4><%= account.account_name %> (<%= account.mt5_id %>)</h4>
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Montant</th>
+                      <th>Notes</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% account.withdrawals.order(withdrawal_date: :desc).each do |withdrawal| %>
+                      <tr>
+                        <td><%= withdrawal.withdrawal_date.strftime("%d/%m/%Y") %></td>
+                        <td class="negative"><%= number_to_currency(withdrawal.amount, unit: "€", format: "%n %u") %></td>
+                        <td><%= withdrawal.notes.present? ? withdrawal.notes : "-" %></td>
+                        <td>
+                          <div class="action-buttons">
+                            <%= button_to "Supprimer", admin_withdrawal_path(withdrawal), 
+                                  method: :delete,
+                                  data: { turbo_confirm: "Supprimer ce retrait ?" },
+                                  class: "btn btn-danger btn-sm" %>
+                          </div>
+                        </td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
     <% end %>
 
     <!-- Historique des Dépôts -->
     <% if current_user.is_admin? && @mt5_accounts.any? %>
-      <div class="card">
-        <div class="card-header">
-          <h2>Historique des Dépôts</h2>
-          <button onclick="showAddDepositModal()" class="btn btn-outline btn-sm">
-            <i class="fa-icon fa-md fa-plus"></i> Ajouter un dépôt
-          </button>
-        </div>
-        
-        <% has_deposits = false %>
-        <% @mt5_accounts.each do |account| %>
-          <% if account.deposits.any? %>
-            <% has_deposits = true %>
-            <h4><%= account.account_name %> (<%= account.mt5_id %>)</h4>
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Montant</th>
-                    <th>Notes</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% account.deposits.order(deposit_date: :desc).each do |deposit| %>
-                    <tr>
-                      <td><%= deposit.deposit_date.strftime("%d/%m/%Y") %></td>
-                      <td class="positive"><%= number_to_currency(deposit.amount, unit: "€", format: "%n %u") %></td>
-                      <td><%= deposit.notes.present? ? deposit.notes : "-" %></td>
-                      <td>
-                        <div class="action-buttons">
-                          <%= button_to "Supprimer", admin_deposit_path(deposit), 
-                                method: :delete,
-                                data: { turbo_confirm: "Supprimer ce dépôt ?" },
-                                class: "btn btn-danger btn-sm" %>
-                        </div>
-                      </td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
-          <% end %>
-        <% end %>
-        
-        <% unless has_deposits %>
-          <div class="empty-state">
-            <div class="empty-state-icon">
-              <i class="fa-icon fa-lg fa-plus-circle"></i>
-            </div>
-            <h3>Aucun dépôt enregistré</h3>
-            <p>Aucun dépôt n'a été détecté pour ce compte. Les dépôts peuvent être :</p>
-            <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
-              <li>Détectés automatiquement lors de la synchronisation MT5</li>
-              <li>Importés depuis l'historique MT5 complet</li>
-              <li>Ajoutés manuellement par l'administrateur</li>
-            </ul>
-            <div style="margin-top: 1rem;">
-              <button onclick="showAddDepositModal()" class="btn btn-primary">
-                <i class="fa-icon fa-md fa-plus"></i> Ajouter un dépôt manuellement
-              </button>
-            </div>
+      <% has_deposits = @mt5_accounts.any? { |account| account.deposits.any? } %>
+      <% if has_deposits %>
+        <div class="card">
+          <div class="card-header">
+            <h2>Historique des Dépôts</h2>
+            <button onclick="showAddDepositModal()" class="btn btn-outline btn-sm">
+              <i class="fa-icon fa-md fa-plus"></i> Ajouter un dépôt
+            </button>
           </div>
-        <% end %>
-      </div>
+          
+          <% @mt5_accounts.each do |account| %>
+            <% if account.deposits.any? %>
+              <h4><%= account.account_name %> (<%= account.mt5_id %>)</h4>
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Montant</th>
+                      <th>Notes</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% account.deposits.order(deposit_date: :desc).each do |deposit| %>
+                      <tr>
+                        <td><%= deposit.deposit_date.strftime("%d/%m/%Y") %></td>
+                        <td class="positive"><%= number_to_currency(deposit.amount, unit: "€", format: "%n %u") %></td>
+                        <td><%= deposit.notes.present? ? deposit.notes : "-" %></td>
+                        <td>
+                          <div class="action-buttons">
+                            <%= button_to "Supprimer", admin_deposit_path(deposit), 
+                                  method: :delete,
+                                  data: { turbo_confirm: "Supprimer ce dépôt ?" },
+                                  class: "btn btn-danger btn-sm" %>
+                          </div>
+                        </td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
     <% end %>
 
     <!-- Formulaire de modification MT5 - En dehors du tableau pour utiliser toute la largeur -->
@@ -1576,45 +1538,39 @@
             window.location.href = '<%= new_admin_deposit_path %>';
           }
         </script>
-      <% else %>
-        <p style="color: #999;">Aucun paiement pour le moment</p>
       <% end %>
     </div>
     <% end %>
 
-    <% if current_user.is_admin? %>
+    <% if current_user.is_admin? && @credits.any? %>
       <div class="card">
         <h2>Historique des Crédits</h2>
-        <% if @credits.any? %>
-          <table>
-            <thead>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Montant</th>
+              <th>Raison</th>
+              <% if current_user.is_admin? %>
+                <th>Actions</th>
+              <% end %>
+            </tr>
+          </thead>
+          <tbody>
+            <% @credits.each do |credit| %>
               <tr>
-                <th>Date</th>
-                <th>Montant</th>
-                <th>Raison</th>
+                <td><%= credit.created_at.strftime("%d/%m/%Y") %></td>
+                <td><%= number_to_currency(credit.amount, unit: "€", format: "%n %u") %></td>
+                <td><%= credit.reason %></td>
                 <% if current_user.is_admin? %>
-                  <th>Actions</th>
+                  <td>
+                    <%= button_to "Supprimer", admin_credit_path(credit), method: :delete, data: { turbo_confirm: "Êtes-vous sûr ?" }, class: "btn btn-danger" %>
+                  </td>
                 <% end %>
               </tr>
-            </thead>
-            <tbody>
-              <% @credits.each do |credit| %>
-                <tr>
-                  <td><%= credit.created_at.strftime("%d/%m/%Y") %></td>
-                  <td><%= number_to_currency(credit.amount, unit: "€", format: "%n %u") %></td>
-                  <td><%= credit.reason %></td>
-                  <% if current_user.is_admin? %>
-                    <td>
-                      <%= button_to "Supprimer", admin_credit_path(credit), method: :delete, data: { turbo_confirm: "Êtes-vous sûr ?" }, class: "btn btn-danger" %>
-                    </td>
-                  <% end %>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        <% else %>
-          <p style="color: #999;">Aucun crédit pour le moment</p>
-        <% end %>
+            <% end %>
+          </tbody>
+        </table>
       </div>
     <% end %>
     </div>
