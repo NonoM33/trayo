@@ -58,9 +58,10 @@ module Trayo
     config.generators.system_tests = nil
     
     # Maintenance middleware only in development/test
-    unless Rails.env.production?
-      require Rails.root.join('app', 'middleware', 'maintenance_middleware')
-      config.middleware.insert_before ActionDispatch::Static, MaintenanceMiddleware
-    end
+    # Temporarily disabled to debug server issues
+    # unless Rails.env.production?
+    #   require Rails.root.join('app', 'middleware', 'maintenance_middleware')
+    #   config.middleware.insert_before ActionDispatch::Static, MaintenanceMiddleware
+    # end
   end
 end

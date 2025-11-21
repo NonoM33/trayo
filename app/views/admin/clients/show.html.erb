@@ -257,14 +257,6 @@
         <% end %>
         <% if current_user.is_admin? %>
           <div class="info-item">
-            <div class="info-label">Commission Due</div>
-            <div class="info-value <%= @client.total_commission_due < 0 ? 'negative' : 'positive' %>">
-              <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %>
-            </div>
-          </div>
-        <% end %>
-        <% if current_user.is_admin? %>
-          <div class="info-item">
             <div class="info-label">Crédits Appliqués</div>
             <div class="info-value positive"><%= number_to_currency(@client.total_credits, unit: "€", format: "%n %u") %></div>
           </div>
@@ -1286,8 +1278,7 @@
               <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
             </div>
             <div style="font-size: 12px; color: #856404; margin-top: 5px;">
-              Commission : <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %> | 
-              Crédits : -<%= number_to_currency(@client.total_credits, unit: "€", format: "%n %u") %>
+              Crédits appliqués : -<%= number_to_currency(@client.total_credits, unit: "€", format: "%n %u") %>
             </div>
           </div>
         <% elsif @client.balance_due < 0 %>
