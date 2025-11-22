@@ -1409,8 +1409,9 @@
             amountInput.value = commission.toFixed(2);
             helpText.innerHTML = `<strong>Commissionnable:</strong> ${currentBalance.toFixed(2)}€ (balance) - ${watermark.toFixed(2)}€ (WM) = ${commissionableAmount.toFixed(2)}€<br><strong>Commission (${commissionRateRaw.toFixed(1)}%):</strong> ${commission.toFixed(2)}€`;
           } else {
-            amountInput.value = <%= @client.balance_due || 0 %>;
-            helpText.textContent = 'Pré-rempli avec le solde actuel dû';
+            const balanceDue = <%= @client.balance_due || 0 %>;
+            amountInput.value = balanceDue > 0 ? balanceDue.toFixed(2) : '';
+            helpText.textContent = balanceDue > 0 ? 'Pré-rempli avec le solde actuel dû' : (balanceDue < 0 ? 'Le client a un solde créditeur' : 'Aucun solde dû');
           }
         }
         </script>
@@ -1465,63 +1466,96 @@
         <p style="color: #856404; margin: 5px 0 0 0; font-size: 13px;">Vous pouvez maintenant supprimer des paiements. Cliquez à nouveau sur le verrou pour désactiver ce mode.</p>
       </div>
       <% if @payments.any? %>
-        <table>
+        <table style="width: 100%; border-collapse: collapse;">
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Montant</th>
-              <th>Méthode</th>
-              <th>Référence</th>
-              <th>Watermarks à Validation</th>
-              <th>Statut</th>
-              <th>Notes</th>
+              <th style="text-align: left; padding: 12px; font-weight: 600;">Date</th>
+              <th style="text-align: left; padding: 12px; font-weight: 600;">Montant</th>
+              <th style="text-align: left; padding: 12px; font-weight: 600;">Méthode</th>
+              <th style="text-align: left; padding: 12px; font-weight: 600;">Référence</th>
+              <th style="text-align: left; padding: 12px; font-weight: 600; min-width: 280px;">Détails Watermark</th>
+              <th style="text-align: left; padding: 12px; font-weight: 600;">Statut</th>
+              <th style="text-align: left; padding: 12px; font-weight: 600;">Notes</th>
               <% if current_user.is_admin? %>
-                <th>Actions</th>
+                <th style="text-align: left; padding: 12px; font-weight: 600;">Actions</th>
               <% end %>
             </tr>
           </thead>
           <tbody>
             <% @payments.each do |payment| %>
-              <tr style="cursor: default;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
-                <td style="cursor: pointer;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= payment.payment_date.strftime("%Y-%m-%d") %></td>
-                <td style="cursor: pointer;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= number_to_currency(payment.amount, unit: "€", format: "%n %u") %></td>
-                <td style="cursor: pointer;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= payment.payment_method_label %></td>
-                <td style="cursor: pointer;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= payment.reference %></td>
-                <td style="cursor: pointer;" onclick="window.location='<%= admin_payment_path(payment) %>'">
+              <tr style="cursor: default; border-bottom: 1px solid var(--border-color);" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
+                <td style="cursor: pointer; padding: 12px; vertical-align: top;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= payment.payment_date.strftime("%Y-%m-%d") %></td>
+                <td style="cursor: pointer; padding: 12px; vertical-align: top; font-weight: 600;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= number_to_currency(payment.amount, unit: "€", format: "%n %u") %></td>
+                <td style="cursor: pointer; padding: 12px; vertical-align: top;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= payment.payment_method_label %></td>
+                <td style="cursor: pointer; padding: 12px; vertical-align: top;" onclick="window.location='<%= admin_payment_path(payment) %>'">
+                  <%= payment.reference.presence || content_tag(:span, "-", style: "color: var(--text-muted); font-style: italic;") %>
+                </td>
+                <td style="cursor: pointer; min-width: 280px; max-width: 350px; padding: 12px; vertical-align: top;" onclick="window.location='<%= admin_payment_path(payment) %>'">
                   <% if payment.status == "validated" && payment.watermark_data.any? %>
                     <% payment.watermark_data.each do |mt5_id, data| %>
-                      <div style="font-size: 12px; margin-bottom: 3px;">
-                        <strong><%= data["account_name"] %></strong> (<%= mt5_id %>)<br>
-                        WM : <%= number_to_currency(data["watermark"], unit: "€", format: "%n %u") %> <i class='fa-icon fa-md fa-arrow-right'></i> <%= number_to_currency(data["balance"], unit: "€", format: "%n %u") %><br>
-                        <span style="color: #4CAF50;">Commissionnable : <%= number_to_currency(data["commissionable"], unit: "€", format: "%n %u") %></span>
+                      <div style="font-size: 13px; margin-bottom: 8px; padding: 8px; background: rgba(34, 197, 94, 0.1); border-radius: 4px; border-left: 3px solid #4CAF50;">
+                        <div style="font-weight: 600; margin-bottom: 6px; color: var(--text-primary);">
+                          <%= data["account_name"] %> <span style="color: var(--text-muted); font-weight: 400;">(<%= mt5_id %>)</span>
+                        </div>
+                        <div style="margin-bottom: 4px; line-height: 1.6;">
+                          <span style="color: var(--text-muted);">WM:</span> 
+                          <span style="font-weight: 500;"><%= number_to_currency(data["watermark"], unit: "€", format: "%n %u") %></span>
+                          <i class='fa-icon fa-sm fa-arrow-right' style="margin: 0 4px; color: var(--text-muted);"></i>
+                          <span style="font-weight: 500;"><%= number_to_currency(data["balance"], unit: "€", format: "%n %u") %></span>
+                        </div>
+                        <div style="color: #4CAF50; font-weight: 600;">
+                          Commissionnable: <%= number_to_currency(data["commissionable"], unit: "€", format: "%n %u") %>
+                        </div>
                       </div>
                     <% end %>
                   <% elsif payment.status == "validated" %>
-                    <span style="color: #999; font-size: 12px;">Pas de données</span>
+                    <span style="color: var(--text-muted); font-size: 13px; font-style: italic;">Pas de données</span>
                   <% else %>
-                    <span style="color: #999; font-size: 12px;">-</span>
+                    <span style="color: var(--text-muted); font-size: 13px;">-</span>
                   <% end %>
                 </td>
-                <td style="cursor: pointer;" onclick="window.location='<%= admin_payment_path(payment) %>'">
-                  <span class="status-badge status-<%= payment.status %>">
-                    <%= payment.status.upcase %>
+                <td style="cursor: pointer; padding: 12px; vertical-align: top;" onclick="window.location='<%= admin_payment_path(payment) %>'">
+                  <span class="status-badge status-<%= payment.status %>" style="font-size: 12px; font-weight: 700; color: white !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); letter-spacing: 0.5px;">
+                    <% case payment.status %>
+                    <% when "pending" %>
+                      EN ATTENTE
+                    <% when "validated" %>
+                      VALIDÉ
+                    <% when "rejected" %>
+                      REJETÉ
+                    <% else %>
+                      <%= payment.status.upcase %>
+                    <% end %>
                   </span>
                 </td>
-                <td style="cursor: pointer;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= payment.notes %></td>
+                <td style="cursor: pointer; max-width: 200px; padding: 12px; vertical-align: top;" onclick="window.location='<%= admin_payment_path(payment) %>'">
+                  <%= payment.notes.presence || content_tag(:span, "-", style: "color: var(--text-muted); font-style: italic;") %>
+                </td>
                 <% if current_user.is_admin? %>
-                  <td onclick="event.stopPropagation();">
-                    <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                      <%= link_to admin_payment_path(payment), class: "btn btn-sm", style: "padding: 4px 8px; font-size: 11px;", title: "Voir les détails" do %>
+                  <td style="padding: 12px; vertical-align: top;" onclick="event.stopPropagation();">
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                      <%= link_to admin_payment_path(payment), class: "btn btn-sm", style: "padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;", title: "Voir les détails" do %>
                         <i class="fa-icon fa-sm fa-eye"></i>
+                        <span>Voir</span>
                       <% end %>
-                      <a href="<%= download_pdf_admin_payment_path(payment) %>" target="_blank" class="btn btn-sm" style="padding: 4px 8px; font-size: 11px;" title="Télécharger PDF">
+                      <a href="<%= download_pdf_admin_payment_path(payment) %>" target="_blank" class="btn btn-sm" style="padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;" title="Télécharger PDF">
                         <i class="fa-icon fa-sm fa-download"></i>
+                        <span>PDF</span>
                       </a>
                       <% if payment.status == "pending" %>
-                        <%= button_to "✓", admin_payment_path(payment, action_type: "validate"), method: :patch, class: "btn btn-sm", style: "padding: 4px 8px; font-size: 11px;", title: "Valider", onclick: "event.stopPropagation();" %>
-                        <%= button_to "✗", admin_payment_path(payment, action_type: "reject"), method: :patch, class: "btn btn-danger btn-sm", style: "padding: 4px 8px; font-size: 11px;", title: "Rejeter", onclick: "event.stopPropagation();" %>
+                        <%= button_to admin_payment_path(payment, action_type: "validate"), method: :patch, class: "btn btn-sm", style: "padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; background: #4CAF50; color: white; border-color: #4CAF50;", title: "Valider", onclick: "event.stopPropagation();" do %>
+                          <i class="fa-icon fa-sm fa-check"></i>
+                          <span>Valider</span>
+                        <% end %>
+                        <%= button_to admin_payment_path(payment, action_type: "reject"), method: :patch, class: "btn btn-danger btn-sm", style: "padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;", title: "Rejeter", onclick: "event.stopPropagation();" do %>
+                          <i class="fa-icon fa-sm fa-times"></i>
+                          <span>Rejeter</span>
+                        <% end %>
                       <% end %>
-                      <%= button_to "🗑️", admin_payment_path(payment), method: :delete, data: { turbo_confirm: "Supprimer ce paiement ?" }, class: "btn btn-danger btn-sm delete-btn", style: "display: none; padding: 4px 8px; font-size: 11px;", title: "Supprimer", onclick: "event.stopPropagation();" %>
+                      <%= button_to admin_payment_path(payment), method: :delete, data: { turbo_confirm: "Supprimer ce paiement ?" }, class: "btn btn-danger btn-sm delete-btn", style: "display: none; padding: 6px 12px; font-size: 12px; align-items: center; gap: 6px;", title: "Supprimer", onclick: "event.stopPropagation();" do %>
+                        <i class="fa-icon fa-sm fa-trash"></i>
+                        <span>Supprimer</span>
+                      <% end %>
                     </div>
                   </td>
                 <% end %>
@@ -1595,6 +1629,45 @@
             <% end %>
           </tbody>
         </table>
+      </div>
+    <% end %>
+    
+    <% if current_user.is_admin? %>
+      <div class="card" style="margin-top: 2rem; border: 2px solid var(--color-danger); background: rgba(239, 68, 68, 0.05);">
+        <h2 style="color: var(--color-danger); margin-bottom: 1rem;">
+          <i class="fa-icon fa-md fa-exclamation-triangle"></i> Zone de Danger
+        </h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6;">
+          La suppression d'un client est une action irréversible. Cela supprimera définitivement :
+        </p>
+        <ul style="color: var(--text-secondary); margin-bottom: 1.5rem; padding-left: 1.5rem; line-height: 1.8;">
+          <li>Le compte utilisateur</li>
+          <li>Tous les comptes MT5 associés</li>
+          <li>Tous les trades</li>
+          <li>Tous les paiements</li>
+          <li>Tous les crédits</li>
+        </ul>
+        <%= button_to "Supprimer ce Client", admin_client_path(@client), method: :delete,
+            data: { turbo_confirm: "⚠️ ATTENTION : Suppression définitive !\n\nÊtes-vous ABSOLUMENT sûr de vouloir supprimer #{@client.email} ?\n\nCette action NE PEUT PAS être annulée !\n\nTapez 'SUPPRIMER' pour confirmer.", client_email: @client.email },
+            class: "btn btn-danger",
+            style: "font-size: 16px; padding: 12px 24px; font-weight: 600;",
+            id: "delete-client-btn" %>
+        <script>
+          (function() {
+            var btn = document.getElementById('delete-client-btn');
+            if (btn) {
+              btn.addEventListener('click', function(e) {
+                var email = btn.getAttribute('data-client-email');
+                var confirmText = prompt('⚠️ ATTENTION : Tapez SUPPRIMER pour confirmer la suppression définitive de ' + email);
+                if (confirmText !== 'SUPPRIMER') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  return false;
+                }
+              });
+            }
+          })();
+        </script>
       </div>
     <% end %>
     </div>
