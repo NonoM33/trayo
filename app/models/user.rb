@@ -51,6 +51,12 @@ class User < ApplicationRecord
     mt5_accounts.reload.sum { |account| account.commissionable_gains }
   end
 
+  def watermark_difference
+    total_balance = mt5_accounts.reload.sum(&:balance)
+    total_watermark = mt5_accounts.reload.sum(&:high_watermark)
+    (total_balance - total_watermark).round(2)
+  end
+
   def total_commission_due
     return 0 if commission_rate.zero?
     (total_commissionable_gains * commission_rate / 100).round(2)
@@ -70,9 +76,11 @@ class User < ApplicationRecord
     # le montant encaissé NE peut PAS devenir un crédit pour lui.
     # Le watermark protège déjà : les commissions sont seulement sur les gains.
     #
-    # Donc : Solde à payer = MAX(0, Commission due - Crédits - Paiements)
-    result = total_commission_due - total_credits - total_validated_payments
-    result > 0 ? result.round(2) : 0
+    # Solde à payer = Commission due - Crédits - Paiements
+    # Si positif : montant à payer
+    # Si négatif : solde créditeur (surpaiement)
+    # Si zéro : entièrement payé
+    (total_commission_due - total_credits - total_validated_payments).round(2)
   end
 
   # Détecter automatiquement les bots basés sur les bots enregistrés
