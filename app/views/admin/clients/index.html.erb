@@ -155,7 +155,7 @@
           <div class="info-item">
             <div class="info-label">Commissions Dues</div>
             <div class="info-value positive">
-              <%= number_to_currency(@clients.sum(&:total_commission_due), unit: "€", format: "%n %u") %>
+              <%= number_to_currency(@clients.sum { |c| c.total_commission_due || 0 }, unit: "€", format: "%n %u") %>
             </div>
             <div class="help-text" style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">
               Total commissions sans crédits

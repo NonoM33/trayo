@@ -66,11 +66,11 @@ class User < ApplicationRecord
   end
 
   def total_validated_payments
-    payments.validated.sum(:amount)
+    payments.validated.sum(:amount) || 0
   end
 
   def total_credits
-    credits.sum(:amount)
+    credits.sum(:amount) || 0
   end
 
   def balance_due
@@ -81,7 +81,9 @@ class User < ApplicationRecord
     # Donc le solde à payer = Commission due actuelle - Crédits uniquement
     # Les paiements ne sont PAS soustraits car ils sont déjà reflétés dans le watermark
     
-    (total_commission_due - total_credits).round(2)
+    commission_due = total_commission_due || 0
+    credits = total_credits || 0
+    (commission_due - credits).round(2)
   end
 
   # Détecter automatiquement les bots basés sur les bots enregistrés
