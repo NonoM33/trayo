@@ -121,8 +121,16 @@ Rails.application.routes.draw do
       end
     end
     
-    resources :withdrawals, only: [:index, :show, :new, :create, :edit, :update, :destroy]
-    resources :deposits, only: [:index, :show, :new, :create, :edit, :update, :destroy]
+    resources :withdrawals, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
+      collection do
+        post :bulk_destroy
+      end
+    end
+    resources :deposits, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
+      collection do
+        post :bulk_destroy
+      end
+    end
     resources :mt5_tokens, only: [:index, :new, :create, :show, :destroy] do
       collection do
         get :show_token

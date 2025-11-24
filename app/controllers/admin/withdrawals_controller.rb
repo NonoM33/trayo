@@ -51,6 +51,40 @@ module Admin
                   notice: 'Retrait supprimé avec succès.'
     end
 
+    def bulk_destroy
+      Rails.logger.info "=== BULK DESTROY WITHDRAWALS ==="
+      Rails.logger.info "Params: #{params.inspect}"
+      Rails.logger.info "Withdrawal IDs: #{params[:withdrawal_ids].inspect}"
+      Rails.logger.info "User ID: #{params[:user_id].inspect}"
+      
+      withdrawal_ids = params[:withdrawal_ids] || []
+      user_id = params[:user_id]
+      
+      if withdrawal_ids.empty?
+        Rails.logger.warn "Aucun retrait sélectionné"
+        redirect_to admin_client_path(user_id), alert: 'Aucun retrait sélectionné.'
+        return
+      end
+
+      withdrawals = Withdrawal.where(id: withdrawal_ids).includes(:mt5_account)
+      Rails.logger.info "Withdrawals trouvés: #{withdrawals.count}"
+      
+      user = withdrawals.first&.mt5_account&.user if withdrawals.any?
+      
+      mt5_accounts_to_update = withdrawals.map(&:mt5_account).uniq
+      
+      count = withdrawals.count
+      withdrawals.destroy_all
+      
+      mt5_accounts_to_update.each do |account|
+        account.update(total_withdrawals: account.withdrawals.sum(:amount) || 0)
+      end
+      
+      Rails.logger.info "=== FIN BULK DESTROY ==="
+      redirect_to admin_client_path(user || user_id), 
+                  notice: "#{count} retrait(s) supprimé(s) avec succès."
+    end
+
     private
 
     def set_withdrawal
