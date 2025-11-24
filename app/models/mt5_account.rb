@@ -10,18 +10,24 @@ class Mt5Account < ApplicationRecord
 
   after_save :clear_user_cache
   after_save :recalculate_initial_balance_if_needed
+  after_save :update_watermark_if_balance_increased
   after_save :broadcast_balance_updated
 
   def update_from_mt5_data(data)
-    # Valider les données avant la mise à jour
     account_name = data[:account_name].present? ? data[:account_name] : self.account_name
     balance = data[:balance].present? ? data[:balance].to_f : self.balance
     
-    update!(
+    update_params = {
       account_name: account_name,
       balance: balance,
       last_sync_at: Time.current
-    )
+    }
+    
+    if balance > high_watermark
+      update_params[:high_watermark] = balance
+    end
+    
+    update!(update_params)
   end
 
   def total_profits
@@ -93,9 +99,14 @@ class Mt5Account < ApplicationRecord
   end
 
   def recalculate_initial_balance_if_needed
-    # Recalculer la balance initiale si elle est calculée automatiquement
     if auto_calculated_initial_balance
       calculate_initial_balance_from_history
+    end
+  end
+
+  def update_watermark_if_balance_increased
+    if balance_changed? && balance > high_watermark
+      update_column(:high_watermark, balance)
     end
   end
 
