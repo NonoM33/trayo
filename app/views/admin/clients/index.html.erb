@@ -217,13 +217,17 @@
                       </span>
                     </td>
                     <td>
-                      <% if client.balance_due >= 0 %>
+                      <% if client.balance_due > 0 %>
                         <span class="status-badge status-pending">
                           <%= number_to_currency(client.balance_due, unit: "€", format: "%n %u") %>
                         </span>
-                      <% else %>
+                      <% elsif client.balance_due < 0 %>
                         <span class="status-badge status-rejected">
                           Crédit: <%= number_to_currency(client.balance_due.abs, unit: "€", format: "%n %u") %>
+                        </span>
+                      <% else %>
+                        <span class="status-badge" style="background: var(--bg-hover); color: var(--text-muted);">
+                          0,00 €
                         </span>
                       <% end %>
                     </td>
