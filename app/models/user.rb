@@ -48,7 +48,8 @@ class User < ApplicationRecord
   end
 
   def total_commissionable_gains
-    mt5_accounts.reload.sum { |account| account.commissionable_gains }
+    return 0 unless mt5_accounts.any?
+    mt5_accounts.reload.sum { |account| account.commissionable_gains || 0 }
   end
 
   def watermark_difference
@@ -58,8 +59,10 @@ class User < ApplicationRecord
   end
 
   def total_commission_due
-    return 0 if commission_rate.zero?
-    (total_commissionable_gains * commission_rate / 100).round(2)
+    return 0 if commission_rate.nil? || commission_rate.zero?
+    gains = total_commissionable_gains
+    return 0 if gains.nil? || gains.zero?
+    (gains * commission_rate / 100).round(2)
   end
 
   def total_validated_payments
