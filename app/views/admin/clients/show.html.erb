@@ -683,10 +683,20 @@
         <div class="card">
           <div class="card-header">
             <h2>Historique des Retraits</h2>
-            <button onclick="showAddWithdrawalModal()" class="btn btn-outline btn-sm">
-              <i class="fa-icon fa-md fa-plus"></i> Ajouter un retrait
-            </button>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button onclick="showAddWithdrawalModal()" class="btn btn-outline btn-sm">
+                <i class="fa-icon fa-md fa-plus"></i> Ajouter un retrait
+              </button>
+              <button type="button" class="btn btn-danger btn-sm" id="bulk-destroy-withdrawals-btn" disabled>
+                Supprimer la sélection
+              </button>
+            </div>
           </div>
+          
+          <form id="bulk-destroy-withdrawals-form" action="<%= bulk_destroy_admin_withdrawals_path %>" method="post" style="display: none;">
+            <%= hidden_field_tag :authenticity_token, form_authenticity_token, id: "bulk-destroy-withdrawals-auth-token" %>
+            <%= hidden_field_tag :user_id, @client.id, id: "bulk-destroy-withdrawals-user-id" %>
+          </form>
           
           <% @mt5_accounts.each do |account| %>
             <% if account.withdrawals.any? %>
@@ -695,6 +705,9 @@
                 <table>
                   <thead>
                     <tr>
+                      <th style="width: 40px;">
+                        <input type="checkbox" id="select-all-withdrawals-<%= account.id %>" onchange="window.toggleAllWithdrawals(<%= account.id %>)">
+                      </th>
                       <th>Date</th>
                       <th>Montant</th>
                       <th>Notes</th>
@@ -704,6 +717,9 @@
                   <tbody>
                     <% account.withdrawals.order(withdrawal_date: :desc).each do |withdrawal| %>
                       <tr>
+                        <td>
+                          <input type="checkbox" value="<%= withdrawal.id %>" class="withdrawal-checkbox withdrawal-checkbox-<%= account.id %>" onchange="window.updateBulkDestroyWithdrawalsButton(); window.updateSelectAllWithdrawals(<%= account.id %>);">
+                        </td>
                         <td><%= withdrawal.withdrawal_date.strftime("%d/%m/%Y") %></td>
                         <td class="negative"><%= number_to_currency(withdrawal.amount, unit: "€", format: "%n %u") %></td>
                         <td><%= withdrawal.notes.present? ? withdrawal.notes : "-" %></td>
@@ -733,10 +749,20 @@
         <div class="card">
           <div class="card-header">
             <h2>Historique des Dépôts</h2>
-            <button onclick="showAddDepositModal()" class="btn btn-outline btn-sm">
-              <i class="fa-icon fa-md fa-plus"></i> Ajouter un dépôt
-            </button>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button onclick="showAddDepositModal()" class="btn btn-outline btn-sm">
+                <i class="fa-icon fa-md fa-plus"></i> Ajouter un dépôt
+              </button>
+              <button type="button" class="btn btn-danger btn-sm" id="bulk-destroy-deposits-btn" disabled>
+                Supprimer la sélection
+              </button>
+            </div>
           </div>
+          
+          <form id="bulk-destroy-deposits-form" action="<%= bulk_destroy_admin_deposits_path %>" method="post" style="display: none;">
+            <%= hidden_field_tag :authenticity_token, form_authenticity_token, id: "bulk-destroy-deposits-auth-token" %>
+            <%= hidden_field_tag :user_id, @client.id, id: "bulk-destroy-deposits-user-id" %>
+          </form>
           
           <% @mt5_accounts.each do |account| %>
             <% if account.deposits.any? %>
@@ -745,6 +771,9 @@
                 <table>
                   <thead>
                     <tr>
+                      <th style="width: 40px;">
+                        <input type="checkbox" id="select-all-deposits-<%= account.id %>" onchange="window.toggleAllDeposits(<%= account.id %>)">
+                      </th>
                       <th>Date</th>
                       <th>Montant</th>
                       <th>Notes</th>
@@ -754,6 +783,9 @@
                   <tbody>
                     <% account.deposits.order(deposit_date: :desc).each do |deposit| %>
                       <tr>
+                        <td>
+                          <input type="checkbox" value="<%= deposit.id %>" class="deposit-checkbox deposit-checkbox-<%= account.id %>" onchange="window.updateBulkDestroyDepositsButton(); window.updateSelectAllDeposits(<%= account.id %>);">
+                        </td>
                         <td><%= deposit.deposit_date.strftime("%d/%m/%Y") %></td>
                         <td class="positive"><%= number_to_currency(deposit.amount, unit: "€", format: "%n %u") %></td>
                         <td><%= deposit.notes.present? ? deposit.notes : "-" %></td>
