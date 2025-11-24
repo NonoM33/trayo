@@ -53,8 +53,9 @@ class User < ApplicationRecord
   end
 
   def watermark_difference
-    total_balance = mt5_accounts.reload.sum(&:balance)
-    total_watermark = mt5_accounts.reload.sum(&:high_watermark)
+    return 0 unless mt5_accounts.any?
+    total_balance = mt5_accounts.reload.sum { |account| account.balance || 0 }
+    total_watermark = mt5_accounts.reload.sum { |account| account.high_watermark || 0 }
     (total_balance - total_watermark).round(2)
   end
 
