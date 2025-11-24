@@ -72,15 +72,13 @@ class User < ApplicationRecord
 
   def balance_due
     # RÈGLE FONDAMENTALE : 
-    # Si on a encaissé une commission et que le client fait une perte ensuite,
-    # le montant encaissé NE peut PAS devenir un crédit pour lui.
-    # Le watermark protège déjà : les commissions sont seulement sur les gains.
-    #
-    # Solde à payer = Commission due - Crédits - Paiements
-    # Si positif : montant à payer
-    # Si négatif : solde créditeur (surpaiement)
-    # Si zéro : entièrement payé
-    (total_commission_due - total_credits - total_validated_payments).round(2)
+    # Les paiements validés mettent à jour le watermark lors de la validation
+    # Le watermark actuel représente le niveau jusqu'auquel les commissions ont été payées
+    # Les gains commissionnables actuels sont calculés depuis ce watermark
+    # Donc le solde à payer = Commission due actuelle - Crédits uniquement
+    # Les paiements ne sont PAS soustraits car ils sont déjà reflétés dans le watermark
+    
+    (total_commission_due - total_credits).round(2)
   end
 
   # Détecter automatiquement les bots basés sur les bots enregistrés
