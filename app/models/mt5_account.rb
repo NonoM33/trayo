@@ -69,8 +69,7 @@ class Mt5Account < ApplicationRecord
   end
 
   def commissionable_gains
-    # Les gains commissionnables = Balance actuelle - High Watermark
-    # Si WM = Balance actuelle, alors gains commissionnables = 0
+    return 0 if balance.nil? || high_watermark.nil?
     gains = balance - high_watermark
     gains > 0 ? gains.round(2) : 0
   end
