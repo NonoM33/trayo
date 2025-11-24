@@ -1620,13 +1620,13 @@
         </script>
         
         <script>
-          function showAddWithdrawalModal() {
+          window.showAddWithdrawalModal = function() {
             window.location.href = '<%= new_admin_withdrawal_path %>';
-          }
+          };
           
-          function showAddDepositModal() {
+          window.showAddDepositModal = function() {
             window.location.href = '<%= new_admin_deposit_path %>';
-          }
+          };
         </script>
       <% end %>
     </div>
@@ -1761,6 +1761,181 @@ allSelects.forEach((select, index) => {
 });
 
 console.log('=== END CLIENT SHOW PAGE DROPDOWN DEBUG ===');
+</script>
+
+<script>
+  window.showAddWithdrawalModal = window.showAddWithdrawalModal || function() {
+    window.location.href = '<%= new_admin_withdrawal_path %>';
+  };
+  
+  window.showAddDepositModal = window.showAddDepositModal || function() {
+    window.location.href = '<%= new_admin_deposit_path %>';
+  };
+
+  window.toggleAllWithdrawals = function(accountId) {
+    const selectAll = document.getElementById('select-all-withdrawals-' + accountId);
+    if (!selectAll) return;
+    
+    const checkboxes = document.querySelectorAll('.withdrawal-checkbox-' + accountId);
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = selectAll.checked;
+    });
+    window.updateBulkDestroyWithdrawalsButton();
+    window.updateSelectAllWithdrawals(accountId);
+  };
+
+  window.toggleAllDeposits = function(accountId) {
+    const selectAll = document.getElementById('select-all-deposits-' + accountId);
+    if (!selectAll) return;
+    
+    const checkboxes = document.querySelectorAll('.deposit-checkbox-' + accountId);
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = selectAll.checked;
+    });
+    window.updateBulkDestroyDepositsButton();
+    window.updateSelectAllDeposits(accountId);
+  };
+
+  window.updateSelectAllWithdrawals = function(accountId) {
+    const selectAll = document.getElementById('select-all-withdrawals-' + accountId);
+    if (!selectAll) return;
+    
+    const checkboxes = document.querySelectorAll('.withdrawal-checkbox-' + accountId);
+    const checkedCount = document.querySelectorAll('.withdrawal-checkbox-' + accountId + ':checked').length;
+    selectAll.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
+    selectAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+  };
+
+  window.updateSelectAllDeposits = function(accountId) {
+    const selectAll = document.getElementById('select-all-deposits-' + accountId);
+    if (!selectAll) return;
+    
+    const checkboxes = document.querySelectorAll('.deposit-checkbox-' + accountId);
+    const checkedCount = document.querySelectorAll('.deposit-checkbox-' + accountId + ':checked').length;
+    selectAll.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
+    selectAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+  };
+
+  window.updateBulkDestroyWithdrawalsButton = function() {
+    const checkboxes = document.querySelectorAll('.withdrawal-checkbox:checked');
+    const button = document.getElementById('bulk-destroy-withdrawals-btn');
+    if (button) {
+      button.disabled = checkboxes.length === 0;
+      if (!button.disabled && !button.hasAttribute('data-listener-added')) {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.submitBulkDestroyWithdrawals();
+        });
+        button.setAttribute('data-listener-added', 'true');
+      }
+    }
+    
+    document.querySelectorAll('[id^="select-all-withdrawals-"]').forEach(selectAll => {
+      const accountId = selectAll.id.replace('select-all-withdrawals-', '');
+      window.updateSelectAllWithdrawals(accountId);
+    });
+  };
+
+  window.updateBulkDestroyDepositsButton = function() {
+    const checkboxes = document.querySelectorAll('.deposit-checkbox:checked');
+    const button = document.getElementById('bulk-destroy-deposits-btn');
+    if (button) {
+      button.disabled = checkboxes.length === 0;
+      if (!button.disabled && !button.hasAttribute('data-listener-added')) {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.submitBulkDestroyDeposits();
+        });
+        button.setAttribute('data-listener-added', 'true');
+      }
+    }
+    
+    document.querySelectorAll('[id^="select-all-deposits-"]').forEach(selectAll => {
+      const accountId = selectAll.id.replace('select-all-deposits-', '');
+      window.updateSelectAllDeposits(accountId);
+    });
+  };
+
+  window.submitBulkDestroyWithdrawals = function() {
+    const checkboxes = document.querySelectorAll('.withdrawal-checkbox:checked');
+    if (checkboxes.length === 0) {
+      alert('Veuillez sélectionner au moins un retrait à supprimer.');
+      return false;
+    }
+    
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ' + checkboxes.length + ' retrait(s) sélectionné(s) ?')) {
+      return false;
+    }
+    
+    const ids = Array.from(checkboxes).map(cb => cb.value);
+    const form = document.getElementById('bulk-destroy-withdrawals-form');
+    
+    if (!form) {
+      alert('Erreur: formulaire introuvable.');
+      return false;
+    }
+    
+    document.querySelectorAll('#bulk-destroy-withdrawals-form input[name="withdrawal_ids[]"]').forEach(input => input.remove());
+    
+    ids.forEach(id => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'withdrawal_ids[]';
+      input.value = id;
+      form.appendChild(input);
+    });
+    
+    const submitButton = document.createElement('button');
+    submitButton.type = 'submit';
+    submitButton.style.display = 'none';
+    form.appendChild(submitButton);
+    submitButton.click();
+    
+    return false;
+  };
+
+  window.submitBulkDestroyDeposits = function() {
+    const checkboxes = document.querySelectorAll('.deposit-checkbox:checked');
+    if (checkboxes.length === 0) {
+      alert('Veuillez sélectionner au moins un dépôt à supprimer.');
+      return false;
+    }
+    
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ' + checkboxes.length + ' dépôt(s) sélectionné(s) ?')) {
+      return false;
+    }
+    
+    const ids = Array.from(checkboxes).map(cb => cb.value);
+    const form = document.getElementById('bulk-destroy-deposits-form');
+    
+    if (!form) {
+      alert('Erreur: formulaire introuvable.');
+      return false;
+    }
+    
+    document.querySelectorAll('#bulk-destroy-deposits-form input[name="deposit_ids[]"]').forEach(input => input.remove());
+    
+    ids.forEach(id => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'deposit_ids[]';
+      input.value = id;
+      form.appendChild(input);
+    });
+    
+    const submitButton = document.createElement('button');
+    submitButton.type = 'submit';
+    submitButton.style.display = 'none';
+    form.appendChild(submitButton);
+    submitButton.click();
+    
+    return false;
+  };
+
+  document.addEventListener('DOMContentLoaded', function() {
+    window.updateBulkDestroyWithdrawalsButton();
+    window.updateBulkDestroyDepositsButton();
+  });
 </script>
 
 
