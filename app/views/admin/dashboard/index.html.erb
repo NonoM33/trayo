@@ -117,14 +117,28 @@
         </div>
       </div>
       
-      <div class="stat-card stat-card-warning">
+      <div class="stat-card <%= @client.balance_due > 0 ? 'stat-card-warning' : (@client.balance_due < 0 ? 'stat-card-success' : 'stat-card-info') %>">
         <div class="stat-icon">
-          <%= svg_tag "alert-circle", size: "24" %>
+          <% if @client.balance_due > 0 %>
+            <%= svg_tag "alert-circle", size: "24" %>
+          <% elsif @client.balance_due < 0 %>
+            <%= svg_tag "check-circle", size: "24" %>
+          <% else %>
+            <%= svg_tag "info", size: "24" %>
+          <% end %>
         </div>
         <div class="stat-content">
-          <div class="stat-label">Solde à Payer</div>
-          <div class="stat-value <%= @client.balance_due > 0 ? 'value-negative' : 'value-positive' %>">
-            <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
+          <div class="stat-label">
+            <% if @client.balance_due > 0 %>
+              Solde à Payer
+            <% elsif @client.balance_due < 0 %>
+              Solde Créditeur
+            <% else %>
+              Solde à Payer
+            <% end %>
+          </div>
+          <div class="stat-value <%= @client.balance_due > 0 ? 'value-negative' : (@client.balance_due < 0 ? 'value-positive' : 'value-neutral') %>">
+            <%= number_to_currency(@client.balance_due.abs, unit: "€", format: "%n %u") %>
           </div>
           <div class="stat-change">Régularisation</div>
         </div>
