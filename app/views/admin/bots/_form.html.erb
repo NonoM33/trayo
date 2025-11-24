@@ -1,144 +1,289 @@
-<%= form_with model: bot, url: bot.new_record? ? admin_bots_path : admin_bot_path(bot), method: bot.new_record? ? :post : :patch, local: true, multipart: true do |f| %>
+<%= form_with model: bot, url: bot.new_record? ? admin_bots_path : admin_bot_path(bot), method: bot.new_record? ? :post : :patch, local: true, multipart: true, id: "botForm" do |f| %>
   <% if bot.errors.any? %>
-    <div class="error-messages" style="background: #f44336; color: white; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
-      <strong><%= pluralize(bot.errors.count, "erreur") %> :</strong>
-      <ul style="margin: 10px 0 0 20px;">
-        <% bot.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+    <div class="card-enhanced" style="background: rgba(239, 68, 68, 0.1); border-color: var(--color-danger); margin-bottom: var(--spacing-lg);">
+      <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+        <i class="fa-icon fa-md fa-exclamation-circle" style="color: var(--color-danger);" aria-hidden="true"></i>
+        <div>
+          <strong style="color: var(--color-danger);"><%= pluralize(bot.errors.count, "erreur") %> détectée(s) :</strong>
+          <ul style="margin: var(--spacing-sm) 0 0 var(--spacing-lg); color: var(--text-primary);">
+            <% bot.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
     </div>
   <% end %>
 
-  <div class="card">
-    <h3>📝 Informations Générales</h3>
+  <!-- Section 1: Paramètres Généraux -->
+  <div class="card-enhanced">
+    <div class="card-enhanced-header">
+      <h3 class="card-enhanced-title">
+        <i class="fa-icon fa-md fa-info-circle" style="margin-right: 8px;" aria-hidden="true"></i>
+        Paramètres Généraux
+      </h3>
+    </div>
     
-    <div class="two-col">
-      <div class="form-group">
-        <%= f.label :name, "Nom du Bot *" %>
-        <%= f.text_field :name, required: true, placeholder: "Ex: Alpha Trader Pro" %>
+    <div class="grid-12 gutter-md">
+      <div class="col-12 col-md-6">
+        <div class="form-group-enhanced">
+          <%= f.label :name, "Nom du Bot *", class: "form-label" %>
+          <%= f.text_field :name, required: true, placeholder: "Ex: Alpha Trader Pro", 
+              class: "form-input", 
+              oninput: "updateSummary()",
+              aria-describedby: "name-help" %>
+          <div class="help-text" id="name-help">
+            <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+            Nom qui sera affiché dans la boutique et sur le dashboard
+          </div>
+        </div>
       </div>
       
-      <div class="form-group">
-        <%= f.label :price, "Prix (€) *" %>
-        <%= f.number_field :price, step: 0.01, min: 0, required: true, placeholder: "499.00" %>
+      <div class="col-12 col-md-6">
+        <div class="form-group-enhanced">
+          <%= f.label :price, "Prix (€) *", class: "form-label" %>
+          <%= f.number_field :price, step: 0.01, min: 0, required: true, placeholder: "499.00", 
+              class: "form-input",
+              oninput: "updateSummary()",
+              aria-describedby: "price-help" %>
+          <div class="help-text" id="price-help">
+            <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+            Prix de vente du bot dans la boutique
+          </div>
+        </div>
       </div>
     </div>
     
-    <div class="two-col">
-      <div class="form-group">
-        <%= f.label :symbol, "Symbol MT5" %>
-        <%= f.text_field :symbol, placeholder: "Ex: EURUSD, GBPUSD, XAUUSD..." %>
-        <div class="help-text">Le symbole que ce bot trade (optionnel)</div>
+    
+    <div class="grid-12 gutter-md">
+      <div class="col-12 col-md-6">
+        <div class="form-group-enhanced">
+          <%= f.label :symbol, "Symbol MT5", class: "form-label" %>
+          <%= f.text_field :symbol, placeholder: "Ex: EURUSD, GBPUSD, XAUUSD...", 
+              class: "form-input",
+              oninput: "updateSummary()",
+              aria-describedby: "symbol-help" %>
+          <div class="help-text" id="symbol-help">
+            <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+            Le symbole que ce bot trade (optionnel). Exemples : EURUSD, GBPUSD, XAUUSD
+          </div>
+        </div>
       </div>
       
-      <div class="form-group">
-        <%= f.label :magic_number_prefix, "Préfixe Magic Number" %>
-        <%= f.number_field :magic_number_prefix, placeholder: "Ex: 10000, 20000..." %>
-        <div class="help-text">Pour identifier les trades de ce bot dans MT5 (optionnel)</div>
+      <div class="col-12 col-md-6">
+        <div class="form-group-enhanced">
+          <%= f.label :magic_number_prefix, "Préfixe Magic Number", class: "form-label" %>
+          <%= f.number_field :magic_number_prefix, placeholder: "Ex: 10000, 20000...", 
+              class: "form-input",
+              oninput: "updateSummary()",
+              aria-describedby: "magic-help" %>
+          <div class="help-text" id="magic-help">
+            <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+            Numéro magique pour identifier les trades de ce bot dans MT5 (optionnel). Utilisé pour le suivi des performances.
+          </div>
+        </div>
       </div>
     </div>
     
-    <div class="form-group">
-      <%= f.label :description, "Description Courte" %>
-      <%= f.text_area :description, rows: 3, placeholder: "Une description attrayante du bot..." %>
+    <div class="form-group-enhanced">
+      <%= f.label :description, "Description Courte", class: "form-label" %>
+      <%= f.text_area :description, rows: 3, placeholder: "Une description attrayante du bot...", 
+          class: "form-input",
+          oninput: "updateSummary()",
+          aria-describedby: "description-help" %>
+      <div class="help-text" id="description-help">
+        <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+        Description courte qui apparaîtra dans les listes et cartes du bot
+      </div>
     </div>
     
-    <div class="two-col">
-      <div class="form-group">
-        <%= f.label :image_url, "URL de l'Image" %>
-        <%= f.text_field :image_url, placeholder: "https://..." %>
-        <div class="help-text">Lien vers une image représentant le bot</div>
+    <div class="grid-12 gutter-md">
+      <div class="col-12 col-md-6">
+        <div class="form-group-enhanced">
+          <%= f.label :image_url, "URL de l'Image", class: "form-label" %>
+          <%= f.text_field :image_url, placeholder: "https://...", 
+              class: "form-input",
+              oninput: "updateSummary()",
+              aria-describedby: "image-help" %>
+          <div class="help-text" id="image-help">
+            <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+            Lien vers une image représentant le bot (format recommandé : 400x300px)
+          </div>
+        </div>
       </div>
       
-      <div class="form-group">
-        <%= f.label :status, "Statut *" %>
-        <%= f.select :status, [['Actif', 'active'], ['Inactif', 'inactive']], {}, 
-            { class: "form-control", style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" } %>
+      <div class="col-12 col-md-6">
+        <div class="form-group-enhanced">
+          <%= f.label :status, "Statut *", class: "form-label" %>
+          <%= f.select :status, [['Actif', 'active'], ['Inactif', 'inactive']], {}, 
+              { class: "filter-select", onchange: "updateSummary()", aria-describedby: "status-help" } %>
+          <div class="help-text" id="status-help">
+            <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+            Statut général du bot dans le système
+          </div>
+        </div>
       </div>
     </div>
     
-    <div class="form-group">
-      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-        <%= f.check_box :is_active, style: "width: auto; margin: 0;" %>
-        <span>Disponible à la vente dans la boutique</span>
-      </label>
+    <div class="form-group-enhanced">
+      <div class="checkbox-group">
+        <%= f.check_box :is_active, class: "form-checkbox", onchange: "updateSummary()" %>
+        <%= f.label :is_active, "Disponible à la vente dans la boutique", class: "form-label", style: "margin: 0; cursor: pointer;" %>
+      </div>
+      <div class="help-text">
+        <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+        Si coché, le bot sera visible et achetable dans la boutique
+      </div>
     </div>
   </div>
 
-  <div class="card">
-    <h3><i class="fa-icon fa-md fa-chart-bar"></i> Projections & Performance</h3>
+  <!-- Section 2: Stratégie -->
+  <div class="card-enhanced">
+    <div class="card-enhanced-header">
+      <h3 class="card-enhanced-title">
+        <i class="fa-icon fa-md fa-bullhorn" style="margin-right: 8px;" aria-hidden="true"></i>
+        Stratégie & Fonctionnalités
+      </h3>
+    </div>
     
-    <div class="two-col">
-      <div class="form-group">
-        <%= f.label :projection_monthly_min, "Gain Mensuel Minimum (€)" %>
-        <%= f.number_field :projection_monthly_min, step: 0.01, min: 0, placeholder: "500" %>
-        <div class="help-text">Projection la plus conservatrice</div>
-      </div>
-      
-      <div class="form-group">
-        <%= f.label :projection_monthly_max, "Gain Mensuel Maximum (€)" %>
-        <%= f.number_field :projection_monthly_max, step: 0.01, min: 0, placeholder: "1500" %>
-        <div class="help-text">Projection optimiste</div>
+    <div class="form-group-enhanced">
+      <%= f.label :strategy_description, "Description de la Stratégie", class: "form-label" %>
+      <%= f.text_area :strategy_description, rows: 6, placeholder: "Expliquez comment fonctionne ce bot, sa stratégie de trading, ses avantages...", 
+          class: "form-input",
+          oninput: "updateSummary()",
+          aria-describedby: "strategy-help" %>
+      <div class="help-text" id="strategy-help">
+        <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+        Description détaillée qui apparaîtra sur la page de vente du bot
       </div>
     </div>
     
-    <div class="two-col">
-      <div class="form-group">
-        <%= f.label :projection_yearly, "Gain Annuel Projeté (€)" %>
-        <%= f.number_field :projection_yearly, step: 0.01, min: 0, placeholder: "12000" %>
-      </div>
-      
-      <div class="form-group">
-        <%= f.label :win_rate, "Taux de Réussite (%)" %>
-        <%= f.number_field :win_rate, step: 0.01, min: 0, max: 100, placeholder: "75.5" %>
-        <div class="help-text">Pourcentage de trades gagnants</div>
-      </div>
-    </div>
-    
-    <div class="two-col">
-      <div class="form-group">
-        <%= f.label :risk_level, "Niveau de Risque" %>
-        <%= f.select :risk_level, [
-          ['Risque Faible', 'low'],
-          ['Risque Modéré', 'medium'],
-          ['Risque Élevé', 'high']
-        ], { include_blank: 'Sélectionner...' }, 
-        { class: "form-control", style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" } %>
-      </div>
-      
-      <div class="form-group">
-        <%= f.label :max_drawdown_limit, "Drawdown Maximum Autorisé (%)" %>
-        <%= f.number_field :max_drawdown_limit, step: 0.1, min: 0, placeholder: "35.0" %>
-        <div class="help-text">Limite de perte avant arrêt automatique</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h3><i class="fa-icon fa-md fa-bullhorn"></i> Stratégie & Fonctionnalités</h3>
-    
-    <div class="form-group">
-      <%= f.label :strategy_description, "Description de la Stratégie" %>
-      <%= f.text_area :strategy_description, rows: 6, placeholder: "Expliquez comment fonctionne ce bot, sa stratégie de trading, ses avantages..." %>
-      <div class="help-text">Description détaillée pour la page de vente</div>
-    </div>
-    
-    <div class="form-group">
-      <%= f.label :features, "Caractéristiques Clés" %>
+    <div class="form-group-enhanced">
+      <%= f.label :features, "Caractéristiques Clés", class: "form-label" %>
       <div id="features-container">
         <% (bot.features_list + [""]).each_with_index do |feature, index| %>
-          <div class="feature-input" style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <div class="feature-input" style="display: flex; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
             <input type="text" name="trading_bot[features][]" value="<%= feature %>" 
                    placeholder="Ex: Trading automatique 24/7" 
-                   style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-            <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm">✕</button>
+                   class="form-input"
+                   style="flex: 1;"
+                   oninput: "updateSummary()">
+            <button type="button" onclick="this.parentElement.remove(); updateSummary();" class="btn btn-danger btn-sm" aria-label="Supprimer cette fonctionnalité">
+              <i class="fa-icon fa-md fa-times"></i>
+            </button>
           </div>
         <% end %>
       </div>
-      <button type="button" onclick="addFeature()" class="btn" style="background: #4CAF50; margin-top: 10px;">
-        <i class="fa-icon fa-md fa-plus"></i> Ajouter une Fonctionnalité
+      <button type="button" onclick="addFeature()" class="btn btn-outline" style="margin-top: var(--spacing-sm);">
+        <i class="fa-icon fa-md fa-plus" aria-hidden="true"></i> Ajouter une Fonctionnalité
       </button>
+      <div class="help-text" style="margin-top: var(--spacing-xs);">
+        <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+        Liste des fonctionnalités principales du bot (affichées sous forme de puces)
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Performance & Risque -->
+  <div class="card-enhanced">
+    <div class="card-enhanced-header">
+      <h3 class="card-enhanced-title">
+        <i class="fa-icon fa-md fa-chart-bar" style="margin-right: 8px;" aria-hidden="true"></i>
+        Projections & Performance
+      </h3>
+    </div>
+    
+    
+    <div class="grid-12 gutter-md">
+      <div class="col-12 col-md-6">
+        <div class="form-group-enhanced">
+          <%= f.label :projection_monthly_min, "Gain Mensuel Minimum (€)", class: "form-label" %>
+          <%= f.number_field :projection_monthly_min, step: 0.01, min: 0, placeholder: "500", 
+              class: "form-input",
+              oninput: "updateSummary()",
+              aria-describedby: "projection-min-help" %>
+          <div class="help-text" id="projection-min-help">
+            <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+            Projection la plus conservatrice basée sur les backtests
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-12 col-md-6">
+        <div class="form-group-enhanced">
+          <%= f.label :projection_monthly_max, "Gain Mensuel Maximum (€)", class: "form-label" %>
+          <%= f.number_field :projection_monthly_max, step: 0.01, min: 0, placeholder: "1500", 
+              class: "form-input",
+              oninput: "updateSummary()",
+              aria-describedby: "projection-max-help" %>
+          <div class="help-text" id="projection-max-help">
+            <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+            Projection optimiste dans les meilleures conditions de marché
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="grid-12 gutter-md">
+      <div class="col-12 col-md-6">
+        <div class="form-group-enhanced">
+          <%= f.label :projection_yearly, "Gain Annuel Projeté (€)", class: "form-label" %>
+          <%= f.number_field :projection_yearly, step: 0.01, min: 0, placeholder: "12000", 
+              class: "form-input",
+              oninput: "updateSummary()",
+              aria-describedby: "projection-yearly-help" %>
+          <div class="help-text" id="projection-yearly-help">
+            <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+            Projection annuelle basée sur la moyenne mensuelle
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-12 col-md-6">
+        <div class="form-group-enhanced">
+          <%= f.label :win_rate, "Taux de Réussite (%)", class: "form-label" %>
+          <%= f.number_field :win_rate, step: 0.01, min: 0, max: 100, placeholder: "75.5", 
+              class: "form-input",
+              oninput: "updateSummary()",
+              aria-describedby: "winrate-help" %>
+          <div class="help-text" id="winrate-help">
+            <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+            Pourcentage de trades gagnants calculé sur les backtests
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="grid-12 gutter-md">
+      <div class="col-12 col-md-6">
+        <div class="form-group-enhanced">
+          <%= f.label :risk_level, "Niveau de Risque", class: "form-label" %>
+          <%= f.select :risk_level, [
+            ['Risque Faible', 'low'],
+            ['Risque Modéré', 'medium'],
+            ['Risque Élevé', 'high']
+          ], { include_blank: 'Sélectionner...' }, 
+          { class: "filter-select", onchange: "updateSummary()", aria-describedby: "risk-help" } %>
+          <div class="help-text" id="risk-help">
+            <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+            Classification du niveau de risque du bot (affecte l'affichage et les recommandations)
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-12 col-md-6">
+        <div class="form-group-enhanced">
+          <%= f.label :max_drawdown_limit, "Drawdown Maximum Autorisé (%)", class: "form-label" %>
+          <%= f.number_field :max_drawdown_limit, step: 0.1, min: 0, placeholder: "35.0", 
+              class: "form-input",
+              oninput: "updateSummary()",
+              aria-describedby: "drawdown-help" %>
+          <div class="help-text" id="drawdown-help">
+            <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+            Limite de perte maximale avant arrêt automatique du bot pour protéger le capital
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   
@@ -164,10 +309,27 @@
     </div>
   <% end %>
 
-  <div style="display: flex; gap: 12px; margin-top: 24px;">
-    <%= f.submit bot.new_record? ? "🚀 Créer le Bot" : "💾 Enregistrer les Modifications", 
-        class: "btn btn-success" %>
-    <%= link_to "Annuler", admin_bots_path, class: "btn", style: "background: #999;" %>
+  <!-- Résumé avant Validation -->
+  <div class="card-enhanced" id="summaryCard" style="background: var(--bg-info-box); border-color: var(--color-info); display: none;">
+    <div class="card-enhanced-header">
+      <h3 class="card-enhanced-title">
+        <i class="fa-icon fa-md fa-check-circle" style="margin-right: 8px;" aria-hidden="true"></i>
+        Résumé des Paramètres
+      </h3>
+    </div>
+    <div id="summaryContent" style="line-height: 1.8;">
+    </div>
+  </div>
+
+  <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-xl); flex-wrap: wrap;">
+    <%= f.submit bot.new_record? ? "Créer le Bot" : "Enregistrer les Modifications", 
+        class: "btn btn-primary btn-lg",
+        style: "display: inline-flex; align-items: center; gap: 8px;",
+        onclick: "return validateForm()" %>
+    <%= link_to admin_bots_path, class: "btn btn-outline btn-lg", style: "display: inline-flex; align-items: center; gap: 8px;" do %>
+      <i class="fa-icon fa-md fa-times" aria-hidden="true"></i>
+      Annuler
+    <% end %>
   </div>
 <% end %>
 
@@ -176,13 +338,80 @@
     const container = document.getElementById('features-container');
     const div = document.createElement('div');
     div.className = 'feature-input';
-    div.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px;';
+    div.style.cssText = 'display: flex; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);';
     div.innerHTML = `
       <input type="text" name="trading_bot[features][]" placeholder="Ex: Stop-loss automatique" 
-             style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-      <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm">✕</button>
+             class="form-input"
+             style="flex: 1;"
+             oninput="updateSummary()">
+      <button type="button" onclick="this.parentElement.remove(); updateSummary();" class="btn btn-danger btn-sm" aria-label="Supprimer">
+        <i class="fa-icon fa-md fa-times"></i>
+      </button>
     `;
     container.appendChild(div);
+    updateSummary();
   }
+  
+  function updateSummary() {
+    const form = document.getElementById('botForm');
+    if (!form) return;
+    
+    const name = form.querySelector('[name="trading_bot[name]"]')?.value || 'Non renseigné';
+    const price = form.querySelector('[name="trading_bot[price]"]')?.value || '0';
+    const status = form.querySelector('[name="trading_bot[status]"]')?.value || 'Non défini';
+    const risk = form.querySelector('[name="trading_bot[risk_level]"]')?.value || 'Non défini';
+    const isActive = form.querySelector('[name="trading_bot[is_active]"]')?.checked;
+    const monthlyMin = form.querySelector('[name="trading_bot[projection_monthly_min]"]')?.value || '0';
+    const monthlyMax = form.querySelector('[name="trading_bot[projection_monthly_max]"]')?.value || '0';
+    const winRate = form.querySelector('[name="trading_bot[win_rate]"]')?.value || '0';
+    
+    const summaryCard = document.getElementById('summaryCard');
+    const summaryContent = document.getElementById('summaryContent');
+    
+    if (!summaryCard || !summaryContent) return;
+    
+    const riskLabels = { low: 'Faible', medium: 'Modéré', high: 'Élevé' };
+    const statusLabels = { active: 'Actif', inactive: 'Inactif' };
+    
+    summaryContent.innerHTML = `
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-md);">
+        <div>
+          <strong>Nom :</strong> ${name}<br>
+          <strong>Prix :</strong> ${parseFloat(price).toFixed(2)} €<br>
+          <strong>Statut :</strong> ${statusLabels[status] || status}<br>
+          <strong>Disponible boutique :</strong> ${isActive ? 'Oui' : 'Non'}
+        </div>
+        <div>
+          <strong>Risque :</strong> ${riskLabels[risk] || risk}<br>
+          <strong>Gain mensuel :</strong> ${monthlyMin}€ - ${monthlyMax}€<br>
+          <strong>Taux de réussite :</strong> ${winRate}%<br>
+        </div>
+      </div>
+    `;
+    
+    summaryCard.style.display = 'block';
+  }
+  
+  function validateForm() {
+    const form = document.getElementById('botForm');
+    const name = form.querySelector('[name="trading_bot[name]"]')?.value;
+    const price = form.querySelector('[name="trading_bot[price]"]')?.value;
+    
+    if (!name || name.trim() === '') {
+      showToast('Le nom du bot est obligatoire', 'error', 'Validation');
+      return false;
+    }
+    
+    if (!price || parseFloat(price) <= 0) {
+      showToast('Le prix doit être supérieur à 0', 'error', 'Validation');
+      return false;
+    }
+    
+    return true;
+  }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    updateSummary();
+  });
 </script>
 

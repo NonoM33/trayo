@@ -42,97 +42,146 @@
           </div>
         <% end %>
 
-        <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-            <h2 style="margin: 0; border: none; padding: 0;">📋 Bots de Trading</h2>
-            <%= link_to "Nouveau Bot", new_admin_bot_path, class: "btn btn-success" %>
+        <div class="card-enhanced">
+          <div class="card-enhanced-header">
+            <h2 class="card-enhanced-title">
+              <i class="fa-icon fa-md fa-robot" style="margin-right: 8px;" aria-hidden="true"></i>
+              Bots de Trading
+            </h2>
+            <%= link_to new_admin_bot_path, class: "btn btn-primary", style: "display: inline-flex; align-items: center; gap: 8px;" do %>
+              <i class="fa-icon fa-md fa-plus" aria-hidden="true"></i>
+              Nouveau Bot
+            <% end %>
+          </div>
+          
+          <!-- Filtres et Recherche -->
+          <div class="filters-section" style="margin-bottom: var(--spacing-lg);">
+            <div class="filters-form">
+              <div class="filters-grid">
+                <div class="filter-group">
+                  <label class="filter-label">Recherche</label>
+                  <input type="text" id="botSearch" class="filter-input" placeholder="Rechercher un bot..." onkeyup="filterBots()">
+                </div>
+                <div class="filter-group">
+                  <label class="filter-label">Statut</label>
+                  <select id="statusFilter" class="filter-select" onchange="filterBots()">
+                    <option value="">Tous</option>
+                    <option value="active">Actif</option>
+                    <option value="inactive">Inactif</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label class="filter-label">Risque</label>
+                  <select id="riskFilter" class="filter-select" onchange="filterBots()">
+                    <option value="">Tous</option>
+                    <option value="low">Faible</option>
+                    <option value="medium">Moyen</option>
+                    <option value="high">Élevé</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label class="filter-label">Tri</label>
+                  <select id="sortFilter" class="filter-select" onchange="sortBots()">
+                    <option value="name">Nom (A-Z)</option>
+                    <option value="price">Prix</option>
+                    <option value="users">Utilisateurs</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
           
           <% if @bots.any? %>
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Bot</th>
-                    <th>Prix</th>
-                    <th>Risque</th>
-                    <th>Projection Mensuelle</th>
-                    <th>Win Rate</th>
-                    <th>Statut</th>
-                    <th>Utilisateurs</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% @bots.each do |bot| %>
-                    <tr>
-                      <td>
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                        
-                          <div>
-                            <div style="font-weight: 700; color: var(--text-primary); font-size: 15px;">
-                              <%= bot.name %>
-                            </div>
-                            <% tagline = bot.real_marketing_tagline %>
-                            <% if tagline.present? %>
-                              <div style="font-size: 12px; color: var(--text-muted);">
-                                <%= tagline.truncate(40) %>
-                              </div>
-                            <% end %>
-                          </div>
+            <div class="grid-12 gutter-md" id="botsGrid">
+              <% @bots.each do |bot| %>
+                <div class="col-12 col-md-6 col-lg-4 bot-card-item" 
+                     data-name="<%= bot.name.downcase %>" 
+                     data-status="<%= bot.is_active? ? 'active' : 'inactive' %>"
+                     data-risk="<%= bot.risk_level.downcase %>"
+                     data-price="<%= bot.price %>"
+                     data-users="<%= bot.active_users_count %>">
+                  <div class="card-enhanced" style="height: 100%; display: flex; flex-direction: column;">
+                    <div style="flex: 1;">
+                      <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--spacing-md);">
+                        <div style="flex: 1;">
+                          <h3 style="margin: 0 0 var(--spacing-xs) 0; font-size: var(--font-size-lg); font-weight: var(--font-weight-bold);">
+                            <%= bot.name %>
+                          </h3>
+                          <% tagline = bot.real_marketing_tagline %>
+                          <% if tagline.present? %>
+                            <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-muted);">
+                              <%= tagline.truncate(60) %>
+                            </p>
+                          <% end %>
                         </div>
-                      </td>
-                      <td>
-                        <div style="font-weight: 700; font-size: 16px; color: var(--text-primary);">
-                          <%= bot.formatted_price %>
+                        <div class="dropdown" style="position: relative;">
+                          <button class="icon-btn outline sm" onclick="event.stopPropagation(); this.closest('.dropdown').classList.toggle('active');" aria-label="Actions">
+                            <i class="fa-icon fa-md fa-ellipsis-v"></i>
+                          </button>
+                          <ul class="dropdown-menu" style="right: 0; left: auto;">
+                            <li><%= link_to "Voir", admin_bot_path(bot), class: "dropdown-item" %></li>
+                            <li><%= link_to "Modifier", edit_admin_bot_path(bot), class: "dropdown-item" %></li>
+                            <li class="dropdown-divider"></li>
+                            <li>
+                              <%= button_to "Supprimer", admin_bot_path(bot), method: :delete, 
+                                  data: { turbo_confirm: "Supprimer ce bot ?" }, 
+                                  class: "dropdown-item",
+                                  style: "color: var(--color-danger); background: none; border: none; width: 100%; text-align: left; cursor: pointer; padding: 8px 16px;" %>
+                            </li>
+                          </ul>
                         </div>
-                      </td>
-                      <td>
+                      </div>
+                      
+                      <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm); margin-bottom: var(--spacing-md);">
                         <span class="risk-badge risk-<%= bot.risk_level.downcase %>">
                           <%= bot.risk_label %>
                         </span>
-                      </td>
-                      <td style="white-space: nowrap; font-weight: 600;">
+                        <% if bot.is_active? %>
+                          <span class="status-active">Actif</span>
+                        <% else %>
+                          <span class="status-inactive">Inactif</span>
+                        <% end %>
+                      </div>
+                      
+                      <div style="margin-bottom: var(--spacing-md);">
+                        <div style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-accent);">
+                          <%= bot.formatted_price %>
+                        </div>
                         <% projections = bot.calculate_real_projections %>
-                        <%= number_to_currency(projections[:monthly_min], unit: "€", format: "%n %u", precision: 0) %> - 
-                        <%= number_to_currency(projections[:monthly_max], unit: "€", format: "%n %u", precision: 0) %>
-                      </td>
-                      <td>
-                        <% win_rate = bot.calculate_global_win_rate %>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                          <div style="flex: 1; height: 8px; background: var(--bg-hover); border-radius: var(--radius-full); overflow: hidden;">
-                            <div style="width: <%= win_rate %>%; height: 100%; background: var(--gradient-success); border-radius: var(--radius-full);"></div>
+                        <div style="font-size: var(--font-size-sm); color: var(--text-muted); margin-top: var(--spacing-xs);">
+                          <%= number_to_currency(projections[:monthly_min], unit: "€", format: "%n %u", precision: 0) %> - 
+                          <%= number_to_currency(projections[:monthly_max], unit: "€", format: "%n %u", precision: 0) %>/mois
+                        </div>
+                      </div>
+                      
+                      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: var(--spacing-md); border-top: 1px solid var(--border-color);">
+                        <div>
+                          <div style="font-size: var(--font-size-xs); color: var(--text-muted); margin-bottom: var(--spacing-xs);">Win Rate</div>
+                          <% win_rate = bot.calculate_global_win_rate %>
+                          <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                            <div style="flex: 1; height: 6px; background: var(--bg-hover); border-radius: var(--radius-full); overflow: hidden;">
+                              <div style="width: <%= win_rate %>%; height: 100%; background: var(--gradient-success); border-radius: var(--radius-full);"></div>
+                            </div>
+                            <span class="positive" style="font-weight: var(--font-weight-semibold); font-size: var(--font-size-sm); min-width: 45px;">
+                              <%= number_to_percentage(win_rate, precision: 1) %>
+                            </span>
                           </div>
-                          <span class="positive" style="font-weight: 700; font-size: 14px; min-width: 50px;">
-                            <%= number_to_percentage(win_rate, precision: 1) %>
+                        </div>
+                        <div style="text-align: right;">
+                          <div style="font-size: var(--font-size-xs); color: var(--text-muted); margin-bottom: var(--spacing-xs);">Utilisateurs</div>
+                          <span class="status-badge" style="background: var(--bg-info-box); color: var(--color-info);">
+                            <%= bot.active_users_count %>
                           </span>
                         </div>
-                      </td>
-                      <td>
-                        <% if bot.is_active? %>
-                          <span class="status-badge status-active">Actif</span>
-                        <% else %>
-                          <span class="status-badge status-inactive">Inactif</span>
-                        <% end %>
-                      </td>
-                      <td style="text-align: center;">
-                        <span class="status-badge" style="background: var(--bg-info-box); color: var(--color-info);">
-                          <%= bot.active_users_count %>
-                        </span>
-                      </td>
-                      <td>
-                        <div class="action-buttons">
-                          <%= link_to "Voir", admin_bot_path(bot), class: "btn btn-outline btn-sm" %>
-                          <%= link_to "Modifier", edit_admin_bot_path(bot), class: "btn btn-warning btn-sm" %>
-                          <%= button_to "Supprimer", admin_bot_path(bot), method: :delete, 
-                              data: { turbo_confirm: "Supprimer ce bot ?" }, 
-                              class: "btn btn-danger btn-sm" %>
-                        </div>
-                      </td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
+                      </div>
+                    </div>
+                    
+                    <div style="margin-top: var(--spacing-md); padding-top: var(--spacing-md); border-top: 1px solid var(--border-color);">
+                      <%= link_to "Voir les détails", admin_bot_path(bot), class: "btn btn-outline", style: "width: 100%;" %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
             </div>
           <% else %>
             <div style="text-align: center; padding: 80px 24px; color: var(--text-muted);">
@@ -146,6 +195,59 @@
       </div>
     </div>
   </div>
+  
+  <!-- Floating Action Button pour mobile -->
+  <% unless current_user.is_admin? %>
+    <%= link_to new_admin_bot_path, { class: "fab", id: "fabAddBot", "aria-label": "Ajouter un bot" } do %>
+      <i class="fa-icon fa-md fa-plus"></i>
+    <% end %>
+  <% end %>
+  
+  <script>
+    function filterBots() {
+      const search = document.getElementById('botSearch').value.toLowerCase();
+      const status = document.getElementById('statusFilter').value;
+      const risk = document.getElementById('riskFilter').value;
+      const cards = document.querySelectorAll('.bot-card-item');
+      
+      cards.forEach(card => {
+        const name = card.dataset.name;
+        const cardStatus = card.dataset.status;
+        const cardRisk = card.dataset.risk;
+        
+        const matchesSearch = !search || name.includes(search);
+        const matchesStatus = !status || cardStatus === status;
+        const matchesRisk = !risk || cardRisk === risk;
+        
+        if (matchesSearch && matchesStatus && matchesRisk) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+    
+    function sortBots() {
+      const sortBy = document.getElementById('sortFilter').value;
+      const grid = document.getElementById('botsGrid');
+      const cards = Array.from(grid.querySelectorAll('.bot-card-item'));
+      
+      cards.sort((a, b) => {
+        switch(sortBy) {
+          case 'name':
+            return a.dataset.name.localeCompare(b.dataset.name);
+          case 'price':
+            return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+          case 'users':
+            return parseInt(b.dataset.users) - parseInt(a.dataset.users);
+          default:
+            return 0;
+        }
+      });
+      
+      cards.forEach(card => grid.appendChild(card));
+    }
+  </script>
 </body>
 </html>
 

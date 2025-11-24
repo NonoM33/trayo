@@ -1,0 +1,306 @@
+<% if current_user.created_at > 7.days.ago && !session[:onboarding_completed] %>
+  <div id="onboardingModal" class="onboarding-modal" role="dialog" aria-labelledby="onboarding-title" aria-modal="true">
+    <div class="onboarding-overlay" onclick="closeOnboarding()"></div>
+    <div class="onboarding-content">
+      <div class="onboarding-header">
+        <h2 id="onboarding-title">Bienvenue sur Trayo !</h2>
+        <button class="onboarding-close" onclick="closeOnboarding()" aria-label="Fermer l'onboarding">
+          <i class="fa-icon fa-md fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="onboarding-body">
+        <div class="onboarding-steps">
+          <div class="onboarding-step active" data-step="1">
+            <div class="step-icon">
+              <i class="fa-icon fa-2xl fa-robot"></i>
+            </div>
+            <h3>Découvrez les Bots</h3>
+            <p>Explorez notre collection de bots de trading automatisés. Chaque bot a sa propre stratégie et son niveau de risque.</p>
+          </div>
+          
+          <div class="onboarding-step" data-step="2">
+            <div class="step-icon">
+              <i class="fa-icon fa-2xl fa-chart-line"></i>
+            </div>
+            <h3>Suivez vos Performances</h3>
+            <p>Consultez votre dashboard pour suivre vos gains, vos bots actifs et vos statistiques en temps réel.</p>
+          </div>
+          
+          <div class="onboarding-step" data-step="3">
+            <div class="step-icon">
+              <i class="fa-icon fa-2xl fa-wallet"></i>
+            </div>
+            <h3>Gérez vos Comptes</h3>
+            <p>Connectez vos comptes MT5 et synchronisez vos trades automatiquement pour un suivi précis.</p>
+          </div>
+        </div>
+        
+        <div class="onboarding-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" id="onboardingProgress" style="width: 33.33%;"></div>
+          </div>
+          <div class="progress-steps">
+            <span class="step-indicator active" data-step="1">1</span>
+            <span class="step-indicator" data-step="2">2</span>
+            <span class="step-indicator" data-step="3">3</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="onboarding-footer">
+        <button class="btn btn-outline" onclick="skipOnboarding()">Passer</button>
+        <button class="btn btn-primary" onclick="nextOnboardingStep()" id="onboardingNextBtn">Suivant</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let currentStep = 1;
+    const totalSteps = 3;
+    
+    function nextOnboardingStep() {
+      const currentStepEl = document.querySelector(`.onboarding-step[data-step="${currentStep}"]`);
+      currentStepEl.classList.remove('active');
+      
+      if (currentStep < totalSteps) {
+        currentStep++;
+        const nextStepEl = document.querySelector(`.onboarding-step[data-step="${currentStep}"]`);
+        nextStepEl.classList.add('active');
+        
+        document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+          if (index + 1 <= currentStep) {
+            indicator.classList.add('active');
+          } else {
+            indicator.classList.remove('active');
+          }
+        });
+        
+        document.getElementById('onboardingProgress').style.width = `${(currentStep / totalSteps) * 100}%`;
+        
+        if (currentStep === totalSteps) {
+          document.getElementById('onboardingNextBtn').textContent = 'Terminer';
+        }
+      } else {
+        completeOnboarding();
+      }
+    }
+    
+    function skipOnboarding() {
+      completeOnboarding();
+    }
+    
+    function closeOnboarding() {
+      document.getElementById('onboardingModal').style.display = 'none';
+    }
+    
+    function completeOnboarding() {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]');
+      if (csrfToken) {
+        fetch('/admin/dashboard/complete_onboarding', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-Token': csrfToken.content,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'same-origin'
+        }).then(() => {
+          closeOnboarding();
+        }).catch(() => {
+          closeOnboarding();
+        });
+      } else {
+        closeOnboarding();
+      }
+    }
+    
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.getElementById('onboardingModal').style.display !== 'none') {
+        closeOnboarding();
+      }
+    });
+  </script>
+  
+  <style>
+    .onboarding-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-lg);
+    }
+    
+    .onboarding-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+    }
+    
+    .onboarding-content {
+      position: relative;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      max-width: 600px;
+      width: 100%;
+      box-shadow: var(--shadow-2xl);
+      border: 1px solid var(--border-color);
+      animation: onboardingSlideIn 0.3s ease-out;
+    }
+    
+    @keyframes onboardingSlideIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    
+    .onboarding-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-xl);
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .onboarding-header h2 {
+      margin: 0;
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+    }
+    
+    .onboarding-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: var(--font-size-xl);
+      cursor: pointer;
+      padding: var(--spacing-xs);
+      transition: color var(--transition-fast);
+    }
+    
+    .onboarding-close:hover {
+      color: var(--text-primary);
+    }
+    
+    .onboarding-body {
+      padding: var(--spacing-xl);
+    }
+    
+    .onboarding-steps {
+      min-height: 300px;
+      position: relative;
+    }
+    
+    .onboarding-step {
+      display: none;
+      text-align: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .onboarding-step.active {
+      display: block;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .step-icon {
+      margin-bottom: var(--spacing-lg);
+      color: var(--color-accent);
+    }
+    
+    .onboarding-step h3 {
+      margin: 0 0 var(--spacing-md) 0;
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-bold);
+    }
+    
+    .onboarding-step p {
+      margin: 0;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-size: var(--font-size-base);
+    }
+    
+    .onboarding-progress {
+      margin-top: var(--spacing-xl);
+    }
+    
+    .progress-bar {
+      height: 4px;
+      background: var(--bg-hover);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: var(--gradient-accent);
+      border-radius: var(--radius-full);
+      transition: width 0.3s ease;
+    }
+    
+    .progress-steps {
+      display: flex;
+      justify-content: center;
+      gap: var(--spacing-md);
+    }
+    
+    .step-indicator {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      background: var(--bg-hover);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: var(--font-weight-semibold);
+      transition: all var(--transition-fast);
+    }
+    
+    .step-indicator.active {
+      background: var(--color-accent);
+      color: white;
+    }
+    
+    .onboarding-footer {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--spacing-xl);
+      border-top: 1px solid var(--border-color);
+      gap: var(--spacing-md);
+    }
+    
+    @media (max-width: 768px) {
+      .onboarding-content {
+        max-width: 100%;
+        margin: var(--spacing-md);
+      }
+      
+      .onboarding-header,
+      .onboarding-body,
+      .onboarding-footer {
+        padding: var(--spacing-md);
+      }
+    }
+  </style>
+<% end %>
+

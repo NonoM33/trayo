@@ -20,11 +20,46 @@
   </div>
   <div class="navbar-right">
     <% total_credits = current_user.total_credits %>
+    <% if total_credits > 0 %>
     <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: linear-gradient(135deg, var(--color-success), var(--color-success-hover)); border-radius: 12px; box-shadow: var(--shadow-sm);">
-      <i class="fa-icon fa-md fa-gift" style="color: white;"></i>
+      <i class="fa-icon fa-md fa-gift" style="color: white;" aria-hidden="true"></i>
       <span style="color: white; font-weight: 700; font-size: 15px;">
         <%= number_to_currency(total_credits, unit: "€", format: "%n %u", precision: 2) %> crédits
       </span>
+    </div>
+    <% end %>
+    
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle" aria-label="Basculer le thème">
+      <span class="theme-icon" id="themeIcon">
+        <i class="fa-icon fa-md fa-moon"></i>
+      </span>
+    </button>
+    
+    <div class="dropdown" style="position: relative;">
+      <button class="dropdown-toggle" onclick="event.stopPropagation()" aria-label="Menu utilisateur" id="userMenuToggle">
+        <div class="sidebar-user-avatar" style="width: 36px; height: 36px; font-size: 14px; margin: 0;">
+          <%= current_user.email[0].upcase %>
+        </div>
+        <i class="fa-icon fa-sm fa-chevron-down"></i>
+      </button>
+      <ul class="dropdown-menu" id="userMenu">
+        <li>
+          <%= link_to admin_client_path(current_user), class: "dropdown-item" do %>
+            <i class="fa-icon fa-sm fa-user" style="margin-right: 8px;"></i> Mon Profil
+          <% end %>
+        </li>
+        <li>
+          <%= link_to admin_client_path(current_user), class: "dropdown-item" do %>
+            <i class="fa-icon fa-sm fa-cog" style="margin-right: 8px;"></i> Paramètres
+          <% end %>
+        </li>
+        <li class="dropdown-divider"></li>
+        <li>
+          <%= link_to admin_logout_path, data: { turbo_method: :delete }, class: "dropdown-item", style: "color: var(--color-danger);" do %>
+            <i class="fa-icon fa-sm fa-sign-out-alt" style="margin-right: 8px;"></i> Déconnexion
+          <% end %>
+        </li>
+      </ul>
     </div>
   </div>
 </div>
@@ -32,26 +67,36 @@
 <script>
   function toggleTheme() {
     const body = document.body;
+    const html = document.documentElement;
     const icon = document.getElementById('themeIcon');
     
     if (body.classList.contains('dark-mode')) {
       body.classList.remove('dark-mode');
-      icon.innerHTML = '<i class="fa-solid fa-moon"></i>';
+      html.classList.remove('dark-mode');
+      if (icon) icon.innerHTML = '<i class="fa-icon fa-md fa-moon"></i>';
       localStorage.setItem('theme', 'light');
     } else {
       body.classList.add('dark-mode');
-      icon.innerHTML = '<i class="fa-solid fa-sun"></i>';
+      html.classList.add('dark-mode');
+      if (icon) icon.innerHTML = '<i class="fa-icon fa-md fa-sun"></i>';
       localStorage.setItem('theme', 'dark');
     }
   }
   
   (function() {
-    const savedTheme = localStorage.getItem('theme');
+    const savedTheme = localStorage.getItem('theme') || 'dark';
     const icon = document.getElementById('themeIcon');
+    const body = document.body;
+    const html = document.documentElement;
     
     if (savedTheme === 'dark') {
-      document.body.classList.add('dark-mode');
-      if (icon) icon.innerHTML = '<i class="fa-solid fa-sun"></i>';
+      body.classList.add('dark-mode');
+      html.classList.add('dark-mode');
+      if (icon) icon.innerHTML = '<i class="fa-icon fa-md fa-sun"></i>';
+    } else {
+      body.classList.remove('dark-mode');
+      html.classList.remove('dark-mode');
+      if (icon) icon.innerHTML = '<i class="fa-icon fa-md fa-moon"></i>';
     }
     
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -62,6 +107,23 @@
     window.addEventListener('resize', function() {
       if (mobileMenuBtn) {
         mobileMenuBtn.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+      }
+    });
+    
+    const userMenuToggle = document.getElementById('userMenuToggle');
+    if (userMenuToggle) {
+      userMenuToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const dropdown = this.closest('.dropdown');
+        dropdown.classList.toggle('active');
+      });
+    }
+    
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown.active').forEach(dropdown => {
+          dropdown.classList.remove('active');
+        });
       }
     });
   })();

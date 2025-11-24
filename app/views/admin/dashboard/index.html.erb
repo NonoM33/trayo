@@ -12,12 +12,45 @@
         <p class="hero-subtitle">Surveillez et analysez vos performances de trading en temps réel</p>
       </div>
       <div class="hero-actions">
+        <% unless current_user.is_admin? %>
+          <%= link_to admin_shop_index_path, class: "btn btn-primary", style: "display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; font-weight: 600;" do %>
+            <i class="fa-icon fa-md fa-plus" aria-hidden="true"></i>
+            <span>+ Ajouter un bot</span>
+          <% end %>
+        <% end %>
         <%= link_to admin_shop_index_path, class: "hero-button" do %>
           <%= svg_tag "arrow-up-right", size: "16" %>
           <span>Explorer les bots</span>
         <% end %>
       </div>
     </div>
+    
+    <!-- Section Alertes Récentes -->
+    <% alerts = [] %>
+    <% if @client.balance_due > 0 %>
+      <% alerts << { type: 'warning', message: "Solde à payer : #{number_to_currency(@client.balance_due, unit: '€', format: '%n %u')}", icon: 'exclamation-triangle' } %>
+    <% end %>
+    <% if @client.mt5_accounts.any? { |acc| acc.trades.where("close_time >= ?", 24.hours.ago).count == 0 } %>
+      <% alerts << { type: 'info', message: "Aucun trade détecté dans les dernières 24h sur certains comptes", icon: 'info-circle' } %>
+    <% end %>
+    <% if alerts.any? %>
+      <div class="card-enhanced" style="margin-bottom: var(--spacing-lg);">
+        <div class="card-enhanced-header">
+          <h3 class="card-enhanced-title">
+            <i class="fa-icon fa-md fa-bell" style="margin-right: 8px;" aria-hidden="true"></i>
+            Alertes Récentes
+          </h3>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+          <% alerts.each do |alert| %>
+            <div class="alert alert-<%= alert[:type] %>" style="padding: var(--spacing-md); border-radius: var(--radius-md); display: flex; align-items: center; gap: var(--spacing-md);">
+              <i class="fa-icon fa-md fa-<%= alert[:icon] %>" aria-hidden="true"></i>
+              <span><%= alert[:message] %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
     
     <% if current_user.is_admin? %>
     <div class="monitoring-alert-widget">
@@ -81,52 +114,74 @@
     </div>
     <% end %>
     
-    <div class="stats-grid">
-      <div class="stat-card stat-card-accent">
-        <div class="stat-icon">
-          <%= svg_tag "wallet", size: "48" %>
-        </div>
-        <div class="stat-content">
-          <div class="stat-label">Balance Totale</div>
-          <div class="stat-value"><%= number_to_currency(@client.mt5_accounts.sum(:balance), unit: "€", format: "%n %u") %></div>
-          <div class="stat-change">Tous comptes</div>
-        </div>
+    <!-- Section Overview Modulaire -->
+    <div class="card-enhanced overview-section">
+      <div class="card-enhanced-header">
+        <h2 class="card-enhanced-title">
+          <i class="fa-icon fa-md fa-chart-pie" style="margin-right: 8px;" aria-hidden="true"></i>
+          Vue d'ensemble
+        </h2>
       </div>
       
-      <div class="stat-card stat-card-success">
-        <div class="stat-icon">
-          <%= svg_tag "trending-up", size: "24" %>
-        </div>
-        <div class="stat-content">
-          <div class="stat-label">Gains Totaux</div>
-          <div class="stat-value <%= @client.total_profits > 0 ? 'value-positive' : 'value-negative' %>">
-            <%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %>
+      <div class="grid-12 gutter-md">
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="stat-item-enhanced">
+            <div class="stat-item-enhanced-label">
+              <i class="fa-icon fa-sm fa-wallet" style="margin-right: 4px;" aria-hidden="true"></i>
+              Balance Totale
+            </div>
+            <div class="stat-item-enhanced-value">
+              <%= number_to_currency(@client.mt5_accounts.sum(:balance), unit: "€", format: "%n %u") %>
+            </div>
+            <div class="help-text" style="margin-top: var(--spacing-xs); font-size: var(--font-size-xs);">
+              Tous comptes MT5
+            </div>
           </div>
-          <div class="stat-change">Performance globale</div>
         </div>
-      </div>
-      
-      <div class="stat-card stat-card-info">
-        <div class="stat-icon">
-          <%= svg_tag "percent", size: "24" %>
-        </div>
-        <div class="stat-content">
-          <div class="stat-label">Commission Due</div>
-          <div class="stat-value"><%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %></div>
-          <div class="stat-change">À payer</div>
-        </div>
-      </div>
-      
-      <div class="stat-card stat-card-warning">
-        <div class="stat-icon">
-          <%= svg_tag "alert-circle", size: "24" %>
-        </div>
-        <div class="stat-content">
-          <div class="stat-label">Solde à Payer</div>
-          <div class="stat-value <%= @client.balance_due > 0 ? 'value-negative' : 'value-positive' %>">
-            <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
+        
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="stat-item-enhanced">
+            <div class="stat-item-enhanced-label">
+              <i class="fa-icon fa-sm fa-trending-up" style="margin-right: 4px;" aria-hidden="true"></i>
+              Gains Totaux
+            </div>
+            <div class="stat-item-enhanced-value <%= @client.total_profits > 0 ? 'positive' : 'negative' %>">
+              <%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %>
+            </div>
+            <div class="help-text" style="margin-top: var(--spacing-xs); font-size: var(--font-size-xs);">
+              Performance globale
+            </div>
           </div>
-          <div class="stat-change">Régularisation</div>
+        </div>
+        
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="stat-item-enhanced">
+            <div class="stat-item-enhanced-label">
+              <i class="fa-icon fa-sm fa-percent" style="margin-right: 4px;" aria-hidden="true"></i>
+              Commission Due
+            </div>
+            <div class="stat-item-enhanced-value">
+              <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %>
+            </div>
+            <div class="help-text" style="margin-top: var(--spacing-xs); font-size: var(--font-size-xs);">
+              À payer
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="stat-item-enhanced">
+            <div class="stat-item-enhanced-label">
+              <i class="fa-icon fa-sm fa-robot" style="margin-right: 4px;" aria-hidden="true"></i>
+              Bots Actifs
+            </div>
+            <div class="stat-item-enhanced-value">
+              <%= @client.bot_purchases.where(status: 'active').count %>
+            </div>
+            <div class="help-text" style="margin-top: var(--spacing-xs); font-size: var(--font-size-xs);">
+              <%= @client.bot_purchases.count %> au total
+            </div>
+          </div>
         </div>
       </div>
     </div>

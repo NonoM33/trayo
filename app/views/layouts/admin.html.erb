@@ -14,6 +14,7 @@
   <%= javascript_importmap_tags %>
 </head>
 <body class="dark-mode">
+  <a href="#main-content" class="skip-to-main">Aller au contenu principal</a>
   <script>
     (function() {
       // Activer le mode sombre par défaut
@@ -40,10 +41,95 @@
   
   <%= render 'admin/shared/navbar' %>
   <%= render 'admin/shared/sidebar' %>
+  <%= render 'admin/shared/onboarding' %>
   
-  <div class="main-content">
+  <main id="main-content" class="main-content" role="main">
     <%= yield %>
-  </div>
+  </main>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Toast System JavaScript -->
+  <script>
+    function showToast(message, type = 'info', title = null) {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      
+      const icons = {
+        success: '<i class="fa-icon fa-md fa-check-circle"></i>',
+        error: '<i class="fa-icon fa-md fa-exclamation-circle"></i>',
+        warning: '<i class="fa-icon fa-md fa-exclamation-triangle"></i>',
+        info: '<i class="fa-icon fa-md fa-info-circle"></i>'
+      };
+      
+      const titles = {
+        success: 'Succès',
+        error: 'Erreur',
+        warning: 'Attention',
+        info: 'Information'
+      };
+      
+      toast.innerHTML = `
+        <div class="toast-icon">${icons[type] || icons.info}</div>
+        <div class="toast-content">
+          ${title ? `<div class="toast-title">${title}</div>` : ''}
+          <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close" onclick="this.parentElement.remove()" aria-label="Fermer">×</button>
+      `;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('hiding');
+        setTimeout(() => toast.remove(), 300);
+      }, 5000);
+    }
+    
+    function humanizeMessage(message) {
+      const translations = {
+        'api.*key.*error': 'Connexion impossible avec votre plateforme. Vérifiez votre clé API.',
+        'connection.*failed': 'La connexion au serveur a échoué. Vérifiez votre connexion internet.',
+        'timeout': 'La requête a pris trop de temps. Veuillez réessayer.',
+        'not found': 'La ressource demandée est introuvable.',
+        'unauthorized': 'Vous n\'avez pas les permissions nécessaires pour effectuer cette action.',
+        'validation failed': 'Certaines informations sont incorrectes. Veuillez vérifier les champs en erreur.',
+        'can\'t be blank': 'Ce champ est obligatoire.',
+        'has already been taken': 'Cette valeur est déjà utilisée. Veuillez en choisir une autre.',
+        'is invalid': 'Cette valeur n\'est pas valide.',
+        'too short': 'Cette valeur est trop courte.',
+        'too long': 'Cette valeur est trop longue.'
+      };
+      
+      const lowerMessage = message.toLowerCase();
+      for (const [pattern, translation] of Object.entries(translations)) {
+        if (new RegExp(pattern, 'i').test(lowerMessage)) {
+          return translation;
+        }
+      }
+      
+      return message;
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      const flashNotice = document.querySelector('.notice');
+      const flashAlert = document.querySelector('.alert');
+      
+      if (flashNotice) {
+        showToast(humanizeMessage(flashNotice.textContent.trim()), 'success', 'Succès');
+        flashNotice.remove();
+      }
+      
+      if (flashAlert) {
+        showToast(humanizeMessage(flashAlert.textContent.trim()), 'error', 'Erreur');
+        flashAlert.remove();
+      }
+    });
+  </script>
 
   <!-- Dropdown JavaScript -->
   <script>

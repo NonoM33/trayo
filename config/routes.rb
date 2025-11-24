@@ -29,6 +29,7 @@ Rails.application.routes.draw do
 
     get "dashboard", to: "dashboard#index"
     get "dashboard/monitoring_status", to: "dashboard#monitoring_status"
+    post "dashboard/complete_onboarding", to: "dashboard#complete_onboarding", as: :complete_onboarding
 
     # Routes pour les pages de test (AVANT les resources pour éviter les conflits)
     get "test/client_dropdowns", to: "test#client_dropdowns"

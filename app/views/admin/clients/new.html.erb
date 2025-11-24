@@ -33,75 +33,145 @@
       <div class="container">
     <%= link_to "<i class='fa-icon fa-md fa-arrow-left'></i> Retour aux Utilisateurs".html_safe, admin_clients_path, class: "back-link" %>
 
-    <div class="card">
-      <h2>Créer un Nouvel Utilisateur</h2>
+    <div class="card-enhanced">
+      <div class="card-enhanced-header">
+        <h2 class="card-enhanced-title">
+          <i class="fa-icon fa-md fa-user-plus" style="margin-right: 8px;" aria-hidden="true"></i>
+          Créer un Nouvel Utilisateur
+        </h2>
+      </div>
 
       <% if @user.errors.any? %>
-        <div class="error-messages">
-          <strong><%= pluralize(@user.errors.count, "error") %> prohibited this user from being saved:</strong>
-          <ul>
-            <% @user.errors.full_messages.each do |message| %>
-              <li><%= message %></li>
-            <% end %>
-          </ul>
+        <div class="card-enhanced" style="background: rgba(239, 68, 68, 0.1); border-color: var(--color-danger); margin-bottom: var(--spacing-lg);">
+          <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+            <i class="fa-icon fa-md fa-exclamation-circle" style="color: var(--color-danger);" aria-hidden="true"></i>
+            <div>
+              <strong style="color: var(--color-danger);"><%= pluralize(@user.errors.count, "erreur") %> détectée(s) :</strong>
+              <ul style="margin: var(--spacing-sm) 0 0 var(--spacing-lg); color: var(--text-primary);">
+                <% @user.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
         </div>
       <% end %>
 
-      <%= form_with model: @user, url: admin_clients_path, method: :post do |f| %>
-        <div class="form-group">
-          <%= f.label :email, "Email *" %>
-          <%= f.email_field :email, required: true, autofocus: true %>
+      <%= form_with model: @user, url: admin_clients_path, method: :post, id: "clientForm" do |f| %>
+        <div class="grid-12 gutter-md">
+          <div class="col-12 col-md-6">
+            <div class="form-group-enhanced">
+              <%= f.label :email, "Email *", class: "form-label" %>
+              <%= f.email_field :email, required: true, autofocus: true, 
+                  class: "form-input",
+                  onblur: "validateEmail(this)",
+                  aria-describedby: "email-help email-error" %>
+              <div class="help-text" id="email-help">
+                <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+                Adresse email unique qui servira d'identifiant de connexion
+              </div>
+              <div class="help-text" id="email-error" style="color: var(--color-danger); display: none;"></div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <div class="form-group-enhanced">
+              <%= f.label :commission_rate, "Taux de Commission (%)", class: "form-label" %>
+              <%= f.number_field :commission_rate, step: 0.01, min: 0, max: 100, value: 0, 
+                  class: "form-input",
+                  oninput: "validateCommission(this)",
+                  aria-describedby: "commission-help commission-error" %>
+              <div class="help-text" id="commission-help">
+                <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+                0 pour les administrateurs, entre 0-100 pour les clients
+              </div>
+              <div class="help-text" id="commission-error" style="color: var(--color-danger); display: none;"></div>
+            </div>
+          </div>
         </div>
 
-        <div class="form-group">
-          <%= f.label :password, "Password *" %>
-          <%= f.password_field :password, required: true %>
-          <div class="help-text">Minimum 6 characters</div>
+        <div class="grid-12 gutter-md">
+          <div class="col-12 col-md-6">
+            <div class="form-group-enhanced">
+              <%= f.label :password, "Mot de passe *", class: "form-label" %>
+              <%= f.password_field :password, required: true, 
+                  class: "form-input",
+                  oninput: "validatePassword(this)",
+                  aria-describedby: "password-help password-error" %>
+              <div class="help-text" id="password-help">
+                <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+                Minimum 6 caractères
+              </div>
+              <div class="help-text" id="password-error" style="color: var(--color-danger); display: none;"></div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <div class="form-group-enhanced">
+              <%= f.label :password_confirmation, "Confirmer le mot de passe *", class: "form-label" %>
+              <%= f.password_field :password_confirmation, required: true, 
+                  class: "form-input",
+                  oninput: "validatePasswordConfirmation(this)",
+                  aria-describedby: "password-confirm-help password-confirm-error" %>
+              <div class="help-text" id="password-confirm-help">
+                <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+                Doit correspondre au mot de passe
+              </div>
+              <div class="help-text" id="password-confirm-error" style="color: var(--color-danger); display: none;"></div>
+            </div>
+          </div>
         </div>
 
-        <div class="form-group">
-          <%= f.label :password_confirmation, "Confirm Password *" %>
-          <%= f.password_field :password_confirmation, required: true %>
+        <div class="grid-12 gutter-md">
+          <div class="col-12 col-md-6">
+            <div class="form-group-enhanced">
+              <%= f.label :first_name, "Prénom", class: "form-label" %>
+              <%= f.text_field :first_name, 
+                  class: "form-input",
+                  aria-describedby: "firstname-help" %>
+              <div class="help-text" id="firstname-help">
+                <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+                Prénom de l'utilisateur (optionnel mais recommandé)
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <div class="form-group-enhanced">
+              <%= f.label :last_name, "Nom", class: "form-label" %>
+              <%= f.text_field :last_name, 
+                  class: "form-input",
+                  aria-describedby: "lastname-help" %>
+              <div class="help-text" id="lastname-help">
+                <i class="fa-icon fa-sm fa-info-circle help-icon" aria-hidden="true"></i>
+                Nom de famille de l'utilisateur (optionnel mais recommandé)
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="form-group">
-          <%= f.label :first_name, "First Name" %>
-          <%= f.text_field :first_name %>
-        </div>
-
-        <div class="form-group">
-          <%= f.label :last_name, "Last Name" %>
-          <%= f.text_field :last_name %>
-        </div>
-
-        <div class="form-group">
-          <%= f.label :commission_rate, "Commission Rate (%)" %>
-          <%= f.number_field :commission_rate, step: 0.01, min: 0, max: 100, value: 0 %>
-          <div class="help-text">0 for administrators, between 0-100 for clients</div>
-        </div>
-
-        <div class="form-group">
-          <label>User Role *</label>
-          <div class="role-selector">
-            <div class="role-option">
-              <%= f.radio_button :is_admin, false, checked: true, id: "role_client" %>
-              <%= f.label :is_admin, for: "role_client" do %>
+        <div class="form-group-enhanced">
+          <label class="form-label">Type de compte *</label>
+          <div class="role-selector" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-md);">
+            <div class="role-option" style="padding: var(--spacing-md); border: 2px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast);" onclick="document.getElementById('role_client').click()">
+              <%= f.radio_button :is_admin, false, checked: true, id: "role_client", onchange: "updateRoleSelection()" %>
+              <%= f.label :is_admin, for: "role_client", style: "cursor: pointer; margin: 0;" do %>
                 <div>
-                  <strong>Client</strong>
-                  <div class="role-description">
-                    Trading client with commission tracking. Can access API and sync MT5 accounts.
+                  <strong style="display: block; margin-bottom: var(--spacing-xs);">Client</strong>
+                  <div class="role-description" style="font-size: var(--font-size-sm); color: var(--text-muted);">
+                    Client de trading avec suivi des commissions. Accès à l'API et synchronisation des comptes MT5.
                   </div>
                 </div>
               <% end %>
             </div>
 
-            <div class="role-option">
-              <%= f.radio_button :is_admin, true, id: "role_admin" %>
-              <%= f.label :is_admin, for: "role_admin" do %>
+            <div class="role-option" style="padding: var(--spacing-md); border: 2px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast);" onclick="document.getElementById('role_admin').click()">
+              <%= f.radio_button :is_admin, true, id: "role_admin", onchange: "updateRoleSelection()" %>
+              <%= f.label :is_admin, for: "role_admin", style: "cursor: pointer; margin: 0;" do %>
                 <div>
-                  <strong>Administrator</strong>
-                  <div class="role-description">
-                    Full back office access. Can manage clients, payments, credits, and view all data.
+                  <strong style="display: block; margin-bottom: var(--spacing-xs);">Administrateur</strong>
+                  <div class="role-description" style="font-size: var(--font-size-sm); color: var(--text-muted);">
+                    Accès complet au back office. Peut gérer les clients, paiements, crédits et voir toutes les données.
                   </div>
                 </div>
               <% end %>
@@ -109,8 +179,137 @@
           </div>
         </div>
 
-        <%= f.submit "Create User", class: "btn" %>
+        <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-xl); flex-wrap: wrap;">
+          <%= f.submit "Créer l'Utilisateur", class: "btn btn-primary btn-lg", 
+              style: "display: inline-flex; align-items: center; gap: 8px;",
+              onclick: "return validateClientForm()" %>
+          <%= link_to admin_clients_path, class: "btn btn-outline btn-lg", style: "display: inline-flex; align-items: center; gap: 8px;" do %>
+            <i class="fa-icon fa-md fa-times" aria-hidden="true"></i>
+            Annuler
+          <% end %>
+        </div>
       <% end %>
+      
+      <script>
+        function validateEmail(input) {
+          const email = input.value;
+          const errorDiv = document.getElementById('email-error');
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          
+          if (email && !emailRegex.test(email)) {
+            errorDiv.textContent = 'Format d\'email invalide';
+            errorDiv.style.display = 'block';
+            input.style.borderColor = 'var(--color-danger)';
+            return false;
+          } else {
+            errorDiv.style.display = 'none';
+            input.style.borderColor = '';
+            return true;
+          }
+        }
+        
+        function validatePassword(input) {
+          const password = input.value;
+          const errorDiv = document.getElementById('password-error');
+          
+          if (password && password.length < 6) {
+            errorDiv.textContent = 'Le mot de passe doit contenir au moins 6 caractères';
+            errorDiv.style.display = 'block';
+            input.style.borderColor = 'var(--color-danger)';
+            return false;
+          } else {
+            errorDiv.style.display = 'none';
+            input.style.borderColor = '';
+            validatePasswordConfirmation(document.getElementById('user_password_confirmation'));
+            return true;
+          }
+        }
+        
+        function validatePasswordConfirmation(input) {
+          if (!input) return true;
+          const password = document.getElementById('user_password').value;
+          const confirmation = input.value;
+          const errorDiv = document.getElementById('password-confirm-error');
+          
+          if (confirmation && password !== confirmation) {
+            errorDiv.textContent = 'Les mots de passe ne correspondent pas';
+            errorDiv.style.display = 'block';
+            input.style.borderColor = 'var(--color-danger)';
+            return false;
+          } else {
+            errorDiv.style.display = 'none';
+            input.style.borderColor = '';
+            return true;
+          }
+        }
+        
+        function validateCommission(input) {
+          const commission = parseFloat(input.value);
+          const errorDiv = document.getElementById('commission-error');
+          
+          if (isNaN(commission) || commission < 0 || commission > 100) {
+            errorDiv.textContent = 'Le taux de commission doit être entre 0 et 100';
+            errorDiv.style.display = 'block';
+            input.style.borderColor = 'var(--color-danger)';
+            return false;
+          } else {
+            errorDiv.style.display = 'none';
+            input.style.borderColor = '';
+            return true;
+          }
+        }
+        
+        function updateRoleSelection() {
+          const clientOption = document.querySelector('#role_client').closest('.role-option');
+          const adminOption = document.querySelector('#role_admin').closest('.role-option');
+          const isAdmin = document.getElementById('role_admin').checked;
+          
+          if (isAdmin) {
+            clientOption.style.borderColor = 'var(--border-color)';
+            adminOption.style.borderColor = 'var(--color-accent)';
+            adminOption.style.background = 'var(--bg-info-box)';
+            clientOption.style.background = '';
+          } else {
+            adminOption.style.borderColor = 'var(--border-color)';
+            clientOption.style.borderColor = 'var(--color-accent)';
+            clientOption.style.background = 'var(--bg-info-box)';
+            adminOption.style.background = '';
+          }
+        }
+        
+        function validateClientForm() {
+          const email = document.getElementById('user_email').value;
+          const password = document.getElementById('user_password').value;
+          const passwordConfirmation = document.getElementById('user_password_confirmation').value;
+          
+          if (!validateEmail(document.getElementById('user_email'))) {
+            if (typeof showToast === 'function') {
+              showToast('Veuillez corriger l\'adresse email', 'error', 'Validation');
+            }
+            return false;
+          }
+          
+          if (!validatePassword(document.getElementById('user_password'))) {
+            if (typeof showToast === 'function') {
+              showToast('Le mot de passe doit contenir au moins 6 caractères', 'error', 'Validation');
+            }
+            return false;
+          }
+          
+          if (password !== passwordConfirmation) {
+            if (typeof showToast === 'function') {
+              showToast('Les mots de passe ne correspondent pas', 'error', 'Validation');
+            }
+            return false;
+          }
+          
+          return true;
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+          updateRoleSelection();
+        });
+      </script>
       </div>
     </div>
   </div>

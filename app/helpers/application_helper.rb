@@ -59,4 +59,37 @@ module ApplicationHelper
     
     content_tag(:svg, svg.html_safe, { width: width, height: height, viewBox: "0 0 24 24", fill: "none", xmlns: "http://www.w3.org/2000/svg" }.merge(options))
   end
+  
+  def humanize_error_message(message)
+    translations = {
+      /api.*key.*error/i => "Connexion impossible avec votre plateforme. Vérifiez votre clé API dans les paramètres.",
+      /connection.*failed/i => "La connexion au serveur a échoué. Vérifiez votre connexion internet.",
+      /timeout/i => "La requête a pris trop de temps. Veuillez réessayer.",
+      /not found/i => "La ressource demandée est introuvable.",
+      /unauthorized/i => "Vous n'avez pas les permissions nécessaires pour effectuer cette action.",
+      /validation failed/i => "Certaines informations sont incorrectes. Veuillez vérifier les champs en erreur.",
+      /can't be blank/i => "Ce champ est obligatoire.",
+      /has already been taken/i => "Cette valeur est déjà utilisée. Veuillez en choisir une autre.",
+      /is invalid/i => "Cette valeur n'est pas valide.",
+      /too short/i => "Cette valeur est trop courte.",
+      /too long/i => "Cette valeur est trop longue.",
+      /must be greater than/i => "Cette valeur doit être supérieure.",
+      /must be less than/i => "Cette valeur doit être inférieure.",
+      /email/i => "L'adresse email n'est pas valide.",
+      /password/i => "Le mot de passe ne respecte pas les critères requis.",
+      /commission/i => "Le taux de commission doit être entre 0 et 100%."
+    }
+    
+    translations.each do |pattern, translation|
+      return translation if message.match?(pattern)
+    end
+    
+    message
+  end
+  
+  def friendly_error_messages(errors)
+    return [] if errors.empty?
+    
+    errors.full_messages.map { |msg| humanize_error_message(msg) }
+  end
 end

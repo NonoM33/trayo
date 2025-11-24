@@ -164,57 +164,132 @@
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-header">
-            <h2>Liste des Clients</h2>
-            <div class="card-header-actions">
-              <%= link_to new_admin_mt5_token_path, class: "btn btn-outline" do %>
-                <i class="fa-icon fa-md fa-ticket-alt"></i>
-                Générer un token MT5
+        <div class="card-enhanced">
+          <div class="card-enhanced-header">
+            <h2 class="card-enhanced-title">
+              <i class="fa-icon fa-md fa-users" style="margin-right: 8px;" aria-hidden="true"></i>
+              Liste des Clients
+            </h2>
+            <div style="display: flex; gap: var(--spacing-sm);">
+              <%= link_to new_admin_mt5_token_path, class: "btn btn-outline", style: "display: inline-flex; align-items: center; gap: 8px;" do %>
+                <i class="fa-icon fa-md fa-ticket-alt" aria-hidden="true"></i>
+                Token MT5
               <% end %>
-              <%= link_to new_admin_client_path, class: "btn btn-primary" do %>
-                <i class="fa-icon fa-md fa-plus"></i>
+              <%= link_to new_admin_client_path, class: "btn btn-primary", style: "display: inline-flex; align-items: center; gap: 8px;" do %>
+                <i class="fa-icon fa-md fa-plus" aria-hidden="true"></i>
                 Nouvel Utilisateur
               <% end %>
             </div>
           </div>
           
+          <!-- Recherche et Filtres -->
+          <div class="filters-section" style="margin-bottom: var(--spacing-lg);">
+            <div class="filters-form">
+              <div class="filters-grid">
+                <div class="filter-group" style="grid-column: span 2;">
+                  <label class="filter-label">Recherche</label>
+                  <input type="text" id="clientSearch" class="filter-input" placeholder="Rechercher par nom, email..." onkeyup="debounceSearch()">
+                </div>
+                <div class="filter-group">
+                  <label class="filter-label">Catégorie</label>
+                  <select id="categoryFilter" class="filter-select" onchange="filterClients()">
+                    <option value="">Toutes</option>
+                    <option value="vip">VIP</option>
+                    <option value="new">Nouveau</option>
+                    <option value="inactive">Inactif</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label class="filter-label">Tri</label>
+                  <select id="sortClients" class="filter-select" onchange="sortClients()">
+                    <option value="name">Nom (A-Z)</option>
+                    <option value="profits">Gains</option>
+                    <option value="activity">Dernière activité</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <div class="table-wrapper">
-            <table>
+            <table class="table-enhanced">
               <thead>
                 <tr>
-                  <th>Client</th>
-                  <th>Commission</th>
+                  <th style="width: 200px;">Client</th>
+                  <th>Email</th>
+                  <th>Statut</th>
+                  <th>Nombre de bots</th>
                   <th>Gains</th>
-                  <th>Écart WM</th>
                   <th>Solde</th>
+                  <th style="width: 120px;">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="clientsTableBody">
                 <% @clients.each do |client| %>
-                  <tr style="cursor: pointer; transition: background-color 0.2s;" 
+                  <% 
+                    category = if client.bot_purchases.count >= 5 && client.total_profits > 10000
+                      'vip'
+                    elsif client.created_at > 30.days.ago
+                      'new'
+                    elsif client.updated_at < 90.days.ago
+                      'inactive'
+                    else
+                      'regular'
+                    end
+                  %>
+                  <tr class="client-row" 
+                      data-name="<%= "#{client.first_name} #{client.last_name}".downcase %>"
+                      data-email="<%= client.email.downcase %>"
+                      data-category="<%= category %>"
+                      data-profits="<%= client.total_profits %>"
+                      data-activity="<%= client.updated_at.to_i %>"
                       onclick="window.location.href='<%= admin_client_path(client) %>'"
-                      onmouseover="this.style.backgroundColor='var(--bg-hover)'"
-                      onmouseout="this.style.backgroundColor=''">
+                      style="cursor: pointer;">
                     <td>
                       <div class="client-info-wrapper">
                         <div class="client-avatar">
                           <%= client.first_name&.first&.upcase || client.email.first.upcase %>
                         </div>
-                        <div class="client-name">
-                          <%= "#{client.first_name} #{client.last_name}".strip.presence || "N/A" %>
+                        <div>
+                          <div class="client-name">
+                            <%= "#{client.first_name} #{client.last_name}".strip.presence || "N/A" %>
+                          </div>
+                          <div style="font-size: var(--font-size-xs); color: var(--text-muted); margin-top: 2px;">
+                            <% 
+                              category = if client.bot_purchases.count >= 5 && client.total_profits > 10000
+                                'vip'
+                              elsif client.created_at > 30.days.ago
+                                'new'
+                              elsif client.updated_at < 90.days.ago
+                                'inactive'
+                              else
+                                'regular'
+                              end
+                            %>
+                            <% if category == 'vip' %>
+                              <span style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;">VIP</span>
+                            <% elsif category == 'new' %>
+                              <span style="background: var(--color-success); color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;">Nouveau</span>
+                            <% elsif category == 'inactive' %>
+                              <span style="background: var(--text-muted); color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;">Inactif</span>
+                            <% end %>
+                          </div>
                         </div>
                       </div>
                     </td>
-                    <td><span class="status-badge" style="background: var(--bg-hover); color: var(--text-primary);"><%= number_to_percentage(client.commission_rate, precision: 1) %></span></td>
-                    <td class="<%= client.total_profits >= 0 ? 'positive' : 'negative' %>" style="font-weight: 600; font-size: 0.875rem;">
-                      <%= number_to_currency(client.total_profits, unit: "€", format: "%n %u") %>
-                    </td>
+                    <td style="font-size: var(--font-size-sm);"><%= client.email %></td>
                     <td>
-                      <% diff = client.watermark_difference %>
-                      <span class="<%= diff >= 0 ? 'positive' : 'negative' %>" style="font-weight: 700; font-size: 1rem;">
-                        <%= number_to_currency(diff, unit: "€", format: "%n %u") %>
+                      <span class="status-badge" style="background: var(--bg-hover); color: var(--text-primary);">
+                        <%= number_to_percentage(client.commission_rate, precision: 1) %>
                       </span>
+                    </td>
+                    <td style="text-align: center;">
+                      <span class="status-badge" style="background: var(--bg-info-box); color: var(--color-info);">
+                        <%= client.bot_purchases.count %>
+                      </span>
+                    </td>
+                    <td class="<%= client.total_profits >= 0 ? 'positive' : 'negative' %>" style="font-weight: var(--font-weight-semibold);">
+                      <%= number_to_currency(client.total_profits, unit: "€", format: "%n %u") %>
                     </td>
                     <td>
                       <% if client.balance_due >= 0 %>
@@ -226,6 +301,24 @@
                           Crédit: <%= number_to_currency(client.balance_due.abs, unit: "€", format: "%n %u") %>
                         </span>
                       <% end %>
+                    </td>
+                    <td onclick="event.stopPropagation();">
+                      <div class="dropdown" style="position: relative;">
+                        <button class="icon-btn outline sm" onclick="event.stopPropagation(); this.closest('.dropdown').classList.toggle('active');" aria-label="Actions">
+                          <i class="fa-icon fa-md fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu" style="right: 0; left: auto;">
+                          <li><%= link_to "Voir", admin_client_path(client), class: "dropdown-item" %></li>
+                          <li><%= link_to "Modifier", edit_admin_client_path(client), class: "dropdown-item" %></li>
+                          <li class="dropdown-divider"></li>
+                          <li>
+                            <%= button_to "Supprimer", admin_client_path(client), method: :delete, 
+                                data: { turbo_confirm: "Supprimer ce client ?" }, 
+                                class: "dropdown-item",
+                                style: "color: var(--color-danger); background: none; border: none; width: 100%; text-align: left; cursor: pointer; padding: 8px 16px;" %>
+                          </li>
+                        </ul>
+                      </div>
                     </td>
                   </tr>
                 <% end %>
@@ -278,5 +371,63 @@
       </div>
     </div>
   </div>
+  
+<!-- Floating Action Button pour mobile -->
+<%= link_to new_admin_client_path, class: "fab", id: "fabAddClient", "aria-label": "Ajouter un client" do %>
+  <i class="fa-icon fa-md fa-plus"></i>
+<% end %>
+  
+  <script>
+    let searchTimeout;
+    
+    function debounceSearch() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        filterClients();
+      }, 300);
+    }
+    
+    function filterClients() {
+      const search = document.getElementById('clientSearch').value.toLowerCase();
+      const category = document.getElementById('categoryFilter').value;
+      const rows = document.querySelectorAll('.client-row');
+      
+      rows.forEach(row => {
+        const name = row.dataset.name;
+        const email = row.dataset.email;
+        const rowCategory = row.dataset.category;
+        
+        const matchesSearch = !search || name.includes(search) || email.includes(search);
+        const matchesCategory = !category || rowCategory === category;
+        
+        if (matchesSearch && matchesCategory) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+    
+    function sortClients() {
+      const sortBy = document.getElementById('sortClients').value;
+      const tbody = document.getElementById('clientsTableBody');
+      const rows = Array.from(tbody.querySelectorAll('.client-row'));
+      
+      rows.sort((a, b) => {
+        switch(sortBy) {
+          case 'name':
+            return a.dataset.name.localeCompare(b.dataset.name);
+          case 'profits':
+            return parseFloat(b.dataset.profits) - parseFloat(a.dataset.profits);
+          case 'activity':
+            return parseInt(b.dataset.activity) - parseInt(a.dataset.activity);
+          default:
+            return 0;
+        }
+      });
+      
+      rows.forEach(row => tbody.appendChild(row));
+    }
+  </script>
 </body>
 </html>

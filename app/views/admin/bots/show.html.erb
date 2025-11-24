@@ -51,33 +51,75 @@
           <div class="notice"><%= flash[:notice] %></div>
         <% end %>
 
-        <div class="card">
-          <div style="display: flex; align-items: start; gap: 24px;">
-         
-            
+        <!-- Section Informations du Bot -->
+        <div class="card-enhanced">
+          <div class="card-enhanced-header">
             <div style="flex: 1;">
-              <h2 style="margin: 0 0 12px 0;"><%= @bot.name %></h2>
-              <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+              <h2 class="card-enhanced-title" style="margin: 0 0 var(--spacing-sm) 0;">
+                <i class="fa-icon fa-md fa-robot" style="margin-right: 8px;" aria-hidden="true"></i>
+                <%= @bot.name %>
+              </h2>
+              <div style="display: flex; gap: var(--spacing-sm); margin-bottom: var(--spacing-md); flex-wrap: wrap;">
                 <span class="risk-badge risk-<%= @bot.risk_level.downcase %>">
                   <%= @bot.risk_label %>
                 </span>
                 <% if @bot.is_active? %>
-                  <span class="status-badge status-validated">Disponible</span>
+                  <span class="status-active">Disponible</span>
                 <% else %>
-                  <span class="status-badge status-inactive">Non Disponible</span>
+                  <span class="status-inactive">Non Disponible</span>
                 <% end %>
               </div>
-              <p style="margin: 0; color: var(--text-secondary);"><%= @bot.description %></p>
+              <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;"><%= @bot.description %></p>
             </div>
+            <% if current_user.is_admin? %>
+              <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;">
+                <%= link_to admin_bot_backtests_path(@bot), class: "btn btn-outline", style: "display: inline-flex; align-items: center; gap: 8px;" do %>
+                  <i class="fa-icon fa-md fa-chart-line" aria-hidden="true"></i>
+                  Backtests
+                <% end %>
+                <%= link_to edit_admin_bot_path(@bot), class: "btn btn-primary", style: "display: inline-flex; align-items: center; gap: 8px;" do %>
+                  <i class="fa-icon fa-md fa-edit" aria-hidden="true"></i>
+                  Modifier
+                <% end %>
+                <%= button_to admin_bot_path(@bot), method: :delete,
+                    data: { turbo_confirm: "Supprimer ce bot ?" }, 
+                    class: "btn btn-danger",
+                    style: "display: inline-flex; align-items: center; gap: 8px;" do %>
+                  <i class="fa-icon fa-md fa-trash" aria-hidden="true"></i>
+                  Supprimer
+                <% end %>
+              </div>
+            <% end %>
           </div>
         </div>
+        
+        <!-- Bannière Erreur Critique si nécessaire -->
+        <% if @bot.max_drawdown_limit && @purchases.any? { |p| p.drawdown_percentage > @bot.max_drawdown_limit } %>
+          <div class="card-enhanced" style="background: rgba(239, 68, 68, 0.1); border-color: var(--color-danger); margin-bottom: var(--spacing-lg);">
+            <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+              <i class="fa-icon fa-md fa-exclamation-triangle" style="color: var(--color-danger); font-size: var(--font-size-2xl);" aria-hidden="true"></i>
+              <div style="flex: 1;">
+                <h3 style="margin: 0 0 var(--spacing-xs) 0; color: var(--color-danger);">
+                  Erreur Critique Détectée
+                </h3>
+                <p style="margin: 0; color: var(--text-primary);">
+                  Certains utilisateurs de ce bot ont dépassé la limite de drawdown autorisée. Action recommandée : pause ou révision des paramètres.
+                </p>
+              </div>
+            </div>
+          </div>
+        <% end %>
 
-        <div class="two-col">
-          <div class="card">
-            <h3>
-              <i class="fa-icon fa-md fa-credit-card"></i>
-              Informations Financières
-            </h3>
+        <!-- Section Performance -->
+        <div class="grid-12 gutter-md" style="margin-bottom: var(--spacing-lg);">
+          <div class="col-12 col-md-6">
+            <div class="card-enhanced">
+              <div class="card-enhanced-header">
+                <h3 class="card-enhanced-title">
+                  <i class="fa-icon fa-md fa-credit-card" style="margin-right: 8px;" aria-hidden="true"></i>
+                  Informations Financières
+                </h3>
+              </div>
             <div class="info-grid">
               <% projections = @bot.calculate_real_projections %>
               <div class="info-item">
@@ -104,13 +146,17 @@
                 </div>
               </div>
             </div>
+            </div>
           </div>
 
-          <div class="card">
-            <h3>
-              <i class="fa-icon fa-md fa-chart-line"></i>
-              Performances
-            </h3>
+          <div class="col-12 col-md-6">
+            <div class="card-enhanced">
+              <div class="card-enhanced-header">
+                <h3 class="card-enhanced-title">
+                  <i class="fa-icon fa-md fa-chart-line" style="margin-right: 8px;" aria-hidden="true"></i>
+                  Performances
+                </h3>
+              </div>
             <div class="info-grid">
               <div class="info-item">
                 <div class="info-label">Taux de Réussite</div>
