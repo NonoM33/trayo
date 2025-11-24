@@ -214,7 +214,7 @@
           <div class="info-item">
             <div class="info-label">Capital à l'instant T</div>
             <div class="info-value positive">
-              <%= number_to_currency(@mt5_accounts.sum(&:balance), unit: "€", format: "%n %u") %>
+              <%= number_to_currency(@mt5_accounts.sum { |account| account.balance || 0 }, unit: "€", format: "%n %u") %>
             </div>
             <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
               Balance actuelle totale
@@ -225,7 +225,7 @@
           <div class="info-item">
             <div class="info-label">High Watermark</div>
             <div class="info-value positive">
-              <%= number_to_currency(@mt5_accounts.sum(&:high_watermark), unit: "€", format: "%n %u") %>
+              <%= number_to_currency(@mt5_accounts.sum { |account| account.high_watermark || 0 }, unit: "€", format: "%n %u") %>
             </div>
             <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
               Plus haut niveau atteint
