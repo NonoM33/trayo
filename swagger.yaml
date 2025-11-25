@@ -2193,6 +2193,393 @@ components:
           format: float
           nullable: true
 
+    V2DepositsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/V2DepositResponse"
+        next_cursor:
+          type: string
+          nullable: true
+        prev_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+
+    V2DepositResponse:
+      type: object
+      properties:
+        deposit:
+          type: object
+          properties:
+            id:
+              type: integer
+            amount:
+              type: number
+              format: float
+            deposit_date:
+              type: string
+              format: date-time
+            notes:
+              type: string
+              nullable: true
+            transaction_id:
+              type: string
+              nullable: true
+            mt5_account:
+              type: object
+              properties:
+                id:
+                  type: integer
+                mt5_id:
+                  type: string
+                account_name:
+                  type: string
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    V2WithdrawalsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/V2WithdrawalResponse"
+        next_cursor:
+          type: string
+          nullable: true
+        prev_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+
+    V2WithdrawalResponse:
+      type: object
+      properties:
+        withdrawal:
+          type: object
+          properties:
+            id:
+              type: integer
+            amount:
+              type: number
+              format: float
+            withdrawal_date:
+              type: string
+              format: date-time
+            notes:
+              type: string
+              nullable: true
+            mt5_account:
+              type: object
+              properties:
+                id:
+                  type: integer
+                mt5_id:
+                  type: string
+                account_name:
+                  type: string
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    V2BonusDepositsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/V2BonusDepositResponse"
+        next_cursor:
+          type: string
+          nullable: true
+        prev_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+
+    V2BonusDepositResponse:
+      type: object
+      properties:
+        bonus_deposit:
+          type: object
+          properties:
+            id:
+              type: integer
+            amount:
+              type: number
+              format: float
+            bonus_percentage:
+              type: number
+              format: float
+            bonus_amount:
+              type: number
+              format: float
+            total_credit:
+              type: number
+              format: float
+            status:
+              type: string
+              enum: [pending, validated, rejected]
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    V2BacktestsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/V2BacktestResponse"
+        next_cursor:
+          type: string
+          nullable: true
+        prev_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+
+    V2BacktestResponse:
+      type: object
+      properties:
+        backtest:
+          type: object
+          properties:
+            id:
+              type: integer
+            trading_bot_id:
+              type: integer
+            start_date:
+              type: string
+              format: date-time
+            end_date:
+              type: string
+              format: date-time
+            duration_days:
+              type: integer
+            duration_years:
+              type: number
+              format: float
+            total_trades:
+              type: integer
+            winning_trades:
+              type: integer
+            losing_trades:
+              type: integer
+            total_profit:
+              type: number
+              format: float
+            max_drawdown:
+              type: number
+              format: float
+            win_rate:
+              type: number
+              format: float
+            projection_monthly_min:
+              type: number
+              format: float
+            projection_monthly_max:
+              type: number
+              format: float
+            projection_yearly:
+              type: number
+              format: float
+            is_active:
+              type: boolean
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    V2AnalyticsAccountPerformanceResponse:
+      type: object
+      properties:
+        account_id:
+          type: integer
+        period:
+          type: string
+        total_profit:
+          type: number
+          format: float
+        total_trades:
+          type: integer
+        daily_profits:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              profit:
+                type: number
+                format: float
+        monthly_profits:
+          type: array
+          items:
+            type: object
+            properties:
+              month:
+                type: string
+              profit:
+                type: number
+                format: float
+        average_daily_profit:
+          type: number
+          format: float
+
+    V2AnalyticsBotPerformanceResponse:
+      type: object
+      properties:
+        bot_purchase_id:
+          type: integer
+        bot_name:
+          type: string
+        period:
+          type: string
+        total_profit:
+          type: number
+          format: float
+        total_trades:
+          type: integer
+        daily_profits:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              profit:
+                type: number
+                format: float
+        performance_by_day_of_week:
+          type: array
+          items:
+            type: object
+        performance_by_hour:
+          type: array
+          items:
+            type: object
+        trade_duration_stats:
+          type: object
+        best_performing_day:
+          type: object
+          nullable: true
+        most_active_day:
+          type: object
+          nullable: true
+        best_performing_hour:
+          type: object
+          nullable: true
+
+    V2AnalyticsPortfolioOverviewResponse:
+      type: object
+      properties:
+        period:
+          type: string
+        total_balance:
+          type: number
+          format: float
+        total_profit:
+          type: number
+          format: float
+        accounts_count:
+          type: integer
+        active_bots_count:
+          type: integer
+        account_performances:
+          type: array
+          items:
+            type: object
+            properties:
+              account_id:
+                type: integer
+              account_name:
+                type: string
+              balance:
+                type: number
+                format: float
+              profit:
+                type: number
+                format: float
+              trades_count:
+                type: integer
+        bot_performances:
+          type: array
+          items:
+            type: object
+            properties:
+              bot_purchase_id:
+                type: integer
+              bot_name:
+                type: string
+              profit:
+                type: number
+                format: float
+              trades_count:
+                type: integer
+              is_running:
+                type: boolean
+
+    V2NotificationsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+                enum: [info, warning, error, success]
+              title:
+                type: string
+              message:
+                type: string
+              account_id:
+                type: integer
+                nullable: true
+              bot_purchase_id:
+                type: integer
+                nullable: true
+              read:
+                type: boolean
+              created_at:
+                type: string
+                format: date-time
+        next_cursor:
+          type: string
+          nullable: true
+        prev_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+        unread_count:
+          type: integer
+
   # ============================================
   # API REST v2 - Endpoints avec pagination, filtres et recherche
   # ============================================
