@@ -11,6 +11,7 @@ module Types
     field :bots_count, Integer, null: false
     field :active_bots_count, Integer, null: false
     field :recent_trades_count, Integer, null: false
+    field :average_daily_gain, Float, null: false
   end
 end
 
