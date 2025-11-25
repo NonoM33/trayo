@@ -6,6 +6,8 @@ module Admin
     def index
       @clients = User.clients.order(:email)
       @admins = User.admins.order(:email)
+      trades_scope = Trade.joins(mt5_account: :user).where(users: { is_admin: false })
+      @average_daily_gain_all = Trade.average_daily_gain(scope: trades_scope)
     end
 
     def new
@@ -27,6 +29,7 @@ module Admin
       @mt5_accounts = @client.mt5_accounts.reload.includes(:trades, :withdrawals)
       @payments = @client.payments.order(created_at: :asc)
       @credits = @client.credits.order(created_at: :asc)
+      @average_daily_gain = @client.average_daily_gain
       
       bot_purchases_count = @client.bot_purchases.count
       Rails.logger.debug "Client show - Bot purchases count: #{bot_purchases_count}"
