@@ -3941,6 +3941,578 @@ components:
             text/event-stream:
               schema:
                 type: string
+
+  /api/v2/deposits:
+    get:
+      tags:
+        - API v2
+      summary: Liste des dépôts
+      description: Retourne la liste des dépôts de l'utilisateur avec pagination
+      operationId: v2DepositsIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: account_id
+          in: query
+          description: Filtrer par compte MT5
+          schema:
+            type: integer
+        - name: start_date
+          in: query
+          description: Date de début (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          description: Date de fin (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: cursor
+          in: query
+          description: Curseur de pagination
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Nombre d'éléments par page (max 100)
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        "200":
+          description: Liste des dépôts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2DepositsResponse"
+    post:
+      tags:
+        - API v2
+      summary: Créer un dépôt
+      description: Crée un nouveau dépôt pour un compte MT5
+      operationId: v2DepositsCreate
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - deposit
+                - account_id
+              properties:
+                account_id:
+                  type: integer
+                deposit:
+                  type: object
+                  required:
+                    - amount
+                    - deposit_date
+                  properties:
+                    amount:
+                      type: number
+                      format: float
+                    deposit_date:
+                      type: string
+                      format: date-time
+                    notes:
+                      type: string
+                    transaction_id:
+                      type: string
+      responses:
+        "201":
+          description: Dépôt créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2DepositResponse"
+
+  /api/v2/accounts/{account_id}/deposits:
+    get:
+      tags:
+        - API v2
+      summary: Liste des dépôts d'un compte
+      description: Retourne les dépôts d'un compte MT5 spécifique
+      operationId: v2AccountDepositsIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: account_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Liste des dépôts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2DepositsResponse"
+
+  /api/v2/deposits/{id}:
+    get:
+      tags:
+        - API v2
+      summary: Détails d'un dépôt
+      description: Retourne les détails d'un dépôt spécifique
+      operationId: v2DepositsShow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Détails du dépôt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2DepositResponse"
+
+  /api/v2/withdrawals:
+    get:
+      tags:
+        - API v2
+      summary: Liste des retraits
+      description: Retourne la liste des retraits de l'utilisateur avec pagination
+      operationId: v2WithdrawalsIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: account_id
+          in: query
+          description: Filtrer par compte MT5
+          schema:
+            type: integer
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Liste des retraits
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2WithdrawalsResponse"
+    post:
+      tags:
+        - API v2
+      summary: Créer un retrait
+      description: Crée un nouveau retrait pour un compte MT5
+      operationId: v2WithdrawalsCreate
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - withdrawal
+                - account_id
+              properties:
+                account_id:
+                  type: integer
+                withdrawal:
+                  type: object
+                  required:
+                    - amount
+                    - withdrawal_date
+                  properties:
+                    amount:
+                      type: number
+                      format: float
+                    withdrawal_date:
+                      type: string
+                      format: date-time
+                    notes:
+                      type: string
+      responses:
+        "201":
+          description: Retrait créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2WithdrawalResponse"
+
+  /api/v2/accounts/{account_id}/withdrawals:
+    get:
+      tags:
+        - API v2
+      summary: Liste des retraits d'un compte
+      description: Retourne les retraits d'un compte MT5 spécifique
+      operationId: v2AccountWithdrawalsIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: account_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Liste des retraits
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2WithdrawalsResponse"
+
+  /api/v2/withdrawals/{id}:
+    get:
+      tags:
+        - API v2
+      summary: Détails d'un retrait
+      description: Retourne les détails d'un retrait spécifique
+      operationId: v2WithdrawalsShow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Détails du retrait
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2WithdrawalResponse"
+
+  /api/v2/bonus_deposits:
+    get:
+      tags:
+        - API v2
+      summary: Liste des bonus dépôts
+      description: Retourne la liste des bonus dépôts de l'utilisateur
+      operationId: v2BonusDepositsIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: filters[status]
+          in: query
+          schema:
+            type: string
+            enum: [pending, validated, rejected]
+      responses:
+        "200":
+          description: Liste des bonus dépôts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2BonusDepositsResponse"
+    post:
+      tags:
+        - API v2
+      summary: Créer un bonus dépôt
+      description: Crée une demande de bonus dépôt
+      operationId: v2BonusDepositsCreate
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bonus_deposit
+              properties:
+                bonus_deposit:
+                  type: object
+                  required:
+                    - amount
+                  properties:
+                    amount:
+                      type: number
+                      format: float
+      responses:
+        "201":
+          description: Bonus dépôt créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2BonusDepositResponse"
+
+  /api/v2/bonus_deposits/{id}:
+    get:
+      tags:
+        - API v2
+      summary: Détails d'un bonus dépôt
+      description: Retourne les détails d'un bonus dépôt
+      operationId: v2BonusDepositsShow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Détails du bonus dépôt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2BonusDepositResponse"
+
+  /api/v2/bots/{bot_id}/backtests:
+    get:
+      tags:
+        - API v2
+      summary: Liste des backtests d'un bot
+      description: Retourne les backtests disponibles pour un bot de trading
+      operationId: v2BotBacktestsIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: bot_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: filters[is_active]
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Liste des backtests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2BacktestsResponse"
+
+  /api/v2/bots/{bot_id}/backtests/{id}:
+    get:
+      tags:
+        - API v2
+      summary: Détails d'un backtest
+      description: Retourne les détails d'un backtest spécifique
+      operationId: v2BotBacktestsShow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: bot_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Détails du backtest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2BacktestResponse"
+
+  /api/v2/analytics/account_performance:
+    get:
+      tags:
+        - API v2
+      summary: Performance d'un compte
+      description: Retourne les statistiques de performance détaillées d'un compte MT5
+      operationId: v2AnalyticsAccountPerformance
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: account_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7_days, 30_days, 3_months, 6_months, 1_year, all]
+            default: 30_days
+      responses:
+        "200":
+          description: Statistiques de performance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2AnalyticsAccountPerformanceResponse"
+
+  /api/v2/analytics/bot_performance:
+    get:
+      tags:
+        - API v2
+      summary: Performance d'un bot
+      description: Retourne les statistiques de performance détaillées d'un bot de trading
+      operationId: v2AnalyticsBotPerformance
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: bot_purchase_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7_days, 30_days, 3_months, 6_months, 1_year, all]
+            default: 30_days
+      responses:
+        "200":
+          description: Statistiques de performance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2AnalyticsBotPerformanceResponse"
+
+  /api/v2/analytics/portfolio_overview:
+    get:
+      tags:
+        - API v2
+      summary: Vue d'ensemble du portefeuille
+      description: Retourne une vue d'ensemble complète du portefeuille de l'utilisateur
+      operationId: v2AnalyticsPortfolioOverview
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7_days, 30_days, 3_months, 6_months, 1_year, all]
+            default: 30_days
+      responses:
+        "200":
+          description: Vue d'ensemble du portefeuille
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2AnalyticsPortfolioOverviewResponse"
+
+  /api/v2/notifications:
+    get:
+      tags:
+        - API v2
+      summary: Liste des notifications
+      description: Retourne les notifications de l'utilisateur (alertes, warnings, infos)
+      operationId: v2NotificationsIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+      responses:
+        "200":
+          description: Liste des notifications
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V2NotificationsResponse"
+    post:
+      tags:
+        - API v2
+      summary: Marquer les notifications comme lues
+      description: Marque une ou plusieurs notifications comme lues
+      operationId: v2NotificationsMarkAsRead
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notification_ids:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Notifications marquées comme lues
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  count:
+                    type: integer
+
+  /api/v2/notifications/unread_count:
+    get:
+      tags:
+        - API v2
+      summary: Nombre de notifications non lues
+      description: Retourne le nombre de notifications non lues
+      operationId: v2NotificationsUnreadCount
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Nombre de notifications non lues
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  unread_count:
+                    type: integer
 # Note: Documentation complète API v2 et GraphQL
 #
 # Pour la documentation complète de :
