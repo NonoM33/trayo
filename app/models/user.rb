@@ -74,6 +74,17 @@ class User < ApplicationRecord
     credits.sum(:amount) || 0
   end
 
+  def average_daily_gain(days: 30)
+    return 0 unless trades.exists?
+    from_date = days.days.ago.beginning_of_day
+    daily_profits = trades.where('close_time >= ?', from_date)
+                          .where.not(close_time: nil)
+                          .group("DATE(close_time)")
+                          .sum(:profit)
+    return 0 if daily_profits.empty?
+    (daily_profits.values.sum.to_f / daily_profits.size).round(2)
+  end
+
   def balance_due
     # RÈGLE FONDAMENTALE : 
     # Les paiements validés mettent à jour le watermark lors de la validation

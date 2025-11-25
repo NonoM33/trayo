@@ -247,6 +247,15 @@
             Gains réels + retraits effectués
           </div>
         </div>
+        <div class="info-item">
+          <div class="info-label">Gain Moyen Journalier (30j)</div>
+          <div class="info-value <%= @average_daily_gain >= 0 ? 'positive' : 'negative' %>">
+            <%= number_to_currency(@average_daily_gain, unit: "€", format: "%n %u") %>
+          </div>
+          <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
+            Moyenne sur les jours avec trades clos
+          </div>
+        </div>
         <% if current_user.is_admin? %>
           <div class="info-item">
             <div class="info-label">Gains Commissionnables</div>

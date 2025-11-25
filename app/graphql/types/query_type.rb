@@ -250,7 +250,8 @@ module Types
         accounts_count: user.mt5_accounts.count,
         bots_count: user.bot_purchases.count,
         active_bots_count: user.bot_purchases.where(status: 'active').count,
-        recent_trades_count: user.trades.where("close_time >= ?", 24.hours.ago).count
+        recent_trades_count: user.trades.where("close_time >= ?", 24.hours.ago).count,
+        average_daily_gain: user.average_daily_gain
       }
     end
 
