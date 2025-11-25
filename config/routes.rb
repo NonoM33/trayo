@@ -240,6 +240,33 @@ Rails.application.routes.draw do
 
       resources :credits, only: [:index, :show]
 
+      resources :accounts, only: [:index, :show] do
+        resources :deposits, only: [:index, :show, :create], controller: "deposits"
+        resources :withdrawals, only: [:index, :show, :create], controller: "withdrawals"
+      end
+
+      resources :deposits, only: [:index, :show]
+      resources :withdrawals, only: [:index, :show]
+
+      resources :bonus_deposits, only: [:index, :show, :create]
+
+      resources :bots, only: [:index, :show] do
+        resources :backtests, only: [:index, :show]
+      end
+
+      namespace :analytics do
+        get :account_performance
+        get :bot_performance
+        get :portfolio_overview
+      end
+
+      resources :notifications, only: [:index] do
+        collection do
+          post :mark_as_read
+          get :unread_count
+        end
+      end
+
       namespace :stats do
         get :dashboard
         get :profits
