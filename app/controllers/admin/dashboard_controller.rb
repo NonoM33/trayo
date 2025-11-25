@@ -200,8 +200,9 @@ module Admin
         # Statistics for charts
         @monthly_profits = calculate_monthly_profits
         @projection_data = calculate_projection
+      end
+      @average_daily_gain = @client.average_daily_gain
     end
-  end
 
   def monitoring_status
     return head :forbidden unless current_user.is_admin?

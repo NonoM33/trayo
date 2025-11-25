@@ -106,6 +106,19 @@
         </div>
       </div>
       
+      <div class="stat-card stat-card-secondary">
+        <div class="stat-icon">
+          <%= svg_tag "activity", size: "24" %>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">Gain Moyen Journalier (30j)</div>
+          <div class="stat-value <%= @average_daily_gain >= 0 ? 'value-positive' : 'value-negative' %>">
+            <%= number_to_currency(@average_daily_gain, unit: "€", format: "%n %u") %>
+          </div>
+          <div class="stat-change">Basé sur les jours avec trades</div>
+        </div>
+      </div>
+      
       <div class="stat-card stat-card-info">
         <div class="stat-icon">
           <%= svg_tag "percent", size: "24" %>
@@ -701,6 +714,19 @@
 
 .stat-card-success::before {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.stat-card-secondary {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.02) 100%);
+}
+
+.stat-card-secondary .stat-icon {
+  background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);
+}
+
+.stat-card-secondary::before {
+  background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
 }
 
 .stat-card-info {

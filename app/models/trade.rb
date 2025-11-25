@@ -15,6 +15,16 @@ class Trade < ApplicationRecord
   scope :admin_trades, -> { where(trade_originality: 'manual_admin') }
   scope :client_manual_trades, -> { where(trade_originality: 'manual_client') }
 
+  def self.average_daily_gain(scope: all, days: 30)
+    from_date = days.days.ago.beginning_of_day
+    daily_profits = scope.where('close_time >= ?', from_date)
+                         .where.not(close_time: nil)
+                         .group("DATE(close_time)")
+                         .sum(:profit)
+    return 0 if daily_profits.empty?
+    (daily_profits.values.sum.to_f / daily_profits.size).round(2)
+  end
+
 
   def bot_name
     return nil unless magic_number.present?

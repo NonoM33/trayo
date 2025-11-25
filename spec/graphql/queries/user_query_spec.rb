@@ -72,6 +72,7 @@ RSpec.describe 'GraphQL Queries', type: :request do
             balanceDue
             accountsCount
             botsCount
+            averageDailyGain
           }
         }
       GQL
@@ -83,6 +84,7 @@ RSpec.describe 'GraphQL Queries', type: :request do
       json = json_response
       expect(json['data']['dashboard']).to be_present
       expect(json['data']['dashboard']['accountsCount']).to eq(2)
+      expect(json['data']['dashboard']['averageDailyGain']).to eq(0)
     end
   end
 end

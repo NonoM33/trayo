@@ -3327,6 +3327,9 @@ components:
                     type: integer
                   recent_trades_count:
                     type: integer
+                  average_daily_gain:
+                    type: number
+                    format: float
 
   /api/v2/stats/profits:
     get:
