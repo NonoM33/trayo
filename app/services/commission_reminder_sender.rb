@@ -74,30 +74,59 @@ class CommissionReminderSender
 
   def build_message(amount_due:, watermark:, deadline_at:, kind:)
     deadline_str = deadline_at.strftime("%d/%m/%Y %H:%M")
-    urgency =
-      case kind
-      when "follow_up_24h" then "⏳ Il reste 24h pour régulariser votre situation."
-      when "follow_up_2h"  then "⚠️ Dernier rappel : il reste 2h !"
-      else "Merci de bien vouloir régler sous 48h."
-      end
+    
+    if kind == "follow_up_2h"
+      # Message spécial pour le dernier rappel 2h avant la coupure
+      <<~MSG
+        🚨 URGENT - Dernier rappel : il reste 2h !
 
-    <<~MSG
-      Bonjour #{@user.first_name},
+        Bonjour #{@user.first_name},
 
-      Vous avez un solde de commission à régler de #{format_amount(amount_due)}.
+        Vous avez un solde de commission à régler de #{format_amount(amount_due)}.
 
-      #{urgency}
+        ⚠️ ATTENTION : Si le règlement n'est pas effectué avant le #{deadline_str}, vos bots de trading seront AUTOMATIQUEMENT COUPÉS.
 
-      Lien de paiement : #{PAYMENT_LINK}
-      Réf : #{format_watermark(watermark.round())}
+        🔴 CONSÉQUENCES CRITIQUES :
+        - Les trades en cours ne seront PLUS contrôlés par les bots
+        - Ces trades représentent un DANGER RÉEL pour votre compte
+        - Vous devrez gérer manuellement tous les trades ouverts
+        - Des frais de remise en service de #{format_amount(FEE_AMOUNT)} seront appliqués
 
-      (Merci d'indiquer OBLIGATOIREMENT cette référence dans la remarque du règlement, sinon le paiement ne sera pas pris en compte.)
+        Lien de paiement : #{PAYMENT_LINK}
+        Réf : #{format_watermark(watermark.round())}
 
-      ⚠️ Après le #{deadline_str}, des frais de remise en service de #{format_amount(FEE_AMOUNT)} seront appliqués.
+        (Merci d'indiquer OBLIGATOIREMENT cette référence dans la remarque du règlement, sinon le paiement ne sera pas pris en compte.)
 
-      Merci de votre compréhension. L'équipe Trayo
-    MSG
-    .strip
+        Agissez MAINTENANT pour éviter la coupure de vos bots.
+        L'équipe Trayo
+      MSG
+      .strip
+    else
+      urgency =
+        case kind
+        when "follow_up_24h" then "⏳ Il reste 24h pour régulariser votre situation."
+        when "follow_up_28d" then "⚠️ Rappel important : votre solde de commission est toujours en attente de règlement."
+        else "Merci de bien vouloir régler sous 48h."
+        end
+
+      <<~MSG
+        Bonjour #{@user.first_name},
+
+        Vous avez un solde de commission à régler de #{format_amount(amount_due)}.
+
+        #{urgency}
+
+        Lien de paiement : #{PAYMENT_LINK}
+        Réf : #{format_watermark(watermark.round())}
+
+        (Merci d'indiquer OBLIGATOIREMENT cette référence dans la remarque du règlement, sinon le paiement ne sera pas pris en compte.)
+
+        ⚠️ Après le #{deadline_str}, des frais de remise en service de #{format_amount(FEE_AMOUNT)} seront appliqués.
+
+        Merci de votre compréhension. L'équipe Trayo
+      MSG
+      .strip
+    end
   end
 
   def format_amount(value)
