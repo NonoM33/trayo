@@ -115,6 +115,16 @@
             <% end %>
           </li>
           <li class="sidebar-menu-item">
+            <%= link_to admin_support_tickets_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/support_tickets') ? 'active' : ''}" do %>
+              <i class="fa-icon fa-md fa-headset"></i>
+              <span>SAV</span>
+              <% unread_count = SupportTicket.unread.count %>
+              <% if unread_count > 0 %>
+                <span class="sidebar-badge"><%= unread_count %></span>
+              <% end %>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
             <%= link_to admin_maintenance_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/maintenance') ? 'active' : ''}" do %>
               <%= nav_icon(:maintenance) %>
               <span>Maintenance</span>

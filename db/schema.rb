@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_26_142918) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_26_151901) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -296,6 +296,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_142918) do
     t.index ["user_id"], name: "index_payments_on_user_id"
   end
 
+  create_table "support_tickets", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "phone_number", null: false
+    t.string "status", default: "open", null: false
+    t.string "ticket_number", null: false
+    t.text "subject"
+    t.text "description", null: false
+    t.string "sms_message_id"
+    t.string "created_via", default: "sms"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "read_at"
+    t.index ["created_at"], name: "index_support_tickets_on_created_at"
+    t.index ["phone_number"], name: "index_support_tickets_on_phone_number"
+    t.index ["status"], name: "index_support_tickets_on_status"
+    t.index ["ticket_number"], name: "index_support_tickets_on_ticket_number", unique: true
+    t.index ["user_id"], name: "index_support_tickets_on_user_id"
+  end
+
   create_table "trades", force: :cascade do |t|
     t.bigint "mt5_account_id", null: false
     t.string "trade_id", null: false
@@ -418,6 +437,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_142918) do
   add_foreign_key "invoices", "users"
   add_foreign_key "mt5_accounts", "users"
   add_foreign_key "payments", "users"
+  add_foreign_key "support_tickets", "users"
   add_foreign_key "trades", "mt5_accounts"
   add_foreign_key "vps", "invoices"
   add_foreign_key "vps", "users"

@@ -12,6 +12,7 @@ class User < ApplicationRecord
   has_many :invoices, dependent: :destroy
   has_many :invoice_payments, through: :invoices
   has_many :commission_reminders, dependent: :destroy
+  has_many :support_tickets, dependent: :destroy
 
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, length: { minimum: 6 }, if: -> { new_record? || !password.nil? }

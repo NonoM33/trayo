@@ -34,6 +34,33 @@ class SmsGateway
     {}
   end
 
+  def self.register_webhook(webhook_url:, event: "sms:received", device_id: DEFAULT_DEVICE_ID, webhook_id: nil)
+    webhook_id ||= SecureRandom.uuid
+    
+    body = {
+      deviceId: device_id,
+      event: event,
+      id: webhook_id,
+      url: webhook_url
+    }
+
+    webhook_uri = URI("https://api.sms-gate.app/3rdparty/v1/webhooks")
+    response = perform_request(webhook_uri, body, method: :post)
+    { status: response.code.to_i, body: response.body }
+  rescue => e
+    Rails.logger.error("[SmsGateway] Webhook registration error: #{e.class}: #{e.message}")
+    raise
+  end
+
+  def self.list_webhooks
+    webhook_uri = URI("https://api.sms-gate.app/3rdparty/v1/webhooks")
+    response = perform_request(webhook_uri, nil, method: :get)
+    JSON.parse(response.body)
+  rescue => e
+    Rails.logger.error("[SmsGateway] Webhook list error: #{e.class}: #{e.message}")
+    {}
+  end
+
   def self.perform_request(uri, body = nil, method: :post)
     request = method == :post ? Net::HTTP::Post.new(uri) : Net::HTTP::Get.new(uri)
     request.basic_auth(DEFAULT_USER, DEFAULT_PASSWORD)

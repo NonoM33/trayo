@@ -171,14 +171,18 @@ module Admin
                              .includes(mt5_account: :user)
                              .order(open_time: :desc)
         
+        # Nouveaux tickets SAV non lus
+        @unread_tickets_count = SupportTicket.unread.count
+        @recent_tickets = SupportTicket.recent.limit(5)
+        
         # Prédictions déjà créées au-dessus
         
         # Debug
- "=== DASHBOARD DEBUG ==="
- "TradingBot.count: #{TradingBot.count}"
- "Trade.count: #{Trade.count}"
- "@bot_predictions.count: #{@bot_predictions.count}"
- "======================="
+        "=== DASHBOARD DEBUG ==="
+        "TradingBot.count: #{TradingBot.count}"
+        "Trade.count: #{Trade.count}"
+        "@bot_predictions.count: #{@bot_predictions.count}"
+        "======================="
         
         # Statistiques globales
         @total_active_trades = @active_trades.count

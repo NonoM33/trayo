@@ -20,6 +20,22 @@
     </div>
     
     <% if current_user.is_admin? %>
+      <% if @unread_tickets_count > 0 %>
+        <div class="alert alert-warning" style="margin: 20px 0; padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fa-icon fa-lg fa-exclamation-triangle" style="color: #856404;"></i>
+            <div>
+              <strong style="color: #856404;">Nouveaux tickets SAV</strong>
+              <p style="margin: 5px 0 0 0; color: #856404;">
+                <%= pluralize(@unread_tickets_count, "nouveau ticket", "nouveaux tickets") %> en attente de traitement
+              </p>
+            </div>
+          </div>
+          <%= link_to admin_support_tickets_path, class: "btn btn-primary", style: "background: #856404; border-color: #856404;" do %>
+            Voir les tickets
+          <% end %>
+        </div>
+      <% end %>
     <div class="monitoring-alert-widget">
       <% all_accounts = Mt5Account.where.not(last_heartbeat_at: nil) %>
       <% online_accounts = all_accounts.where("last_heartbeat_at > ?", 30.seconds.ago) %>
