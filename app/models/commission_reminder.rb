@@ -1,5 +1,5 @@
 class CommissionReminder < ApplicationRecord
-  KINDS = %w[initial follow_up_24h follow_up_2h manual].freeze
+  KINDS = %w[initial follow_up_24h follow_up_2h follow_up_28d manual].freeze
   STATUSES = %w[pending sent failed skipped].freeze
 
   belongs_to :user
