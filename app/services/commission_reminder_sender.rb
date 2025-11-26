@@ -74,35 +74,30 @@ class CommissionReminderSender
 
   def build_message(amount_due:, watermark:, deadline_at:, kind:)
     deadline_str = deadline_at.strftime("%d/%m/%Y %H:%M")
-    urgency = case kind
-      when "follow_up_24h"
-        "⏳ Il reste 24h pour régulariser votre situation."
-      when "follow_up_2h"
-        "⚠️ Dernier rappel : il reste 2h !"
-      else
-        "Merci de bien vouloir régler sous 48h."
-    end
+    urgency =
+      case kind
+      when "follow_up_24h" then "⏳ Il reste 24h pour régulariser votre situation."
+      when "follow_up_2h"  then "⚠️ Dernier rappel : il reste 2h !"
+      else "Merci de bien vouloir régler sous 48h."
+      end
 
-    [
-      "",
-      "Bonjour #{@user.first_name},",
-      "",
-      "Vous avez un solde de commission à régler de #{format_amount(amount_due)}.",
-      "",
-      urgency,
-      "",
-      "",
-      "Lien de paiement : #{PAYMENT_LINK}",
-      "Réf : #{format_watermark(watermark.round())}",
-      "",
-      "(Merci d'indiquer OBLIGATOIREMENT cette référence dans la remarque du règlement, sinon le paiement ne sera pas pris en compte.)",
-      "",
-      "⚠️ Après le #{deadline_str}, des frais de remise en service de #{format_amount(FEE_AMOUNT)} seront appliqués.",
-      "",
-      "",
-      "Merci de votre compréhension. L'équipe Trayo",
-      ""
-    ].join("\n")
+    <<~MSG
+      Bonjour #{@user.first_name},
+
+      Vous avez un solde de commission à régler de #{format_amount(amount_due)}.
+
+      #{urgency}
+
+      Lien de paiement : #{PAYMENT_LINK}
+      Réf : #{format_watermark(watermark.round())}
+
+      (Merci d'indiquer OBLIGATOIREMENT cette référence dans la remarque du règlement, sinon le paiement ne sera pas pris en compte.)
+
+      ⚠️ Après le #{deadline_str}, des frais de remise en service de #{format_amount(FEE_AMOUNT)} seront appliqués.
+
+      Merci de votre compréhension. L'équipe Trayo
+    MSG
+    .strip
   end
 
   def format_amount(value)
