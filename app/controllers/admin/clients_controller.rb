@@ -29,6 +29,10 @@ module Admin
       @mt5_accounts = @client.mt5_accounts.reload.includes(:trades, :withdrawals)
       @payments = @client.payments.order(created_at: :asc)
       @credits = @client.credits.order(created_at: :asc)
+      @invoices = @client.invoices.includes(:invoice_items, :invoice_payments).order(created_at: :desc)
+      @invoices_total_due = @invoices.sum(&:balance_due)
+      @available_bot_purchases = @client.bot_purchases.includes(:trading_bot).where(invoice_id: nil)
+      @available_vps = @client.vps.where(invoice_id: nil)
       @average_daily_gain = @client.average_daily_gain
       
       bot_purchases_count = @client.bot_purchases.count

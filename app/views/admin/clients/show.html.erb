@@ -184,6 +184,205 @@
       <% end %>
     </div>
 
+    <% if current_user.is_admin? %>
+    <div class="card">
+      <h2><i class="fa-icon fa-md fa-file-invoice"></i> Factures & Règlements</h2>
+      
+      <div style="background: rgba(138, 255, 163, 0.08); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 12px; padding: 16px; margin-bottom: 18px;">
+        <h3 style="margin-top: 0; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-icon fa-md fa-plus-square"></i> Créer une facture manuelle
+        </h3>
+        <% if @available_bot_purchases.any? || @available_vps.any? %>
+          <%= form_with url: admin_invoices_path, method: :post, local: true, style: "display: flex; flex-direction: column; gap: 12px;" do %>
+            <%= hidden_field_tag :user_id, @client.id %>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+              <div>
+                <label style="font-size: 12px; text-transform: uppercase; color: var(--text-muted);">Échéance</label>
+                <input type="date" name="due_date" value="<%= (Date.current + 7.days).to_s %>"
+                       style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.2); color: white;">
+              </div>
+            </div>
+
+            <% if @available_bot_purchases.any? %>
+              <div>
+                <div style="font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Bots</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                  <% @available_bot_purchases.each do |purchase| %>
+                    <label style="flex: 1 1 240px; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 10px; background: rgba(0,0,0,0.2); display: flex; gap: 10px; align-items: center;">
+                      <input type="checkbox" name="bot_purchase_ids[]" value="<%= purchase.id %>" style="transform: scale(1.2);">
+                      <div>
+                        <div style="font-weight: 600;"><%= purchase.trading_bot.name %></div>
+                        <div style="font-size: 12px; color: var(--text-muted);">
+                          Prix: <%= number_to_currency(purchase.price_paid, unit: "€", format: "%n %u") %>
+                        </div>
+                      </div>
+                    </label>
+                  <% end %>
+                </div>
+              </div>
+            <% else %>
+              <div style="font-size: 12px; color: var(--text-muted);">Aucun bot disponible (tous déjà facturés).</div>
+            <% end %>
+
+            <% if @available_vps.any? %>
+              <div>
+                <div style="font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">VPS</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                  <% @available_vps.each do |vps| %>
+                    <label style="flex: 1 1 240px; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 10px; background: rgba(0,0,0,0.2); display: flex; gap: 10px; align-items: center;">
+                      <input type="checkbox" name="vps_ids[]" value="<%= vps.id %>" style="transform: scale(1.2);">
+                      <div>
+                        <div style="font-weight: 600;"><%= vps.name %></div>
+                        <div style="font-size: 12px; color: var(--text-muted);">
+                          Annuel: <%= number_to_currency(vps.monthly_price.to_f * 12, unit: "€", format: "%n %u") %>
+                        </div>
+                      </div>
+                    </label>
+                  <% end %>
+                </div>
+              </div>
+            <% else %>
+              <div style="font-size: 12px; color: var(--text-muted);">Aucun VPS à facturer.</div>
+            <% end %>
+
+            <button type="submit" class="btn btn-success" style="align-self: flex-start; padding: 10px 20px;">
+              Générer la facture
+            </button>
+          <% end %>
+        <% else %>
+          <div style="font-size: 13px; color: var(--text-muted);">
+            Aucun bot ou VPS disponible pour une nouvelle facture.
+          </div>
+        <% end %>
+      </div>
+
+      <% if @invoices.any? %>
+        <% @invoices.each do |invoice| %>
+          <% badge = invoice.status_badge %>
+          <div style="border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px; margin-bottom: 16px; background: rgba(255,255,255,0.02);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div>
+                <div style="font-size: 14px; color: var(--text-muted);">Facture</div>
+                <div style="font-size: 18px; font-weight: 600; color: white;"><%= invoice.reference %></div>
+                <div style="font-size: 12px; color: var(--text-muted);">
+                  Émise le <%= invoice.created_at.strftime("%d/%m/%Y") %>
+                  <% if invoice.due_date %> · Échéance <%= invoice.due_date.strftime("%d/%m/%Y") %><% end %>
+                </div>
+              </div>
+              <span style="background: <%= badge[:color] %>; color: white; padding: 6px 12px; border-radius: 999px; font-size: 12px;">
+                <%= badge[:label] %>
+              </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px;">
+              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px;">
+                <div style="font-size: 12px; color: var(--text-muted);">Montant total</div>
+                <div style="font-size: 18px; font-weight: 600;"><%= number_to_currency(invoice.total_amount, unit: "€", format: "%n %u") %></div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px;">
+                <div style="font-size: 12px; color: var(--text-muted);">Restant dû</div>
+                <div style="font-size: 18px; font-weight: 600;" class="<%= invoice.balance_due.positive? ? 'negative' : 'positive' %>">
+                  <%= number_to_currency(invoice.balance_due, unit: "€", format: "%n %u") %>
+                </div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px;">
+                <div style="font-size: 12px; color: var(--text-muted);">Source</div>
+                <div style="font-size: 14px; font-weight: 600; text-transform: capitalize;"><%= invoice.source || "N/A" %></div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">Détails</div>
+              <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="text-align: left; font-size: 12px; color: var(--text-muted);">
+                    <th>Élément</th>
+                    <th style="width: 120px;">Quantité</th>
+                    <th style="width: 140px;">Prix</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% invoice.invoice_items.each do |item| %>
+                    <tr>
+                      <td style="padding: 6px 0;"><%= item.label %></td>
+                      <td><%= item.quantity %></td>
+                      <td><%= number_to_currency(item.total_price, unit: "€", format: "%n %u") %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">Règlements</div>
+              <% if invoice.invoice_payments.any? %>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr style="text-align: left; font-size: 12px; color: var(--text-muted);">
+                      <th>Date</th>
+                      <th>Montant</th>
+                      <th>Méthode</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% invoice.invoice_payments.each do |payment| %>
+                      <tr>
+                        <td style="padding: 6px 0;"><%= payment.paid_at.strftime("%d/%m/%Y") %></td>
+                        <td><%= number_to_currency(payment.amount, unit: "€", format: "%n %u") %></td>
+                        <td><%= payment.payment_method.presence || "N/A" %></td>
+                        <td><%= payment.notes.presence || "-" %></td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              <% else %>
+                <div style="font-size: 12px; color: var(--text-muted);">Aucun règlement enregistré</div>
+              <% end %>
+            </div>
+
+            <% if invoice.balance_due.positive? %>
+              <div style="margin-top: 12px;">
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">Ajouter un règlement</div>
+                <%= form_with url: admin_invoice_payments_path(invoice), method: :post, local: true, style: "display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;" do %>
+                  <div style="flex: 1 1 160px;">
+                    <label style="font-size: 12px; text-transform: uppercase;">Montant</label>
+                    <input type="number" name="amount" step="0.01" min="0" value="<%= invoice.balance_due %>" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
+                  </div>
+                  <div style="flex: 1 1 160px;">
+                    <label style="font-size: 12px; text-transform: uppercase;">Date</label>
+                    <input type="date" name="paid_at" value="<%= Date.current %>" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
+                  </div>
+                  <div style="flex: 1 1 160px;">
+                    <label style="font-size: 12px; text-transform: uppercase;">Méthode</label>
+                    <select name="payment_method" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
+                      <option value="cash">Cash</option>
+                      <option value="bank_transfer">Virement</option>
+                      <option value="paypal">PayPal</option>
+                      <option value="credit_card">Carte</option>
+                      <option value="check">Chèque</option>
+                      <option value="other">Autre</option>
+                    </select>
+                  </div>
+                  <div style="flex: 2 1 240px;">
+                    <label style="font-size: 12px; text-transform: uppercase;">Notes</label>
+                    <input type="text" name="notes" placeholder="Référence, conditions, etc." style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
+                  </div>
+                  <button type="submit" class="btn btn-success" style="padding: 10px 18px;">
+                    Enregistrer le règlement
+                  </button>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      <% else %>
+        <p style="color: var(--text-muted);">Aucune facture pour ce client.</p>
+      <% end %>
+    </div>
+    <% end %>
+
     <% if flash[:notice] %>
       <div class="notice"><%= flash[:notice] %></div>
     <% end %>
