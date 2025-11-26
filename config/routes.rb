@@ -14,6 +14,9 @@ Rails.application.routes.draw do
   # Maintenance page
   get "maintenance", to: "maintenance#show"
 
+  # Webhooks
+  post "webhooks/sms", to: "webhooks/sms#receive"
+
   root "admin/sessions#new"
   
   get "join", to: "onboarding#landing"
@@ -119,6 +122,12 @@ Rails.application.routes.draw do
     end
 
     resources :sms_logs, only: [:index]
+    
+    resources :support_tickets, only: [:index, :show, :update, :destroy] do
+      member do
+        post :mark_as_read
+      end
+    end
     
     resources :invitations, only: [:index, :new, :create, :show, :destroy]
     
