@@ -4,7 +4,6 @@ FactoryBot.define do
     sequence(:mt5_id) { |n| "123456#{n}" }
     account_name { Faker::Company.name }
     balance { 10000.0 }
-    equity { 10000.0 }
     initial_balance { 10000.0 }
     high_watermark { 10000.0 }
     total_withdrawals { 0.0 }
