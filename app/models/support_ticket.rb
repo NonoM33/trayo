@@ -2,6 +2,7 @@ class SupportTicket < ApplicationRecord
   STATUSES = %w[open in_progress waiting_for_user closed].freeze
 
   belongs_to :user, optional: true
+  has_many :ticket_comments, dependent: :destroy
 
   validates :phone_number, presence: true
   validates :status, inclusion: { in: STATUSES }
@@ -9,6 +10,7 @@ class SupportTicket < ApplicationRecord
   validates :description, presence: true
 
   before_validation :generate_ticket_number, on: :create
+  before_validation :generate_public_token, on: :create
   before_validation :normalize_phone_number, on: :create
 
   scope :open, -> { where(status: ["open", "in_progress", "waiting_for_user"]) }
@@ -44,6 +46,18 @@ class SupportTicket < ApplicationRecord
     end
   end
 
+  def public_url
+    Rails.application.routes.url_helpers.ticket_path(public_token)
+  end
+
+  def public_comments
+    ticket_comments.visible.recent
+  end
+
+  def internal_comments
+    ticket_comments.internal.recent
+  end
+
   private
 
   def generate_ticket_number
@@ -52,6 +66,15 @@ class SupportTicket < ApplicationRecord
     loop do
       self.ticket_number = "TKT-#{Time.current.strftime('%Y%m%d')}-#{SecureRandom.hex(4).upcase}"
       break unless self.class.exists?(ticket_number: ticket_number)
+    end
+  end
+
+  def generate_public_token
+    return if public_token.present?
+
+    loop do
+      self.public_token = SecureRandom.urlsafe_base64(32)
+      break unless self.class.exists?(public_token: public_token)
     end
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_26_151901) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -308,11 +308,28 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_151901) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "read_at"
+    t.string "public_token"
     t.index ["created_at"], name: "index_support_tickets_on_created_at"
     t.index ["phone_number"], name: "index_support_tickets_on_phone_number"
+    t.index ["public_token"], name: "index_support_tickets_on_public_token", unique: true
     t.index ["status"], name: "index_support_tickets_on_status"
     t.index ["ticket_number"], name: "index_support_tickets_on_ticket_number", unique: true
     t.index ["user_id"], name: "index_support_tickets_on_user_id"
+  end
+
+  create_table "ticket_comments", force: :cascade do |t|
+    t.bigint "support_ticket_id", null: false
+    t.bigint "user_id"
+    t.text "content", null: false
+    t.boolean "is_internal", default: false
+    t.string "author_name"
+    t.string "author_email"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_ticket_comments_on_created_at"
+    t.index ["is_internal"], name: "index_ticket_comments_on_is_internal"
+    t.index ["support_ticket_id"], name: "index_ticket_comments_on_support_ticket_id"
+    t.index ["user_id"], name: "index_ticket_comments_on_user_id"
   end
 
   create_table "trades", force: :cascade do |t|
@@ -438,6 +455,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_151901) do
   add_foreign_key "mt5_accounts", "users"
   add_foreign_key "payments", "users"
   add_foreign_key "support_tickets", "users"
+  add_foreign_key "ticket_comments", "support_tickets"
+  add_foreign_key "ticket_comments", "users"
   add_foreign_key "trades", "mt5_accounts"
   add_foreign_key "vps", "invoices"
   add_foreign_key "vps", "users"

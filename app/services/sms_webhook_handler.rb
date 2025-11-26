@@ -149,10 +149,13 @@ class SmsWebhookHandler
   end
 
   def send_ticket_confirmation(ticket, user)
+    base_url = ENV.fetch("APP_BASE_URL", Rails.application.routes.url_helpers.root_url(host: ENV.fetch("HOST", "localhost:3000")))
+    ticket_url = "#{base_url.chomp('/')}/ticket/#{ticket.public_token}"
+    
     response_text = if user
-      "Bonjour #{user.first_name}, votre demande a bien été prise en compte. Numéro de ticket : #{ticket.ticket_number}. Notre équipe vous répondra dans les plus brefs délais."
+      "Bonjour #{user.first_name}, votre demande a bien été prise en compte.\n\n📋 Numéro de ticket : #{ticket.ticket_number}\n🔗 Suivez votre ticket : #{ticket_url}\n\nNotre équipe vous répondra dans les plus brefs délais."
     else
-      "Votre demande a bien été prise en compte. Numéro de ticket : #{ticket.ticket_number}. Notre équipe vous répondra dans les plus brefs délais."
+      "Votre demande a bien été prise en compte.\n\n📋 Numéro de ticket : #{ticket.ticket_number}\n🔗 Suivez votre ticket : #{ticket_url}\n\nNotre équipe vous répondra dans les plus brefs délais."
     end
 
     send_response(response_text)
