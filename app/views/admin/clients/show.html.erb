@@ -259,67 +259,74 @@
 
       <% if @invoices.any? %>
         <% @invoices.each do |invoice| %>
+          <% expanded = invoice.balance_due.positive? ? true : false %>
           <% badge = invoice.status_badge %>
-          <div style="border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px; margin-bottom: 16px; background: rgba(255,255,255,0.02);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div class="invoice-card">
+            <button class="invoice-summary" onclick="toggleInvoice('<%= invoice.id %>')" type="button" aria-expanded="<%= expanded %>">
               <div>
-                <div style="font-size: 14px; color: var(--text-muted);">Facture</div>
-                <div style="font-size: 18px; font-weight: 600; color: white;"><%= invoice.reference %></div>
-                <div style="font-size: 12px; color: var(--text-muted);">
+                <div class="invoice-ref"><%= invoice.reference %></div>
+                <div class="invoice-meta">
                   Émise le <%= invoice.created_at.strftime("%d/%m/%Y") %>
                   <% if invoice.due_date %> · Échéance <%= invoice.due_date.strftime("%d/%m/%Y") %><% end %>
                 </div>
               </div>
-              <span style="background: <%= badge[:color] %>; color: white; padding: 6px 12px; border-radius: 999px; font-size: 12px;">
-                <%= badge[:label] %>
-              </span>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px;">
-              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px;">
-                <div style="font-size: 12px; color: var(--text-muted);">Montant total</div>
-                <div style="font-size: 18px; font-weight: 600;"><%= number_to_currency(invoice.total_amount, unit: "€", format: "%n %u") %></div>
+              <div class="invoice-summary-right">
+                <div class="invoice-amount">
+                  <span>Total</span>
+                  <strong><%= number_to_currency(invoice.total_amount, unit: "€", format: "%n %u") %></strong>
+                </div>
+                <div class="invoice-balance <%= invoice.balance_due.positive? ? 'negative' : 'positive' %>">
+                  <span>Restant</span>
+                  <strong><%= number_to_currency(invoice.balance_due, unit: "€", format: "%n %u") %></strong>
+                </div>
+                <span class="invoice-badge" style="background: <%= badge[:color] %>;">
+                  <%= badge[:label] %>
+                </span>
+                <i class="fa-icon" id="invoice-chevron-<%= invoice.id %>" style="margin-left: 12px; transition: transform 0.2s; transform: rotate(<%= expanded ? 180 : 0 %>deg);">⌄</i>
               </div>
-              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px;">
-                <div style="font-size: 12px; color: var(--text-muted);">Restant dû</div>
-                <div style="font-size: 18px; font-weight: 600;" class="<%= invoice.balance_due.positive? ? 'negative' : 'positive' %>">
-                  <%= number_to_currency(invoice.balance_due, unit: "€", format: "%n %u") %>
+            </button>
+
+            <div id="invoice-details-<%= invoice.id %>" class="invoice-details" style="display: <%= expanded ? 'block' : 'none' %>;">
+              <div class="invoice-grid">
+                <div>
+                  <div class="label">Source</div>
+                  <div class="value"><%= invoice.source || "N/A" %></div>
+                </div>
+                <div>
+                  <div class="label">Statut</div>
+                  <div class="value"><%= badge[:label] %></div>
+                </div>
+                <div>
+                  <div class="label">Émise par</div>
+                  <div class="value"><%= invoice.metadata&.dig("created_by") ? User.find_by(id: invoice.metadata["created_by"])&.email : "Système" %></div>
                 </div>
               </div>
-              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px;">
-                <div style="font-size: 12px; color: var(--text-muted);">Source</div>
-                <div style="font-size: 14px; font-weight: 600; text-transform: capitalize;"><%= invoice.source || "N/A" %></div>
-              </div>
-            </div>
 
-            <div style="margin-bottom: 12px;">
-              <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">Détails</div>
-              <table style="width: 100%; border-collapse: collapse;">
+              <div class="section-title">Détails</div>
+              <table class="table-flat">
                 <thead>
-                  <tr style="text-align: left; font-size: 12px; color: var(--text-muted);">
+                  <tr>
                     <th>Élément</th>
-                    <th style="width: 120px;">Quantité</th>
-                    <th style="width: 140px;">Prix</th>
+                    <th>Quantité</th>
+                    <th>Prix</th>
                   </tr>
                 </thead>
                 <tbody>
                   <% invoice.invoice_items.each do |item| %>
                     <tr>
-                      <td style="padding: 6px 0;"><%= item.label %></td>
+                      <td><%= item.label %></td>
                       <td><%= item.quantity %></td>
                       <td><%= number_to_currency(item.total_price, unit: "€", format: "%n %u") %></td>
                     </tr>
                   <% end %>
                 </tbody>
               </table>
-            </div>
 
-            <div style="margin-bottom: 12px;">
-              <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">Règlements</div>
+              <div class="section-title">Règlements</div>
               <% if invoice.invoice_payments.any? %>
-                <table style="width: 100%; border-collapse: collapse;">
+                <table class="table-flat">
                   <thead>
-                    <tr style="text-align: left; font-size: 12px; color: var(--text-muted);">
+                    <tr>
                       <th>Date</th>
                       <th>Montant</th>
                       <th>Méthode</th>
@@ -329,7 +336,7 @@
                   <tbody>
                     <% invoice.invoice_payments.each do |payment| %>
                       <tr>
-                        <td style="padding: 6px 0;"><%= payment.paid_at.strftime("%d/%m/%Y") %></td>
+                        <td><%= payment.paid_at.strftime("%d/%m/%Y") %></td>
                         <td><%= number_to_currency(payment.amount, unit: "€", format: "%n %u") %></td>
                         <td><%= payment.payment_method.presence || "N/A" %></td>
                         <td><%= payment.notes.presence || "-" %></td>
@@ -338,25 +345,23 @@
                   </tbody>
                 </table>
               <% else %>
-                <div style="font-size: 12px; color: var(--text-muted);">Aucun règlement enregistré</div>
+                <div class="empty-text">Aucun règlement enregistré</div>
               <% end %>
-            </div>
 
-            <% if invoice.balance_due.positive? %>
-              <div style="margin-top: 12px;">
-                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">Ajouter un règlement</div>
-                <%= form_with url: admin_invoice_payments_path(invoice), method: :post, local: true, style: "display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;" do %>
-                  <div style="flex: 1 1 160px;">
-                    <label style="font-size: 12px; text-transform: uppercase;">Montant</label>
-                    <input type="number" name="amount" step="0.01" min="0" value="<%= invoice.balance_due %>" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
+              <% if invoice.balance_due.positive? %>
+                <div class="section-title">Ajouter un règlement</div>
+                <%= form_with url: admin_invoice_payments_path(invoice), method: :post, local: true, class: "payments-form" do %>
+                  <div>
+                    <label>Montant</label>
+                    <input type="number" name="amount" step="0.01" min="0" value="<%= invoice.balance_due %>" required>
                   </div>
-                  <div style="flex: 1 1 160px;">
-                    <label style="font-size: 12px; text-transform: uppercase;">Date</label>
-                    <input type="date" name="paid_at" value="<%= Date.current %>" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
+                  <div>
+                    <label>Date</label>
+                    <input type="date" name="paid_at" value="<%= Date.current %>">
                   </div>
-                  <div style="flex: 1 1 160px;">
-                    <label style="font-size: 12px; text-transform: uppercase;">Méthode</label>
-                    <select name="payment_method" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
+                  <div>
+                    <label>Méthode</label>
+                    <select name="payment_method">
                       <option value="cash">Cash</option>
                       <option value="bank_transfer">Virement</option>
                       <option value="paypal">PayPal</option>
@@ -365,16 +370,16 @@
                       <option value="other">Autre</option>
                     </select>
                   </div>
-                  <div style="flex: 2 1 240px;">
-                    <label style="font-size: 12px; text-transform: uppercase;">Notes</label>
-                    <input type="text" name="notes" placeholder="Référence, conditions, etc." style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
+                  <div class="notes-field">
+                    <label>Notes</label>
+                    <input type="text" name="notes" placeholder="Référence, conditions, etc.">
                   </div>
-                  <button type="submit" class="btn btn-success" style="padding: 10px 18px;">
+                  <button type="submit" class="btn btn-success">
                     Enregistrer le règlement
                   </button>
                 <% end %>
-              </div>
-            <% end %>
+              <% end %>
+            </div>
           </div>
         <% end %>
       <% else %>
@@ -1308,6 +1313,16 @@
         <% end %>
       </div>
     </div>
+
+    <script>
+      function toggleInvoice(id) {
+        const details = document.getElementById(`invoice-details-${id}`);
+        const icon = document.getElementById(`invoice-chevron-${id}`);
+        const isVisible = details.style.display !== 'none';
+        details.style.display = isVisible ? 'none' : 'block';
+        icon.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)';
+      }
+    </script>
     <% end %>
 
     <% if current_user.is_admin? %>
