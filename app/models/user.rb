@@ -80,6 +80,10 @@ class User < ApplicationRecord
     invoices.sum(:balance_due).round(2)
   end
 
+  def total_balance_snapshot
+    mt5_accounts.sum(:balance).to_f.round(2)
+  end
+
   def average_daily_gain(days: 30)
     return 0 unless trades.exists?
     from_date = days.days.ago.beginning_of_day

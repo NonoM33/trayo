@@ -33,6 +33,7 @@ module Admin
       @invoices_total_due = @invoices.sum(&:balance_due)
       @available_bot_purchases = @client.bot_purchases.includes(:trading_bot).where(invoice_id: nil)
       @available_vps = @client.vps.where(invoice_id: nil)
+    @recent_commission_reminders = @client.commission_reminders.recent.limit(5)
       @average_daily_gain = @client.average_daily_gain
       
       bot_purchases_count = @client.bot_purchases.count
@@ -237,6 +238,28 @@ module Admin
       else
         redirect_to admin_client_path(@client), notice: "Aucun nouveau bot détecté. Tous les bots correspondants sont déjà assignés."
       end
+    end
+
+    def send_commission_sms
+      @client = User.find(params[:id])
+      if @client.phone.blank?
+        redirect_to admin_client_path(@client), alert: "Pas de numéro enregistré pour ce client."
+        return
+      end
+
+      result = CommissionReminderSender.new(@client).call(kind: "manual", force: true)
+
+      if result.success?
+        redirect_to admin_client_path(@client), notice: "SMS envoyé à #{@client.phone}."
+      else
+        redirect_to admin_client_path(@client), alert: "Échec de l'envoi : #{result.message}"
+      end
+    end
+
+    def sms_preview
+      @client = User.find(params[:id])
+      result = CommissionReminderSender.new(@client).preview(kind: "manual")
+      render partial: "admin/clients/sms_preview_modal", locals: { client: @client, result: result }
     end
 
     private

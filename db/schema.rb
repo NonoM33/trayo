@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_26_120000) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_26_142918) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -109,6 +109,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_120000) do
     t.string "button_text", limit: 255
     t.string "button_url", limit: 255
     t.index ["is_active", "start_date", "end_date"], name: "index_campaigns_on_is_active_and_start_date_and_end_date"
+  end
+
+  create_table "commission_reminders", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "kind", default: "initial", null: false
+    t.decimal "amount", precision: 15, scale: 2, default: "0.0"
+    t.decimal "watermark_reference", precision: 15, scale: 2, default: "0.0"
+    t.string "phone_number"
+    t.string "status", default: "pending", null: false
+    t.datetime "deadline_at"
+    t.datetime "sent_at"
+    t.text "response_payload"
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "message_content"
+    t.string "external_id"
+    t.index ["user_id", "kind", "created_at"], name: "idx_commission_reminders_user_kind_created"
+    t.index ["user_id"], name: "index_commission_reminders_on_user_id"
   end
 
   create_table "credits", force: :cascade do |t|
@@ -390,6 +409,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_120000) do
   add_foreign_key "bot_purchases", "invoices"
   add_foreign_key "bot_purchases", "trading_bots"
   add_foreign_key "bot_purchases", "users"
+  add_foreign_key "commission_reminders", "users"
   add_foreign_key "credits", "users"
   add_foreign_key "deposits", "mt5_accounts"
   add_foreign_key "invoice_items", "invoices"

@@ -72,11 +72,204 @@
     align-items: center;
     margin-bottom: 1rem;
   }
+
+  .invoice-card {
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    background: rgba(255,255,255,0.02);
+    overflow: hidden;
+  }
+
+  .invoice-summary {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: inherit;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .invoice-summary-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .invoice-amount span,
+  .invoice-balance span {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .invoice-amount strong,
+  .invoice-balance strong {
+    font-size: 15px;
+  }
+
+  .invoice-badge {
+    color: white;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .invoice-details {
+    padding: 0 16px 16px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .invoice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .section-title {
+    font-size: 14px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 18px 0 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .table-flat {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+  }
+
+  .table-flat th {
+    text-align: left;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .table-flat td {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .payments-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: end;
+  }
+
+  .payments-form button {
+    grid-column: span 2;
+    justify-self: flex-start;
+  }
+
+  .notes-field {
+    grid-column: span 2;
+  }
+
+  .payments-form input,
+  .payments-form select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(0,0,0,0.2);
+    color: white;
+  }
+
+  .payments-form label {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .empty-text {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
   
   .empty-state {
     text-align: center;
     padding: 3rem;
     color: var(--text-muted);
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .status-pill.status-sent { background: rgba(16,185,129,0.2); color: #10b981; }
+  .status-pill.status-pending { background: rgba(245,158,11,0.2); color: #f59e0b; }
+  .status-pill.status-failed { background: rgba(239,68,68,0.2); color: #ef4444; }
+  .status-pill.status-skipped { background: rgba(148,163,184,0.2); color: #94a3b8; }
+
+  .sms-message {
+    max-width: 420px;
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .modal-card {
+    background: var(--bg-card);
+    padding: 24px;
+    border-radius: 16px;
+    width: min(520px, 90vw);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    position: relative;
+  }
+
+  .modal-card h3 {
+    margin-top: 0;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .sms-preview-box {
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 14px;
+    margin: 16px 0;
+    line-height: 1.5;
   }
   
   .empty-state-icon {
@@ -171,6 +364,12 @@
       <%= render 'admin/shared/navbar' %>
       
       <div class="container">
+    <% if flash[:notice] %>
+      <div class="notice"><%= flash[:notice] %></div>
+    <% end %>
+    <% if flash[:alert] %>
+      <div class="alert"><%= flash[:alert] %></div>
+    <% end %>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
       <% if current_user.is_admin? %>
         <%= link_to admin_clients_path, class: "back-link", style: "margin: 0;" do %>
@@ -184,9 +383,27 @@
       <% end %>
     </div>
 
+    <% if @client.phone.blank? %>
+      <div style="background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px;">
+        ⚠️ Aucun numéro renseigné. Ajoute un téléphone pour activer les rappels SMS de commission.
+      </div>
+    <% end %>
+
     <% if current_user.is_admin? %>
     <div class="card">
-      <h2><i class="fa-icon fa-md fa-file-invoice"></i> Factures & Règlements</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+        <h2 style="margin: 0;"><i class="fa-icon fa-md fa-file-invoice"></i> Factures & Règlements</h2>
+        <% if @client.phone.present? %>
+          <%= link_to "Prévisualiser le SMS", sms_preview_admin_client_path(@client),
+                class: "btn btn-outline",
+                data: { turbo_frame: "sms_modal" } %>
+        <% else %>
+          <button class="btn btn-outline" style="opacity: 0.5; cursor: not-allowed;" disabled>
+            Enregistrer un numéro pour envoyer un SMS
+          </button>
+        <% end %>
+      </div>
+    <%= turbo_frame_tag "sms_modal" %>
       
       <div style="background: rgba(138, 255, 163, 0.08); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 12px; padding: 16px; margin-bottom: 18px;">
         <h3 style="margin-top: 0; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
@@ -384,6 +601,42 @@
         <% end %>
       <% else %>
         <p style="color: var(--text-muted);">Aucune facture pour ce client.</p>
+      <% end %>
+
+      <% if @recent_commission_reminders.any? %>
+        <div class="section-title" style="margin-top: 24px;">Historique des SMS</div>
+        <table class="table-flat">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Montant</th>
+              <th>Référence</th>
+              <th>Message</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @recent_commission_reminders.each do |reminder| %>
+              <tr>
+                <td><%= reminder.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+                <td><%= reminder.kind.humanize %></td>
+                <td><%= number_to_currency(reminder.amount, unit: "€", format: "%n %u") %></td>
+                <td><%= reminder.watermark_reference.present? ? "REF #{reminder.watermark_reference.round(2)}" : "-" %></td>
+                <td>
+                  <div class="sms-message" title="<%= reminder.message_content %>">
+                    <%= reminder.message_content.presence || "-" %>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-pill status-<%= reminder.status %>">
+                    <%= reminder.status_label %>
+                  </span>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       <% end %>
     </div>
     <% end %>

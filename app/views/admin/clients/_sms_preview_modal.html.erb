@@ -1,0 +1,41 @@
+<turbo-frame id="sms_modal">
+  <div class="modal-overlay" onclick="closeSmsModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation();">
+      <button class="modal-close" onclick="closeSmsModal(event)">×</button>
+      <% if result.success? %>
+        <h3>SMS prêt à envoyer</h3>
+        <p>
+          <strong>Client :</strong> <%= client.email %><br>
+          <strong>Téléphone :</strong> <%= result.data[:phone] %><br>
+          <strong>Montant dû :</strong> <%= number_to_currency(result.data[:amount], unit: "€", format: "%n %u") %><br>
+          <strong>Référence :</strong> REF <%= result.data[:watermark].round(2) %>
+        </p>
+
+        <div class="sms-preview-box">
+          <%= result.data[:text] %>
+        </div>
+
+        <form action="<%= send_commission_sms_admin_client_path(client) %>" method="post" style="margin-top: 16px;">
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+          <button type="submit" class="btn btn-success">Envoyer maintenant</button>
+          <button type="button" class="btn" style="margin-left: 8px;" onclick="closeSmsModal(event)">Annuler</button>
+        </form>
+      <% else %>
+        <h3>Envoi impossible</h3>
+        <p><%= result.message %></p>
+        <button type="button" class="btn btn-outline" onclick="closeSmsModal(event)">Fermer</button>
+      <% end %>
+    </div>
+  </div>
+</turbo-frame>
+
+<script>
+  function closeSmsModal(event) {
+    event.preventDefault();
+    const frame = document.getElementById('sms_modal');
+    if (frame) {
+      frame.innerHTML = '';
+    }
+  }
+</script>
+

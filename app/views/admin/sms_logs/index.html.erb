@@ -1,0 +1,48 @@
+<div class="container">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <h1>Logs SMS</h1>
+    <%= link_to "Retour aux Clients", admin_clients_path, class: "btn btn-outline" %>
+  </div>
+
+  <div class="card">
+    <table class="table-flat">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Client</th>
+          <th>Téléphone</th>
+          <th>Type</th>
+          <th>Montant</th>
+          <th>REF</th>
+          <th>Message</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @logs.each do |log| %>
+          <tr>
+            <td><%= log.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+            <td><%= link_to log.user.email, admin_client_path(log.user) %></td>
+            <td><%= log.phone_number %></td>
+            <td><%= log.kind.humanize %></td>
+            <td><%= number_to_currency(log.amount, unit: "€", format: "%n %u") %></td>
+            <td><%= log.watermark_reference.present? ? "REF #{log.watermark_reference.round(2)}" : "-" %></td>
+            <td>
+              <div class="sms-message" title="<%= log.message_content %>">
+                <%= log.short_message %>
+              </div>
+            </td>
+            <td>
+              <span class="status-pill status-<%= log.status %>"><%= log.status_label %></span>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 12px; text-align: right;">
+      <%= paginate @logs if @logs.respond_to?(:total_pages) %>
+    </div>
+  </div>
+</div>
+
