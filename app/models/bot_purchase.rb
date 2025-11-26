@@ -1,11 +1,16 @@
 class BotPurchase < ApplicationRecord
+  BILLING_STATUSES = %w[pending partial paid].freeze
+
   belongs_to :user
   belongs_to :trading_bot
+  belongs_to :invoice, optional: true
 
   validates :price_paid, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :status, presence: true, inclusion: { in: %w[active inactive] }
+  validates :billing_status, inclusion: { in: BILLING_STATUSES }
 
   scope :active, -> { where(status: "active") }
+  scope :awaiting_payment, -> { where(billing_status: %w[pending partial]) }
   scope :running, -> { where(is_running: true) }
   scope :stopped, -> { where(is_running: false) }
   scope :recent, -> { order(created_at: :desc) }
@@ -79,6 +84,15 @@ class BotPurchase < ApplicationRecord
 
   def status_badge
     is_running? ? '🟢 Actif' : '🔴 Inactif'
+  end
+
+  def billing_status_badge
+    case billing_status
+    when "paid" then { label: "Réglé", color: "#16a34a" }
+    when "partial" then { label: "Partiel", color: "#facc15" }
+    else
+      { label: "En attente", color: "#f87171" }
+    end
   end
 
   def status_color

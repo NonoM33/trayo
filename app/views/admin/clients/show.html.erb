@@ -519,6 +519,18 @@
             <%= number_to_currency(@client.total_validated_payments, unit: "€", format: "%n %u") %> payés
           </div>
         </div>
+        <% if current_user.is_admin? %>
+        <% outstanding_count = @invoices.select { |inv| inv.pending? || inv.partial? }.count %>
+        <div class="info-item">
+          <div class="info-label">Factures à Régler</div>
+          <div class="info-value <%= @invoices_total_due.positive? ? 'negative' : 'positive' %>">
+            <%= number_to_currency(@invoices_total_due, unit: "€", format: "%n %u") %>
+          </div>
+          <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
+            <%= outstanding_count %> facture(s) en attente
+          </div>
+        </div>
+        <% end %>
       </div>
 
       <% if current_user.is_admin? %>
@@ -1212,6 +1224,12 @@
                   </td>
                   <td>
                     <%= purchase.status_badge %>
+                    <% billing_badge = purchase.billing_status_badge %>
+                    <div style="margin-top: 6px;">
+                      <span style="background: <%= billing_badge[:color] %>; color: white; padding: 3px 8px; border-radius: 999px; font-size: 10px;">
+                        <%= billing_badge[:label] %>
+                      </span>
+                    </div>
                     <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
                       <%= purchase.trades_count %> trades
                     </div>
@@ -1459,6 +1477,12 @@
                   <span style="background: <%= vps.status_color %>; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700;">
                     <%= vps.status_icon %> <%= vps.status_label %>
                   </span>
+                  <% vps_badge = vps.billing_status_badge %>
+                  <div style="margin-top: 6px;">
+                    <span style="background: <%= vps_badge[:color] %>; color: white; padding: 3px 8px; border-radius: 999px; font-size: 10px;">
+                      <%= vps_badge[:label] %>
+                    </span>
+                  </div>
                 </td>
                 <td><%= number_to_currency(vps.monthly_price, unit: "€", format: "%n %u") %></td>
                 <td><%= vps.ordered_at&.strftime("%d/%m/%Y") || '-' %></td>

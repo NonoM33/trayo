@@ -1,5 +1,8 @@
 class Vps < ApplicationRecord
+  BILLING_STATUSES = %w[pending partial paid].freeze
+
   belongs_to :user
+  belongs_to :invoice, optional: true
   
   before_save :set_renewal_date_if_needed
   after_save :update_renewal_date_from_first_trade
@@ -16,6 +19,7 @@ class Vps < ApplicationRecord
   validates :name, presence: true
   validates :status, presence: true, inclusion: { in: STATUSES.keys }
   validates :monthly_price, numericality: { greater_than_or_equal_to: 0 }
+  validates :billing_status, inclusion: { in: BILLING_STATUSES }
   
   scope :ordered, -> { where(status: 'ordered') }
   scope :configuring, -> { where(status: 'configuring') }
@@ -78,6 +82,15 @@ class Vps < ApplicationRecord
   
   def is_operational?
     %w[ready active].include?(status)
+  end
+
+  def billing_status_badge
+    case billing_status
+    when "paid" then { label: "Réglé", color: "#16a34a" }
+    when "partial" then { label: "Partiel", color: "#facc15" }
+    else
+      { label: "En attente", color: "#f87171" }
+    end
   end
   
   def first_trade_date

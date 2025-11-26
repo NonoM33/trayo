@@ -76,6 +76,10 @@ class User < ApplicationRecord
     credits.sum(:amount) || 0
   end
 
+  def outstanding_invoices_total
+    invoices.sum(:balance_due).round(2)
+  end
+
   def average_daily_gain(days: 30)
     return 0 unless trades.exists?
     from_date = days.days.ago.beginning_of_day
