@@ -99,6 +99,8 @@ class CommissionReminderSender
 
         Agissez MAINTENANT pour éviter la coupure de vos bots.
         L'équipe Trayo
+
+        💬 Besoin d'aide ? Envoyez "aide" par SMS.
       MSG
       .strip
     else
@@ -124,6 +126,8 @@ class CommissionReminderSender
         ⚠️ Après le #{deadline_str}, des frais de remise en service de #{format_amount(FEE_AMOUNT)} seront appliqués.
 
         Merci de votre compréhension. L'équipe Trayo
+
+        💬 Besoin d'aide ? Envoyez "aide" par SMS.
       MSG
       .strip
     end
