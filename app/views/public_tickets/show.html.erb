@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ticket #<%= @ticket.ticket_number %> - Trayo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .header h1 { font-size: 24px; margin-bottom: 10px; }
+    .header .ticket-number { font-size: 18px; opacity: 0.9; }
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    .status-open { background: #ffc107; color: #000; }
+    .status-in_progress { background: #17a2b8; color: #fff; }
+    .status-waiting_for_user { background: #6c757d; color: #fff; }
+    .status-closed { background: #28a745; color: #fff; }
+    .content {
+      padding: 30px;
+    }
+    .info-section {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e9ecef;
+    }
+    .info-section:last-child { border-bottom: none; }
+    .info-section h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .description {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .comments {
+      margin-top: 30px;
+    }
+    .comment {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border-left: 4px solid #667eea;
+    }
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .comment-author { font-weight: 600; color: #667eea; }
+    .comment-date { color: #6c757d; }
+    .comment-content {
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .form-section {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #e9ecef;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #333;
+    }
+    input[type="text"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    .alert {
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Ticket Support</h1>
+      <div class="ticket-number">#<%= @ticket.ticket_number %></div>
+      <div class="status-badge status-<%= @ticket.status %>">
+        <%= @ticket.status_label %>
+      </div>
+    </div>
+
+    <div class="content">
+      <% if notice %>
+        <div class="alert alert-success"><%= notice %></div>
+      <% end %>
+      <% if alert %>
+        <div class="alert alert-error"><%= alert %></div>
+      <% end %>
+
+      <div class="info-section">
+        <h2>Description du problème</h2>
+        <div class="description"><%= @ticket.description %></div>
+      </div>
+
+      <% if @comments.any? %>
+        <div class="info-section comments">
+          <h2>Échanges</h2>
+          <% @comments.each do |comment| %>
+            <div class="comment">
+              <div class="comment-header">
+                <span class="comment-author">
+                  <%= comment.author_display_name %>
+                  <% if comment.is_admin_comment? %>
+                    <span style="background: #667eea; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 8px;">Support</span>
+                  <% end %>
+                </span>
+                <span class="comment-date"><%= comment.created_at.strftime("%d/%m/%Y %H:%M") %></span>
+              </div>
+              <div class="comment-content"><%= comment.content %></div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div class="form-section">
+        <h2>Ajouter un commentaire</h2>
+        <%= form_with url: ticket_comment_path(@ticket.public_token), method: :post, local: true do |f| %>
+          <div class="form-group">
+            <%= f.label :name, "Votre nom" %>
+            <%= f.text_field :name, placeholder: "Votre nom", class: "form-control" %>
+          </div>
+          <div class="form-group">
+            <%= f.label :email, "Votre email (optionnel)" %>
+            <%= f.email_field :email, placeholder: "votre@email.com", class: "form-control" %>
+          </div>
+          <div class="form-group">
+            <%= f.label :content, "Votre message" %>
+            <%= f.text_area :content, placeholder: "Décrivez votre problème ou posez une question...", required: true, class: "form-control" %>
+          </div>
+          <%= f.submit "Envoyer", class: "btn" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

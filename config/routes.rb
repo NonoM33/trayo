@@ -17,6 +17,10 @@ Rails.application.routes.draw do
   # Webhooks
   post "webhooks/sms", to: "webhooks/sms#receive"
 
+  # Public ticket access
+  get "ticket/:token", to: "public_tickets#show", as: :ticket
+  post "ticket/:token/comments", to: "public_tickets#add_comment", as: :ticket_comment
+
   root "admin/sessions#new"
   
   get "join", to: "onboarding#landing"
@@ -126,6 +130,7 @@ Rails.application.routes.draw do
     resources :support_tickets, only: [:index, :show, :update, :destroy] do
       member do
         post :mark_as_read
+        post :add_comment
       end
     end
     

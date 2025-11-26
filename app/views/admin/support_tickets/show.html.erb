@@ -77,7 +77,11 @@
           <%= f.select :status, 
               options_for_select(SupportTicket::STATUSES.map { |s| [SupportTicket.new(status: s).status_label, s] }, @ticket.status),
               {},
-              { class: "form-control" } %>
+              { class: "form-control", id: "ticket_status" } %>
+        </div>
+        <div style="margin-bottom: 20px; display: none;" id="status_comment_field">
+          <label for="status_change_comment" class="form-label">Commentaire sur le changement de statut (optionnel)</label>
+          <input type="text" name="status_change_comment" id="status_change_comment" class="form-control" placeholder="Ex: Problème résolu, en attente de confirmation client...">
         </div>
 
         <div style="display: flex; gap: 10px;">
@@ -87,13 +91,75 @@
       <% end %>
     </div>
 
-    <!-- Historique -->
+    <!-- Commentaires -->
+    <div class="card" style="margin-bottom: 24px;">
+      <h2 style="margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">
+        Commentaires et Historique
+      </h2>
+
+      <!-- Liste des commentaires -->
+      <div style="margin-bottom: 30px;">
+        <!-- Message initial du ticket -->
+        <div class="comment-item" style="padding: 15px; margin-bottom: 15px; border-left: 3px solid #007bff; background: rgba(0, 123, 255, 0.05); border-radius: 4px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <strong><%= @ticket.user&.first_name || @ticket.user&.email || "Client" %></strong>
+            <span style="color: var(--text-muted); font-size: 0.9em;">
+              <%= @ticket.created_at.strftime("%d/%m/%Y %H:%M") %>
+              <span class="badge badge-info" style="margin-left: 10px;">Message initial</span>
+            </span>
+          </div>
+          <div style="white-space: pre-wrap;"><%= @ticket.description %></div>
+        </div>
+
+        <!-- Commentaires -->
+        <% @ticket.ticket_comments.recent.each do |comment| %>
+          <% is_internal = comment.is_internal %>
+          <div class="comment-item" style="padding: 15px; margin-bottom: 15px; border-left: 3px solid <%= is_internal ? '#ffc107' : '#007bff' %>; background: <%= is_internal ? 'rgba(255, 193, 7, 0.1)' : 'rgba(0, 123, 255, 0.05)' %>; border-radius: 4px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <strong><%= comment.author_display_name %></strong>
+              <span style="color: var(--text-muted); font-size: 0.9em;">
+                <%= comment.created_at.strftime("%d/%m/%Y %H:%M") %>
+                <% if is_internal %>
+                  <span class="badge badge-warning" style="margin-left: 10px;">Interne</span>
+                <% end %>
+              </span>
+            </div>
+            <div style="white-space: pre-wrap;"><%= comment.content %></div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Formulaire d'ajout de commentaire -->
+      <%= form_with url: add_comment_admin_support_ticket_path(@ticket), method: :post, local: true do |f| %>
+        <div style="margin-bottom: 15px;">
+          <%= f.text_area :content, name: "comment[content]", rows: 4, placeholder: "Ajouter un commentaire...", class: "form-control", required: true %>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <label style="display: flex; align-items: center; gap: 5px;">
+            <%= check_box_tag "comment[is_internal]", "1", false %>
+            <span>Commentaire interne (non visible par le client)</span>
+          </label>
+          <%= f.submit "Ajouter le commentaire", class: "btn btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Informations techniques -->
     <div class="card">
       <h2 style="margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">
         Informations techniques
       </h2>
       
       <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">Lien public</div>
+          <div class="info-value">
+            <code style="background: #f5f5f5; padding: 5px 10px; border-radius: 4px;">
+              <%= ticket_url(@ticket.public_token) %>
+            </code>
+            <%= link_to "Ouvrir", ticket_path(@ticket.public_token), target: "_blank", class: "btn btn-sm btn-outline", style: "margin-left: 10px;" %>
+          </div>
+        </div>
         <div class="info-item">
           <div class="info-label">ID SMS</div>
           <div class="info-value">
@@ -116,4 +182,22 @@
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const statusSelect = document.getElementById('ticket_status');
+    const commentField = document.getElementById('status_comment_field');
+    const originalStatus = '<%= @ticket.status %>';
+    
+    if (statusSelect) {
+      statusSelect.addEventListener('change', function() {
+        if (this.value !== originalStatus) {
+          commentField.style.display = 'block';
+        } else {
+          commentField.style.display = 'none';
+        }
+      });
+    }
+  });
+</script>
 
