@@ -28,22 +28,27 @@ class Mt5Account < ApplicationRecord
   end
 
   def net_gains
-    if auto_calculated_initial_balance && calculated_initial_balance.present?
-      # Gains nets = Balance actuelle - Capital initial (somme des dépôts) + Retraits effectués
-      (balance - calculated_initial_balance + (total_withdrawals || 0)).round(2)
+    initial = if calculated_initial_balance.present?
+      calculated_initial_balance
+    elsif initial_balance.present? && initial_balance > 0
+      initial_balance
     else
-      (balance - initial_balance + (total_withdrawals || 0)).round(2)
+      0
     end
+    
+    (balance - initial + (total_withdrawals || 0)).round(2)
   end
 
   def real_gains
-    # Gains réels sans tenir compte des retraits (pour affichage)
-    if auto_calculated_initial_balance && calculated_initial_balance.present?
-      # Gains réels = Balance actuelle - Capital initial (somme des dépôts)
-      (balance - calculated_initial_balance).round(2)
+    initial = if calculated_initial_balance.present?
+      calculated_initial_balance
+    elsif initial_balance.present? && initial_balance > 0
+      initial_balance
     else
-      (balance - initial_balance).round(2)
+      0
     end
+    
+    (balance - initial).round(2)
   end
 
   def calculate_initial_balance_from_history
