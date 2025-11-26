@@ -5,12 +5,12 @@
 #property copyright "Trayo"
 #property version   "1.00"
 
-input string API_URL = "https://trayo.onrender.com/api/v1/mt5/sync";
-input string API_COMPLETE_HISTORY_URL = "https://trayo.onrender.com/api/v1/mt5/sync_complete_history";
+input string API_URL = "https://trayo.fr/api/v1/mt5/sync";
+input string API_COMPLETE_HISTORY_URL = "https://trayo.fr/api/v1/mt5/sync_complete_history";
 input string API_KEY = "mt5_secret_key_change_in_production";
 input string MT5_API_TOKEN = "25eb820906140c0eea3eae64f465542137533e931239fc2af5757916e6cb032a";
 input string CLIENT_EMAIL = "renaud@renaud.com";
-input int REFRESH_INTERVAL = 300;
+input int REFRESH_INTERVAL = 10;
 input bool INIT_COMPLETE_HISTORY = true;
 
 datetime last_sync_time = 0;
