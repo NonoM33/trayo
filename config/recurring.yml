@@ -18,3 +18,9 @@ production:
     command: "Rake::Task['backups:create_and_cleanup'].invoke"
     schedule: at midnight every day
     priority: 1
+
+  commission_reminder_schedule:
+    class: CommissionReminderScheduleJob
+    queue: default
+    schedule: at 9am every day
+    priority: 2
