@@ -1146,10 +1146,11 @@
                     <% if account.broker_password.present? %>
                     <button onclick="togglePassword('<%= account.id %>', '<%= j(account.broker_password) %>')" 
                             type="button"
-                            style="background: transparent; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
+                            style="background: transparent; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: background 0.2s; color: var(--text-primary); font-weight: 600;"
                             onmouseover="this.style.background='rgba(255,255,255,0.1)'"
                             onmouseout="this.style.background='transparent'"
                             title="Afficher/Masquer le mot de passe">
+                      <span id="toggle-label-<%= account.id %>" style="margin-right: 8px;">Afficher</span>
                       <i class="fa-icon fa-md fa-eye" id="toggle-icon-<%= account.id %>" style="font-size: 18px; color: rgba(255, 255, 255, 0.8);"></i>
                     </button>
                     <% else %>
@@ -1219,14 +1220,17 @@
         const displayDiv = document.getElementById('password-display-' + accountId);
         const icon = document.getElementById('toggle-icon-' + accountId);
         
+        const label = document.getElementById('toggle-label-' + accountId);
         if (displayDiv.textContent.trim() === '••••••••' || displayDiv.textContent.trim() === '•'.repeat(8)) {
           displayDiv.textContent = password;
           icon.classList.remove('fa-eye');
           icon.classList.add('fa-eye-slash');
+          if (label) { label.textContent = 'Masquer'; }
         } else {
           displayDiv.textContent = '••••••••';
           icon.classList.remove('fa-eye-slash');
           icon.classList.add('fa-eye');
+          if (label) { label.textContent = 'Afficher'; }
         }
       }
       </script>
