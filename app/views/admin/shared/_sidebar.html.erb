@@ -1,338 +1,400 @@
-<div class="sidebar-mobile-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+<div class="flex h-full w-full flex-col relative" data-controller="sidebar" data-sidebar-storage-key-value="trayoSidebar">
+  <!-- Mobile Sidebar Overlay -->
+  <div class="absolute inset-0 z-50 md:hidden hidden" data-sidebar-target="mobileSidebar">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/50 transition-opacity duration-300" data-sidebar-target="mobileBackdrop" data-action="click->sidebar#closeMobile"></div>
 
-<div class="sidebar" id="mainSidebar">
-  <div class="sidebar-header">
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-icon" onclick="toggleSidebarCollapse()" title="Réduire/Agrandir la barre latérale">T</div>
-      <span><%= current_user.is_admin? ? 'Trayo Admin' : 'Trayo' %></span>
+    <!-- Sidebar Panel -->
+    <div class="absolute inset-y-0 left-0 w-64 bg-neutral-50 dark:bg-neutral-900 shadow-xl border-r border-neutral-200 dark:border-neutral-800 transition-transform duration-300 ease-out" data-sidebar-target="mobilePanel">
+      <div data-sidebar-target="sharedContent"></div>
     </div>
-    <button class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" id="sidebarToggleBtn" title="Réduire la barre latérale">
-      <i class="fa-solid fa-chevron-left"></i>
-    </button>
   </div>
-  
-  <nav class="sidebar-nav">
-    <div class="sidebar-section">
-      <div class="sidebar-section-title">Principal</div>
-      <ul class="sidebar-menu">
-        <% if current_user.is_admin? %>
-          <% Rails.logger.info "=== SIDEBAR DEBUG: Rendering admin sidebar ===" %>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_dashboard_path, class: "sidebar-menu-link #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
-              <% Rails.logger.info "=== SIDEBAR DEBUG: Dashboard icon ===" %>
-              <%= nav_icon(:dashboard) %>
-              <span>Tableau de Bord</span>
+
+  <div class="relative z-0 flex h-full w-full">
+    <div class="relative flex h-full flex-row">
+      <details class="w-13 open:w-64 group/sidebar relative z-20 h-full shrink-0 overflow-hidden border-r border-neutral-200 bg-neutral-50 max-md:hidden motion-safe:transition-all motion-safe:duration-300 dark:border-neutral-800 dark:bg-neutral-900" data-sidebar-target="desktopSidebar">
+        <!-- Tiny Sidebar (shown when closed) -->
+        <summary class="group-open/sidebar:hidden flex min-h-screen h-full cursor-e-resize list-none flex-col items-start pl-2 pr-1.5">
+          <div class="flex h-13 w-full items-center justify-start">
+            <button class="cursor-e-resize flex size-10 items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 sm:size-9 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800" data-action="click->sidebar#open">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+          </div>
+
+          <div class="mt-1.5 sm:mt-2 flex w-full flex-col items-start gap-1">
+            <%= link_to admin_dashboard_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Tableau de Bord" do %>
+              <i class="fa-solid fa-chart-line"></i>
             <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_clients_path, class: "sidebar-menu-link #{request.path == admin_clients_path ? 'active' : ''}" do %>
-              <%= nav_icon(:clients) %>
-              <span>Clients</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_bots_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bots') ? 'active' : ''}" do %>
-              <%= nav_icon(:my_bots) %>
-              <span>Bots Trading</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_payments_path, class: "sidebar-menu-link #{request.path == admin_payments_path ? 'active' : ''}" do %>
-              <%= nav_icon(:payments) %>
-              <span>Paiements</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_credits_path, class: "sidebar-menu-link #{request.path == admin_credits_path ? 'active' : ''}" do %>
-              <%= nav_icon(:bonus_program) %>
-              <span>Crédits</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_bonus_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus_deposit') ? 'active' : ''}" do %>
-              <%= nav_icon(:bonus_program) %>
-              <span>Dépôts Bonus</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_bonus_periods_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus_period') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-calendar"></i>
-              <span>Périodes Bonus</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_vps_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/vps') ? 'active' : ''}" do %>
-              <%= nav_icon(:my_vps) %>
-              <span>VPS</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_campaigns_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/campaigns') ? 'active' : ''}" do %>
-              <%= nav_icon(:campaigns) %>
-              <span>Campagnes</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_invitations_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/invitations') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-ticket-alt"></i>
-              <span>Invitations</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_trades_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/trades') ? 'active' : ''}" do %>
-              <%= nav_icon(:trades) %>
-              <span>Trades</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_trade_defenders_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/trade_defenders') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-shield-alt"></i>
-              <span>Trade Defender</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_withdrawals_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/withdrawals') ? 'active' : ''}" do %>
-              <%= nav_icon(:withdrawals) %>
-              <span>Retraits</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/deposits') ? 'active' : ''}" do %>
-              <%= nav_icon(:deposits) %>
-              <span>Dépôts</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_mt5_tokens_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/mt5_tokens') ? 'active' : ''}" do %>
-              <%= nav_icon(:mt5_tokens) %>
-              <span>Tokens MT5</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_sms_logs_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/sms_logs') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-comment-dots"></i>
-              <span>SMS</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_support_tickets_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/support_tickets') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-headset"></i>
-              <span>SAV</span>
-              <% unread_count = SupportTicket.unread.count %>
-              <% if unread_count > 0 %>
-                <span class="sidebar-badge"><%= unread_count %></span>
+            <% if current_user.is_admin? %>
+              <%= link_to admin_clients_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Clients" do %>
+                <i class="fa-solid fa-users"></i>
+              <% end %>
+              <%= link_to admin_bots_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Bots Trading" do %>
+                <i class="fa-solid fa-robot"></i>
+              <% end %>
+              <%= link_to admin_payments_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Paiements" do %>
+                <i class="fa-solid fa-credit-card"></i>
+              <% end %>
+              <%= link_to admin_support_tickets_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "SAV" do %>
+                <i class="fa-solid fa-headset"></i>
+                <% unread_count = SupportTicket.unread.count %>
+                <% if unread_count > 0 %>
+                  <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1 rounded-full"><%= unread_count %></span>
+                <% end %>
+              <% end %>
+            <% else %>
+              <%= link_to admin_shop_index_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Boutique" do %>
+                <i class="fa-solid fa-shopping-cart"></i>
+              <% end %>
+              <%= link_to admin_my_bots_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Mes Bots" do %>
+                <i class="fa-solid fa-robot"></i>
+              <% end %>
+              <%= link_to admin_my_trades_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Mes Trades" do %>
+                <i class="fa-solid fa-chart-line"></i>
               <% end %>
             <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_maintenance_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/maintenance') ? 'active' : ''}" do %>
-              <%= nav_icon(:maintenance) %>
-              <span>Maintenance</span>
+          </div>
+
+          <div class="flex-grow"></div>
+
+          <div class="py-1 sm:py-1.5 flex items-start justify-center">
+            <%= link_to admin_client_path(current_user), class: "flex mb-1 h-8 w-9 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Profil" do %>
+              <div class="size-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xs">
+                <%= current_user.email[0].upcase %>
+              </div>
             <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_backups_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/backups') ? 'active' : ''}" do %>
-              <i class="fa-icon fa-md fa-database"></i>
-              <span>Backups</span>
-            <% end %>
-          </li>
-        <% else %>
-          <% Rails.logger.info "=== SIDEBAR DEBUG: Rendering non-admin sidebar ===" %>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_dashboard_path, class: "sidebar-menu-link #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
-              <% Rails.logger.info "=== SIDEBAR DEBUG: Non-admin Dashboard icon ===" %>
-              <%= nav_icon(:dashboard) %>
-              <span>Tableau de Bord</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_client_path(current_user), class: "sidebar-menu-link #{request.path == admin_client_path(current_user) ? 'active' : ''}" do %>
-              <%= nav_icon(:profile) %>
-              <span>Mon Profil</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_shop_index_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/shop') ? 'active' : ''}" do %>
-              <%= nav_icon(:shop) %>
-              <span>Boutique</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_my_bots_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/my_bots') ? 'active' : ''}" do %>
-              <%= nav_icon(:my_bots) %>
-              <span>Mes Bots</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_my_trades_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/my_trades') ? 'active' : ''}" do %>
-              <%= nav_icon(:my_trades) %>
-              <span>Mes Trades</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_bonus_deposits_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/bonus') ? 'active' : ''}" do %>
-              <%= nav_icon(:bonus_program) %>
-              <span>Programme Bonus</span>
-            <% end %>
-          </li>
-          <li class="sidebar-menu-item">
-            <%= link_to admin_vps_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/vps') ? 'active' : ''}" do %>
-              <%= nav_icon(:my_vps) %>
-              <span>Mes VPS</span>
-            <% end %>
-          </li>
-        <% end %>
-      </ul>
-    </div>
-  </nav>
-  
-  <div class="sidebar-footer">
-    <div class="sidebar-user" onclick="openUserSettings()" title="Paramètres utilisateur">
-      <div class="sidebar-user-avatar">
-        <%= current_user.email[0].upcase %>
-      </div>
-      <div class="sidebar-user-info">
-        <div class="sidebar-user-name"><%= current_user.first_name || current_user.email.split('@').first %></div>
-        <div class="sidebar-user-role"><%= current_user.is_admin? ? 'Administrateur' : 'Client' %></div>
-      </div>
-    </div>
-    <div class="sidebar-logout-link">
-      <%= link_to "Déconnexion", admin_logout_path, data: { turbo_method: :delete }, style: "display: block; text-align: center; margin-top: 12px; color: var(--text-muted); font-size: 13px; text-decoration: none; transition: all 0.2s; padding: 8px; border-radius: var(--radius-md); font-weight: 600;" %>
+          </div>
+        </summary>
+
+        <!-- Full Sidebar (shown when open) -->
+        <div class="h-full w-64 overflow-x-clip overflow-y-auto bg-neutral-50 text-clip whitespace-nowrap dark:bg-neutral-900" data-sidebar-target="desktopContent">
+          <!-- Shared Sidebar Content Template -->
+          <template data-sidebar-target="contentTemplate">
+            <nav class="min-h-screen relative flex h-full w-full flex-1 flex-col overflow-y-auto select-none">
+            <div class="sticky top-0 z-30 bg-neutral-50 dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800">
+              <div class="px-1.5 sm:px-2">
+                <div class="flex h-13 items-center justify-between">
+                  <%= link_to admin_dashboard_path, class: "flex size-10 items-center justify-center rounded-lg text-neutral-900 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 sm:size-9 dark:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800" do %>
+                    <div class="size-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                      T
+                    </div>
+                  <% end %>
+                  <div class="flex">
+                    <button class="flex size-10 cursor-w-resize items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 sm:size-9 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800" aria-expanded="true" aria-label="Close sidebar" data-state="closed" data-action="click->sidebar#close">
+                      <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <aside class="relative bg-neutral-50 p-1.5 last:mb-5 sm:p-2 dark:bg-neutral-900">
+              <%= link_to admin_dashboard_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path == admin_dashboard_path ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                <div class="flex min-w-0 items-center gap-1.5">
+                  <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                    <i class="fa-solid fa-chart-line"></i>
+                  </div>
+                  <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                    <div class="truncate">Tableau de Bord</div>
+                  </div>
+                </div>
+              <% end %>
+              
+              <% if current_user.is_admin? %>
+                <%= link_to admin_clients_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path == admin_clients_path ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Clients</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_bots_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/bots') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Bots Trading</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_payments_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path == admin_payments_path ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-credit-card"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Paiements</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_credits_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path == admin_credits_path ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-gift"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Crédits</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_bonus_deposits_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/bonus') && !request.path.start_with?('/admin/bonus_period') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-gift"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Dépôts Bonus</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_bonus_periods_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/bonus_period') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-calendar"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Périodes Bonus</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_vps_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/vps') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-server"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">VPS</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_campaigns_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/campaigns') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-bullhorn"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Campagnes</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_invitations_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/invitations') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-ticket-alt"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Invitations</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_trades_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/trades') && !request.path.start_with?('/admin/trade_defenders') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-exchange-alt"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Trades</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_trade_defenders_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/trade_defenders') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-shield-alt"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Trade Defender</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_withdrawals_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/withdrawals') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-arrow-up"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Retraits</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_deposits_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/deposits') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-arrow-down"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Dépôts</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_mt5_tokens_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/mt5_tokens') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-key"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Tokens MT5</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_sms_logs_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/sms_logs') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-comment-dots"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">SMS</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_support_tickets_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/support_tickets') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">SAV</div>
+                    </div>
+                    <% unread_count = SupportTicket.unread.count %>
+                    <% if unread_count > 0 %>
+                      <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full"><%= unread_count %></span>
+                    <% end %>
+                  </div>
+                <% end %>
+                <%= link_to admin_maintenance_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/maintenance') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-tools"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Maintenance</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_backups_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/backups') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-database"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Backups</div>
+                    </div>
+                  </div>
+                <% end %>
+              <% else %>
+                <%= link_to admin_client_path(current_user), class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path == admin_client_path(current_user) ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Mon Profil</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_shop_index_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/shop') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-shopping-cart"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Boutique</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_my_bots_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/my_bots') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Mes Bots</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_my_trades_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/my_trades') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Mes Trades</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_bonus_deposits_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/bonus') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-gift"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Programme Bonus</div>
+                    </div>
+                  </div>
+                <% end %>
+                <%= link_to admin_vps_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/vps') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
+                  <div class="flex min-w-0 items-center gap-1.5">
+                    <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                      <i class="fa-solid fa-server"></i>
+                    </div>
+                    <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                      <div class="truncate">Mes VPS</div>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            </aside>
+
+            <div class="grow"></div>
+
+            <div class="sticky bottom-0 z-30 bg-neutral-50 p-1.5 empty:hidden sm:p-2 dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800">
+              <%= link_to admin_client_path(current_user), class: "w-full flex items-center gap-2 rounded-md px-1 sm:px-1.5 py-1 sm:py-1.5 text-left text-sm text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50" do %>
+                <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
+                  <div class="flex h-6 w-6 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
+                    <div class="h-6 w-6 flex items-center justify-center text-white font-semibold text-xs">
+                      <%= current_user.email[0].upcase %>
+                    </div>
+                  </div>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
+                    <div class="truncate text-xs"><%= current_user.first_name || current_user.email.split('@').first %></div>
+                  </div>
+                  <div class="truncate text-xs text-neutral-500 dark:text-neutral-400"><%= current_user.is_admin? ? 'Administrateur' : 'Client' %></div>
+                </div>
+              <% end %>
+              <%= link_to admin_logout_path, data: { turbo_method: :delete }, class: "w-full mt-2 flex items-center justify-center gap-2 rounded-md px-1 sm:px-1.5 py-1 sm:py-1.5 text-left text-sm text-red-600 hover:bg-red-50 focus-visible:bg-red-50 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-900/20 dark:focus-visible:bg-red-900/20" do %>
+                <i class="fa-solid fa-sign-out-alt"></i>
+                <span class="text-xs">Déconnexion</span>
+              <% end %>
+            </div>
+          </nav>
+          </template>
+        </div>
+      </details>
     </div>
   </div>
 </div>
 
-<% unless current_user.is_admin? %>
-  <div class="mobile-bottom-nav">
-    <div class="mobile-bottom-nav-content">
-      <%= link_to admin_dashboard_path, class: "mobile-nav-item #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-tachometer-alt"></i></div>
-        <div class="mobile-nav-label">Tableau</div>
-      <% end %>
-      <%= link_to admin_shop_index_path, class: "mobile-nav-item #{request.path.start_with?('/admin/shop') ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-shopping-cart"></i></div>
-        <div class="mobile-nav-label">Boutique</div>
-      <% end %>
-      <%= link_to admin_my_bots_path, class: "mobile-nav-item #{request.path.start_with?('/admin/my_bots') ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-robot"></i></div>
-        <div class="mobile-nav-label">Mes Bots</div>
-      <% end %>
-      <%= link_to admin_my_trades_path, class: "mobile-nav-item #{request.path.start_with?('/admin/my_trades') ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-chart-line"></i></div>
-        <div class="mobile-nav-label">Mes Trades</div>
-      <% end %>
-      <%= link_to admin_vps_path, class: "mobile-nav-item #{request.path.start_with?('/admin/vps') ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-desktop"></i></div>
-        <div class="mobile-nav-label">VPS</div>
-      <% end %>
-      <a href="#" class="mobile-nav-item" onclick="toggleMobileSidebar(); return false;">
-        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-bars"></i></div>
-        <div class="mobile-nav-label">Menu</div>
-      </a>
-    </div>
-  </div>
-<% else %>
-  <!-- Mobile bottom navigation for admins -->
-  <div class="mobile-bottom-nav">
-    <div class="mobile-bottom-nav-content">
-      <%= link_to admin_clients_path, class: "mobile-nav-item #{request.path == admin_clients_path ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-users"></i></div>
-        <div class="mobile-nav-label">Clients</div>
-      <% end %>
-      <%= link_to admin_bots_path, class: "mobile-nav-item #{request.path.start_with?('/admin/bots') ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-robot"></i></div>
-        <div class="mobile-nav-label">Bots</div>
-      <% end %>
-      <%= link_to admin_payments_path, class: "mobile-nav-item #{request.path == admin_payments_path ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-credit-card"></i></div>
-        <div class="mobile-nav-label">Paiements</div>
-      <% end %>
-      <%= link_to admin_shop_index_path, class: "mobile-nav-item #{request.path.start_with?('/admin/shop') ? 'active' : ''}" do %>
-        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-shopping-cart"></i></div>
-        <div class="mobile-nav-label">Boutique</div>
-      <% end %>
-      <a href="#" class="mobile-nav-item" onclick="toggleMobileSidebar(); return false;">
-        <div class="mobile-nav-icon"><i class="fa-icon fa-md fa-bars"></i></div>
-        <div class="mobile-nav-label">Plus</div>
-      </a>
-    </div>
-  </div>
-<% end %>
-
 <script>
-  function toggleSidebarCollapse() {
-    const sidebar = document.getElementById('mainSidebar');
-    const toggleBtn = document.getElementById('sidebarToggleBtn');
-    const isCollapsed = sidebar.classList.toggle('collapsed');
-    
-    toggleBtn.innerHTML = isCollapsed ? '<i class="fa-solid fa-chevron-right"></i>' : '<i class="fa-solid fa-chevron-left"></i>';
-    toggleBtn.title = isCollapsed ? 'Agrandir la barre latérale' : 'Réduire la barre latérale';
-    
-    localStorage.setItem('sidebarCollapsed', isCollapsed ? 'true' : 'false');
-    document.documentElement.classList.toggle('sidebar-collapsed-init', isCollapsed);
-  }
-  
-  function toggleMobileSidebar() {
-    const sidebar = document.getElementById('mainSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    sidebar.classList.toggle('open');
-    overlay.classList.toggle('active');
-    document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
-  }
-
-  function openUserSettings() {
-    // Pour l'instant, rediriger vers le profil utilisateur
-    // Plus tard, on pourra implémenter une modal de paramètres
-    window.location.href = '<%= admin_client_path(current_user) %>';
-  }
-
   (function() {
-    console.log('=== SIDEBAR JAVASCRIPT DEBUG ===');
-    const sidebar = document.getElementById('mainSidebar');
-    const toggleBtn = document.getElementById('sidebarToggleBtn');
-    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-    
-    console.log('Sidebar element:', sidebar);
-    console.log('Toggle button:', toggleBtn);
-    console.log('Is collapsed:', isCollapsed);
-    
-    // Debug: Check for FontAwesome icons
-    const icons = document.querySelectorAll('.sidebar-menu-icon');
-    console.log('Found sidebar icons:', icons.length);
-    icons.forEach((icon, index) => {
-      console.log(`Icon ${index}:`, icon);
-      console.log(`Icon classes:`, icon.className);
-      const style = window.getComputedStyle(icon);
-      console.log(`Icon computed style:`, style);
-      console.log(`Font family:`, style.fontFamily);
-      console.log(`Font weight:`, style.fontWeight);
-      console.log(`Display:`, style.display);
-      console.log(`Visibility:`, style.visibility);
-      console.log(`Opacity:`, style.opacity);
-      console.log(`Color:`, style.color);
+    const sidebar = document.querySelector('[data-controller="sidebar"]');
+    if (sidebar) {
+      const template = sidebar.querySelector('[data-sidebar-target="contentTemplate"]');
+      const sharedContent = sidebar.querySelector('[data-sidebar-target="sharedContent"]');
+      const desktopContent = sidebar.querySelector('[data-sidebar-target="desktopContent"]');
       
-      // Check if icon has content
-      console.log(`Icon text content:`, icon.textContent);
-      console.log(`Icon innerHTML:`, icon.innerHTML);
-    });
-    
-    // Debug: Check for any FontAwesome icons in sidebar
-    const allFaSolid = document.querySelectorAll('.sidebar .fa-solid');
-    console.log('Found all .fa-solid in sidebar:', allFaSolid.length);
-    allFaSolid.forEach((icon, index) => {
-      console.log(`FA Solid ${index}:`, icon);
-      console.log(`Classes:`, icon.className);
-      const style = window.getComputedStyle(icon);
-      console.log(`Font family:`, style.fontFamily);
-      console.log(`Display:`, style.display);
-    });
-    
-    if (isCollapsed && sidebar && toggleBtn && window.innerWidth > 768) {
-      sidebar.classList.add('collapsed');
-      toggleBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
-      toggleBtn.title = 'Agrandir la barre latérale';
+      if (template && sharedContent) {
+        sharedContent.innerHTML = template.innerHTML;
+      }
+      
+      if (template && desktopContent) {
+        desktopContent.innerHTML = template.innerHTML;
+      }
     }
-    console.log('=== END SIDEBAR JAVASCRIPT DEBUG ===');
   })();
 </script>
-

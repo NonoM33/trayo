@@ -218,6 +218,30 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+.sidebar:not(#mainSidebar) {
+  display: none !important;
+}
+
+#mainSidebar {
+  position: fixed !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 256px !important;
+  background-color: #111827 !important;
+  transform: translateX(0) !important;
+}
+
+@media (max-width: 768px) {
+  #mainSidebar {
+    transform: translateX(-100%) !important;
+  }
+}
+
 html.sidebar-collapsed-init .sidebar {
   width: var(--sidebar-collapsed-width);
   transition: none;
