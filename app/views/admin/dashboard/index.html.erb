@@ -1,41 +1,40 @@
-<%= render 'admin/shared/sidebar' %>
-
-<div class="main-content">
-  <%= render 'admin/shared/navbar' %>
+<div class="space-y-6">
+  <%= render 'admin/shared/campaign_banner' if defined?(render) %>
   
-  <div class="container">
-    <%= render 'admin/shared/campaign_banner' %>
-    
-    <div class="dashboard-hero">
-      <div class="hero-content">
-        <h1 class="hero-title">Bienvenue, <%= @client.first_name || @client.email.split('@').first %></h1>
-        <p class="hero-subtitle">Surveillez et analysez vos performances de trading en temps réel</p>
-      </div>
-      <div class="hero-actions">
-        <%= link_to admin_shop_index_path, class: "hero-button" do %>
-          <%= svg_tag "arrow-up-right", size: "16" %>
-          <span>Explorer les bots</span>
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+        Bienvenue, <%= @client.first_name || @client.email.split('@').first %>
+      </h1>
+      <p class="text-lg text-gray-600 dark:text-gray-400">
+        Surveillez et analysez vos performances de trading en temps réel
+      </p>
+    </div>
+    <div>
+      <%= link_to admin_shop_index_path, class: "inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition-colors" do %>
+        <i class="fa-solid fa-arrow-up-right"></i>
+        <span>Explorer les bots</span>
+      <% end %>
+    </div>
+  </div>
+  
+  <% if current_user.is_admin? %>
+    <% if @unread_tickets_count > 0 %>
+      <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-exclamation-triangle text-yellow-600 dark:text-yellow-400 text-xl"></i>
+          <div>
+            <strong class="text-yellow-800 dark:text-yellow-200">Nouveaux tickets SAV</strong>
+            <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+              <%= pluralize(@unread_tickets_count, "nouveau ticket", "nouveaux tickets") %> en attente de traitement
+            </p>
+          </div>
+        </div>
+        <%= link_to admin_support_tickets_path, class: "px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-lg transition-colors" do %>
+          Voir les tickets
         <% end %>
       </div>
-    </div>
-    
-    <% if current_user.is_admin? %>
-      <% if @unread_tickets_count > 0 %>
-        <div class="alert alert-warning" style="margin: 20px 0; padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <i class="fa-icon fa-lg fa-exclamation-triangle" style="color: #856404;"></i>
-            <div>
-              <strong style="color: #856404;">Nouveaux tickets SAV</strong>
-              <p style="margin: 5px 0 0 0; color: #856404;">
-                <%= pluralize(@unread_tickets_count, "nouveau ticket", "nouveaux tickets") %> en attente de traitement
-              </p>
-            </div>
-          </div>
-          <%= link_to admin_support_tickets_path, class: "btn btn-primary", style: "background: #856404; border-color: #856404;" do %>
-            Voir les tickets
-          <% end %>
-        </div>
-      <% end %>
+    <% end %>
     <div class="monitoring-alert-widget">
       <% all_accounts = Mt5Account.where.not(last_heartbeat_at: nil) %>
       <% online_accounts = all_accounts.where("last_heartbeat_at > ?", 30.seconds.ago) %>
@@ -97,79 +96,93 @@
     </div>
     <% end %>
     
-    <div class="stats-grid">
-      <div class="stat-card stat-card-accent">
-        <div class="stat-icon">
-          <%= svg_tag "wallet", size: "48" %>
-        </div>
-        <div class="stat-content">
-          <div class="stat-label">Balance Totale</div>
-          <div class="stat-value"><%= number_to_currency(@client.mt5_accounts.sum(:balance), unit: "€", format: "%n %u") %></div>
-          <div class="stat-change">Tous comptes</div>
-        </div>
-      </div>
-      
-      <div class="stat-card stat-card-success">
-        <div class="stat-icon">
-          <%= svg_tag "trending-up", size: "24" %>
-        </div>
-        <div class="stat-content">
-          <div class="stat-label">Gains Totaux</div>
-          <div class="stat-value <%= @client.total_profits > 0 ? 'value-positive' : 'value-negative' %>">
-            <%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-wallet text-white text-xl"></i>
           </div>
-          <div class="stat-change">Performance globale</div>
-        </div>
-      </div>
-      
-      <div class="stat-card stat-card-secondary">
-        <div class="stat-icon">
-          <%= svg_tag "activity", size: "24" %>
-        </div>
-        <div class="stat-content">
-          <div class="stat-label">Gain Moyen Journalier (30j)</div>
-          <div class="stat-value <%= @average_daily_gain >= 0 ? 'value-positive' : 'value-negative' %>">
-            <%= number_to_currency(@average_daily_gain, unit: "€", format: "%n %u") %>
+          <div class="flex-1">
+            <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Balance Totale</div>
+            <div class="text-2xl font-bold text-gray-900 dark:text-white">
+              <%= number_to_currency(@client.mt5_accounts.sum(:balance), unit: "€", format: "%n %u") %>
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Tous comptes</div>
           </div>
-          <div class="stat-change">Basé sur les jours avec trades</div>
         </div>
       </div>
       
-      <div class="stat-card stat-card-info">
-        <div class="stat-icon">
-          <%= svg_tag "percent", size: "24" %>
-        </div>
-        <div class="stat-content">
-          <div class="stat-label">Commission Due</div>
-          <div class="stat-value"><%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %></div>
-          <div class="stat-change">À payer</div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-chart-line text-white text-xl"></i>
+          </div>
+          <div class="flex-1">
+            <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Gains Totaux</div>
+            <div class="text-2xl font-bold <%= @client.total_profits > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
+              <%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %>
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Performance globale</div>
+          </div>
         </div>
       </div>
       
-      <div class="stat-card <%= @client.balance_due > 0 ? 'stat-card-warning' : (@client.balance_due < 0 ? 'stat-card-success' : 'stat-card-info') %>">
-        <div class="stat-icon">
-          <% if @client.balance_due > 0 %>
-            <%= svg_tag "alert-circle", size: "24" %>
-          <% elsif @client.balance_due < 0 %>
-            <%= svg_tag "check-circle", size: "24" %>
-          <% else %>
-            <%= svg_tag "info", size: "24" %>
-          <% end %>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-500 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-chart-area text-white text-xl"></i>
+          </div>
+          <div class="flex-1">
+            <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Gain Moyen Journalier (30j)</div>
+            <div class="text-2xl font-bold <%= @average_daily_gain >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
+              <%= number_to_currency(@average_daily_gain, unit: "€", format: "%n %u") %>
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Basé sur les jours avec trades</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">
+      </div>
+      
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-percent text-white text-xl"></i>
+          </div>
+          <div class="flex-1">
+            <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Commission Due</div>
+            <div class="text-2xl font-bold text-gray-900 dark:text-white">
+              <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %>
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">À payer</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 <%= @client.balance_due > 0 ? 'bg-gradient-to-br from-yellow-500 to-yellow-600' : (@client.balance_due < 0 ? 'bg-gradient-to-br from-green-500 to-green-600' : 'bg-gradient-to-br from-blue-500 to-blue-600') %> rounded-lg flex items-center justify-center">
             <% if @client.balance_due > 0 %>
-              Solde à Payer
+              <i class="fa-solid fa-exclamation-circle text-white text-xl"></i>
             <% elsif @client.balance_due < 0 %>
-              Solde Créditeur
+              <i class="fa-solid fa-check-circle text-white text-xl"></i>
             <% else %>
-              Solde à Payer
+              <i class="fa-solid fa-info-circle text-white text-xl"></i>
             <% end %>
           </div>
-          <div class="stat-value <%= @client.balance_due > 0 ? 'value-negative' : (@client.balance_due < 0 ? 'value-positive' : 'value-neutral') %>">
-            <%= number_to_currency(@client.balance_due.abs, unit: "€", format: "%n %u") %>
+          <div class="flex-1">
+            <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+              <% if @client.balance_due > 0 %>
+                Solde à Payer
+              <% elsif @client.balance_due < 0 %>
+                Solde Créditeur
+              <% else %>
+                Solde à Payer
+              <% end %>
+            </div>
+            <div class="text-2xl font-bold <%= @client.balance_due > 0 ? 'text-yellow-600 dark:text-yellow-400' : (@client.balance_due < 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white') %>">
+              <%= number_to_currency(@client.balance_due.abs, unit: "€", format: "%n %u") %>
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Régularisation</div>
           </div>
-          <div class="stat-change">Régularisation</div>
         </div>
       </div>
     </div>
