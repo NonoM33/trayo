@@ -18,17 +18,29 @@ module Admin
         return
       end
 
-      purchase = current_user.bot_purchases.create(
-        trading_bot: @bot,
-        price_paid: @bot.price,
-        status: "active"
-      )
-      
-      if purchase.persisted?
-        redirect_to admin_my_bots_path, notice: "🎉 Bot acheté avec succès ! Vous pouvez maintenant l'activer."
-      else
-        redirect_to admin_shop_path(@bot), alert: "Erreur lors de l'achat du bot"
+      purchase = nil
+      ActiveRecord::Base.transaction do
+        purchase = current_user.bot_purchases.create!(
+          trading_bot: @bot,
+          price_paid: @bot.price,
+          status: "active",
+          is_running: false
+        )
+
+        Invoices::Builder.new(
+          user: current_user,
+          source: "shop",
+          metadata: { bot_id: @bot.id },
+          deactivate_bots: true
+        ).build_from_selection(
+          bot_purchases: [purchase],
+          vps_list: []
+        )
       end
+      
+      redirect_to admin_my_bots_path, notice: "🎉 Bot réservé ! Facture créée, statut en attente de règlement."
+    rescue ActiveRecord::RecordInvalid => e
+      redirect_to admin_shop_path(@bot), alert: "Erreur lors de l'achat: #{e.message}"
     end
   end
 end

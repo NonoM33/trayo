@@ -193,7 +193,7 @@ class OnboardingController < ApplicationController
             purchase_type: "onboarding",
             is_running: false
           )
-          bot_purchases_created << purchase.id
+          bot_purchases_created << purchase
         rescue ActiveRecord::RecordNotFound => e
           Rails.logger.error "Bot with ID #{bot_id} not found: #{e.message}"
         end
@@ -202,7 +202,20 @@ class OnboardingController < ApplicationController
       Rails.logger.warn "No bot_ids provided or not an array. bot_ids: #{bot_ids.inspect}"
     end
     
-    Rails.logger.debug "Created #{bot_purchases_created.count} bot purchases: #{bot_purchases_created.inspect}"
+    Rails.logger.debug "Created #{bot_purchases_created.count} bot purchases: #{bot_purchases_created.map(&:id)}"
+
+    if bot_purchases_created.any? || vps.present?
+      builder = Invoices::Builder.new(
+        user: user,
+        source: "invitation",
+        metadata: { invitation_id: @invitation.id },
+        deactivate_bots: true
+      )
+      @invoice = builder.build_from_selection(
+        bot_purchases: bot_purchases_created,
+        vps_list: vps.present? ? [vps] : []
+      )
+    end
     
     @invitation.complete!
     
