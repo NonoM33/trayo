@@ -1,4 +1,4 @@
-<div class="flex h-full w-full flex-col relative" data-controller="sidebar" data-sidebar-storage-key-value="trayoSidebar">
+<div class="flex h-full w-full flex-col relative" data-controller="sidebar" data-sidebar-storage-key-value="trayoSidebar" style="height: 100vh;">
   <!-- Mobile Sidebar Overlay -->
   <div class="absolute inset-0 z-50 md:hidden hidden" data-sidebar-target="mobileSidebar">
     <!-- Backdrop -->
@@ -12,7 +12,7 @@
 
   <div class="relative z-0 flex h-full w-full">
     <div class="relative flex h-full flex-row">
-      <details class="w-13 open:w-64 group/sidebar relative z-20 h-full shrink-0 overflow-hidden border-r border-neutral-200 bg-neutral-50 max-md:hidden motion-safe:transition-all motion-safe:duration-300 dark:border-neutral-800 dark:bg-neutral-900" data-sidebar-target="desktopSidebar">
+      <details class="w-13 open:w-64 group/sidebar relative z-20 h-full shrink-0 overflow-hidden border-r border-neutral-200 bg-neutral-50 max-md:hidden motion-safe:transition-all motion-safe:duration-300 dark:border-neutral-800 dark:bg-neutral-900" data-sidebar-target="desktopSidebar" style="height: 100vh;">
         <!-- Tiny Sidebar (shown when closed) -->
         <summary class="group-open/sidebar:hidden flex min-h-screen h-full cursor-e-resize list-none flex-col items-start pl-2 pr-1.5">
           <div class="flex h-13 w-full items-center justify-start">
@@ -21,36 +21,88 @@
             </button>
           </div>
 
-          <div class="mt-1.5 sm:mt-2 flex w-full flex-col items-start gap-1">
-            <%= link_to admin_dashboard_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Tableau de Bord" do %>
+          <div class="mt-1.5 sm:mt-2 flex w-full flex-col items-start gap-1 overflow-y-auto">
+            <%= link_to admin_dashboard_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Tableau de Bord", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
               <i class="fa-solid fa-chart-line"></i>
             <% end %>
+            
             <% if current_user.is_admin? %>
-              <%= link_to admin_clients_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Clients" do %>
+              <%= link_to admin_clients_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Clients", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
                 <i class="fa-solid fa-users"></i>
               <% end %>
-              <%= link_to admin_bots_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Bots Trading" do %>
+              <%= link_to admin_bots_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Bots Trading", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
                 <i class="fa-solid fa-robot"></i>
               <% end %>
-              <%= link_to admin_payments_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Paiements" do %>
+              <%= link_to admin_vps_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "VPS", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-server"></i>
+              <% end %>
+              <%= link_to admin_campaigns_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Campagnes", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-bullhorn"></i>
+              <% end %>
+              <%= link_to admin_invitations_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Invitations", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-ticket-alt"></i>
+              <% end %>
+              <%= link_to admin_payments_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Paiements", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
                 <i class="fa-solid fa-credit-card"></i>
               <% end %>
-              <%= link_to admin_support_tickets_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "SAV" do %>
+              <%= link_to admin_credits_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Crédits", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-gift"></i>
+              <% end %>
+              <%= link_to admin_bonus_deposits_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Dépôts Bonus", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-gift"></i>
+              <% end %>
+              <%= link_to admin_bonus_periods_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Périodes Bonus", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-calendar"></i>
+              <% end %>
+              <%= link_to admin_withdrawals_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Retraits", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-arrow-up"></i>
+              <% end %>
+              <%= link_to admin_deposits_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Dépôts", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-arrow-down"></i>
+              <% end %>
+              <%= link_to admin_trades_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Trades", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-exchange-alt"></i>
+              <% end %>
+              <%= link_to admin_trade_defenders_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Trade Defender", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-shield-alt"></i>
+              <% end %>
+              <%= link_to admin_support_tickets_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "SAV", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
                 <i class="fa-solid fa-headset"></i>
                 <% unread_count = SupportTicket.unread.count %>
                 <% if unread_count > 0 %>
-                  <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1 rounded-full"><%= unread_count %></span>
+                  <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1 rounded-full min-w-[16px] text-center"><%= unread_count %></span>
                 <% end %>
               <% end %>
+              <%= link_to admin_sms_logs_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "SMS", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-comment-dots"></i>
+              <% end %>
+              <%= link_to admin_mt5_tokens_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Tokens MT5", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-key"></i>
+              <% end %>
+              <%= link_to admin_maintenance_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Maintenance", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-tools"></i>
+              <% end %>
+              <%= link_to admin_backups_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Backups", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-database"></i>
+              <% end %>
             <% else %>
-              <%= link_to admin_shop_index_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Boutique" do %>
+              <%= link_to admin_client_path(current_user), class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Mon Profil", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-user"></i>
+              <% end %>
+              <%= link_to admin_shop_index_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Boutique", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
                 <i class="fa-solid fa-shopping-cart"></i>
               <% end %>
-              <%= link_to admin_my_bots_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Mes Bots" do %>
+              <%= link_to admin_my_bots_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Mes Bots", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
                 <i class="fa-solid fa-robot"></i>
               <% end %>
-              <%= link_to admin_my_trades_path, class: "flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Mes Trades" do %>
+              <%= link_to admin_my_trades_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Mes Trades", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
                 <i class="fa-solid fa-chart-line"></i>
+              <% end %>
+              <%= link_to admin_vps_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Mes VPS", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-server"></i>
+              <% end %>
+              <%= link_to admin_bonus_deposits_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Programme Bonus", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
+                <i class="fa-solid fa-gift"></i>
               <% end %>
             <% end %>
           </div>
@@ -58,7 +110,7 @@
           <div class="flex-grow"></div>
 
           <div class="py-1 sm:py-1.5 flex items-start justify-center">
-            <%= link_to admin_client_path(current_user), class: "flex mb-1 h-8 w-9 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Profil" do %>
+            <%= link_to admin_client_path(current_user), class: "flex mb-1 h-8 w-9 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", data: { controller: "tooltip", tooltip_content: "Profil", tooltip_placement_value: "right", tooltip_arrow: "true", tooltip_animation_value: "fade origin", tooltip_size_value: "small" } do %>
               <div class="size-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xs">
                 <%= current_user.email[0].upcase %>
               </div>
