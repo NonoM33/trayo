@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_27_143508) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_26_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -84,6 +84,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_27_143508) do
     t.datetime "stopped_at"
     t.integer "magic_number"
     t.string "purchase_type", default: "manual"
+    t.bigint "invoice_id"
+    t.string "billing_status", default: "paid", null: false
+    t.index ["invoice_id"], name: "index_bot_purchases_on_invoice_id"
     t.index ["magic_number"], name: "index_bot_purchases_on_magic_number"
     t.index ["purchase_type"], name: "index_bot_purchases_on_purchase_type"
     t.index ["status"], name: "index_bot_purchases_on_status"
@@ -163,6 +166,50 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_27_143508) do
     t.decimal "budget"
     t.index ["code"], name: "index_invitations_on_code", unique: true
     t.index ["status"], name: "index_invitations_on_status"
+  end
+
+  create_table "invoice_items", force: :cascade do |t|
+    t.bigint "invoice_id", null: false
+    t.string "label", null: false
+    t.string "item_type"
+    t.bigint "item_id"
+    t.integer "quantity", default: 1, null: false
+    t.decimal "unit_price", precision: 15, scale: 2, default: "0.0"
+    t.decimal "total_price", precision: 15, scale: 2, default: "0.0"
+    t.jsonb "metadata"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["invoice_id"], name: "index_invoice_items_on_invoice_id"
+    t.index ["item_type", "item_id"], name: "index_invoice_items_on_item_type_and_item_id"
+  end
+
+  create_table "invoice_payments", force: :cascade do |t|
+    t.bigint "invoice_id", null: false
+    t.decimal "amount", precision: 15, scale: 2, null: false
+    t.datetime "paid_at", null: false
+    t.string "payment_method"
+    t.text "notes"
+    t.bigint "recorded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["invoice_id"], name: "index_invoice_payments_on_invoice_id"
+    t.index ["recorded_by_id"], name: "index_invoice_payments_on_recorded_by_id"
+  end
+
+  create_table "invoices", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "reference", null: false
+    t.string "status", default: "pending", null: false
+    t.decimal "total_amount", precision: 15, scale: 2, default: "0.0"
+    t.decimal "balance_due", precision: 15, scale: 2, default: "0.0"
+    t.string "source"
+    t.date "due_date"
+    t.boolean "vps_included", default: true
+    t.jsonb "metadata"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["reference"], name: "index_invoices_on_reference", unique: true
+    t.index ["user_id"], name: "index_invoices_on_user_id"
   end
 
   create_table "maintenance_settings", id: :serial, force: :cascade do |t|
@@ -316,6 +363,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_27_143508) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.date "renewal_date"
+    t.bigint "invoice_id"
+    t.string "billing_status", default: "paid", null: false
+    t.index ["invoice_id"], name: "index_vps_on_invoice_id"
     t.index ["status"], name: "index_vps_on_status"
     t.index ["user_id"], name: "index_vps_on_user_id"
   end
@@ -337,13 +387,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_27_143508) do
   add_foreign_key "backtests", "trading_bots"
   add_foreign_key "bonus_deposits", "users"
   add_foreign_key "bonus_periods", "campaigns"
+  add_foreign_key "bot_purchases", "invoices"
   add_foreign_key "bot_purchases", "trading_bots"
   add_foreign_key "bot_purchases", "users"
   add_foreign_key "credits", "users"
   add_foreign_key "deposits", "mt5_accounts"
+  add_foreign_key "invoice_items", "invoices"
+  add_foreign_key "invoice_payments", "invoices"
+  add_foreign_key "invoice_payments", "users", column: "recorded_by_id"
+  add_foreign_key "invoices", "users"
   add_foreign_key "mt5_accounts", "users"
   add_foreign_key "payments", "users"
   add_foreign_key "trades", "mt5_accounts"
+  add_foreign_key "vps", "invoices"
   add_foreign_key "vps", "users"
   add_foreign_key "withdrawals", "mt5_accounts"
 end
