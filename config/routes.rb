@@ -42,6 +42,8 @@ Rails.application.routes.draw do
         post :reset_password
         post :regenerate_token
         post :reset_mt5
+        post :send_commission_sms
+        get :sms_preview
         get :trades
         get :bots
         patch :auto_detect_bots
@@ -115,6 +117,8 @@ Rails.application.routes.draw do
         post :toggle_active
       end
     end
+
+    resources :sms_logs, only: [:index]
     
     resources :invitations, only: [:index, :new, :create, :show, :destroy]
     

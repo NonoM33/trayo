@@ -109,6 +109,12 @@
             <% end %>
           </li>
           <li class="sidebar-menu-item">
+            <%= link_to admin_sms_logs_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/sms_logs') ? 'active' : ''}" do %>
+              <i class="fa-icon fa-md fa-comment-dots"></i>
+              <span>SMS</span>
+            <% end %>
+          </li>
+          <li class="sidebar-menu-item">
             <%= link_to admin_maintenance_path, class: "sidebar-menu-link #{request.path.start_with?('/admin/maintenance') ? 'active' : ''}" do %>
               <%= nav_icon(:maintenance) %>
               <span>Maintenance</span>

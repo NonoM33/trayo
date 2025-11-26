@@ -45,6 +45,12 @@
       localStorage.setItem('theme', 'dark');
       document.body.classList.add('dark-mode');
     </script>
-    <%= yield %>
+    <% if content_for?(:full_width) && content_for(:full_width) %>
+      <%= yield %>
+    <% else %>
+      <main class="app-main">
+        <%= yield %>
+      </main>
+    <% end %>
   </body>
 </html>
