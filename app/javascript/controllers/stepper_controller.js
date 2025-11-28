@@ -291,15 +291,32 @@ export default class extends Controller {
     const isLastStep = this.currentStepValue === this.stepTargets.length - 1;
     if (this.hasPrevButtonTarget) {
       this.prevButtonTargets.forEach((btn) => {
-        btn.classList.toggle("hidden", isFirstStep);
-        btn.disabled = isFirstStep;
+        if (isFirstStep) {
+          btn.classList.add("hidden");
+          btn.disabled = true;
+        } else {
+          btn.classList.remove("hidden");
+          btn.disabled = false;
+        }
       });
     }
     if (this.hasNextButtonTarget) {
-      this.nextButtonTargets.forEach((btn) => btn.classList.toggle("hidden", isLastStep));
+      this.nextButtonTargets.forEach((btn) => {
+        if (isLastStep) {
+          btn.classList.add("hidden");
+        } else {
+          btn.classList.remove("hidden");
+        }
+      });
     }
     if (this.hasSubmitButtonTarget) {
-      this.submitButtonTargets.forEach((btn) => btn.classList.toggle("hidden", !isLastStep));
+      this.submitButtonTargets.forEach((btn) => {
+        if (isLastStep) {
+          btn.classList.remove("hidden");
+        } else {
+          btn.classList.add("hidden");
+        }
+      });
     }
   }
 
@@ -338,83 +355,17 @@ export default class extends Controller {
     event?.preventDefault();
     if (this.validateOnNextValue && !this.validateCurrentStep()) return;
     if (this.saveProgressValue) this.saveCurrentStepData();
-    const form = this.element.closest('form') || this.element.querySelector('form');
-    if (form) {
-      Object.keys(this.formData).forEach(key => {
-        let input = form.querySelector(`[name="${key}"]`);
-        if (!input) {
-          input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = key;
-          form.appendChild(input);
-        }
-        if (Array.isArray(this.formData[key])) {
-          input.value = JSON.stringify(this.formData[key]);
-        } else {
-          input.value = this.formData[key];
-        }
-      });
-      form.requestSubmit();
-    }
-  }
-
-  selectBot(event) {
-    const card = event.currentTarget;
-    const checkbox = card.querySelector('input[type="checkbox"]');
-    if (checkbox && event.target !== checkbox) {
-      checkbox.checked = !checkbox.checked;
-      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-    this.updateBotSelection();
-  }
-
-  updateBotSelection() {
-    const checkboxes = this.element.querySelectorAll('input[name="selected_bots[]"]');
-    let total = 0;
-    checkboxes.forEach(cb => {
-      const card = cb.closest('[data-action*="selectBot"]');
-      if (cb.checked) {
-        card?.classList.add('ring-2', 'ring-blue-500', 'bg-blue-500/10');
-        card?.classList.remove('bg-neutral-800/50');
-        total += parseFloat(cb.dataset.price || 0);
-      } else {
-        card?.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-500/10');
-        card?.classList.add('bg-neutral-800/50');
+    const submitEvent = new CustomEvent("stepper:submit", {
+      detail: { data: this.formData },
+      bubbles: true,
+      cancelable: true,
+    });
+    this.element.dispatchEvent(submitEvent);
+    if (!submitEvent.defaultPrevented) {
+      const form = this.element.closest('form');
+      if (form) {
+        form.requestSubmit();
       }
-    });
-    const totalEl = this.element.querySelector('[data-bots-total]');
-    if (totalEl) totalEl.textContent = total.toFixed(2) + ' €';
-  }
-
-  selectBroker(event) {
-    const card = event.currentTarget;
-    const radio = card.querySelector('input[type="radio"]');
-    if (radio) {
-      radio.checked = true;
-      radio.dispatchEvent(new Event('change', { bubbles: true }));
     }
-    this.element.querySelectorAll('[data-action*="selectBroker"]').forEach(c => {
-      c.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-500/10');
-      c.classList.add('bg-neutral-800/50');
-    });
-    card.classList.add('ring-2', 'ring-blue-500', 'bg-blue-500/10');
-    card.classList.remove('bg-neutral-800/50');
-  }
-
-  selectQuizAnswer(event) {
-    const card = event.currentTarget;
-    const questionGroup = card.closest('[data-quiz-question]');
-    const radio = card.querySelector('input[type="radio"]');
-    if (radio) {
-      radio.checked = true;
-      radio.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-    questionGroup.querySelectorAll('[data-action*="selectQuizAnswer"]').forEach(c => {
-      c.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-500/10');
-      c.classList.add('bg-neutral-800/50', 'hover:bg-neutral-700/50');
-    });
-    card.classList.add('ring-2', 'ring-blue-500', 'bg-blue-500/10');
-    card.classList.remove('bg-neutral-800/50', 'hover:bg-neutral-700/50');
   }
 }
-
