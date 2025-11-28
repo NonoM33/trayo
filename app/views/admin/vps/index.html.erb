@@ -16,7 +16,7 @@
 
   <% if @vps_list.any? %>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+      <div class="bg-neutral-900 rounded-xl p-4">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
             <i class="fa-solid fa-server text-blue-400"></i>
@@ -28,7 +28,7 @@
         </div>
       </div>
       
-      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+      <div class="bg-neutral-900 rounded-xl p-4">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
             <i class="fa-solid fa-check-circle text-green-400"></i>
@@ -40,7 +40,7 @@
         </div>
       </div>
       
-      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+      <div class="bg-neutral-900 rounded-xl p-4">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
             <i class="fa-solid fa-cog text-amber-400"></i>
@@ -52,7 +52,7 @@
         </div>
       </div>
       
-      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+      <div class="bg-neutral-900 rounded-xl p-4">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
             <i class="fa-solid fa-euro-sign text-cyan-400"></i>
@@ -66,18 +66,18 @@
     </div>
   <% end %>
 
-  <div class="relative w-full bg-neutral-950 rounded-xl border border-white/10 overflow-hidden"
+  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
        data-controller="scroll-area"
        data-scroll-area-target="root"
        data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
 
-    <div class="px-6 py-5 border-b border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-neutral-900">
+    <div class="px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-neutral-900">
       <h2 class="text-lg font-semibold text-white flex items-center gap-2">
         <i class="fa-solid fa-server text-cyan-400"></i>
         <%= current_user.is_admin? ? 'Liste des VPS' : 'Mes VPS' %>
       </h2>
       <% if current_user.is_admin? %>
-        <div data-controller="slideover">
+        <div data-controller="slideover" id="new-vps-slideover">
           <button type="button" data-action="slideover#show:prevent" class="flex items-center justify-center gap-1.5 rounded-lg border border-blue-400/30 bg-blue-600 px-3.5 py-2 text-sm font-medium whitespace-nowrap text-white shadow-sm transition-all duration-100 ease-in-out select-none hover:bg-blue-500">
             <i class="fa-solid fa-plus"></i>
             <span>Nouveau VPS</span>
@@ -102,62 +102,7 @@
               
               <%= form_with model: Vps.new, url: admin_vps_path, method: :post, class: "flex flex-1 flex-col min-h-0" do |f| %>
                 <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-neutral-950">
-                  
-                  <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-4">
-                    <h5 class="text-sm font-semibold text-neutral-300 flex items-center gap-2">
-                      <i class="fa-solid fa-info-circle text-blue-400"></i>
-                      Informations VPS
-                    </h5>
-                    
-                    <div>
-                      <label class="block text-sm font-medium text-neutral-300 mb-2">Client *</label>
-                      <%= f.select :user_id, User.where(is_admin: false).order(:email).map { |c| ["#{c.first_name} #{c.last_name} (#{c.email})", c.id] }, { prompt: 'Sélectionner un client...' }, required: true, class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
-                    </div>
-                    
-                    <div>
-                      <label class="block text-sm font-medium text-neutral-300 mb-2">Nom du VPS *</label>
-                      <%= f.text_field :name, required: true, placeholder: "VPS Trading Pro", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                      <div>
-                        <label class="block text-sm font-medium text-neutral-300 mb-2">Emplacement</label>
-                        <%= f.text_field :server_location, placeholder: "Paris, France", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
-                      </div>
-                      <div>
-                        <label class="block text-sm font-medium text-neutral-300 mb-2">Adresse IP</label>
-                        <%= f.text_field :ip_address, placeholder: "192.168.1.100", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
-                      </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                      <div>
-                        <label class="block text-sm font-medium text-neutral-300 mb-2">Prix annuel (€)</label>
-                        <%= f.number_field :monthly_price, step: 0.01, min: 0, value: 399.99, class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
-                      </div>
-                      <div>
-                        <label class="block text-sm font-medium text-neutral-300 mb-2">Statut</label>
-                        <%= f.select :status, Vps::STATUSES.map { |k, v| [v, k] }, {}, class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-4">
-                    <h5 class="text-sm font-semibold text-neutral-300 flex items-center gap-2">
-                      <i class="fa-solid fa-key text-amber-400"></i>
-                      Accès & Configuration
-                    </h5>
-                    
-                    <div>
-                      <label class="block text-sm font-medium text-neutral-300 mb-2">Identifiants d'accès</label>
-                      <%= f.text_area :access_credentials, rows: 3, placeholder: "Username: admin\nPassword: ********", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none font-mono text-sm" %>
-                    </div>
-                    
-                    <div>
-                      <label class="block text-sm font-medium text-neutral-300 mb-2">Notes</label>
-                      <%= f.text_area :notes, rows: 2, placeholder: "Notes internes...", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none" %>
-                    </div>
-                  </div>
+                  <%= render 'vps_form_fields', f: f, clients: User.where(is_admin: false).order(:email) %>
                 </div>
                 
                 <div class="flex items-center gap-3 border-t border-neutral-800 bg-neutral-900 px-6 py-5">

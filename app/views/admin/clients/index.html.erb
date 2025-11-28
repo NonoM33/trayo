@@ -15,7 +15,7 @@
   <% end %>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-    <div class="bg-white dark:bg-neutral-800 border border-black/10 dark:border-white/10 overflow-hidden rounded-xl shadow-xs">
+    <div class="bg-neutral-900 overflow-hidden rounded-xl">
       <div class="px-4 py-5 sm:p-6">
         <dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400 truncate">Total Clients</dt>
         <dd class="mt-1 text-3xl font-semibold text-neutral-900 dark:text-white"><%= @clients.count %></dd>
@@ -27,7 +27,7 @@
       </div>
     </div>
 
-    <div class="bg-white dark:bg-neutral-800 border border-black/10 dark:border-white/10 overflow-hidden rounded-xl shadow-xs">
+    <div class="bg-neutral-900 overflow-hidden rounded-xl">
       <div class="px-4 py-5 sm:p-6">
         <dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400 truncate">Profits Totaux</dt>
         <dd class="mt-1 text-3xl font-semibold <%= @clients.sum(&:total_profits) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
@@ -42,7 +42,7 @@
       </div>
     </div>
 
-    <div class="bg-white dark:bg-neutral-800 border border-black/10 dark:border-white/10 overflow-hidden rounded-xl shadow-xs">
+    <div class="bg-neutral-900 overflow-hidden rounded-xl">
       <div class="px-4 py-5 sm:p-6">
         <dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400 truncate">Gain Moyen / Jour</dt>
         <dd class="mt-1 text-3xl font-semibold <%= @average_daily_gain_all >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
@@ -56,7 +56,7 @@
       </div>
     </div>
 
-    <div class="bg-white dark:bg-neutral-800 border border-black/10 dark:border-white/10 overflow-hidden rounded-xl shadow-xs">
+    <div class="bg-neutral-900 overflow-hidden rounded-xl">
       <div class="px-4 py-5 sm:p-6">
         <dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400 truncate">Commissions Dues</dt>
         <dd class="mt-1 text-3xl font-semibold text-green-600 dark:text-green-400">
@@ -70,7 +70,7 @@
       </div>
     </div>
 
-    <div class="bg-white dark:bg-neutral-800 border border-black/10 dark:border-white/10 overflow-hidden rounded-xl shadow-xs">
+    <div class="bg-neutral-900 overflow-hidden rounded-xl">
       <div class="px-4 py-5 sm:p-6">
         <dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400 truncate">Administrateurs</dt>
         <dd class="mt-1 text-3xl font-semibold text-neutral-900 dark:text-white"><%= @admins.count %></dd>
@@ -83,12 +83,12 @@
     </div>
   </div>
 
-  <div class="relative w-full bg-neutral-950 rounded-xl border border-white/10 overflow-hidden"
+  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
        data-controller="scroll-area"
        data-scroll-area-target="root"
        data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
 
-    <div class="px-6 py-5 border-b border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-neutral-900">
+    <div class="px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-neutral-900">
       <h2 class="text-lg font-semibold text-white">Liste des Clients</h2>
       <div class="flex gap-2">
         <div data-controller="slideover">
@@ -382,12 +382,12 @@
     </div>
   </div>
 
-  <div class="relative w-full bg-neutral-950 rounded-xl border border-white/10 overflow-hidden"
+  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
        data-controller="scroll-area"
        data-scroll-area-target="root"
        data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
 
-    <div class="px-6 py-5 border-b border-white/10 bg-neutral-900">
+    <div class="px-6 py-5 bg-neutral-900">
       <h2 class="text-lg font-semibold text-white">Administrateurs</h2>
     </div>
     
@@ -451,12 +451,12 @@
     </div>
   </div>
 
-  <div class="relative w-full bg-neutral-950 rounded-xl border border-white/10 overflow-hidden"
+  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
        data-controller="scroll-area"
        data-scroll-area-target="root"
        data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
 
-    <div class="px-6 py-5 border-b border-white/10 flex items-center justify-between bg-neutral-900">
+    <div class="px-6 py-5 flex items-center justify-between bg-neutral-900">
       <h2 class="text-lg font-semibold text-white flex items-center gap-2">
         <i class="fa-solid fa-envelope text-emerald-400"></i>
         Invitations
