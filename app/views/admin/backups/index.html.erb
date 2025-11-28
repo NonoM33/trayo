@@ -1,254 +1,184 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Backups - Admin Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-  <style>
-    .backup-actions {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    
-    .backup-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-    
-    .status-completed {
-      background: hsl(142, 76%, 36%);
-      color: white;
-    }
-    
-    .status-pending {
-      background: hsl(45, 93%, 47%);
-      color: white;
-    }
-    
-    .status-failed {
-      background: hsl(0, 84%, 60%);
-      color: white;
-    }
-    
-    .status-restoring {
-      background: hsl(217, 91%, 60%);
-      color: white;
-    }
-    
-    .upload-section {
-      background: hsl(var(--muted));
-      padding: 1.5rem;
-      border-radius: 0.5rem;
-      margin-bottom: 2rem;
-    }
-    
-    .upload-section h3 {
-      margin-top: 0;
-      margin-bottom: 1rem;
-    }
-    
-    .form-group {
-      margin-bottom: 1rem;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-    }
-    
-    .form-group input[type="file"],
-    .form-group textarea {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid hsl(var(--border));
-      border-radius: 0.375rem;
-      background: hsl(var(--background));
-      color: hsl(var(--foreground));
-    }
-    
-    .form-group textarea {
-      min-height: 80px;
-      resize: vertical;
-    }
-    
-    .info-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: hsl(var(--muted));
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-    }
-  </style>
-</head>
-<body>
-  <% @page_title = 'Gestion des Backups' %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
-      
-      <div class="container">
-        <% if flash[:notice] %>
-          <div class="notice"><%= flash[:notice] %></div>
-        <% end %>
-        <% if flash[:alert] %>
-          <div class="alert"><%= flash[:alert] %></div>
-        <% end %>
+<% @page_title = "Backups" %>
 
-        <div class="card">
-          <div class="card-header">
-            <h2>Gestion des Backups</h2>
-            <div class="card-header-actions">
-              <%= form_with url: admin_backups_path, method: :post, local: true, class: "inline-form" do |f| %>
-                <%= f.text_area :notes, placeholder: "Notes (optionnel)", rows: 2, style: "width: 200px; margin-right: 0.5rem;" %>
-                <%= f.submit "Créer un Backup", class: "btn btn-primary", data: { turbo_confirm: "Créer un nouveau backup de la base de données ?" } %>
-              <% end %>
-            </div>
-          </div>
+<div class="space-y-6">
+  <%= render 'admin/shared/flash_messages' %>
 
-          <div class="upload-section">
-            <h3>Téléverser un Backup</h3>
-            <%= form_with url: upload_admin_backups_path, method: :post, local: true, multipart: true do |f| %>
-              <div class="form-group">
-                <%= f.label :file, "Fichier de backup (.sql)" %>
-                <%= f.file_field :file, accept: ".sql", required: true %>
-              </div>
-              <div class="form-group">
-                <%= f.label :notes, "Notes (optionnel)" %>
-                <%= f.text_area :notes, rows: 2 %>
-              </div>
-              <%= f.submit "Téléverser", class: "btn btn-primary" %>
-            <% end %>
-          </div>
-          
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Fichier</th>
-                  <th>Date de création</th>
-                  <th>Date du backup</th>
-                  <th>Taille</th>
-                  <th>Statut</th>
-                  <th>Notes</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% if @backups.any? %>
-                  <% @backups.each do |backup| %>
-                    <tr>
-                      <td style="font-family: monospace; font-size: 0.875rem;"><%= backup.filename %></td>
-                      <td><%= backup.created_at.strftime("%d/%m/%Y %H:%M") %></td>
-                      <td><%= backup.backup_date.strftime("%d/%m/%Y %H:%M") %></td>
-                      <td><%= backup.file_size_human %></td>
-                      <td>
-                        <span class="backup-status status-<%= backup.status %>">
-                          <%= backup.status.humanize %>
-                        </span>
-                        <% if backup.error_message.present? %>
-                          <div style="font-size: 0.75rem; color: hsl(var(--destructive)); margin-top: 0.25rem;">
-                            <%= truncate(backup.error_message, length: 50) %>
-                          </div>
-                        <% end %>
-                      </td>
-                      <td style="font-size: 0.875rem;"><%= truncate(backup.notes, length: 30) if backup.notes.present? %></td>
-                      <td>
-                        <div class="backup-actions">
-                          <% if backup.can_restore? %>
-                            <%= link_to "Restaurer", admin_backup_path(backup), class: "btn btn-outline btn-sm" %>
-                          <% end %>
-                          <% if backup.exists? %>
-                            <%= link_to "Télécharger", download_admin_backup_path(backup), class: "btn btn-outline btn-sm" %>
-                          <% end %>
-                          <%= link_to "Voir", admin_backup_path(backup), class: "btn btn-outline btn-sm" %>
-                          <%= button_to "Supprimer", admin_backup_path(backup), method: :delete, data: { turbo_confirm: "Supprimer ce backup ?" }, class: "btn btn-danger btn-sm" %>
-                        </div>
-                      </td>
-                    </tr>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-database',
+        icon_color: 'blue',
+        label: 'Total Backups',
+        value: @backups&.count || 0 %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-check-circle',
+        icon_color: 'green',
+        label: 'Complétés',
+        value: @backups&.select { |b| b.status == 'completed' }&.count || 0,
+        value_color: 'green' %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-clock',
+        icon_color: 'amber',
+        label: 'En Cours',
+        value: @backups&.select { |b| ['pending', 'restoring'].include?(b.status) }&.count || 0,
+        value_color: 'amber' %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-calendar',
+        icon_color: 'purple',
+        label: 'Dernier Backup',
+        value: @backups&.first&.created_at&.strftime("%d/%m") || 'N/A' %>
+  </div>
+
+  <div class="bg-neutral-900 rounded-xl p-6">
+    <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <i class="fa-solid fa-plus-circle text-green-400"></i>
+      Créer un Backup
+    </h3>
+    <%= form_with url: admin_backups_path, method: :post, local: true, class: "flex flex-col sm:flex-row items-start sm:items-end gap-4" do |f| %>
+      <div class="flex-1 w-full">
+        <label class="block text-sm font-medium text-neutral-400 mb-1.5">Notes (optionnel)</label>
+        <%= f.text_area :notes, placeholder: "Description du backup...", rows: 2, class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none" %>
+      </div>
+      <%= f.submit "Créer un Backup", class: "flex items-center justify-center gap-2 rounded-lg bg-green-600 px-5 py-3 text-sm font-medium text-white shadow-lg shadow-green-600/25 transition-all hover:bg-green-500 cursor-pointer whitespace-nowrap", data: { turbo_confirm: "Créer un nouveau backup de la base de données ?" } %>
+    <% end %>
+  </div>
+
+  <div class="bg-neutral-900 rounded-xl p-6">
+    <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <i class="fa-solid fa-upload text-blue-400"></i>
+      Téléverser un Backup
+    </h3>
+    <%= form_with url: upload_admin_backups_path, method: :post, local: true, multipart: true, class: "space-y-4" do |f| %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-neutral-400 mb-1.5">Fichier .sql *</label>
+          <%= f.file_field :file, accept: ".sql", required: true, class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-600 file:text-white hover:file:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer" %>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-neutral-400 mb-1.5">Notes (optionnel)</label>
+          <%= f.text_field :notes, placeholder: "Description...", class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+        </div>
+      </div>
+      <%= f.submit "Téléverser", class: "flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-500 cursor-pointer" %>
+    <% end %>
+  </div>
+
+  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
+       data-controller="scroll-area"
+       data-scroll-area-target="root"
+       data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
+
+    <div class="px-6 py-5 bg-neutral-900">
+      <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+        <i class="fa-solid fa-database text-blue-400"></i>
+        Liste des Backups
+      </h2>
+    </div>
+
+    <% if @backups && @backups.any? %>
+      <div data-scroll-area-target="viewport"
+           data-action="scroll->scroll-area#onViewportScroll"
+           class="max-h-[500px] overflow-auto scrollbar-hide bg-neutral-950">
+        <table class="w-full min-w-[900px]">
+          <thead class="sticky top-0 z-10 bg-neutral-900">
+            <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Fichier</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Date</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Taille</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-center">Statut</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Notes</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="*:even:bg-neutral-900/50 *:*:py-4 bg-neutral-950">
+            <% @backups.each do |backup| %>
+              <tr class="hover:bg-neutral-800 transition-colors">
+                <td class="px-6">
+                  <code class="text-sm text-cyan-400 font-mono"><%= backup.filename %></code>
+                  <% if backup.error_message.present? %>
+                    <p class="text-xs text-red-400 mt-1"><%= truncate(backup.error_message, length: 50) %></p>
                   <% end %>
-                <% else %>
-                  <tr>
-                    <td colspan="7" style="text-align: center; padding: 2rem; color: hsl(var(--muted-foreground));">
-                      Aucun backup disponible. Créez votre premier backup maintenant.
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-
-          <% if @backups.respond_to?(:current_page) %>
-            <div style="margin-top: 1.5rem; display: flex; justify-content: center;">
-              <%= paginate @backups %>
-            </div>
-          <% end %>
+                </td>
+                <td class="px-6">
+                  <p class="text-sm text-white"><%= backup.created_at.strftime("%d/%m/%Y") %></p>
+                  <p class="text-xs text-neutral-500"><%= backup.created_at.strftime("%H:%M") %></p>
+                </td>
+                <td class="px-6 text-sm text-neutral-300"><%= backup.file_size_human %></td>
+                <td class="px-6 text-center">
+                  <% variant = case backup.status
+                     when 'completed' then 'success'
+                     when 'pending', 'restoring' then 'warning'
+                     when 'failed' then 'danger'
+                     else 'neutral'
+                     end %>
+                  <%= render 'admin/shared/status_badge', label: backup.status.humanize, variant: variant, pulse: ['pending', 'restoring'].include?(backup.status) %>
+                </td>
+                <td class="px-6 text-sm text-neutral-400"><%= backup.notes.present? ? truncate(backup.notes, length: 30) : "—" %></td>
+                <td class="px-6">
+                  <div class="flex items-center justify-end gap-2">
+                    <% if backup.can_restore? %>
+                      <%= link_to admin_backup_path(backup), class: "flex items-center justify-center w-8 h-8 rounded-lg border border-purple-400/30 bg-purple-600 text-white hover:bg-purple-500 transition-colors", title: "Restaurer" do %>
+                        <i class="fa-solid fa-undo text-xs"></i>
+                      <% end %>
+                    <% end %>
+                    <% if backup.exists? %>
+                      <%= link_to download_admin_backup_path(backup), class: "flex items-center justify-center w-8 h-8 rounded-lg border border-green-400/30 bg-green-600 text-white hover:bg-green-500 transition-colors", title: "Télécharger" do %>
+                        <i class="fa-solid fa-download text-xs"></i>
+                      <% end %>
+                    <% end %>
+                    <%= link_to admin_backup_path(backup), class: "flex items-center justify-center w-8 h-8 rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors", title: "Voir" do %>
+                      <i class="fa-solid fa-eye text-xs"></i>
+                    <% end %>
+                    <%= button_to admin_backup_path(backup), method: :delete, data: { turbo_confirm: "Supprimer ce backup ?" }, class: "flex items-center justify-center w-8 h-8 rounded-lg border border-red-400/30 bg-red-600 text-white hover:bg-red-500 transition-colors", title: "Supprimer" do %>
+                      <i class="fa-solid fa-trash text-xs"></i>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      
+      <% if @backups.respond_to?(:current_page) %>
+        <div class="px-6 py-4 border-t border-neutral-800">
+          <%= paginate @backups %>
         </div>
+      <% end %>
+    <% else %>
+      <%= render 'admin/shared/empty_state',
+          icon: 'fa-database',
+          icon_gradient: 'from-blue-500/20 to-cyan-500/20',
+          icon_color: 'text-blue-400',
+          title: 'Aucun backup',
+          description: 'Créez votre premier backup pour sécuriser vos données.' %>
+    <% end %>
+  </div>
 
-        <div class="card" style="margin-top: 2rem;">
-          <h3>Informations importantes</h3>
-          <div style="display: flex; flex-direction: column; gap: 1rem;">
-            <div class="info-badge">
-              <i class="fa-icon fa-info-circle"></i>
-              <span>Les backups contiennent l'intégralité de l'historique de la base de données</span>
-            </div>
-            <div class="info-badge">
-              <i class="fa-icon fa-clock"></i>
-              <span>Les backups sont automatiquement supprimés après 30 jours</span>
-            </div>
-            <div class="info-badge">
-              <i class="fa-icon fa-exclamation-triangle"></i>
-              <span>La restauration d'un backup remplace toutes les données actuelles</span>
-            </div>
-            <div class="info-badge">
-              <i class="fa-icon fa-calendar"></i>
-              <span>Un backup journalier automatique est créé chaque jour à minuit</span>
-            </div>
-          </div>
-        </div>
+  <div class="bg-neutral-900 rounded-xl p-6">
+    <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <i class="fa-solid fa-info-circle text-blue-400"></i>
+      Informations
+    </h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div class="flex items-start gap-3 p-3 rounded-lg bg-neutral-800">
+        <i class="fa-solid fa-database text-blue-400 mt-0.5"></i>
+        <p class="text-sm text-neutral-300">Les backups contiennent l'intégralité de la base de données</p>
+      </div>
+      <div class="flex items-start gap-3 p-3 rounded-lg bg-neutral-800">
+        <i class="fa-solid fa-clock text-amber-400 mt-0.5"></i>
+        <p class="text-sm text-neutral-300">Supprimés automatiquement après 30 jours</p>
+      </div>
+      <div class="flex items-start gap-3 p-3 rounded-lg bg-neutral-800">
+        <i class="fa-solid fa-exclamation-triangle text-red-400 mt-0.5"></i>
+        <p class="text-sm text-neutral-300">La restauration remplace toutes les données actuelles</p>
+      </div>
+      <div class="flex items-start gap-3 p-3 rounded-lg bg-neutral-800">
+        <i class="fa-solid fa-calendar-check text-green-400 mt-0.5"></i>
+        <p class="text-sm text-neutral-300">Backup automatique quotidien à minuit</p>
       </div>
     </div>
   </div>
-
-  <script>
-    (function() {
-      const scrollKey = 'backups_scroll_position';
-      
-      window.addEventListener('beforeunload', function() {
-        sessionStorage.setItem(scrollKey, window.scrollY.toString());
-      });
-      
-      window.addEventListener('load', function() {
-        const savedScroll = sessionStorage.getItem(scrollKey);
-        if (savedScroll) {
-          setTimeout(function() {
-            window.scrollTo(0, parseInt(savedScroll, 10));
-            sessionStorage.removeItem(scrollKey);
-          }, 100);
-        }
-      });
-      
-      document.addEventListener('turbo:load', function() {
-        const savedScroll = sessionStorage.getItem(scrollKey);
-        if (savedScroll) {
-          setTimeout(function() {
-            window.scrollTo(0, parseInt(savedScroll, 10));
-            sessionStorage.removeItem(scrollKey);
-          }, 100);
-        }
-      });
-    })();
-  </script>
-</body>
-</html>
-
+</div>

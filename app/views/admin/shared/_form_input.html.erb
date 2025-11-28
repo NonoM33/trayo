@@ -1,0 +1,31 @@
+<div>
+  <label class="block text-sm font-medium text-neutral-300 mb-2"><%= local_assigns[:label] %><%= ' *' if local_assigns[:required] %></label>
+  <% input_class = "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-#{local_assigns[:color] || 'blue'}-500 focus:border-transparent transition-all" %>
+  
+  <% case local_assigns[:type] %>
+  <% when 'textarea' %>
+    <textarea name="<%= local_assigns[:name] %>" 
+              rows="<%= local_assigns[:rows] || 3 %>"
+              placeholder="<%= local_assigns[:placeholder] %>"
+              class="<%= input_class %> resize-none"
+              <%= 'required' if local_assigns[:required] %>><%= local_assigns[:value] %></textarea>
+  <% when 'select' %>
+    <select name="<%= local_assigns[:name] %>" class="<%= input_class %>" <%= 'required' if local_assigns[:required] %>>
+      <% (local_assigns[:options] || []).each do |opt| %>
+        <% label, value = opt.is_a?(Array) ? opt : [opt, opt] %>
+        <option value="<%= value %>" <%= 'selected' if local_assigns[:selected].to_s == value.to_s %>><%= label %></option>
+      <% end %>
+    </select>
+  <% else %>
+    <input type="<%= local_assigns[:type] || 'text' %>"
+           name="<%= local_assigns[:name] %>"
+           value="<%= local_assigns[:value] %>"
+           placeholder="<%= local_assigns[:placeholder] %>"
+           class="<%= input_class %>"
+           <%= 'required' if local_assigns[:required] %>>
+  <% end %>
+  
+  <% if local_assigns[:hint] %>
+    <p class="mt-1 text-xs text-neutral-500"><%= local_assigns[:hint] %></p>
+  <% end %>
+</div>

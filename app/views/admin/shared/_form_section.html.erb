@@ -1,0 +1,16 @@
+<div class="space-y-4">
+  <% if local_assigns[:title] || local_assigns[:icon] %>
+    <div class="flex items-center gap-2 text-<%= local_assigns[:icon_color] || 'neutral' %>-400">
+      <% if local_assigns[:icon] %>
+        <i class="fa-solid <%= local_assigns[:icon] %>"></i>
+      <% end %>
+      <% if local_assigns[:title] %>
+        <h4 class="font-medium text-white"><%= local_assigns[:title] %></h4>
+      <% end %>
+    </div>
+  <% end %>
+  
+  <div class="<%= local_assigns[:grid] ? 'grid grid-cols-' + (local_assigns[:cols] || '2').to_s + ' gap-4' : 'space-y-4' %>">
+    <%= yield %>
+  </div>
+</div>

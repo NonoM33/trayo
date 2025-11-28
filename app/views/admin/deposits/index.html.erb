@@ -1,302 +1,114 @@
-<% content_for :title, "Dépôts - Administration" %>
+<% @page_title = "Dépôts" %>
 
-<div class="page-header">
-  <div class="page-header-content">
-    <div class="page-header-left">
-      <h1>Dépôts - Administration</h1>
-      <p class="page-description">Vue complète de tous les dépôts de tous les clients</p>
-    </div>
-    <div class="page-header-right">
-      <%= link_to "Ajouter un dépôt", new_admin_deposit_path, class: "btn btn-primary" %>
-    </div>
-  </div>
-</div>
+<div class="space-y-6">
+  <%= render 'admin/shared/flash_messages' %>
 
-<div class="page-content">
-  <!-- Statistiques globales -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-value"><%= @deposits.total_count %></div>
-      <div class="stat-label">Total Dépôts</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value positive">
-        <%= number_to_currency(@deposits.sum(:amount), unit: "€", format: "%n %u") %>
-      </div>
-      <div class="stat-label">Montant Total</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value positive">
-        <%= number_to_currency(@deposits.average(:amount) || 0, unit: "€", format: "%n %u") %>
-      </div>
-      <div class="stat-label">Montant Moyen</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">
-        <%= Deposit.select(:mt5_account_id).distinct.count %>
-      </div>
-      <div class="stat-label">Comptes Actifs</div>
-    </div>
-  </div>
-
-  <!-- Table des dépôts -->
-  <div class="table-container">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Client</th>
-          <th>Compte MT5</th>
-          <th>Montant</th>
-          <th>Notes</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @deposits.each do |deposit| %>
-          <tr>
-            <td>
-              <div class="date-cell">
-                <%= deposit.deposit_date&.strftime("%d/%m/%Y") %>
-              </div>
-            </td>
-            <td>
-              <%= link_to "#{deposit.mt5_account.user.first_name} #{deposit.mt5_account.user.last_name}", 
-                          admin_client_path(deposit.mt5_account.user), 
-                          class: "client-link" %>
-            </td>
-            <td><%= deposit.mt5_account.account_name %></td>
-            <td>
-              <span class="amount-value positive">
-                <%= number_to_currency(deposit.amount, unit: "€", format: "%n %u") %>
-              </span>
-            </td>
-            <td>
-              <% if deposit.notes.present? %>
-                <span class="notes-text" title="<%= deposit.notes %>">
-                  <%= truncate(deposit.notes, length: 30) %>
-                </span>
-              <% else %>
-                <span class="text-muted">-</span>
-              <% end %>
-            </td>
-            <td>
-              <div class="action-buttons">
-                <%= link_to "Modifier", edit_admin_deposit_path(deposit), 
-                            class: "btn btn-sm btn-outline" %>
-                <%= link_to "Supprimer", admin_deposit_path(deposit), 
-                            method: :delete, 
-                            data: { confirm: "Êtes-vous sûr de vouloir supprimer ce dépôt ?" },
-                            class: "btn btn-sm btn-danger" %>
-              </div>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-arrow-down',
+        icon_color: 'green',
+        label: 'Total Dépôts',
+        value: @deposits.respond_to?(:total_count) ? @deposits.total_count : @deposits.count %>
     
-    <% if @deposits.empty? %>
-      <div class="empty-state">
-        <div class="empty-state-icon">
-          <i class="fa-icon fa-lg fa-plus-circle"></i>
-        </div>
-        <h3>Aucun dépôt trouvé</h3>
-        <p>Aucun dépôt n'a été enregistré pour le moment.</p>
-        <%= link_to "Ajouter le premier dépôt", new_admin_deposit_path, class: "btn btn-primary" %>
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-euro-sign',
+        icon_color: 'cyan',
+        label: 'Montant Total',
+        value: number_to_currency(@deposits.sum(:amount), unit: "€", format: "%n%u"),
+        value_color: 'green' %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-chart-line',
+        icon_color: 'purple',
+        label: 'Montant Moyen',
+        value: number_to_currency(@deposits.average(:amount) || 0, unit: "€", format: "%n%u") %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-users',
+        icon_color: 'blue',
+        label: 'Comptes Actifs',
+        value: Deposit.select(:mt5_account_id).distinct.count %>
+  </div>
+
+  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
+       data-controller="scroll-area"
+       data-scroll-area-target="root"
+       data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
+
+    <div class="px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-neutral-900">
+      <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+        <i class="fa-solid fa-arrow-down text-green-400"></i>
+        Tous les Dépôts
+      </h2>
+      <%= link_to new_admin_deposit_path, class: "flex items-center justify-center gap-1.5 rounded-lg border border-blue-400/30 bg-blue-600 px-3.5 py-2 text-sm font-medium whitespace-nowrap text-white shadow-sm transition-all hover:bg-blue-500" do %>
+        <i class="fa-solid fa-plus"></i>
+        <span>Ajouter un dépôt</span>
+      <% end %>
+    </div>
+
+    <% if @deposits&.any? %>
+      <div data-scroll-area-target="viewport"
+           data-action="scroll->scroll-area#onViewportScroll"
+           class="max-h-[600px] overflow-auto scrollbar-hide bg-neutral-950">
+        <table class="w-full min-w-[800px]">
+          <thead class="sticky top-0 z-10 bg-neutral-900">
+            <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Date</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Client</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Compte MT5</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-right">Montant</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Notes</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="*:even:bg-neutral-900/50 *:*:py-4 bg-neutral-950">
+            <% @deposits.each do |deposit| %>
+              <tr class="hover:bg-neutral-800 transition-colors">
+                <td class="px-6 text-sm text-neutral-300"><%= deposit.deposit_date&.strftime("%d/%m/%Y") %></td>
+                <td class="px-6">
+                  <% if deposit.mt5_account&.user.present? %>
+                    <%= render 'admin/shared/avatar', user: deposit.mt5_account.user, size: 'sm', link: admin_client_path(deposit.mt5_account.user) %>
+                  <% else %>
+                    <span class="text-sm text-neutral-500 italic">—</span>
+                  <% end %>
+                </td>
+                <td class="px-6 text-sm text-neutral-400"><%= deposit.mt5_account&.account_name || "—" %></td>
+                <td class="px-6 text-right">
+                  <span class="text-lg font-bold text-green-400">+<%= number_to_currency(deposit.amount, unit: "€", format: "%n%u") %></span>
+                </td>
+                <td class="px-6 text-sm text-neutral-400"><%= deposit.notes.present? ? truncate(deposit.notes, length: 30) : "—" %></td>
+                <td class="px-6">
+                  <div class="flex items-center justify-end gap-2">
+                    <% if defined?(edit_admin_deposit_path) %>
+                      <%= link_to edit_admin_deposit_path(deposit), class: "flex items-center justify-center w-8 h-8 rounded-lg border border-amber-400/30 bg-amber-500 text-white hover:bg-amber-400 transition-colors", title: "Modifier" do %>
+                        <i class="fa-solid fa-pen text-xs"></i>
+                      <% end %>
+                    <% end %>
+                    <%= button_to admin_deposit_path(deposit), method: :delete, data: { turbo_confirm: "Supprimer ce dépôt ?" }, class: "flex items-center justify-center w-8 h-8 rounded-lg border border-red-400/30 bg-red-600 text-white hover:bg-red-500 transition-colors", title: "Supprimer" do %>
+                      <i class="fa-solid fa-trash text-xs"></i>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
+      
+      <% if @deposits.respond_to?(:current_page) %>
+        <div class="px-6 py-4 border-t border-neutral-800">
+          <%= paginate @deposits %>
+        </div>
+      <% end %>
+    <% else %>
+      <%= render 'admin/shared/empty_state',
+          icon: 'fa-arrow-down',
+          icon_gradient: 'from-green-500/20 to-emerald-500/20',
+          icon_color: 'text-green-400',
+          title: 'Aucun dépôt',
+          description: 'Les dépôts apparaîtront ici une fois enregistrés.',
+          button_label: 'Ajouter un dépôt',
+          button_href: new_admin_deposit_path %>
     <% end %>
   </div>
-
-  <!-- Pagination -->
-  <% if @deposits.respond_to?(:current_page) %>
-    <div class="pagination-container">
-      <%= paginate @deposits, theme: 'github' %>
-    </div>
-  <% end %>
 </div>
-
-<style>
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 1.5rem;
-  text-align: center;
-}
-
-.stat-value {
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.stat-value.positive {
-  color: var(--success-color);
-}
-
-.stat-label {
-  color: var(--text-muted);
-  font-size: 0.875rem;
-}
-
-.date-cell {
-  display: flex;
-  flex-direction: column;
-}
-
-.amount-value {
-  font-weight: 600;
-}
-
-.amount-value.positive {
-  color: var(--success-color);
-}
-
-.notes-text {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-.client-link {
-  color: var(--primary-color);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.client-link:hover {
-  text-decoration: underline;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.btn-sm {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.875rem;
-}
-
-.btn-danger {
-  background: var(--error-color);
-  color: white;
-  border: 1px solid var(--error-color);
-}
-
-.btn-danger:hover {
-  background: #dc2626;
-  border-color: #dc2626;
-}
-
-.pagination-container {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: center;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 3rem;
-  color: var(--text-muted);
-}
-
-.empty-state-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}
-
-.empty-state h3 {
-  margin-bottom: 0.5rem;
-  color: var(--text-color);
-}
-
-/* Pagination GitHub Style */
-.pagination {
-  display: inline-block;
-  padding-left: 0;
-  margin: 20px 0;
-  border-radius: 4px;
-}
-
-.pagination > li {
-  display: inline;
-}
-
-.pagination > li > a,
-.pagination > li > span {
-  position: relative;
-  float: left;
-  padding: 6px 12px;
-  margin-left: -1px;
-  line-height: 1.42857143;
-  color: #337ab7;
-  text-decoration: none;
-  background-color: #fff;
-  border: 1px solid #ddd;
-}
-
-.pagination > li:first-child > a,
-.pagination > li:first-child > span {
-  margin-left: 0;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-}
-
-.pagination > li:last-child > a,
-.pagination > li:last-child > span {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-.pagination > li > a:hover,
-.pagination > li > span:hover,
-.pagination > li > a:focus,
-.pagination > li > span:focus {
-  color: #23527c;
-  background-color: #eee;
-  border-color: #ddd;
-}
-
-.pagination > .active > a,
-.pagination > .active > span,
-.pagination > .active > a:hover,
-.pagination > .active > span:hover,
-.pagination > .active > a:focus,
-.pagination > .active > span:focus {
-  z-index: 2;
-  color: #fff;
-  cursor: default;
-  background-color: #337ab7;
-  border-color: #337ab7;
-}
-
-.pagination > .disabled > span,
-.pagination > .disabled > span:hover,
-.pagination > .disabled > span:focus,
-.pagination > .disabled > a,
-.pagination > .disabled > a:hover,
-.pagination > .disabled > a:focus {
-  color: #777;
-  cursor: not-allowed;
-  background-color: #fff;
-  border-color: #ddd;
-}
-
-@media (max-width: 768px) {
-  .action-buttons {
-    flex-direction: column;
-  }
-  
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-</style>
