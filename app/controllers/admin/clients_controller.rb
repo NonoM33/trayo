@@ -6,6 +6,7 @@ module Admin
     def index
       @clients = User.clients.order(:email)
       @admins = User.admins.order(:email)
+      @invitations = Invitation.order(created_at: :desc).limit(20)
       trades_scope = Trade.joins(mt5_account: :user).where(users: { is_admin: false })
       @average_daily_gain_all = Trade.average_daily_gain(scope: trades_scope)
     end
