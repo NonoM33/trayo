@@ -76,9 +76,6 @@
               <%= link_to admin_sms_logs_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "SMS" do %>
                 <i class="fa-solid fa-comment-dots"></i>
               <% end %>
-              <%= link_to admin_mt5_tokens_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Tokens MT5" do %>
-                <i class="fa-solid fa-key"></i>
-              <% end %>
               <%= link_to admin_maintenance_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Maintenance" do %>
                 <i class="fa-solid fa-tools"></i>
               <% end %>
@@ -328,16 +325,6 @@
 
                 <div class="mb-4">
                   <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2">Configuration</div>
-                  <%= link_to admin_mt5_tokens_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/mt5_tokens') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
-                    <div class="flex min-w-0 items-center gap-1.5">
-                      <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
-                        <i class="fa-solid fa-key"></i>
-                      </div>
-                      <div class="flex min-w-0 grow items-center gap-2.5 group-data-no-contents-gap:gap-0">
-                        <div class="truncate">Tokens MT5</div>
-                      </div>
-                    </div>
-                  <% end %>
                   <%= link_to admin_maintenance_path, class: "group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm #{request.path.start_with?('/admin/maintenance') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-700/50 dark:focus-visible:bg-neutral-700/50'}" do %>
                     <div class="flex min-w-0 items-center gap-1.5">
                       <div class="flex items-center justify-center group-disabled:opacity-50 group-data-disabled:opacity-50">
