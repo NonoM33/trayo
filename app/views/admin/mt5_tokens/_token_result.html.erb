@@ -1,0 +1,109 @@
+<turbo-frame id="mt5_token_content" class="flex-1 flex flex-col min-h-0">
+  <div class="flex-1 overflow-y-auto p-6 bg-neutral-950">
+    <% if @generated_token %>
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-600/25">
+          <i class="fa-solid fa-check text-2xl text-white"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-white mb-1">Token généré !</h3>
+        <p class="text-neutral-400 text-sm">Copié automatiquement dans le presse-papiers</p>
+      </div>
+
+      <div class="p-4 rounded-xl border border-neutral-700 bg-neutral-900 mb-6">
+        <label class="block text-xs font-medium text-neutral-500 mb-2 uppercase tracking-wide">Votre Token MT5</label>
+        <div class="flex items-center gap-2">
+          <code id="tokenValue" class="flex-1 block px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-green-400 font-mono text-sm break-all"><%= @generated_token %></code>
+          <button onclick="copyToken()" class="shrink-0 p-3 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors" title="Copier">
+            <i class="fa-solid fa-copy"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 mb-6">
+        <label class="block text-xs font-medium text-neutral-500 mb-3 uppercase tracking-wide">Code à coller dans MT5</label>
+        <div class="relative">
+          <pre class="px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-sm overflow-x-auto"><code class="text-blue-400">input string</code> <code class="text-white">MT5_API_TOKEN</code> <code class="text-neutral-500">=</code> <code class="text-green-400">"<%= @generated_token %>"</code><code class="text-neutral-500">;</code></pre>
+          <button onclick="copyCode()" class="absolute top-2 right-2 p-2 rounded-md bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors text-xs">
+            <i class="fa-solid fa-copy"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <%= form_with url: admin_mt5_tokens_path, method: :post, data: { turbo_frame: "mt5_token_content" }, class: "flex-1" do %>
+          <button type="submit" class="w-full flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white cursor-pointer">
+            <i class="fa-solid fa-refresh"></i>
+            Générer un autre
+          </button>
+        <% end %>
+        <button onclick="downloadToken('<%= @generated_token %>')" class="flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white">
+          <i class="fa-solid fa-download"></i>
+        </button>
+      </div>
+    <% else %>
+      <div class="text-center py-8">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
+          <i class="fa-solid fa-exclamation-triangle text-2xl text-white"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">Erreur</h3>
+        <p class="text-neutral-400 mb-6">Impossible de générer le token.</p>
+        <%= form_with url: admin_mt5_tokens_path, method: :post, data: { turbo_frame: "mt5_token_content" } do %>
+          <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 cursor-pointer">
+            <i class="fa-solid fa-redo"></i>
+            Réessayer
+          </button>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      <% if @generated_token %>
+        copyToken();
+      <% end %>
+    });
+
+    function copyToken() {
+      const token = '<%= @generated_token %>';
+      navigator.clipboard.writeText(token).then(() => showNotification('Token copié !'));
+    }
+
+    function copyCode() {
+      const code = 'input string MT5_API_TOKEN = "<%= @generated_token %>";';
+      navigator.clipboard.writeText(code).then(() => showNotification('Code copié !'));
+    }
+
+    function showNotification(message) {
+      const existing = document.querySelector('.token-notification');
+      if (existing) existing.remove();
+
+      const notification = document.createElement('div');
+      notification.className = 'token-notification fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-[9999] text-sm font-medium';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 2000);
+    }
+
+    function downloadToken(token) {
+      const content = `Token MT5 Trayo
+================
+Token: ${token}
+Date: ${new Date().toLocaleString('fr-FR')}
+
+Instructions:
+1. Ouvrez votre script TrayoSync.mq5
+2. Remplacez: input string MT5_API_TOKEN = "${token}";
+3. Lancez la synchronisation`;
+      
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `token_mt5_${token.substring(0, 8)}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</turbo-frame>
+
