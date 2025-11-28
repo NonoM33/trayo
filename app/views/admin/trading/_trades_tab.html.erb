@@ -1,0 +1,95 @@
+<div class="p-6 space-y-6">
+  <% total_profit = @total_profit || 0 %>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <%= render 'admin/shared/stat_card', icon: 'fa-chart-line', icon_color: 'blue', label: 'Total', value: @total_trades || 0 %>
+    <%= render 'admin/shared/stat_card', icon: 'fa-euro-sign', icon_color: total_profit >= 0 ? 'green' : 'red', label: 'Profit', value: number_to_currency(total_profit, unit: "€", format: "%n%u"), value_color: total_profit >= 0 ? 'green' : 'red' %>
+    <%= render 'admin/shared/stat_card', icon: 'fa-percent', icon_color: 'purple', label: 'Win Rate', value: "#{@win_rate || 0}%" %>
+    <%= render 'admin/shared/stat_card', icon: 'fa-trophy', icon_color: 'amber', label: 'W / L', value: "#{@winning_trades || 0} / #{@losing_trades || 0}" %>
+  </div>
+
+  <div class="bg-neutral-800 rounded-lg p-4">
+    <%= form_with url: admin_trading_path(tab: 'trades'), method: :get, local: true, class: "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3" do |form| %>
+      <%= form.hidden_field :tab, value: 'trades' %>
+      <div>
+        <label class="block text-xs text-neutral-500 mb-1">Client</label>
+        <%= form.select :client_id, options_for_select([["Tous", ""]] + @clients.map { |c| ["#{c.first_name} #{c.last_name}", c.id] }, params[:client_id]), {}, class: "w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" %>
+      </div>
+      <div>
+        <label class="block text-xs text-neutral-500 mb-1">Symbole</label>
+        <%= form.select :symbol, options_for_select([["Tous", ""]] + @symbols.map { |s| [s, s] }, params[:symbol]), {}, class: "w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" %>
+      </div>
+      <div>
+        <label class="block text-xs text-neutral-500 mb-1">Bot</label>
+        <%= form.select :magic_number, options_for_select([["Tous", ""]] + @magic_numbers.map { |m| ["Bot #{m}", m] }, params[:magic_number]), {}, class: "w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" %>
+      </div>
+      <div>
+        <label class="block text-xs text-neutral-500 mb-1">Profit</label>
+        <%= form.select :profit_filter, options_for_select([["Tous", ""], ["Profitables", "positive"], ["Perdants", "negative"]], params[:profit_filter]), {}, class: "w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" %>
+      </div>
+      <div>
+        <label class="block text-xs text-neutral-500 mb-1">Du</label>
+        <%= form.date_field :date_from, value: params[:date_from], class: "w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" %>
+      </div>
+      <div>
+        <label class="block text-xs text-neutral-500 mb-1">Au</label>
+        <%= form.date_field :date_to, value: params[:date_to], class: "w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" %>
+      </div>
+      <div class="flex items-end gap-2">
+        <%= form.submit "Filtrer", class: "px-4 py-2 bg-blue-600 rounded-lg text-white text-sm font-medium cursor-pointer hover:bg-blue-500" %>
+        <%= link_to "×", admin_trading_path(tab: 'trades'), class: "px-3 py-2 bg-neutral-700 rounded-lg text-neutral-300 text-sm hover:bg-neutral-600" %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @trades&.any? %>
+    <div class="overflow-auto max-h-[450px] scrollbar-hide rounded-lg">
+      <table class="w-full min-w-[1000px]">
+        <thead class="sticky top-0 z-10 bg-neutral-800">
+          <tr class="*:py-3 *:text-left *:[box-shadow:inset_0_-1px_0_0_rgb(64_64_64)]">
+            <th class="px-4 text-xs font-semibold text-neutral-300">Date</th>
+            <th class="px-4 text-xs font-semibold text-neutral-300">Client</th>
+            <th class="px-4 text-xs font-semibold text-neutral-300">Symbole</th>
+            <th class="px-4 text-xs font-semibold text-neutral-300 text-center">Type</th>
+            <th class="px-4 text-xs font-semibold text-neutral-300 text-right">Vol</th>
+            <th class="px-4 text-xs font-semibold text-neutral-300 text-right">Open</th>
+            <th class="px-4 text-xs font-semibold text-neutral-300 text-right">Close</th>
+            <th class="px-4 text-xs font-semibold text-neutral-300 text-right">Profit</th>
+            <th class="px-4 text-xs font-semibold text-neutral-300">Bot</th>
+          </tr>
+        </thead>
+        <tbody class="bg-neutral-900">
+          <% @trades.each do |trade| %>
+            <tr class="border-b border-neutral-800 hover:bg-neutral-800 transition-colors">
+              <td class="px-4 py-2 text-xs text-neutral-400"><%= trade.close_time&.strftime("%d/%m %H:%M") %></td>
+              <td class="px-4 py-2 text-xs text-blue-400"><%= trade.mt5_account&.user&.email&.split('@')&.first %></td>
+              <td class="px-4 py-2 text-xs text-white font-medium"><%= trade.symbol %></td>
+              <td class="px-4 py-2 text-center">
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold <%= trade.trade_type == 'buy' ? 'bg-green-500 text-white' : 'bg-red-500 text-white' %>"><%= trade.trade_type&.upcase %></span>
+              </td>
+              <td class="px-4 py-2 text-xs text-neutral-400 text-right"><%= trade.volume %></td>
+              <td class="px-4 py-2 text-xs text-neutral-500 text-right font-mono"><%= number_with_precision(trade.open_price, precision: 5) %></td>
+              <td class="px-4 py-2 text-xs text-neutral-500 text-right font-mono"><%= number_with_precision(trade.close_price, precision: 5) %></td>
+              <td class="px-4 py-2 text-right">
+                <span class="text-sm font-bold <%= trade.profit >= 0 ? 'text-green-400' : 'text-red-400' %>"><%= number_to_currency(trade.profit, unit: "€", format: "%n%u") %></span>
+              </td>
+              <td class="px-4 py-2">
+                <% if trade.magic_number.present? %>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] bg-cyan-500/20 text-cyan-400"><%= bot_name_for_magic_number(trade.magic_number, @bots_cache) %></span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <% if @trades.respond_to?(:current_page) %>
+      <div class="pt-4"><%= paginate @trades %></div>
+    <% end %>
+  <% else %>
+    <div class="text-center py-12">
+      <i class="fa-solid fa-chart-line text-4xl text-neutral-600 mb-4"></i>
+      <p class="text-neutral-400">Aucun trade trouvé</p>
+    </div>
+  <% end %>
+</div>
+

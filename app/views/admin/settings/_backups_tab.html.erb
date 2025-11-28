@@ -1,0 +1,102 @@
+<div class="p-6 space-y-6">
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <%= render 'admin/shared/stat_card', icon: 'fa-database', icon_color: 'blue', label: 'Total', value: @backups&.count || 0 %>
+    <%= render 'admin/shared/stat_card', icon: 'fa-check-circle', icon_color: 'green', label: 'Complétés', value: @backups&.select { |b| b.status == 'completed' }&.count || 0, value_color: 'green' %>
+    <%= render 'admin/shared/stat_card', icon: 'fa-clock', icon_color: 'amber', label: 'En Cours', value: @backups&.select { |b| ['pending', 'restoring'].include?(b.status) }&.count || 0, value_color: 'amber' %>
+    <%= render 'admin/shared/stat_card', icon: 'fa-calendar', icon_color: 'purple', label: 'Dernier', value: @backups&.first&.created_at&.strftime("%d/%m") || 'N/A' %>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="bg-neutral-800 rounded-lg p-4">
+      <h4 class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+        <i class="fa-solid fa-plus-circle text-green-400"></i>
+        Créer un Backup
+      </h4>
+      <%= form_with url: admin_backups_path, method: :post, local: true, class: "space-y-3" do |f| %>
+        <%= f.text_area :notes, placeholder: "Notes (optionnel)...", rows: 2, class: "w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white placeholder-neutral-500 text-sm focus:outline-none focus:ring-1 focus:ring-green-500 resize-none" %>
+        <%= f.submit "Créer", class: "w-full px-4 py-2 bg-green-600 rounded-lg text-sm font-medium text-white cursor-pointer hover:bg-green-500", data: { turbo_confirm: "Créer un nouveau backup ?" } %>
+      <% end %>
+    </div>
+
+    <div class="bg-neutral-800 rounded-lg p-4">
+      <h4 class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+        <i class="fa-solid fa-upload text-blue-400"></i>
+        Téléverser
+      </h4>
+      <%= form_with url: upload_admin_backups_path, method: :post, local: true, multipart: true, class: "space-y-3" do |f| %>
+        <%= f.file_field :file, accept: ".sql", required: true, class: "w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-600 file:text-white file:text-xs cursor-pointer" %>
+        <%= f.submit "Téléverser", class: "w-full px-4 py-2 bg-blue-600 rounded-lg text-sm font-medium text-white cursor-pointer hover:bg-blue-500" %>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @backups&.any? %>
+    <div class="overflow-auto max-h-[350px] scrollbar-hide rounded-lg">
+      <table class="w-full min-w-[800px]">
+        <thead class="sticky top-0 z-10 bg-neutral-800">
+          <tr class="*:py-3 *:text-left *:[box-shadow:inset_0_-1px_0_0_rgb(64_64_64)]">
+            <th class="px-4 text-xs font-semibold text-neutral-300">Fichier</th>
+            <th class="px-4 text-xs font-semibold text-neutral-300">Date</th>
+            <th class="px-4 text-xs font-semibold text-neutral-300">Taille</th>
+            <th class="px-4 text-xs font-semibold text-neutral-300 text-center">Statut</th>
+            <th class="px-4 text-xs font-semibold text-neutral-300 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-neutral-900">
+          <% @backups.each do |backup| %>
+            <tr class="border-b border-neutral-800 hover:bg-neutral-800 transition-colors">
+              <td class="px-4 py-3">
+                <code class="text-xs text-cyan-400 font-mono"><%= backup.filename %></code>
+              </td>
+              <td class="px-4 py-3 text-xs text-neutral-400"><%= backup.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+              <td class="px-4 py-3 text-xs text-neutral-400"><%= backup.file_size_human %></td>
+              <td class="px-4 py-3 text-center">
+                <% variant = case backup.status
+                   when 'completed' then 'success'
+                   when 'pending', 'restoring' then 'warning'
+                   when 'failed' then 'danger'
+                   else 'neutral'
+                   end %>
+                <%= render 'admin/shared/status_badge', label: backup.status.humanize, variant: variant, pulse: ['pending', 'restoring'].include?(backup.status) %>
+              </td>
+              <td class="px-4 py-3">
+                <div class="flex items-center justify-end gap-1">
+                  <% if backup.can_restore? %>
+                    <%= link_to admin_backup_path(backup), class: "w-7 h-7 flex items-center justify-center rounded bg-purple-600 text-white hover:bg-purple-500", title: "Restaurer" do %>
+                      <i class="fa-solid fa-undo text-xs"></i>
+                    <% end %>
+                  <% end %>
+                  <% if backup.exists? %>
+                    <%= link_to download_admin_backup_path(backup), class: "w-7 h-7 flex items-center justify-center rounded bg-green-600 text-white hover:bg-green-500", title: "Télécharger" do %>
+                      <i class="fa-solid fa-download text-xs"></i>
+                    <% end %>
+                  <% end %>
+                  <%= button_to admin_backup_path(backup), method: :delete, data: { turbo_confirm: "Supprimer ?" }, class: "w-7 h-7 flex items-center justify-center rounded bg-red-600 text-white hover:bg-red-500", title: "Supprimer" do %>
+                    <i class="fa-solid fa-trash text-xs"></i>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <i class="fa-solid fa-database text-4xl text-neutral-600 mb-4"></i>
+      <p class="text-neutral-400">Aucun backup</p>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-2 gap-3 text-xs">
+    <div class="flex items-center gap-2 p-3 rounded-lg bg-neutral-800">
+      <i class="fa-solid fa-clock text-amber-400"></i>
+      <span class="text-neutral-400">Supprimés après 30 jours</span>
+    </div>
+    <div class="flex items-center gap-2 p-3 rounded-lg bg-neutral-800">
+      <i class="fa-solid fa-calendar-check text-green-400"></i>
+      <span class="text-neutral-400">Backup auto quotidien</span>
+    </div>
+  </div>
+</div>
+

@@ -136,6 +136,11 @@ Rails.application.routes.draw do
     
     resources :invitations, only: [:index, :new, :create, :show, :destroy]
     
+    get "finance", to: "finance#index", as: :finance
+    get "trading", to: "trading#index", as: :trading
+    get "support", to: "support#index", as: :support
+    get "settings", to: "settings#index", as: :settings
+    
     resources :trades, only: [:index, :show] do
       collection do
         get :export

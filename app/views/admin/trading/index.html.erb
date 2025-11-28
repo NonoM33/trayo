@@ -1,0 +1,32 @@
+<% @page_title = "Trading" %>
+
+<div class="space-y-6">
+  <%= render 'admin/shared/flash_messages' %>
+
+  <div class="bg-neutral-900 rounded-xl overflow-hidden">
+    <div class="flex border-b border-neutral-800">
+      <%= link_to admin_trading_path(tab: 'trades'), class: "flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors #{@tab == 'trades' ? 'text-blue-400 border-b-2 border-blue-400 bg-blue-500/5' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'}" do %>
+        <i class="fa-solid fa-chart-line"></i>
+        Trades
+      <% end %>
+      <%= link_to admin_trading_path(tab: 'defender'), class: "flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors #{@tab == 'defender' ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-500/5' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'}" do %>
+        <i class="fa-solid fa-shield-alt"></i>
+        Trade Defender
+        <% pending = Trade.where(trade_originality: 'manual_pending_review').count rescue 0 %>
+        <% if pending > 0 %>
+          <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white"><%= pending %></span>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="p-0">
+      <% case @tab %>
+      <% when 'trades' %>
+        <%= render 'trades_tab' %>
+      <% when 'defender' %>
+        <%= render 'defender_tab' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+

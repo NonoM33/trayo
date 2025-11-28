@@ -1,0 +1,40 @@
+<% if @credits&.any? %>
+  <div class="overflow-auto max-h-[500px] scrollbar-hide">
+    <table class="w-full min-w-[600px]">
+      <thead class="sticky top-0 z-10 bg-neutral-800">
+        <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+          <th class="px-6 text-sm font-semibold text-neutral-100">Date</th>
+          <th class="px-6 text-sm font-semibold text-neutral-100">Client</th>
+          <th class="px-6 text-sm font-semibold text-neutral-100 text-right">Montant</th>
+          <th class="px-6 text-sm font-semibold text-neutral-100">Raison</th>
+        </tr>
+      </thead>
+      <tbody class="*:even:bg-neutral-800/30 bg-neutral-900">
+        <% @credits.each do |credit| %>
+          <tr class="hover:bg-neutral-800 transition-colors">
+            <td class="px-6 py-3 text-sm text-neutral-300"><%= credit.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+            <td class="px-6 py-3">
+              <% if credit.user.present? %>
+                <%= link_to admin_client_path(credit.user), class: "text-blue-400 hover:text-blue-300 text-sm" do %>
+                  <%= credit.user.email %>
+                <% end %>
+              <% else %>
+                <span class="text-neutral-500">—</span>
+              <% end %>
+            </td>
+            <td class="px-6 py-3 text-right">
+              <span class="font-bold text-green-400"><%= number_to_currency(credit.amount, unit: "€", format: "%n%u") %></span>
+            </td>
+            <td class="px-6 py-3 text-sm text-neutral-400"><%= credit.reason || "—" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="text-center py-12">
+    <i class="fa-solid fa-coins text-4xl text-neutral-600 mb-4"></i>
+    <p class="text-neutral-400">Aucun crédit</p>
+  </div>
+<% end %>
+

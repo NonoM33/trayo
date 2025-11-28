@@ -1,0 +1,82 @@
+<% @page_title = "Finance" %>
+
+<div class="space-y-6">
+  <%= render 'admin/shared/flash_messages' %>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-credit-card',
+        icon_color: 'blue',
+        label: 'Paiements',
+        value: @stats[:total_payments] %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-clock',
+        icon_color: 'amber',
+        label: 'En attente',
+        value: @stats[:pending_payments],
+        value_color: @stats[:pending_payments] > 0 ? 'amber' : nil %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-coins',
+        icon_color: 'purple',
+        label: 'Crédits',
+        value: number_to_currency(@stats[:total_credits], unit: "€", format: "%n%u") %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-gift',
+        icon_color: 'green',
+        label: 'Bonus',
+        value: number_to_currency(@stats[:total_bonus], unit: "€", format: "%n%u"),
+        value_color: 'green' %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-arrow-down',
+        icon_color: 'cyan',
+        label: 'Dépôts',
+        value: number_to_currency(@stats[:total_deposits], unit: "€", format: "%n%u"),
+        value_color: 'green' %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-arrow-up',
+        icon_color: 'red',
+        label: 'Retraits',
+        value: number_to_currency(@stats[:total_withdrawals], unit: "€", format: "%n%u"),
+        value_color: 'red' %>
+  </div>
+
+  <div class="bg-neutral-900 rounded-xl overflow-hidden">
+    <div class="flex border-b border-neutral-800 overflow-x-auto">
+      <%= link_to admin_finance_path(tab: 'payments'), class: "flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors #{@tab == 'payments' ? 'text-blue-400 border-b-2 border-blue-400 bg-blue-500/5' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'}" do %>
+        <i class="fa-solid fa-credit-card"></i>
+        Paiements
+      <% end %>
+      <%= link_to admin_finance_path(tab: 'credits'), class: "flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors #{@tab == 'credits' ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-500/5' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'}" do %>
+        <i class="fa-solid fa-coins"></i>
+        Crédits
+      <% end %>
+      <%= link_to admin_finance_path(tab: 'bonus'), class: "flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors #{@tab == 'bonus' ? 'text-green-400 border-b-2 border-green-400 bg-green-500/5' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'}" do %>
+        <i class="fa-solid fa-gift"></i>
+        Bonus
+      <% end %>
+      <%= link_to admin_finance_path(tab: 'movements'), class: "flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors #{@tab == 'movements' ? 'text-cyan-400 border-b-2 border-cyan-400 bg-cyan-500/5' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'}" do %>
+        <i class="fa-solid fa-exchange-alt"></i>
+        Mouvements
+      <% end %>
+    </div>
+
+    <div class="p-0">
+      <% case @tab %>
+      <% when 'payments' %>
+        <%= render 'payments_tab' %>
+      <% when 'credits' %>
+        <%= render 'credits_tab' %>
+      <% when 'bonus' %>
+        <%= render 'bonus_tab' %>
+      <% when 'movements' %>
+        <%= render 'movements_tab' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+

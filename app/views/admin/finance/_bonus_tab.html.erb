@@ -1,0 +1,94 @@
+<div class="p-4 space-y-4">
+  <% if @current_period %>
+    <div class="flex items-center gap-4 p-4 rounded-lg bg-green-500/10">
+      <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+        <i class="fa-solid fa-check-circle text-green-400"></i>
+      </div>
+      <div>
+        <p class="text-sm text-neutral-400">Période Active</p>
+        <p class="font-semibold text-white"><%= @current_period.name %> — <span class="text-green-400"><%= number_to_percentage(@current_period.bonus_percentage, precision: 0) %></span></p>
+      </div>
+      <%= link_to admin_bonus_periods_path, class: "ml-auto text-sm text-blue-400 hover:text-blue-300" do %>
+        Gérer les périodes <i class="fa-solid fa-arrow-right ml-1"></i>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="flex items-center gap-4 p-4 rounded-lg bg-amber-500/10">
+      <div class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+        <i class="fa-solid fa-exclamation-triangle text-amber-400"></i>
+      </div>
+      <div>
+        <p class="text-amber-400 font-medium">Aucune période bonus active</p>
+      </div>
+      <%= link_to admin_bonus_periods_path, class: "ml-auto text-sm text-blue-400 hover:text-blue-300" do %>
+        Créer une période <i class="fa-solid fa-arrow-right ml-1"></i>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<% if @bonus_deposits&.any? %>
+  <div class="overflow-auto max-h-[400px] scrollbar-hide">
+    <table class="w-full min-w-[700px]">
+      <thead class="sticky top-0 z-10 bg-neutral-800">
+        <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+          <th class="px-6 text-sm font-semibold text-neutral-100">Date</th>
+          <th class="px-6 text-sm font-semibold text-neutral-100">Client</th>
+          <th class="px-6 text-sm font-semibold text-neutral-100 text-right">Montant</th>
+          <th class="px-6 text-sm font-semibold text-neutral-100 text-center">Bonus</th>
+          <th class="px-6 text-sm font-semibold text-neutral-100 text-center">Statut</th>
+          <th class="px-6 text-sm font-semibold text-neutral-100 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="*:even:bg-neutral-800/30 bg-neutral-900">
+        <% @bonus_deposits.each do |deposit| %>
+          <tr class="hover:bg-neutral-800 transition-colors">
+            <td class="px-6 py-3 text-sm text-neutral-300"><%= deposit.created_at.strftime("%d/%m/%Y") %></td>
+            <td class="px-6 py-3">
+              <% if deposit.user.present? %>
+                <%= link_to admin_client_path(deposit.user), class: "text-blue-400 hover:text-blue-300 text-sm" do %>
+                  <%= deposit.user.email %>
+                <% end %>
+              <% else %>
+                <span class="text-neutral-500">—</span>
+              <% end %>
+            </td>
+            <td class="px-6 py-3 text-right">
+              <span class="font-bold text-green-400"><%= number_to_currency(deposit.amount, precision: 2) %></span>
+            </td>
+            <td class="px-6 py-3 text-center">
+              <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-400/10 text-green-400">
+                +<%= number_to_percentage(deposit.bonus_percentage, precision: 0) %>
+              </span>
+            </td>
+            <td class="px-6 py-3 text-center">
+              <% variant = deposit.status == 'validated' ? 'success' : deposit.status == 'pending' ? 'warning' : 'danger' %>
+              <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium <%= variant == 'success' ? 'bg-green-400/10 text-green-400' : variant == 'warning' ? 'bg-amber-400/10 text-amber-400' : 'bg-red-400/10 text-red-400' %>">
+                <% if deposit.status == 'pending' %><span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><% end %>
+                <%= deposit.status&.upcase %>
+              </span>
+            </td>
+            <td class="px-6 py-3">
+              <div class="flex items-center justify-end gap-1">
+                <% if deposit.status == "pending" %>
+                  <%= button_to validate_deposit_admin_bonus_deposit_path(deposit), method: :post, class: "flex items-center justify-center w-7 h-7 rounded-lg bg-green-600 text-white hover:bg-green-500 transition-colors", title: "Valider" do %>
+                    <i class="fa-solid fa-check text-xs"></i>
+                  <% end %>
+                  <%= button_to reject_deposit_admin_bonus_deposit_path(deposit), method: :post, class: "flex items-center justify-center w-7 h-7 rounded-lg bg-red-600 text-white hover:bg-red-500 transition-colors", title: "Rejeter" do %>
+                    <i class="fa-solid fa-times text-xs"></i>
+                  <% end %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="text-center py-12">
+    <i class="fa-solid fa-gift text-4xl text-neutral-600 mb-4"></i>
+    <p class="text-neutral-400">Aucun dépôt bonus</p>
+  </div>
+<% end %>
+

@@ -1,0 +1,88 @@
+<div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-neutral-800">
+  <div>
+    <div class="px-6 py-4 bg-neutral-800/50 flex items-center gap-2">
+      <i class="fa-solid fa-arrow-down text-green-400"></i>
+      <h3 class="font-semibold text-white">Dépôts</h3>
+      <span class="ml-auto text-sm text-neutral-400"><%= @deposits&.count || 0 %></span>
+    </div>
+    
+    <% if @deposits&.any? %>
+      <div class="overflow-auto max-h-[400px] scrollbar-hide">
+        <table class="w-full">
+          <thead class="sticky top-0 z-10 bg-neutral-800">
+            <tr class="*:py-2 *:text-left *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+              <th class="px-4 text-xs font-semibold text-neutral-300">Date</th>
+              <th class="px-4 text-xs font-semibold text-neutral-300">Client</th>
+              <th class="px-4 text-xs font-semibold text-neutral-300 text-right">Montant</th>
+            </tr>
+          </thead>
+          <tbody class="*:even:bg-neutral-800/30 bg-neutral-900">
+            <% @deposits.each do |deposit| %>
+              <tr class="hover:bg-neutral-800 transition-colors">
+                <td class="px-4 py-2 text-xs text-neutral-400"><%= deposit.deposit_date&.strftime("%d/%m") %></td>
+                <td class="px-4 py-2">
+                  <% if deposit.mt5_account&.user.present? %>
+                    <span class="text-xs text-neutral-300"><%= deposit.mt5_account.user.email.split('@').first %></span>
+                  <% else %>
+                    <span class="text-xs text-neutral-500">—</span>
+                  <% end %>
+                </td>
+                <td class="px-4 py-2 text-right">
+                  <span class="text-sm font-semibold text-green-400">+<%= number_to_currency(deposit.amount, unit: "€", format: "%n%u") %></span>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="text-center py-8">
+        <p class="text-neutral-500 text-sm">Aucun dépôt</p>
+      </div>
+    <% end %>
+  </div>
+
+  <div>
+    <div class="px-6 py-4 bg-neutral-800/50 flex items-center gap-2">
+      <i class="fa-solid fa-arrow-up text-red-400"></i>
+      <h3 class="font-semibold text-white">Retraits</h3>
+      <span class="ml-auto text-sm text-neutral-400"><%= @withdrawals&.count || 0 %></span>
+    </div>
+    
+    <% if @withdrawals&.any? %>
+      <div class="overflow-auto max-h-[400px] scrollbar-hide">
+        <table class="w-full">
+          <thead class="sticky top-0 z-10 bg-neutral-800">
+            <tr class="*:py-2 *:text-left *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+              <th class="px-4 text-xs font-semibold text-neutral-300">Date</th>
+              <th class="px-4 text-xs font-semibold text-neutral-300">Client</th>
+              <th class="px-4 text-xs font-semibold text-neutral-300 text-right">Montant</th>
+            </tr>
+          </thead>
+          <tbody class="*:even:bg-neutral-800/30 bg-neutral-900">
+            <% @withdrawals.each do |withdrawal| %>
+              <tr class="hover:bg-neutral-800 transition-colors">
+                <td class="px-4 py-2 text-xs text-neutral-400"><%= withdrawal.withdrawal_date&.strftime("%d/%m") %></td>
+                <td class="px-4 py-2">
+                  <% if withdrawal.mt5_account&.user.present? %>
+                    <span class="text-xs text-neutral-300"><%= withdrawal.mt5_account.user.email.split('@').first %></span>
+                  <% else %>
+                    <span class="text-xs text-neutral-500">—</span>
+                  <% end %>
+                </td>
+                <td class="px-4 py-2 text-right">
+                  <span class="text-sm font-semibold text-red-400">-<%= number_to_currency(withdrawal.amount, unit: "€", format: "%n%u") %></span>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="text-center py-8">
+        <p class="text-neutral-500 text-sm">Aucun retrait</p>
+      </div>
+    <% end %>
+  </div>
+</div>
+
