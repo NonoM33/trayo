@@ -19,10 +19,141 @@
       <h1 class="text-2xl font-bold text-white">Bots de Trading</h1>
       <p class="text-neutral-400 mt-1">Gérez vos bots de trading automatisés</p>
     </div>
-    <%= link_to new_admin_bot_path, class: "inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-500 hover:shadow-blue-500/30" do %>
-      <i class="fa-solid fa-plus"></i>
-      Nouveau Bot
-    <% end %>
+    
+    <div data-controller="slideover">
+      <button type="button" data-action="slideover#show:prevent" class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-500 hover:shadow-blue-500/30">
+        <i class="fa-solid fa-plus"></i>
+        Nouveau Bot
+      </button>
+
+      <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
+        <div class="flex h-full w-80 flex-col bg-neutral-950 shadow-2xl sm:w-[480px] lg:w-[560px]">
+          <div class="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-6 py-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-robot"></i>
+              </div>
+              <h4 class="text-lg font-semibold text-white">Nouveau Bot</h4>
+            </div>
+            <button type="button" data-action="slideover#hide:prevent" class="rounded-full p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" x2="6" y1="6" y2="18"></line>
+                <line x1="6" x2="18" y1="6" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          
+          <%= form_with model: TradingBot.new, url: admin_bots_path, method: :post, class: "flex flex-1 flex-col min-h-0" do |f| %>
+            <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-neutral-950">
+              
+              <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-4">
+                <h5 class="text-sm font-semibold text-neutral-300 flex items-center gap-2">
+                  <i class="fa-solid fa-info-circle text-blue-400"></i>
+                  Informations générales
+                </h5>
+                
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Nom du Bot *</label>
+                  <%= f.text_field :name, required: true, placeholder: "Ex: Alpha Trader Pro", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Prix (€) *</label>
+                    <%= f.number_field :price, step: 0.01, min: 0, required: true, placeholder: "499", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Statut *</label>
+                    <%= f.select :status, [['Actif', 'active'], ['Inactif', 'inactive']], {}, class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Symbol MT5</label>
+                    <%= f.text_field :symbol, placeholder: "EURUSD", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Magic Number</label>
+                    <%= f.number_field :magic_number_prefix, placeholder: "10000", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Description</label>
+                  <%= f.text_area :description, rows: 2, placeholder: "Description attrayante du bot...", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none" %>
+                </div>
+                
+                <label class="flex items-center gap-3 p-3 rounded-lg border border-neutral-800 bg-neutral-900 cursor-pointer hover:border-neutral-700 transition-colors">
+                  <%= f.check_box :is_active, class: "w-4 h-4 text-blue-600 bg-neutral-800 border-neutral-700 rounded focus:ring-blue-500" %>
+                  <div>
+                    <p class="text-sm font-medium text-white">Disponible à la vente</p>
+                    <p class="text-xs text-neutral-500">Afficher dans la boutique</p>
+                  </div>
+                </label>
+              </div>
+
+              <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-4">
+                <h5 class="text-sm font-semibold text-neutral-300 flex items-center gap-2">
+                  <i class="fa-solid fa-chart-line text-emerald-400"></i>
+                  Projections & Performance
+                </h5>
+                
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Gain mensuel min (€)</label>
+                    <%= f.number_field :projection_monthly_min, step: 0.01, min: 0, placeholder: "500", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Gain mensuel max (€)</label>
+                    <%= f.number_field :projection_monthly_max, step: 0.01, min: 0, placeholder: "1500", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Win Rate (%)</label>
+                    <%= f.number_field :win_rate, step: 0.01, min: 0, max: 100, placeholder: "75", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Niveau de risque</label>
+                    <%= f.select :risk_level, [['Faible', 'low'], ['Modéré', 'medium'], ['Élevé', 'high']], { include_blank: 'Sélectionner...' }, class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Gain annuel (€)</label>
+                    <%= f.number_field :projection_yearly, step: 0.01, min: 0, placeholder: "12000", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Drawdown max (%)</label>
+                    <%= f.number_field :max_drawdown_limit, step: 0.1, min: 0, placeholder: "35", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-4">
+                <h5 class="text-sm font-semibold text-neutral-300 flex items-center gap-2">
+                  <i class="fa-solid fa-bullhorn text-purple-400"></i>
+                  Stratégie
+                </h5>
+                
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Description de la stratégie</label>
+                  <%= f.text_area :strategy_description, rows: 3, placeholder: "Expliquez comment fonctionne ce bot...", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none" %>
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-3 border-t border-neutral-800 bg-neutral-900 px-6 py-5">
+              <%= f.submit "Créer le Bot", class: "flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-500 hover:shadow-blue-500/30 cursor-pointer" %>
+              <button data-action="slideover#hide:prevent" type="button" class="flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-5 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white">Annuler</button>
+            </div>
+          <% end %>
+        </div>
+      </dialog>
+    </div>
   </div>
 
   <% if @bots.any? %>
