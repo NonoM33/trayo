@@ -1,156 +1,138 @@
-<% @page_title = 'Maintenance' %>
+<% @page_title = "Maintenance" %>
 
-<div class="card">
-  <div class="card-header">
-    <h2>Configuration Maintenance</h2>
-    <div class="action-buttons">
-      <%= link_to "Retour", admin_dashboard_path, class: "btn btn-outline" %>
-    </div>
-  </div>
-  
-  <div class="card-body">
-    <div class="maintenance-status" style="margin-bottom: 30px;">
-      <div class="status-indicator <%= @maintenance.is_enabled? ? 'status-active' : 'status-inactive' %>">
-        <%= @maintenance.is_enabled? ? '🟢 Mode Maintenance Activé' : '🔴 Mode Maintenance Désactivé' %>
+<div class="space-y-6">
+  <%= render 'admin/shared/flash_messages' %>
+
+  <div class="bg-neutral-900 rounded-xl p-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl <%= @maintenance.is_enabled? ? 'bg-green-500/20' : 'bg-neutral-700' %> flex items-center justify-center">
+          <i class="fa-solid fa-wrench text-2xl <%= @maintenance.is_enabled? ? 'text-green-400' : 'text-neutral-400' %>"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-white">Mode Maintenance</h2>
+          <div class="flex items-center gap-2 mt-1">
+            <% if @maintenance.is_enabled? %>
+              <span class="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse"></span>
+              <span class="text-green-400 font-medium">Activé</span>
+            <% else %>
+              <span class="w-2.5 h-2.5 rounded-full bg-neutral-500"></span>
+              <span class="text-neutral-400">Désactivé</span>
+            <% end %>
+          </div>
+        </div>
       </div>
       
-      <div style="margin-top: 15px;">
-        <%= form_with url: admin_maintenance_toggle_path, method: :patch, local: true, style: "display: inline;" do |form| %>
-          <%= form.submit @maintenance.is_enabled? ? 'Désactiver la Maintenance' : 'Activer la Maintenance', 
-                          class: "btn #{@maintenance.is_enabled? ? 'btn-danger' : 'btn-success'}",
-                          confirm: @maintenance.is_enabled? ? 'Êtes-vous sûr de vouloir désactiver la maintenance ?' : 'Êtes-vous sûr de vouloir activer la maintenance ?' %>
+      <div class="flex gap-3">
+        <%= form_with url: admin_maintenance_toggle_path, method: :patch, local: true do |form| %>
+          <%= form.submit @maintenance.is_enabled? ? 'Désactiver' : 'Activer', 
+              class: "flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors cursor-pointer #{@maintenance.is_enabled? ? 'border border-red-400/30 bg-red-600 text-white hover:bg-red-500' : 'border border-green-400/30 bg-green-600 text-white hover:bg-green-500'}",
+              data: { turbo_confirm: @maintenance.is_enabled? ? 'Désactiver le mode maintenance ?' : 'Activer le mode maintenance ?' } %>
+        <% end %>
+        <%= link_to admin_dashboard_path, class: "flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-5 py-2.5 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700" do %>
+          <i class="fa-solid fa-arrow-left"></i>
+          Retour
         <% end %>
       </div>
     </div>
-    
-    <%= form_with model: @maintenance, url: admin_maintenance_path, method: :patch, local: true do |form| %>
+
+    <%= form_with model: @maintenance, url: admin_maintenance_path, method: :patch, local: true, class: "space-y-6" do |form| %>
       <% if @maintenance.errors.any? %>
-        <div class="alert">
-          <h4><%= pluralize(@maintenance.errors.count, "erreur") %> empêche(nt) cette configuration d'être sauvegardée :</h4>
-          <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-            <% @maintenance.errors.full_messages.each do |message| %>
-              <li><%= message %></li>
-            <% end %>
-          </ul>
+        <div class="flex items-start gap-3 p-4 rounded-xl bg-red-500/10">
+          <i class="fa-solid fa-exclamation-circle text-red-400 mt-0.5"></i>
+          <div>
+            <p class="text-red-300 font-medium"><%= pluralize(@maintenance.errors.count, "erreur") %> :</p>
+            <ul class="mt-1 text-sm text-red-300/80 list-disc list-inside">
+              <% @maintenance.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
         </div>
       <% end %>
       
-      <div class="two-col">
-        <div class="form-group">
-          <%= form.label :title, "Titre Principal" %>
-          <%= form.text_field :title, placeholder: "Ex: Maintenance Programmé", required: true %>
-          <div class="help-text">
-            Titre affiché en grand sur la page de maintenance
-          </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">Titre Principal *</label>
+          <%= form.text_field :title, placeholder: "Ex: Maintenance Programmée", required: true, class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
         </div>
         
-        <div class="form-group">
-          <%= form.label :logo_url, "URL du Logo" %>
-          <%= form.url_field :logo_url, placeholder: "https://exemple.com/logo.png" %>
-          <div class="help-text">
-            URL vers l'image du logo (optionnel)
-          </div>
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">URL du Logo</label>
+          <%= form.url_field :logo_url, placeholder: "https://exemple.com/logo.png", class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
         </div>
       </div>
       
-      <div class="form-group">
-        <%= form.label :subtitle, "Sous-titre" %>
-        <%= form.text_field :subtitle, placeholder: "Ex: Nous travaillons pour améliorer votre expérience", required: true %>
-        <div class="help-text">
-          Sous-titre affiché sous le titre principal
-        </div>
+      <div>
+        <label class="block text-sm font-medium text-neutral-300 mb-2">Sous-titre *</label>
+        <%= form.text_field :subtitle, placeholder: "Ex: Nous travaillons pour améliorer votre expérience", required: true, class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
       </div>
       
-      <div class="form-group">
-        <%= form.label :description, "Description" %>
-        <%= form.text_area :description, placeholder: "Message détaillé expliquant la maintenance...", rows: 4, required: true %>
-        <div class="help-text">
-          Description détaillée de la maintenance
-        </div>
+      <div>
+        <label class="block text-sm font-medium text-neutral-300 mb-2">Description *</label>
+        <%= form.text_area :description, placeholder: "Message détaillé expliquant la maintenance...", rows: 4, required: true, class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none" %>
       </div>
       
-      <div class="form-group">
-        <%= form.label :countdown_date, "Date de Fin de Maintenance" %>
-        <%= form.datetime_local_field :countdown_date %>
-        <div class="help-text">
-          Date et heure prévues pour la fin de la maintenance (optionnel - affichera un compte à rebours)
-        </div>
+      <div>
+        <label class="block text-sm font-medium text-neutral-300 mb-2">Date de Fin</label>
+        <%= form.datetime_local_field :countdown_date, class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+        <p class="mt-1 text-xs text-neutral-500">Affichera un compte à rebours sur la page de maintenance</p>
       </div>
       
-      <div class="form-group">
-        <div class="checkbox-group">
-          <%= form.check_box :is_enabled %>
-          <%= form.label :is_enabled, "Activer la Maintenance" %>
-        </div>
-        <div class="help-text">
-          Cochez cette case pour activer le mode maintenance
-        </div>
-      </div>
-      
-      <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px;">
-        <%= link_to "Annuler", admin_dashboard_path, class: "btn btn-outline" %>
-        <%= form.submit "Sauvegarder", class: "btn btn-primary" %>
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-neutral-800">
+        <%= link_to admin_dashboard_path, class: "flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-5 py-2.5 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700" do %>
+          Annuler
+        <% end %>
+        <%= form.submit "Sauvegarder", class: "flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-500 cursor-pointer" %>
       </div>
     <% end %>
   </div>
-</div>
 
-<div class="card">
-  <div class="card-header">
-    <h3>Aperçu de la Page de Maintenance</h3>
-  </div>
-  
-  <div class="card-body">
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: var(--radius-lg); text-align: center; margin-bottom: 20px;">
-      <% if @maintenance.logo_url.present? %>
-        <div style="margin-bottom: 20px;">
-          <img src="<%= @maintenance.logo_url %>" alt="Logo" style="max-width: 150px; max-height: 80px; border-radius: 8px;">
-        </div>
-      <% end %>
-      
-      <h2 style="font-size: 2rem; margin-bottom: 15px; font-weight: 700;">
-        <%= @maintenance.title || "Maintenance" %>
-      </h2>
-      
-      <% if @maintenance.subtitle.present? %>
-        <h3 style="font-size: 1.2rem; margin-bottom: 20px; opacity: 0.9; font-weight: 300;">
-          <%= @maintenance.subtitle %>
-        </h3>
-      <% end %>
-      
-      <% if @maintenance.description.present? %>
-        <p style="font-size: 1rem; line-height: 1.6; opacity: 0.8;">
-          <%= simple_format(@maintenance.description) %>
-        </p>
-      <% end %>
-      
-      <% if @maintenance.countdown_date.present? %>
-        <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 12px; margin-top: 20px;">
-          <div style="font-size: 1rem; margin-bottom: 15px;">Retour prévu dans :</div>
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; max-width: 300px; margin: 0 auto;">
-            <div style="text-align: center;">
-              <div style="font-size: 1.5rem; font-weight: 700;">--</div>
-              <div style="font-size: 0.8rem; opacity: 0.8;">Jours</div>
-            </div>
-            <div style="text-align: center;">
-              <div style="font-size: 1.5rem; font-weight: 700;">--</div>
-              <div style="font-size: 0.8rem; opacity: 0.8;">Heures</div>
-            </div>
-            <div style="text-align: center;">
-              <div style="font-size: 1.5rem; font-weight: 700;">--</div>
-              <div style="font-size: 0.8rem; opacity: 0.8;">Minutes</div>
-            </div>
-            <div style="text-align: center;">
-              <div style="font-size: 1.5rem; font-weight: 700;">--</div>
-              <div style="font-size: 0.8rem; opacity: 0.8;">Secondes</div>
-            </div>
-          </div>
-        </div>
-      <% end %>
+  <div class="bg-neutral-900 rounded-xl overflow-hidden">
+    <div class="px-6 py-5 bg-neutral-800">
+      <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+        <i class="fa-solid fa-eye text-purple-400"></i>
+        Aperçu
+      </h3>
     </div>
     
-    <div style="background: var(--bg-hover); padding: 15px; border-radius: var(--radius-md); border-left: 4px solid var(--color-accent);">
-      <strong>💡 Note :</strong> Les administrateurs peuvent toujours accéder au site via <code>/admin</code> même en mode maintenance.
+    <div class="p-6">
+      <div class="bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl p-8 text-center text-white">
+        <% if @maintenance.logo_url.present? %>
+          <div class="mb-6">
+            <img src="<%= @maintenance.logo_url %>" alt="Logo" class="max-w-[150px] max-h-20 mx-auto rounded-lg">
+          </div>
+        <% end %>
+        
+        <h2 class="text-3xl font-bold mb-3"><%= @maintenance.title || "Maintenance" %></h2>
+        
+        <% if @maintenance.subtitle.present? %>
+          <p class="text-xl opacity-90 mb-4"><%= @maintenance.subtitle %></p>
+        <% end %>
+        
+        <% if @maintenance.description.present? %>
+          <p class="opacity-80 max-w-xl mx-auto"><%= simple_format(@maintenance.description) %></p>
+        <% end %>
+        
+        <% if @maintenance.countdown_date.present? %>
+          <div class="bg-white/10 backdrop-blur rounded-xl p-5 mt-6 inline-block">
+            <p class="text-sm mb-3 opacity-80">Retour prévu dans :</p>
+            <div class="grid grid-cols-4 gap-4">
+              <% ['Jours', 'Heures', 'Minutes', 'Secondes'].each do |label| %>
+                <div class="text-center">
+                  <div class="text-2xl font-bold">--</div>
+                  <div class="text-xs opacity-70"><%= label %></div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <div class="flex items-center gap-3 mt-6 p-4 rounded-xl bg-blue-500/10">
+        <i class="fa-solid fa-info-circle text-blue-400"></i>
+        <p class="text-sm text-blue-300">Les administrateurs peuvent toujours accéder au site via <code class="px-1.5 py-0.5 bg-blue-500/20 rounded">/admin</code> en mode maintenance.</p>
+      </div>
     </div>
   </div>
 </div>

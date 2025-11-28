@@ -1,0 +1,27 @@
+<div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
+     data-controller="scroll-area"
+     data-scroll-area-target="root"
+     data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
+
+  <div class="px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-neutral-900">
+    <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+      <% if local_assigns[:title_icon] %>
+        <i class="fa-solid <%= local_assigns[:title_icon] %> text-<%= local_assigns[:icon_color] || 'blue' %>-400"></i>
+      <% end %>
+      <%= local_assigns[:title] || 'Liste' %>
+    </h2>
+    <% if local_assigns[:actions] %>
+      <div class="flex items-center gap-2">
+        <%= local_assigns[:actions] %>
+      </div>
+    <% end %>
+  </div>
+
+  <div data-scroll-area-target="viewport"
+       data-action="scroll->scroll-area#onViewportScroll"
+       class="max-h-[600px] overflow-auto scrollbar-hide bg-neutral-950">
+    <table class="w-full min-w-[<%= local_assigns[:min_width] || '800px' %>]">
+      <%= yield %>
+    </table>
+  </div>
+</div>

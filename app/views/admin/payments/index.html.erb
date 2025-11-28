@@ -1,90 +1,115 @@
 <% @page_title = "Gestion des Paiements" %>
 
-<% if flash[:notice] %>
-  <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg mb-4">
-    <%= flash[:notice] %>
-  </div>
-<% end %>
-<% if flash[:alert] %>
-  <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg mb-4">
-    <%= flash[:alert] %>
-  </div>
-<% end %>
+<div class="space-y-6">
+  <%= render 'admin/shared/flash_messages' %>
 
-<div class="bg-neutral-50 dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 p-6 mb-6">
-  <h2 class="text-xl font-bold text-neutral-900 dark:text-white mb-4">Tous les Paiements</h2>
-  
-  <% if @payments && @payments.any? %>
-    <div class="overflow-x-auto">
-      <table class="w-full">
-        <thead>
-          <tr class="border-b border-neutral-200 dark:border-neutral-800">
-            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Date</th>
-            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Client</th>
-            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Montant</th>
-            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Méthode</th>
-            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Référence</th>
-            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Statut</th>
-            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Notes</th>
-            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @payments.each do |payment| %>
-            <tr class="border-b border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800/50">
-              <td class="py-3 px-4 text-sm"><%= payment.payment_date.strftime("%Y-%m-%d") %></td>
-              <td class="py-3 px-4 text-sm">
-                <%= link_to payment.user.email, admin_client_path(payment.user), class: "text-blue-600 dark:text-blue-400 hover:underline" %>
-              </td>
-              <td class="py-3 px-4 text-sm font-semibold text-green-600 dark:text-green-400">
-                <%= number_to_currency(payment.amount, unit: "€", format: "%n %u") %>
-              </td>
-              <td class="py-3 px-4 text-sm"><%= payment.payment_method_label %></td>
-              <td class="py-3 px-4 text-sm"><%= payment.reference || "—" %></td>
-              <td class="py-3 px-4">
-                <span class="px-2 py-1 rounded text-xs font-semibold <%= payment.status == 'validated' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' : payment.status == 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' %>">
-                  <%= payment.status.upcase %>
-                </span>
-              </td>
-              <td class="py-3 px-4 text-sm"><%= payment.notes.present? ? truncate(payment.notes, length: 50) : "—" %></td>
-              <td class="py-3 px-4">
-                <div class="flex gap-2">
-                  <% if payment.status == "pending" %>
-                    <%= button_to "Valider", admin_payment_path(payment), method: :patch, params: { action_type: "validate" }, class: "px-3 py-1 text-sm bg-green-600 hover:bg-green-700 text-white rounded" %>
-                  <% end %>
-                  <%= link_to "Voir Client", admin_client_path(payment.user), class: "px-3 py-1 text-sm border border-neutral-300 dark:border-neutral-700 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800" %>
-                </div>
-              </td>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-credit-card',
+        icon_color: 'blue',
+        label: 'Total Paiements',
+        value: @payments&.count || 0 %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-check-circle',
+        icon_color: 'green',
+        label: 'Validés',
+        value: @payments&.select { |p| p.status == 'validated' }&.count || 0,
+        value_color: 'green' %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-clock',
+        icon_color: 'amber',
+        label: 'En Attente',
+        value: @payments&.select { |p| p.status == 'pending' }&.count || 0,
+        value_color: 'amber' %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-euro-sign',
+        icon_color: 'cyan',
+        label: 'Montant Total',
+        value: number_to_currency(@payments&.sum(&:amount) || 0, unit: "€", format: "%n%u"),
+        value_color: 'cyan' %>
+  </div>
+
+  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
+       data-controller="scroll-area"
+       data-scroll-area-target="root"
+       data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
+
+    <div class="px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-neutral-900">
+      <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+        <i class="fa-solid fa-credit-card text-blue-400"></i>
+        Tous les Paiements
+      </h2>
+    </div>
+
+    <% if @payments && @payments.any? %>
+      <div data-scroll-area-target="viewport"
+           data-action="scroll->scroll-area#onViewportScroll"
+           class="max-h-[600px] overflow-auto scrollbar-hide bg-neutral-950">
+        <table class="w-full min-w-[1000px]">
+          <thead class="sticky top-0 z-10 bg-neutral-900">
+            <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Date</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Client</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-right">Montant</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Méthode</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Référence</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-center">Statut</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Notes</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-right">Actions</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-  <% else %>
-    <p class="text-center text-neutral-600 dark:text-neutral-400 py-10">Aucun paiement pour le moment</p>
-  <% end %>
-</div>
-
-<div class="bg-neutral-50 dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 p-6">
-  <h2 class="text-xl font-bold text-neutral-900 dark:text-white mb-4">Statistiques des Paiements</h2>
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-    <div class="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
-      <div class="text-sm text-neutral-600 dark:text-neutral-400 mb-1">TOTAL DES PAIEMENTS</div>
-      <div class="text-2xl font-bold text-neutral-900 dark:text-white"><%= @payments ? @payments.count : 0 %></div>
-    </div>
-    <div class="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
-      <div class="text-sm text-neutral-600 dark:text-neutral-400 mb-1">Validé</div>
-      <div class="text-2xl font-bold text-green-600 dark:text-green-400"><%= @payments ? @payments.select { |p| p.status == "validated" }.count : 0 %></div>
-    </div>
-    <div class="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
-      <div class="text-sm text-neutral-600 dark:text-neutral-400 mb-1">En Attente</div>
-      <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400"><%= @payments ? @payments.select { |p| p.status == "pending" }.count : 0 %></div>
-    </div>
-    <div class="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
-      <div class="text-sm text-neutral-600 dark:text-neutral-400 mb-1">MONTANT TOTAL</div>
-      <div class="text-2xl font-bold text-green-600 dark:text-green-400">
-        <%= @payments ? number_to_currency(@payments.sum(&:amount), unit: "€", format: "%n %u") : "0,00 €" %>
+          </thead>
+          <tbody class="*:even:bg-neutral-900/50 *:*:py-4 bg-neutral-950">
+            <% @payments.each do |payment| %>
+              <tr class="hover:bg-neutral-800 transition-colors">
+                <td class="px-6 text-sm text-neutral-300"><%= payment.payment_date&.strftime("%d/%m/%Y") || "—" %></td>
+                <td class="px-6">
+                  <% if payment.user.present? %>
+                    <%= render 'admin/shared/avatar', user: payment.user, size: 'sm', link: admin_client_path(payment.user) %>
+                  <% else %>
+                    <span class="text-sm text-neutral-500 italic">—</span>
+                  <% end %>
+                </td>
+                <td class="px-6 text-right">
+                  <span class="text-lg font-bold text-green-400"><%= number_to_currency(payment.amount, unit: "€", format: "%n%u") %></span>
+                </td>
+                <td class="px-6 text-sm text-neutral-300"><%= payment.payment_method_label %></td>
+                <td class="px-6 text-sm text-neutral-400 font-mono"><%= payment.reference || "—" %></td>
+                <td class="px-6 text-center">
+                  <%= render 'admin/shared/status_badge',
+                      label: payment.status.upcase,
+                      variant: payment.status == 'validated' ? 'success' : payment.status == 'pending' ? 'warning' : 'danger',
+                      pulse: payment.status == 'pending' %>
+                </td>
+                <td class="px-6 text-sm text-neutral-400"><%= payment.notes.present? ? truncate(payment.notes, length: 30) : "—" %></td>
+                <td class="px-6">
+                  <div class="flex items-center justify-end gap-2">
+                    <% if payment.status == "pending" %>
+                      <%= button_to admin_payment_path(payment), method: :patch, params: { action_type: "validate" }, class: "flex items-center justify-center w-8 h-8 rounded-lg border border-green-400/30 bg-green-600 text-white hover:bg-green-500 transition-colors", title: "Valider" do %>
+                        <i class="fa-solid fa-check text-xs"></i>
+                      <% end %>
+                    <% end %>
+                    <% if payment.user.present? %>
+                      <%= link_to admin_client_path(payment.user), class: "flex items-center justify-center w-8 h-8 rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors", title: "Voir client" do %>
+                        <i class="fa-solid fa-user text-xs"></i>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
-    </div>
+    <% else %>
+      <%= render 'admin/shared/empty_state',
+          icon: 'fa-credit-card',
+          icon_gradient: 'from-blue-500/20 to-cyan-500/20',
+          icon_color: 'text-blue-400',
+          title: 'Aucun paiement',
+          description: 'Les paiements apparaîtront ici une fois enregistrés.' %>
+    <% end %>
   </div>
 </div>
