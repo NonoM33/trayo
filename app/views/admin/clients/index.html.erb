@@ -91,14 +91,148 @@
     <div class="px-6 py-5 border-b border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-neutral-900">
       <h2 class="text-lg font-semibold text-white">Liste des Clients</h2>
       <div class="flex gap-2">
-        <%= link_to new_admin_mt5_token_path, class: "flex items-center justify-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-800 px-3.5 py-2 text-sm font-medium whitespace-nowrap text-neutral-100 shadow-xs transition-all duration-100 ease-in-out select-none hover:bg-neutral-700" do %>
-          <i class="fa-solid fa-ticket-alt"></i>
-          <span>Token MT5</span>
-        <% end %>
-        <%= link_to new_admin_client_path, class: "flex items-center justify-center gap-1.5 rounded-lg border border-blue-400/30 bg-blue-600 px-3.5 py-2 text-sm font-medium whitespace-nowrap text-white shadow-sm transition-all duration-100 ease-in-out select-none hover:bg-blue-500" do %>
-          <i class="fa-solid fa-plus"></i>
-          <span>Nouvel Utilisateur</span>
-        <% end %>
+        <div data-controller="slideover">
+          <button type="button" data-action="slideover#show:prevent" class="flex items-center justify-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-800 px-3.5 py-2 text-sm font-medium whitespace-nowrap text-neutral-100 shadow-xs transition-all duration-100 ease-in-out select-none hover:bg-neutral-700">
+            <i class="fa-solid fa-ticket-alt"></i>
+            <span>Token MT5</span>
+          </button>
+
+          <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
+            <div class="flex h-full w-80 flex-col bg-neutral-950 shadow-2xl sm:w-96 lg:w-[520px]">
+              <div class="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-6 py-5">
+                <h4 class="text-lg font-semibold text-white">Générer un Token MT5</h4>
+                <button type="button" data-action="slideover#hide:prevent" class="rounded-full p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" x2="6" y1="6" y2="18"></line>
+                    <line x1="6" x2="18" y1="6" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              
+              <turbo-frame id="mt5_token_content" class="flex-1 flex flex-col min-h-0">
+                <div class="flex-1 overflow-y-auto p-6 bg-neutral-950">
+                  <div class="text-center py-8">
+                    <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-600/25">
+                      <i class="fa-solid fa-ticket-alt text-3xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Token MT5</h3>
+                    <p class="text-neutral-400 mb-8 max-w-sm mx-auto">Générez un token unique pour connecter un script MT5 à la plateforme Trayo.</p>
+                    
+                    <%= form_with url: admin_mt5_tokens_path, method: :post, data: { turbo_frame: "mt5_token_content" } do %>
+                      <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-purple-600/25 transition-all hover:shadow-purple-500/40 hover:scale-[1.02] cursor-pointer">
+                        <i class="fa-solid fa-magic"></i>
+                        Générer un nouveau token
+                      </button>
+                    <% end %>
+                  </div>
+
+                  <div class="mt-8 p-4 rounded-xl border border-neutral-800 bg-neutral-900">
+                    <h4 class="text-sm font-medium text-neutral-300 mb-3 flex items-center gap-2">
+                      <i class="fa-solid fa-info-circle text-blue-400"></i>
+                      Comment utiliser le token ?
+                    </h4>
+                    <ol class="space-y-2 text-sm text-neutral-400">
+                      <li class="flex items-start gap-2">
+                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-neutral-800 flex items-center justify-center text-xs text-neutral-300">1</span>
+                        <span>Copiez le token généré</span>
+                      </li>
+                      <li class="flex items-start gap-2">
+                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-neutral-800 flex items-center justify-center text-xs text-neutral-300">2</span>
+                        <span>Collez-le dans votre script TrayoSync.mq5</span>
+                      </li>
+                      <li class="flex items-start gap-2">
+                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-neutral-800 flex items-center justify-center text-xs text-neutral-300">3</span>
+                        <span>Le client sera créé automatiquement</span>
+                      </li>
+                    </ol>
+                  </div>
+                </div>
+              </turbo-frame>
+            </div>
+          </dialog>
+        </div>
+        <div data-controller="slideover">
+          <button type="button" data-action="slideover#show:prevent" class="flex items-center justify-center gap-1.5 rounded-lg border border-blue-400/30 bg-blue-600 px-3.5 py-2 text-sm font-medium whitespace-nowrap text-white shadow-sm transition-all duration-100 ease-in-out select-none hover:bg-blue-500">
+            <i class="fa-solid fa-plus"></i>
+            <span>Nouvel Utilisateur</span>
+          </button>
+
+          <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
+            <div class="flex h-full w-80 flex-col bg-neutral-950 shadow-2xl sm:w-96 lg:w-[480px]">
+              <div class="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-6 py-5">
+                <h4 class="text-lg font-semibold text-white">Nouvel Utilisateur</h4>
+                <button type="button" data-action="slideover#hide:prevent" class="rounded-full p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" x2="6" y1="6" y2="18"></line>
+                    <line x1="6" x2="18" y1="6" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              
+              <%= form_with model: User.new, url: admin_clients_path, method: :post, class: "flex flex-1 flex-col min-h-0" do |f| %>
+                <div class="flex-1 overflow-y-auto p-6 space-y-5 bg-neutral-950">
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Email *</label>
+                    <%= f.email_field :email, required: true, autofocus: true, placeholder: "email@exemple.com", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Mot de passe *</label>
+                    <%= f.password_field :password, required: true, placeholder: "••••••••", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                    <p class="mt-2 text-xs text-neutral-500">Minimum 6 caractères</p>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Confirmer le mot de passe *</label>
+                    <%= f.password_field :password_confirmation, required: true, placeholder: "••••••••", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium text-neutral-300 mb-2">Prénom</label>
+                      <%= f.text_field :first_name, placeholder: "Jean", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-neutral-300 mb-2">Nom</label>
+                      <%= f.text_field :last_name, placeholder: "Dupont", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Taux de commission (%)</label>
+                    <%= f.number_field :commission_rate, step: 0.01, min: 0, max: 100, value: 25, class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                    <p class="mt-2 text-xs text-neutral-500">0 pour les administrateurs, entre 0-100 pour les clients</p>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-3">Rôle *</label>
+                    <div class="space-y-3">
+                      <label class="flex items-start gap-4 p-4 rounded-xl border border-neutral-800 bg-neutral-900 cursor-pointer hover:border-neutral-700 hover:bg-neutral-800/50 transition-all group">
+                        <%= f.radio_button :is_admin, false, checked: true, class: "mt-0.5 w-4 h-4 text-blue-600 bg-neutral-800 border-neutral-700 focus:ring-blue-500 focus:ring-offset-neutral-900" %>
+                        <div class="flex-1">
+                          <p class="font-medium text-white group-hover:text-blue-400 transition-colors">Client</p>
+                          <p class="text-sm text-neutral-500 mt-1">Client trading avec suivi des commissions. Peut accéder à l'API et synchroniser les comptes MT5.</p>
+                        </div>
+                      </label>
+                      <label class="flex items-start gap-4 p-4 rounded-xl border border-neutral-800 bg-neutral-900 cursor-pointer hover:border-neutral-700 hover:bg-neutral-800/50 transition-all group">
+                        <%= f.radio_button :is_admin, true, class: "mt-0.5 w-4 h-4 text-blue-600 bg-neutral-800 border-neutral-700 focus:ring-blue-500 focus:ring-offset-neutral-900" %>
+                        <div class="flex-1">
+                          <p class="font-medium text-white group-hover:text-blue-400 transition-colors">Administrateur</p>
+                          <p class="text-sm text-neutral-500 mt-1">Accès complet au back office. Peut gérer les clients, paiements, crédits et voir toutes les données.</p>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="flex items-center gap-3 border-t border-neutral-800 bg-neutral-900 px-6 py-5">
+                  <%= f.submit "Créer l'utilisateur", class: "flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-500 hover:shadow-blue-500/30 cursor-pointer" %>
+                  <button data-action="slideover#hide:prevent" type="button" class="flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-5 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white">Annuler</button>
+                </div>
+              <% end %>
+            </div>
+          </dialog>
+        </div>
       </div>
     </div>
 
