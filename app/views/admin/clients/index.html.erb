@@ -235,5 +235,14 @@
         </tbody>
       </table>
     </div>
+
+    <div data-scroll-area-target="scrollbar"
+         data-scroll-area-orientation-value="vertical"
+         data-action="click->scroll-area#onScrollbarClick"
+         class="absolute right-2 top-16 bottom-4 flex w-1.5 justify-center rounded-full bg-black/5 backdrop-blur-sm opacity-0 transition-opacity duration-150 delay-300 pointer-events-none data-[hovering]:opacity-100 data-[hovering]:duration-100 data-[hovering]:delay-0 data-[hovering]:pointer-events-auto data-[scrolling]:opacity-100 data-[scrolling]:duration-100 data-[scrolling]:delay-0 data-[scrolling]:pointer-events-auto data-[visible=false]:hidden dark:bg-white/10">
+      <div data-scroll-area-target="thumb"
+           data-action="mousedown->scroll-area#onThumbMouseDown"
+           class="relative w-full rounded-full bg-neutral-500 transition-opacity duration-100 dark:bg-neutral-400"></div>
+    </div>
   </div>
 </div>
