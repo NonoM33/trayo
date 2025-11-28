@@ -1,173 +1,17 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Mes Bots - Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-  <style>
-    .my-bot-card {
-      background: var(--bg-card);
-      border: 2px solid var(--border-color);
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 24px;
-      transition: all 0.3s;
-    }
-    
-    .my-bot-card:hover {
-      border-color: var(--color-accent);
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    }
-    
-    .bot-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid var(--border-color);
-    }
-    
-    .bot-info {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-    
-    .bot-avatar {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 40px;
-      flex-shrink: 0;
-    }
-    
-    .bot-details h3 {
-      margin: 0 0 8px 0;
-      font-size: 24px;
-      color: var(--text-primary);
-    }
-    
-    .bot-status-badge {
-      display: inline-block;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
-      margin-right: 8px;
-    }
-    
-    .bot-controls {
-      display: flex;
-      gap: 12px;
-    }
-    
-    .toggle-btn {
-      padding: 12px 24px;
-      font-size: 15px;
-      font-weight: 700;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .toggle-btn:hover {
-      transform: scale(1.05);
-    }
-    
-    .toggle-btn-start {
-      background: linear-gradient(135deg, #4CAF50, #45a049);
-      color: white;
-    }
-    
-    .toggle-btn-stop {
-      background: linear-gradient(135deg, #FF9800, #F57C00);
-      color: white;
-    }
-    
-    .bot-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-    
-    .bot-stat-box {
-      background: var(--bg-hover);
-      padding: 16px;
-      border-radius: 12px;
-      text-align: center;
-    }
-    
-    .bot-stat-label {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-    
-    .bot-stat-value {
-      font-size: 24px;
-      font-weight: 800;
-    }
-    
-    .profit-positive { color: var(--color-success); }
-    .profit-negative { color: var(--color-danger); }
-    
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: var(--border-color);
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 8px;
-    }
-    
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--color-success), var(--color-accent));
-      border-radius: 4px;
-      transition: width 0.3s;
-    }
-    
-    .empty-state {
-      text-align: center;
-      padding: 80px 20px;
-    }
-    
-    .empty-state-icon {
-      font-size: 80px;
-      margin-bottom: 24px;
-    }
-  </style>
-</head>
-<body>
-  <% @page_title = "Mes Bots" %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
-      
-      <div class="container">
-        <h1 style="margin-bottom: 32px;"><i class="fa-icon fa-md fa-robot"></i> Mes Bots de Trading</h1>
-        
-        <% if flash[:notice] %>
-          <div class="notice"><%= flash[:notice] %></div>
-        <% end %>
-        <% if flash[:alert] %>
-          <div class="alert"><%= flash[:alert] %></div>
-        <% end %>
+<% @page_title = "Mes Bots" %>
+
+<h1 style="margin-bottom: 32px;"><i class="fa-icon fa-md fa-robot"></i> Mes Bots de Trading</h1>
+
+<% if flash[:notice] %>
+  <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg mb-4">
+    <%= flash[:notice] %>
+  </div>
+<% end %>
+<% if flash[:alert] %>
+  <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg mb-4">
+    <%= flash[:alert] %>
+  </div>
+<% end %>
 
 
         <% if @purchases.any? %>
@@ -300,9 +144,3 @@
             <%= link_to "<i class='fa-icon fa-md fa-shopping-cart'></i> Voir la Boutique".html_safe, admin_shop_index_path, class: "btn btn-success", style: "font-size: 16px; padding: 14px 32px;" %>
           </div>
         <% end %>
-      </div>
-    </div>
-  </div>
-</body>
-</html>
-

@@ -1,20 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Détails Campagne - Admin Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-</head>
-<body>
-  <% @page_title = "Détails Campagne" %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
-      
-      <div class="container">
-        <div class="card">
+<% @page_title = "Détails Campagne" %>
+
+<div class="card">
           <div class="card-header">
             <h2><%= @campaign.title %></h2>
             <div class="action-buttons">
@@ -195,8 +181,3 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-</body>
-</html>

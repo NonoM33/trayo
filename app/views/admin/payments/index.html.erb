@@ -1,102 +1,90 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Paiements - Admin Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-</head>
-<body>
-  <% @page_title = "Gestion des Paiements" %>
+<% @page_title = "Gestion des Paiements" %>
+
+<% if flash[:notice] %>
+  <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg mb-4">
+    <%= flash[:notice] %>
+  </div>
+<% end %>
+<% if flash[:alert] %>
+  <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg mb-4">
+    <%= flash[:alert] %>
+  </div>
+<% end %>
+
+<div class="bg-neutral-50 dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 p-6 mb-6">
+  <h2 class="text-xl font-bold text-neutral-900 dark:text-white mb-4">Tous les Paiements</h2>
   
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
-      
-      <div class="container">
-        <% if flash[:notice] %>
-          <div class="notice"><%= flash[:notice] %></div>
-        <% end %>
-        <% if flash[:alert] %>
-          <div class="alert"><%= flash[:alert] %></div>
-        <% end %>
-        
-        <div class="card">
-          <h2>Tous les Paiements</h2>
-          
-          <% if @payments && @payments.any? %>
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Client</th>
-                  <th>Montant</th>
-                  <th>Méthode</th>
-                  <th>Référence</th>
-                  <th>Statut</th>
-                  <th>Notes</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% @payments.each do |payment| %>
-                  <tr>
-                    <td><%= payment.payment_date.strftime("%Y-%m-%d") %></td>
-                    <td>
-                      <%= link_to payment.user.email, admin_client_path(payment.user), style: "color: var(--color-accent); text-decoration: none;" %>
-                    </td>
-                    <td class="positive"><%= number_to_currency(payment.amount, unit: "€", format: "%n %u") %></td>
-                    <td><%= payment.payment_method_label %></td>
-                    <td><%= payment.reference || "—" %></td>
-                    <td>
-                      <span class="status-badge status-<%= payment.status %>">
-                        <%= payment.status.upcase %>
-                      </span>
-                    </td>
-                    <td><%= payment.notes.present? ? truncate(payment.notes, length: 50) : "—" %></td>
-                    <td>
-                      <div class="action-buttons">
-                        <% if payment.status == "pending" %>
-                          <%= button_to "Valider", admin_payment_path(payment), method: :patch, params: { action_type: "validate" }, class: "btn btn-success btn-sm" %>
-                        <% end %>
-                        <%= link_to "Voir Client", admin_client_path(payment.user), class: "btn btn-outline btn-sm" %>
-                      </div>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          <% else %>
-            <p style="color: var(--text-muted); text-align: center; padding: 40px;">Aucun paiement pour le moment</p>
+  <% if @payments && @payments.any? %>
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-neutral-200 dark:border-neutral-800">
+            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Date</th>
+            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Client</th>
+            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Montant</th>
+            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Méthode</th>
+            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Référence</th>
+            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Statut</th>
+            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Notes</th>
+            <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @payments.each do |payment| %>
+            <tr class="border-b border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800/50">
+              <td class="py-3 px-4 text-sm"><%= payment.payment_date.strftime("%Y-%m-%d") %></td>
+              <td class="py-3 px-4 text-sm">
+                <%= link_to payment.user.email, admin_client_path(payment.user), class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+              </td>
+              <td class="py-3 px-4 text-sm font-semibold text-green-600 dark:text-green-400">
+                <%= number_to_currency(payment.amount, unit: "€", format: "%n %u") %>
+              </td>
+              <td class="py-3 px-4 text-sm"><%= payment.payment_method_label %></td>
+              <td class="py-3 px-4 text-sm"><%= payment.reference || "—" %></td>
+              <td class="py-3 px-4">
+                <span class="px-2 py-1 rounded text-xs font-semibold <%= payment.status == 'validated' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' : payment.status == 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' %>">
+                  <%= payment.status.upcase %>
+                </span>
+              </td>
+              <td class="py-3 px-4 text-sm"><%= payment.notes.present? ? truncate(payment.notes, length: 50) : "—" %></td>
+              <td class="py-3 px-4">
+                <div class="flex gap-2">
+                  <% if payment.status == "pending" %>
+                    <%= button_to "Valider", admin_payment_path(payment), method: :patch, params: { action_type: "validate" }, class: "px-3 py-1 text-sm bg-green-600 hover:bg-green-700 text-white rounded" %>
+                  <% end %>
+                  <%= link_to "Voir Client", admin_client_path(payment.user), class: "px-3 py-1 text-sm border border-neutral-300 dark:border-neutral-700 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800" %>
+                </div>
+              </td>
+            </tr>
           <% end %>
-        </div>
-        
-        <div class="card">
-          <h2>Statistiques des Paiements</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">TOTAL DES PAIEMENTS</div>
-              <div class="info-value"><%= @payments ? @payments.count : 0 %></div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Validé</div>
-              <div class="info-value positive"><%= @payments ? @payments.select { |p| p.status == "validated" }.count : 0 %></div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">En Attente</div>
-              <div class="info-value" style="color: var(--color-warning);"><%= @payments ? @payments.select { |p| p.status == "pending" }.count : 0 %></div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">MONTANT TOTAL</div>
-              <div class="info-value positive">
-                <%= @payments ? number_to_currency(@payments.sum(&:amount), unit: "€", format: "%n %u") : "0,00 €" %>
-              </div>
-            </div>
-          </div>
-        </div>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="text-center text-neutral-600 dark:text-neutral-400 py-10">Aucun paiement pour le moment</p>
+  <% end %>
+</div>
+
+<div class="bg-neutral-50 dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 p-6">
+  <h2 class="text-xl font-bold text-neutral-900 dark:text-white mb-4">Statistiques des Paiements</h2>
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
+      <div class="text-sm text-neutral-600 dark:text-neutral-400 mb-1">TOTAL DES PAIEMENTS</div>
+      <div class="text-2xl font-bold text-neutral-900 dark:text-white"><%= @payments ? @payments.count : 0 %></div>
+    </div>
+    <div class="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
+      <div class="text-sm text-neutral-600 dark:text-neutral-400 mb-1">Validé</div>
+      <div class="text-2xl font-bold text-green-600 dark:text-green-400"><%= @payments ? @payments.select { |p| p.status == "validated" }.count : 0 %></div>
+    </div>
+    <div class="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
+      <div class="text-sm text-neutral-600 dark:text-neutral-400 mb-1">En Attente</div>
+      <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400"><%= @payments ? @payments.select { |p| p.status == "pending" }.count : 0 %></div>
+    </div>
+    <div class="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
+      <div class="text-sm text-neutral-600 dark:text-neutral-400 mb-1">MONTANT TOTAL</div>
+      <div class="text-2xl font-bold text-green-600 dark:text-green-400">
+        <%= @payments ? number_to_currency(@payments.sum(&:amount), unit: "€", format: "%n %u") : "0,00 €" %>
       </div>
     </div>
   </div>
-</body>
-</html>
-
+</div>

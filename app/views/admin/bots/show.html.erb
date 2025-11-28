@@ -1,20 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title><%= @bot.name %> - Admin Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-</head>
-<body>
-  <% @page_title = @bot.name %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
-      
-      <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
           <% if params[:from] == 'client' && params[:client_id].present? %>
             <%= link_to admin_client_path(params[:client_id]), class: "back-link", style: "margin: 0;" do %>
               <i class="fa-icon fa-md fa-arrow-left"></i> Retour au Client
