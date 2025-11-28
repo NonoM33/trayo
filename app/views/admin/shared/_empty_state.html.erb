@@ -1,0 +1,24 @@
+<div class="text-center py-16 px-6 bg-neutral-950">
+  <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br <%= local_assigns[:icon_gradient] || 'from-blue-500/20 to-purple-500/20' %> flex items-center justify-center">
+    <i class="fa-solid <%= local_assigns[:icon] || 'fa-inbox' %> text-4xl <%= local_assigns[:icon_color] || 'text-blue-400' %>"></i>
+  </div>
+  <h3 class="text-xl font-bold text-white mb-2"><%= local_assigns[:title] || 'Aucun élément' %></h3>
+  <p class="text-neutral-400 mb-8 max-w-md mx-auto"><%= local_assigns[:description] || 'Commencez en créant votre premier élément.' %></p>
+  
+  <% if local_assigns[:button_label] %>
+    <% if local_assigns[:button_href] %>
+      <%= link_to local_assigns[:button_href], 
+          class: "inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r #{local_assigns[:button_gradient] || 'from-blue-500 to-purple-600'} px-6 py-3 text-sm font-medium text-white shadow-lg transition-all hover:scale-[1.02]" do %>
+        <i class="fa-solid fa-plus"></i>
+        <%= local_assigns[:button_label] %>
+      <% end %>
+    <% elsif local_assigns[:button_action] %>
+      <button type="button" 
+              onclick="<%= local_assigns[:button_action] %>"
+              class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r <%= local_assigns[:button_gradient] || 'from-blue-500 to-purple-600' %> px-6 py-3 text-sm font-medium text-white shadow-lg transition-all hover:scale-[1.02]">
+        <i class="fa-solid fa-plus"></i>
+        <%= local_assigns[:button_label] %>
+      </button>
+    <% end %>
+  <% end %>
+</div>
