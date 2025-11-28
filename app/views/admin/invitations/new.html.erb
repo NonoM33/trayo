@@ -1,20 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Nouvelle Invitation - Admin Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-</head>
-<body>
-  <% @page_title = "Nouvelle Invitation" %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
-      
-      <div class="container">
-        <% if flash[:notice] %>
+<% @page_title = "Nouvelle Invitation" %>
+
+<% if flash[:notice] %>
           <div class="notice"><%= flash[:notice] %></div>
         <% end %>
         <% if flash[:alert] %>

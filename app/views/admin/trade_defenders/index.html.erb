@@ -1,25 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Trade Defender - Admin Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-</head>
-<body>
-  <% @page_title = "Trade Defender" %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
-      
-      <div class="container">
-        <% if flash[:notice] %>
-          <div class="notice"><%= flash[:notice] %></div>
-        <% end %>
-        <% if flash[:alert] %>
-          <div class="alert"><%= flash[:alert] %></div>
-        <% end %>
+<% @page_title = "Trade Defender" %>
+
+<% if flash[:notice] %>
+  <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg mb-4">
+    <%= flash[:notice] %>
+  </div>
+<% end %>
+<% if flash[:alert] %>
+  <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg mb-4">
+    <%= flash[:alert] %>
+  </div>
+<% end %>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
           <h1 style="margin: 0;">Trade Defender</h1>
@@ -223,83 +213,3 @@
             <p style="color: var(--text-muted);">Aucun compte avec des trades manuels</p>
           <% end %>
         </div>
-      </div>
-    </div>
-  </div>
-</body>
-
-<script>
-  function toggleAll(checkbox) {
-    const checkboxes = document.querySelectorAll('.trade-checkbox');
-    checkboxes.forEach(cb => cb.checked = checkbox.checked);
-  }
-
-  function markSelectedAsAdmin() {
-    const checkboxes = document.querySelectorAll('.trade-checkbox:checked');
-    const tradeIds = Array.from(checkboxes).map(cb => cb.value);
-    
-    if (tradeIds.length === 0) {
-      alert('Sélectionnez au moins un trade');
-      return;
-    }
-    
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '<%= bulk_mark_as_admin_admin_trade_defenders_path %>';
-    
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = 'authenticity_token';
-    csrfInput.value = csrfToken;
-    form.appendChild(csrfInput);
-    
-    tradeIds.forEach(id => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'trade_ids[]';
-      input.value = id;
-      form.appendChild(input);
-    });
-    
-    document.body.appendChild(form);
-    form.submit();
-  }
-
-  function markSelectedAsClient() {
-    const checkboxes = document.querySelectorAll('.trade-checkbox:checked');
-    const tradeIds = Array.from(checkboxes).map(cb => cb.value);
-    
-    if (tradeIds.length === 0) {
-      alert('Sélectionnez au moins un trade');
-      return;
-    }
-    
-    if (!confirm('Êtes-vous sûr de vouloir marquer ces trades comme trades clients et appliquer les sanctions ?')) {
-      return;
-    }
-    
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '<%= bulk_mark_as_client_admin_trade_defenders_path %>';
-    
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = 'authenticity_token';
-    csrfInput.value = csrfToken;
-    form.appendChild(csrfInput);
-    
-    tradeIds.forEach(id => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'trade_ids[]';
-      input.value = id;
-      form.appendChild(input);
-    });
-    
-    document.body.appendChild(form);
-    form.submit();
-  }
-</script>
-</html>

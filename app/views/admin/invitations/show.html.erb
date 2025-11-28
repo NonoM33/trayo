@@ -1,20 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Invitation - Admin Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-</head>
-<body>
-  <% @page_title = "Détails de l'Invitation" %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
-      
-      <div class="container">
-        <% if flash[:notice] %>
+<% @page_title = "Détails de l'Invitation" %>
+
+<% if flash[:notice] %>
           <div class="notice"><%= flash[:notice] %></div>
         <% end %>
         <% if flash[:alert] %>
@@ -116,9 +102,3 @@
                 style: "background: var(--color-danger);" %>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-</body>
-</html>
-
