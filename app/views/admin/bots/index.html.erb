@@ -319,10 +319,10 @@
         </div>
         <h3 class="text-xl font-bold text-white mb-2">Aucun bot pour le moment</h3>
         <p class="text-neutral-400 mb-8 max-w-md mx-auto">Créez votre premier bot de trading intelligent pour commencer à automatiser vos stratégies.</p>
-        <%= link_to new_admin_bot_path, class: "inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-green-600/25 transition-all hover:shadow-green-500/40 hover:scale-[1.02]" do %>
+        <button type="button" onclick="document.querySelector('[data-controller=slideover] button[data-action]').click()" class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-green-600/25 transition-all hover:shadow-green-500/40 hover:scale-[1.02]">
           <i class="fa-solid fa-plus"></i>
           Créer mon Premier Bot
-        <% end %>
+        </button>
       </div>
     </div>
   <% end %>
