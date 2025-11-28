@@ -7,26 +7,28 @@ export default class extends Controller {
     currentStep: { type: Number, default: 0 },
     validateOnNext: { type: Boolean, default: true },
     allowSkip: { type: Boolean, default: false },
-    scrollOnChange: { type: Boolean, default: true },
+    scrollOnChange: { type: Boolean, default: false },
     saveProgress: { type: Boolean, default: true },
     storageKey: { type: String, default: "stepper-progress" },
+    indicatorBaseClass: { type: String, default: "" },
     indicatorCompleteClass: {
       type: String,
-      default: "bg-blue-600 text-white cursor-pointer hover:bg-blue-500"
+      default: "bg-white text-neutral-900 cursor-pointer hover:ring-2 hover:ring-white/20"
     },
     indicatorCurrentClass: {
       type: String,
-      default: "bg-blue-600 text-white ring-4 ring-blue-500/30"
+      default: "bg-white text-neutral-900 ring-2 ring-white/20 cursor-pointer"
     },
     indicatorVisitedClass: {
       type: String,
-      default: "bg-neutral-700 text-neutral-300 cursor-pointer hover:bg-neutral-600"
+      default: "bg-neutral-700 text-neutral-300 border border-neutral-600 cursor-pointer hover:bg-neutral-600"
     },
     indicatorUpcomingClass: {
       type: String,
-      default: "bg-neutral-800 text-neutral-500 cursor-not-allowed"
+      default: "bg-neutral-800 text-neutral-500 border border-neutral-700 cursor-not-allowed opacity-75"
     },
-    lineCompleteClass: { type: String, default: "bg-blue-600" },
+    lineBaseClass: { type: String, default: "" },
+    lineCompleteClass: { type: String, default: "bg-white" },
     lineIncompleteClass: { type: String, default: "bg-neutral-700" },
   };
 
@@ -41,7 +43,8 @@ export default class extends Controller {
     this.element.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         const target = event.target;
-        if (target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') return;
+        if (target.tagName === 'TEXTAREA') return;
+        if (target.tagName === 'BUTTON') return;
         if (target.matches('input, select')) {
           event.preventDefault();
           if (this.currentStepValue === this.stepTargets.length - 1) {
@@ -98,6 +101,13 @@ export default class extends Controller {
         input.reportValidity();
       }
     });
+    const validateEvent = new CustomEvent("stepper:validate", {
+      detail: { step: this.currentStepValue, isValid },
+      bubbles: true,
+      cancelable: true,
+    });
+    this.element.dispatchEvent(validateEvent);
+    if (validateEvent.defaultPrevented) isValid = false;
     return isValid;
   }
 
@@ -129,6 +139,12 @@ export default class extends Controller {
     if (typeof sessionStorage !== "undefined") {
       sessionStorage.setItem(this.storageKeyValue, JSON.stringify(this.formData));
     }
+    this.element.dispatchEvent(
+      new CustomEvent("stepper:save", {
+        detail: { step: this.currentStepValue, data: this.formData },
+        bubbles: true,
+      })
+    );
   }
 
   loadProgress() {
@@ -162,6 +178,17 @@ export default class extends Controller {
     this.updateIndicators();
     this.updateButtons();
     this.updateReviewSections();
+    this.element.dispatchEvent(
+      new CustomEvent("stepper:change", {
+        detail: {
+          step: this.currentStepValue,
+          totalSteps: this.stepTargets.length,
+          isFirst: this.currentStepValue === 0,
+          isLast: this.currentStepValue === this.stepTargets.length - 1,
+        },
+        bubbles: true,
+      })
+    );
   }
 
   restoreStepData(step) {
@@ -214,13 +241,18 @@ export default class extends Controller {
       numberSpan?.classList.remove('hidden');
       checkIcon?.classList.add('hidden');
     }
-    const allClasses = [
+    const allStateClasses = [
       this.indicatorCompleteClassValue,
       this.indicatorCurrentClassValue,
       this.indicatorVisitedClassValue,
       this.indicatorUpcomingClassValue
     ].join(' ').split(' ').filter(cls => cls);
-    allClasses.forEach(cls => indicator.classList.remove(cls));
+    allStateClasses.forEach(cls => indicator.classList.remove(cls));
+    if (this.indicatorBaseClassValue) {
+      this.indicatorBaseClassValue.split(' ').forEach(cls => {
+        if (cls) indicator.classList.add(cls);
+      });
+    }
     const stateClassMap = {
       complete: this.indicatorCompleteClassValue,
       current: this.indicatorCurrentClassValue,
@@ -229,16 +261,28 @@ export default class extends Controller {
     };
     const stateClasses = stateClassMap[state];
     if (stateClasses) {
-      stateClasses.split(' ').forEach(cls => { if (cls) indicator.classList.add(cls); });
+      stateClasses.split(' ').forEach(cls => {
+        if (cls) indicator.classList.add(cls);
+      });
     }
   }
 
   applyLineState(line, isComplete) {
-    const allClasses = [this.lineCompleteClassValue, this.lineIncompleteClassValue].join(' ').split(' ').filter(cls => cls);
-    allClasses.forEach(cls => line.classList.remove(cls));
+    const allStateClasses = [
+      this.lineCompleteClassValue,
+      this.lineIncompleteClassValue
+    ].join(' ').split(' ').filter(cls => cls);
+    allStateClasses.forEach(cls => line.classList.remove(cls));
+    if (this.lineBaseClassValue) {
+      this.lineBaseClassValue.split(' ').forEach(cls => {
+        if (cls) line.classList.add(cls);
+      });
+    }
     const stateClass = isComplete ? this.lineCompleteClassValue : this.lineIncompleteClassValue;
     if (stateClass) {
-      stateClass.split(' ').forEach(cls => { if (cls) line.classList.add(cls); });
+      stateClass.split(' ').forEach(cls => {
+        if (cls) line.classList.add(cls);
+      });
     }
   }
 

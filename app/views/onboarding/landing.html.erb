@@ -1,43 +1,95 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rejoignez Trayo</title>
-  <%= stylesheet_link_tag "onboarding", "data-turbo-track": "reload" %>
-</head>
-<body class="landing-page">
-  <div class="landing-container">
-    <div class="landing-content">
-      <div class="landing-logo">
-        <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-          <rect width="80" height="80" rx="18" fill="url(#gradient)"/>
-          <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
-              <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
-            </linearGradient>
-          </defs>
-          <text x="40" y="52" font-family="-apple-system, BlinkMacSystemFont" font-size="40" font-weight="600" fill="white" text-anchor="middle">T</text>
-        </svg>
+<% @page_title = "Trayo - Trading Automatisé" %>
+
+<div class="min-h-screen flex flex-col">
+  
+  <nav class="fixed top-0 left-0 right-0 z-50 glass">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">T</div>
+        <span class="text-xl font-bold text-white">Trayo</span>
       </div>
-      
-      <h1 class="landing-title">Bienvenue sur Trayo</h1>
-      <p class="landing-subtitle">Saisissez votre code d'invitation pour commencer</p>
-      
-      <%= form_tag onboarding_path(code: ""), method: :get, class: "landing-form" do %>
-        <div class="landing-input-group">
-          <%= text_field_tag :code, "", placeholder: "ENTREZ VOTRE CODE UNIQUE", required: true, class: "landing-input", autocomplete: "off" %>
-          <%= submit_tag "Continuer", class: "landing-button" %>
-        </div>
-      <% end %>
-      
-      <% if params[:invalid] %>
-        <div class="landing-error">
-          Code invalide ou expiré. Vérifiez votre code et réessayez.
-        </div>
+      <%= link_to admin_login_path, class: "px-4 py-2 rounded-lg bg-neutral-800 text-white text-sm font-medium hover:bg-neutral-700 transition-colors" do %>
+        Connexion
       <% end %>
     </div>
-  </div>
-</body>
-</html>
+  </nav>
+
+  <main class="flex-1 flex items-center justify-center py-24 px-4">
+    <div class="max-w-4xl mx-auto text-center">
+      
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm mb-8">
+        <i class="fa-solid fa-bolt"></i>
+        Trading Automatisé Nouvelle Génération
+      </div>
+
+      <h1 class="text-5xl md:text-7xl font-bold mb-6">
+        <span class="text-white">Laissez les </span>
+        <span class="gradient-text">robots</span>
+        <span class="text-white"> trader pour vous</span>
+      </h1>
+
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto mb-12">
+        Trayo automatise vos investissements sur le Forex avec des robots de trading professionnels. 
+        Générez des revenus passifs 24h/24, 7j/7.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+        <div class="glass rounded-xl p-4 flex items-center gap-4">
+          <input type="text" 
+                 id="invitation-code" 
+                 placeholder="Entrez votre code d'invitation" 
+                 class="w-64 px-4 py-3 bg-transparent text-white placeholder-neutral-500 focus:outline-none text-center text-lg tracking-widest uppercase">
+        </div>
+        <button onclick="goToOnboarding()" class="btn-primary text-lg px-8 py-4">
+          Commencer
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass rounded-xl p-6 text-center">
+          <div class="w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
+            <i class="fa-solid fa-chart-line text-2xl text-green-400"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Revenus Passifs</h3>
+          <p class="text-neutral-400 text-sm">Générez des profits pendant que vous dormez</p>
+        </div>
+        <div class="glass rounded-xl p-6 text-center">
+          <div class="w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center">
+            <i class="fa-solid fa-robot text-2xl text-blue-400"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">100% Automatisé</h3>
+          <p class="text-neutral-400 text-sm">Nos robots tradent 24h/24 sans intervention</p>
+        </div>
+        <div class="glass rounded-xl p-6 text-center">
+          <div class="w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+            <i class="fa-solid fa-shield-halved text-2xl text-purple-400"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Sécurisé</h3>
+          <p class="text-neutral-400 text-sm">Vos fonds restent sur votre compte broker</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="py-6 border-t border-neutral-800">
+    <div class="max-w-7xl mx-auto px-4 text-center text-neutral-500 text-sm">
+      © <%= Date.current.year %> Trayo. Tous droits réservés.
+    </div>
+  </footer>
+</div>
+
+<script>
+function goToOnboarding() {
+  const code = document.getElementById('invitation-code').value.trim().toUpperCase();
+  if (code) {
+    window.location.href = '/join/' + code;
+  } else {
+    alert('Veuillez entrer un code d\'invitation valide');
+  }
+}
+
+document.getElementById('invitation-code').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') goToOnboarding();
+});
+</script>

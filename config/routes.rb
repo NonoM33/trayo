@@ -27,6 +27,7 @@ Rails.application.routes.draw do
   get "join/:code", to: "onboarding#show", as: :onboarding
   get "join/:code/step/:step", to: "onboarding#step", as: :onboarding_step
   post "join/:code/next", to: "onboarding#next_step", as: :onboarding_next_step
+  post "join/:code/payment_intent", to: "onboarding#create_payment_intent", as: :onboarding_payment_intent
   get "join/:code/complete", to: "onboarding#complete", as: :onboarding_complete
 
   namespace :admin do
