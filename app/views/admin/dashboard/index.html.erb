@@ -375,44 +375,158 @@
     </div>
   </div>
     
-  <div class="p-6 rounded-2xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
-    <div class="mb-5">
-      <h2 class="text-xl font-bold text-neutral-900 dark:text-white flex items-center gap-2">
-        <i class="fa-solid fa-arrow-trend-up text-blue-500"></i>
-        Profits Mensuels & Projection
-      </h2>
-      <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">Performance historique et projection future</p>
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-      <div class="flex items-start gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-700">
-        <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-neutral-200 dark:bg-neutral-700">
-          <i class="fa-regular fa-clock text-neutral-600 dark:text-neutral-400"></i>
-        </div>
+  <%
+    current_balance = current_user.mt5_accounts.sum(:balance)
+    monthly_avg = @monthly_profits.any? ? (@monthly_profits.sum { |m| m[:profit] } / @monthly_profits.size.to_f) : 0
+    projection_6m = current_balance + (monthly_avg * 6)
+    projection_12m = current_balance + (monthly_avg * 12)
+    roi_monthly = current_balance > 0 ? (monthly_avg / current_balance * 100) : 0
+    positive_months = @monthly_profits.count { |m| m[:profit] > 0 }
+    consistency_rate = @monthly_profits.any? ? (positive_months.to_f / @monthly_profits.size * 100) : 0
+  %>
+  
+  <div class="rounded-2xl overflow-hidden border border-neutral-800 bg-gradient-to-br from-neutral-900 via-neutral-900 to-neutral-950">
+    <!-- Header avec gradient -->
+    <div class="relative px-6 py-5 border-b border-neutral-800 bg-gradient-to-r from-blue-600/10 via-purple-600/5 to-transparent">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+      <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h3 class="font-semibold text-neutral-900 dark:text-white">Performance Historique</h3>
-          <p class="text-sm text-neutral-500 dark:text-neutral-400">Vos profits réels des 12 derniers mois</p>
+          <h2 class="text-xl font-bold text-white flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+              <i class="fa-solid fa-rocket text-white"></i>
+            </div>
+            Projection de Croissance
+          </h2>
+          <p class="text-sm text-neutral-400 mt-1 ml-[52px]">Basée sur vos performances des 12 derniers mois</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <i class="fa-solid fa-chart-line mr-1"></i>
+            Mise à jour en temps réel
+          </span>
         </div>
       </div>
-      <div class="flex items-start gap-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50">
-        <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-800/30">
-          <i class="fa-solid fa-bullseye text-blue-600 dark:text-blue-400"></i>
+    </div>
+    
+    <!-- Stats principales -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-px bg-neutral-800">
+      <!-- Balance Actuelle -->
+      <div class="p-5 bg-neutral-900">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+            <i class="fa-solid fa-wallet text-blue-400 text-sm"></i>
+          </div>
+          <span class="text-xs font-medium text-neutral-500 uppercase tracking-wide">Balance Actuelle</span>
         </div>
-        <div>
-          <h3 class="font-semibold text-neutral-900 dark:text-white">Projection (6 mois)</h3>
-          <p class="text-sm text-neutral-500 dark:text-neutral-400">
-            Basée sur votre moyenne mensuelle: <strong class="text-blue-600 dark:text-blue-400"><%= number_to_currency((@projection_data&.last&.dig(:balance) || 0 - current_user.mt5_accounts.sum(:balance)) / 6, unit: "€", format: "%n %u") %>/mois</strong>
+        <p class="text-2xl font-bold text-white"><%= number_to_currency(current_balance, unit: "€", format: "%n%u") %></p>
+        <p class="text-xs text-neutral-500 mt-1">Capital de départ pour la projection</p>
+      </div>
+      
+      <!-- Gain Moyen Mensuel -->
+      <div class="p-5 bg-neutral-900">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-8 h-8 rounded-lg <%= monthly_avg >= 0 ? 'bg-emerald-500/20' : 'bg-red-500/20' %> flex items-center justify-center">
+            <i class="fa-solid fa-chart-simple <%= monthly_avg >= 0 ? 'text-emerald-400' : 'text-red-400' %> text-sm"></i>
+          </div>
+          <span class="text-xs font-medium text-neutral-500 uppercase tracking-wide">Gain Moyen/Mois</span>
+        </div>
+        <p class="text-2xl font-bold <%= monthly_avg >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+          <%= monthly_avg >= 0 ? '+' : '' %><%= number_to_currency(monthly_avg, unit: "€", format: "%n%u") %>
+        </p>
+        <p class="text-xs text-neutral-500 mt-1">Sur les 12 derniers mois</p>
+      </div>
+      
+      <!-- Projection 6 mois -->
+      <div class="p-5 bg-neutral-900 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2"></div>
+        <div class="relative">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+              <i class="fa-solid fa-bullseye text-purple-400 text-sm"></i>
+            </div>
+            <span class="text-xs font-medium text-neutral-500 uppercase tracking-wide">Objectif 6 Mois</span>
+          </div>
+          <p class="text-2xl font-bold text-purple-400"><%= number_to_currency(projection_6m, unit: "€", format: "%n%u") %></p>
+          <% growth_6m = current_balance > 0 ? ((projection_6m - current_balance) / current_balance * 100) : 0 %>
+          <p class="text-xs mt-1 <%= growth_6m >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+            <i class="fa-solid fa-arrow-<%= growth_6m >= 0 ? 'up' : 'down' %> mr-1"></i>
+            <%= growth_6m >= 0 ? '+' : '' %><%= number_to_percentage(growth_6m, precision: 1) %> estimé
+          </p>
+        </div>
+      </div>
+      
+      <!-- Projection 12 mois -->
+      <div class="p-5 bg-neutral-900 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-500/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2"></div>
+        <div class="relative">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+              <i class="fa-solid fa-trophy text-amber-400 text-sm"></i>
+            </div>
+            <span class="text-xs font-medium text-neutral-500 uppercase tracking-wide">Objectif 12 Mois</span>
+          </div>
+          <p class="text-2xl font-bold text-amber-400"><%= number_to_currency(projection_12m, unit: "€", format: "%n%u") %></p>
+          <% growth_12m = current_balance > 0 ? ((projection_12m - current_balance) / current_balance * 100) : 0 %>
+          <p class="text-xs mt-1 <%= growth_12m >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+            <i class="fa-solid fa-arrow-<%= growth_12m >= 0 ? 'up' : 'down' %> mr-1"></i>
+            <%= growth_12m >= 0 ? '+' : '' %><%= number_to_percentage(growth_12m, precision: 1) %> estimé
           </p>
         </div>
       </div>
     </div>
     
-    <div class="relative h-[400px] w-full">
-      <div id="chart-loading" class="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-700">
-        <div class="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-        <p class="mt-4 text-sm text-neutral-500 dark:text-neutral-400">Chargement du graphique...</p>
+    <!-- Graphique -->
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+            <span class="text-xs text-neutral-400">Profits positifs</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+            <span class="text-xs text-neutral-400">Pertes</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500" style="border-radius: 2px;"></span>
+            <span class="text-xs text-neutral-400">Projection</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700">
+          <i class="fa-solid fa-circle text-emerald-400 text-[8px] animate-pulse"></i>
+          <span class="text-xs font-medium text-neutral-400">
+            Fiabilité: <span class="text-white"><%= number_to_percentage(consistency_rate, precision: 0) %></span>
+          </span>
+        </div>
       </div>
-      <canvas id="portfolioChart" class="hidden"></canvas>
+      
+      <div class="relative h-[350px] w-full">
+        <div id="chart-loading" class="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-neutral-800/50 border border-neutral-700">
+          <div class="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+          <p class="mt-4 text-sm text-neutral-400">Chargement du graphique...</p>
+        </div>
+        <canvas id="portfolioChart" class="hidden"></canvas>
+      </div>
+    </div>
+    
+    <!-- Footer avec insights -->
+    <div class="px-6 py-4 border-t border-neutral-800 bg-neutral-900/50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-6">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full <%= roi_monthly >= 0 ? 'bg-emerald-400' : 'bg-red-400' %>"></div>
+            <span class="text-sm text-neutral-400">ROI mensuel moyen: <strong class="<%= roi_monthly >= 0 ? 'text-emerald-400' : 'text-red-400' %>"><%= number_to_percentage(roi_monthly, precision: 2) %></strong></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+            <span class="text-sm text-neutral-400">Mois positifs: <strong class="text-white"><%= positive_months %>/<%= @monthly_profits.size %></strong></span>
+          </div>
+        </div>
+        <p class="text-xs text-neutral-500 italic">
+          <i class="fa-solid fa-info-circle mr-1"></i>
+          Projection basée sur la moyenne de vos performances passées. Résultats non garantis.
+        </p>
+      </div>
     </div>
   </div>
     
@@ -671,8 +785,8 @@ async function initializeChart() {
     ctx.classList.remove('hidden');
     ctx.style.display = 'block';
   
-    const textColor = '#94a3b8';
-    const gridColor = 'rgba(148, 163, 184, 0.1)';
+    const textColor = '#64748b';
+    const gridColor = 'rgba(100, 116, 139, 0.1)';
     
     const historicalData = <%= raw @monthly_profits.to_json %>;
     const projectionData = <%= raw @projection_data.to_json %>;
