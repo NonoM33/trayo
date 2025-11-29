@@ -357,22 +357,221 @@
     </div>
   <% end %>
     
-  <div class="p-6 rounded-2xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
-    <div class="mb-5">
-      <h2 class="text-xl font-bold text-neutral-900 dark:text-white flex items-center gap-2">
-        <i class="fa-solid fa-chart-bar text-blue-500"></i>
-        Performances des Bots
-      </h2>
-      <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">Analyse détaillée des performances de tous vos bots</p>
+  <%
+    bot_purchases = current_user.bot_purchases.includes(:trading_bot)
+    bots_data = bot_purchases.map do |bp|
+      user_trades = Trade.joins(:mt5_account).where(mt5_accounts: { user_id: current_user.id })
+                         .where(magic_number: bp.magic_number)
+      winning_trades = user_trades.where("profit > 0").count
+      losing_trades = user_trades.where("profit < 0").count
+      total_trades = user_trades.count
+      total_profit = user_trades.sum(:profit)
+      success_rate = total_trades > 0 ? (winning_trades.to_f / total_trades * 100).round(1) : 0
+      avg_profit = total_trades > 0 ? (total_profit / total_trades).round(2) : 0
+      
+      {
+        name: bp.trading_bot.name,
+        profit: total_profit,
+        trades: total_trades,
+        winning: winning_trades,
+        losing: losing_trades,
+        success_rate: success_rate,
+        avg_profit: avg_profit,
+        is_running: bp.is_running,
+        magic_number: bp.magic_number
+      }
+    end
+    
+    total_bot_profit = bots_data.sum { |b| b[:profit] }
+    total_bot_trades = bots_data.sum { |b| b[:trades] }
+    best_bot = bots_data.max_by { |b| b[:profit] }
+    avg_success_rate = bots_data.any? ? (bots_data.sum { |b| b[:success_rate] } / bots_data.size).round(1) : 0
+  %>
+  
+  <div class="rounded-2xl overflow-hidden border border-neutral-800 bg-gradient-to-br from-neutral-900 via-neutral-900 to-neutral-950">
+    <!-- Header -->
+    <div class="relative px-6 py-5 border-b border-neutral-800 bg-gradient-to-r from-emerald-600/10 via-teal-600/5 to-transparent">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+      <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+              <i class="fa-solid fa-robot text-white"></i>
+            </div>
+            Performance de vos Bots
+          </h2>
+          <p class="text-sm text-neutral-400 mt-1 ml-[52px]">Analyse en temps réel de tous vos robots de trading</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <i class="fa-solid fa-robot mr-1"></i>
+            <%= bot_purchases.count %> bot<%= bot_purchases.count > 1 ? 's' : '' %> actif<%= bot_purchases.count > 1 ? 's' : '' %>
+          </span>
+        </div>
+      </div>
     </div>
     
-    <div class="relative h-[400px] w-full">
-      <div id="bots-chart-loading" class="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-700">
-        <div class="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-        <p class="mt-4 text-sm text-neutral-500 dark:text-neutral-400">Chargement du graphique...</p>
+    <% if bots_data.any? %>
+      <!-- Stats globales -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-px bg-neutral-800">
+        <div class="p-5 bg-neutral-900">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-8 h-8 rounded-lg <%= total_bot_profit >= 0 ? 'bg-emerald-500/20' : 'bg-red-500/20' %> flex items-center justify-center">
+              <i class="fa-solid fa-coins <%= total_bot_profit >= 0 ? 'text-emerald-400' : 'text-red-400' %> text-sm"></i>
+            </div>
+            <span class="text-xs font-medium text-neutral-500 uppercase tracking-wide">Profit Total</span>
+          </div>
+          <p class="text-2xl font-bold <%= total_bot_profit >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+            <%= total_bot_profit >= 0 ? '+' : '' %><%= number_to_currency(total_bot_profit, unit: "€", format: "%n%u") %>
+          </p>
+        </div>
+        
+        <div class="p-5 bg-neutral-900">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+              <i class="fa-solid fa-chart-line text-blue-400 text-sm"></i>
+            </div>
+            <span class="text-xs font-medium text-neutral-500 uppercase tracking-wide">Trades Exécutés</span>
+          </div>
+          <p class="text-2xl font-bold text-white"><%= total_bot_trades %></p>
+        </div>
+        
+        <div class="p-5 bg-neutral-900">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+              <i class="fa-solid fa-bullseye text-purple-400 text-sm"></i>
+            </div>
+            <span class="text-xs font-medium text-neutral-500 uppercase tracking-wide">Taux de Réussite</span>
+          </div>
+          <p class="text-2xl font-bold text-purple-400"><%= avg_success_rate %>%</p>
+        </div>
+        
+        <div class="p-5 bg-neutral-900">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+              <i class="fa-solid fa-trophy text-amber-400 text-sm"></i>
+            </div>
+            <span class="text-xs font-medium text-neutral-500 uppercase tracking-wide">Meilleur Bot</span>
+          </div>
+          <p class="text-lg font-bold text-amber-400 truncate"><%= best_bot&.dig(:name) || '-' %></p>
+        </div>
       </div>
-      <canvas id="botsChart" class="hidden"></canvas>
-    </div>
+      
+      <!-- Cards des bots -->
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-<%= [bots_data.size, 3].min %> gap-4">
+          <% bots_data.sort_by { |b| -b[:profit] }.each do |bot| %>
+            <div class="relative rounded-xl border border-neutral-800 bg-neutral-900/50 overflow-hidden group hover:border-neutral-700 transition-all">
+              <!-- Gradient top bar based on performance -->
+              <div class="h-1 w-full <%= bot[:profit] >= 0 ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-gradient-to-r from-red-500 to-orange-500' %>"></div>
+              
+              <div class="p-4">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br <%= bot[:profit] >= 0 ? 'from-emerald-500/20 to-teal-500/20' : 'from-red-500/20 to-orange-500/20' %> flex items-center justify-center">
+                      <i class="fa-solid fa-robot <%= bot[:profit] >= 0 ? 'text-emerald-400' : 'text-red-400' %>"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold text-white"><%= bot[:name] %></h3>
+                      <p class="text-xs text-neutral-500">Magic: <%= bot[:magic_number] %></p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full <%= bot[:is_running] ? 'bg-emerald-400 animate-pulse' : 'bg-neutral-600' %>"></span>
+                    <span class="text-xs <%= bot[:is_running] ? 'text-emerald-400' : 'text-neutral-500' %>"><%= bot[:is_running] ? 'Actif' : 'Inactif' %></span>
+                  </div>
+                </div>
+                
+                <!-- Profit principal -->
+                <div class="mb-4">
+                  <p class="text-3xl font-bold <%= bot[:profit] >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+                    <%= bot[:profit] >= 0 ? '+' : '' %><%= number_to_currency(bot[:profit], unit: "€", format: "%n%u") %>
+                  </p>
+                  <p class="text-xs text-neutral-500 mt-1">Profit total généré</p>
+                </div>
+                
+                <!-- Stats grid -->
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                  <div class="p-2 rounded-lg bg-neutral-800/50 text-center">
+                    <p class="text-lg font-bold text-white"><%= bot[:trades] %></p>
+                    <p class="text-[10px] text-neutral-500 uppercase">Trades</p>
+                  </div>
+                  <div class="p-2 rounded-lg bg-neutral-800/50 text-center">
+                    <p class="text-lg font-bold text-emerald-400"><%= bot[:winning] %></p>
+                    <p class="text-[10px] text-neutral-500 uppercase">Gagnés</p>
+                  </div>
+                  <div class="p-2 rounded-lg bg-neutral-800/50 text-center">
+                    <p class="text-lg font-bold text-red-400"><%= bot[:losing] %></p>
+                    <p class="text-[10px] text-neutral-500 uppercase">Perdus</p>
+                  </div>
+                </div>
+                
+                <!-- Progress bar -->
+                <div class="mb-3">
+                  <div class="flex items-center justify-between text-xs mb-1">
+                    <span class="text-neutral-400">Taux de réussite</span>
+                    <span class="font-bold <%= bot[:success_rate] >= 50 ? 'text-emerald-400' : 'text-red-400' %>"><%= bot[:success_rate] %>%</span>
+                  </div>
+                  <div class="h-2 rounded-full bg-neutral-800 overflow-hidden">
+                    <div class="h-full rounded-full <%= bot[:success_rate] >= 50 ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-gradient-to-r from-red-500 to-orange-500' %> transition-all" style="width: <%= bot[:success_rate] %>%"></div>
+                  </div>
+                </div>
+                
+                <!-- Avg profit -->
+                <div class="flex items-center justify-between text-sm pt-3 border-t border-neutral-800">
+                  <span class="text-neutral-400">Profit moyen/trade</span>
+                  <span class="font-bold <%= bot[:avg_profit] >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+                    <%= bot[:avg_profit] >= 0 ? '+' : '' %><%= number_to_currency(bot[:avg_profit], unit: "€", format: "%n%u") %>
+                  </span>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      
+      <!-- Graphique comparatif -->
+      <div class="px-6 pb-6">
+        <div class="p-4 rounded-xl bg-neutral-800/30 border border-neutral-800">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+              <i class="fa-solid fa-chart-column text-blue-400"></i>
+              Comparaison des Performances
+            </h3>
+            <div class="flex items-center gap-4 text-xs">
+              <div class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded bg-gradient-to-r from-emerald-500 to-teal-500"></span>
+                <span class="text-neutral-400">Profit</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                <span class="text-neutral-400">Trades</span>
+              </div>
+            </div>
+          </div>
+          <div class="relative h-[200px] w-full">
+            <div id="bots-chart-loading" class="absolute inset-0 flex flex-col items-center justify-center">
+              <div class="w-8 h-8 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+            </div>
+            <canvas id="botsChart" class="hidden"></canvas>
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <!-- Empty state -->
+      <div class="p-12 text-center">
+        <div class="w-20 h-20 mx-auto rounded-2xl bg-neutral-800 flex items-center justify-center mb-6">
+          <i class="fa-solid fa-robot text-neutral-600 text-3xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-white mb-2">Aucun bot actif</h3>
+        <p class="text-neutral-400 mb-6 max-w-md mx-auto">Vous n'avez pas encore de robots de trading. Explorez notre boutique pour découvrir nos bots performants.</p>
+        <%= link_to admin_shop_index_path, class: "inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/25" do %>
+          <i class="fa-solid fa-shopping-cart"></i>
+          Découvrir les bots
+        <% end %>
+      </div>
+    <% end %>
   </div>
     
   <%
