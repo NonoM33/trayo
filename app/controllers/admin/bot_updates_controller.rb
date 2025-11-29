@@ -75,7 +75,12 @@ module Admin
       
       if price.zero?
         @update.upgrade_user!(current_user)
-        render json: { success: true, free: true }
+        render json: { success: true, free: true, bot_name: @bot.name, version: @update.version }
+        return
+      end
+
+      unless Stripe.api_key.present?
+        render json: { error: "Configuration Stripe manquante. Contactez l'administrateur." }, status: :unprocessable_entity
         return
       end
 
@@ -108,6 +113,9 @@ module Admin
       }
     rescue Stripe::StripeError => e
       render json: { error: e.message }, status: :unprocessable_entity
+    rescue StandardError => e
+      Rails.logger.error "Bot update purchase error: #{e.message}"
+      render json: { error: "Erreur lors du paiement. Veuillez réessayer." }, status: :unprocessable_entity
     end
 
     def purchase_pass
@@ -120,6 +128,11 @@ module Admin
 
       if bot_purchase.update_pass_active?
         render json: { error: "Vous avez déjà un pass annuel actif" }, status: :unprocessable_entity
+        return
+      end
+
+      unless Stripe.api_key.present?
+        render json: { error: "Configuration Stripe manquante. Contactez l'administrateur." }, status: :unprocessable_entity
         return
       end
 
@@ -160,6 +173,9 @@ module Admin
       }
     rescue Stripe::StripeError => e
       render json: { error: e.message }, status: :unprocessable_entity
+    rescue StandardError => e
+      Rails.logger.error "Bot update pass purchase error: #{e.message}"
+      render json: { error: "Erreur lors du paiement. Veuillez réessayer." }, status: :unprocessable_entity
     end
 
     private
