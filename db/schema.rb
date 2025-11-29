@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_29_000254) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -183,8 +183,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.decimal "budget"
+    t.string "stripe_payment_intent_id"
     t.index ["code"], name: "index_invitations_on_code", unique: true
     t.index ["status"], name: "index_invitations_on_status"
+    t.index ["stripe_payment_intent_id"], name: "index_invitations_on_stripe_payment_intent_id"
   end
 
   create_table "invoice_items", force: :cascade do |t|
@@ -227,7 +229,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
     t.jsonb "metadata"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "stripe_payment_intent_id"
+    t.string "stripe_customer_id"
+    t.string "stripe_charge_id"
     t.index ["reference"], name: "index_invoices_on_reference", unique: true
+    t.index ["stripe_payment_intent_id"], name: "index_invoices_on_stripe_payment_intent_id"
     t.index ["user_id"], name: "index_invoices_on_user_id"
   end
 
@@ -294,6 +300,29 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
     t.index ["payment_date"], name: "index_payments_on_payment_date"
     t.index ["status"], name: "index_payments_on_status"
     t.index ["user_id"], name: "index_payments_on_user_id"
+  end
+
+  create_table "subscriptions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "stripe_subscription_id", null: false
+    t.string "stripe_customer_id", null: false
+    t.string "plan", null: false
+    t.string "status", default: "active"
+    t.datetime "current_period_start"
+    t.datetime "current_period_end"
+    t.datetime "canceled_at"
+    t.decimal "monthly_price", precision: 10, scale: 2
+    t.integer "failed_payment_count", default: 0
+    t.datetime "last_payment_failed_at"
+    t.datetime "last_reminder_sent_at"
+    t.text "cancellation_reason"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["plan"], name: "index_subscriptions_on_plan"
+    t.index ["status"], name: "index_subscriptions_on_status"
+    t.index ["stripe_customer_id"], name: "index_subscriptions_on_stripe_customer_id"
+    t.index ["stripe_subscription_id"], name: "index_subscriptions_on_stripe_subscription_id", unique: true
+    t.index ["user_id"], name: "index_subscriptions_on_user_id"
   end
 
   create_table "support_tickets", force: :cascade do |t|
@@ -397,9 +426,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
     t.boolean "is_admin", default: false
     t.string "phone"
     t.boolean "init_mt5", default: false, null: false
+    t.string "stripe_customer_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["init_mt5"], name: "index_users_on_init_mt5"
     t.index ["mt5_api_token"], name: "index_users_on_mt5_api_token", unique: true
+    t.index ["stripe_customer_id"], name: "index_users_on_stripe_customer_id"
   end
 
   create_table "vps", force: :cascade do |t|
@@ -454,6 +485,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
   add_foreign_key "invoices", "users"
   add_foreign_key "mt5_accounts", "users"
   add_foreign_key "payments", "users"
+  add_foreign_key "subscriptions", "users"
   add_foreign_key "support_tickets", "users"
   add_foreign_key "ticket_comments", "support_tickets"
   add_foreign_key "ticket_comments", "users"

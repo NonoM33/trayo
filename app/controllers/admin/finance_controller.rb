@@ -12,7 +12,7 @@ class Admin::FinanceController < Admin::BaseController
     when 'bonus'
       @bonus_deposits = BonusDeposit.includes(:user).order(created_at: :desc).limit(100)
       @bonus_periods = BonusPeriod.order(start_date: :desc)
-      @current_period = BonusPeriod.current
+      @current_period = BonusPeriod.current.first
     when 'movements'
       @withdrawals = Withdrawal.includes(mt5_account: :user).order(withdrawal_date: :desc).limit(100)
       @deposits = Deposit.includes(mt5_account: :user).order(deposit_date: :desc).limit(100)

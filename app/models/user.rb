@@ -13,6 +13,7 @@ class User < ApplicationRecord
   has_many :invoice_payments, through: :invoices
   has_many :commission_reminders, dependent: :destroy
   has_many :support_tickets, dependent: :destroy
+  has_many :subscriptions, dependent: :destroy
 
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, length: { minimum: 6 }, if: -> { new_record? || !password.nil? }
@@ -25,6 +26,10 @@ class User < ApplicationRecord
   scope :admins, -> { where(is_admin: true) }
   scope :mt5_initialized, -> { where(init_mt5: true) }
   scope :mt5_not_initialized, -> { where(init_mt5: false) }
+
+  def full_name
+    [first_name, last_name].compact.join(' ').presence || email
+  end
 
   def debug_bot_purchases
  "=== USER DEBUG BOT PURCHASES ==="

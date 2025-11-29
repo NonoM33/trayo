@@ -72,7 +72,7 @@
   </div>
 
   <script>
-    window.stripePublicKey = "***REMOVED***";
+    window.stripePublicKey = "<%= Rails.application.config.stripe_publishable_key %>";
   </script>
 </body>
 </html>

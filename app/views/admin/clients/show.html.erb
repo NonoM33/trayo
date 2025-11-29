@@ -1,2445 +1,765 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Client Details - Admin Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-  <style>
-    .container { max-width: 1600px; }
-    .alert { padding: 15px; margin-bottom: 20px; background: #f44336; color: white; border-radius: 4px; }
-    .status-pending { color: #ff9800; font-weight: 600; }
-    .status-validated { color: #4CAF50; font-weight: 600; }
-    .status-rejected { color: #f44336; font-weight: 600; }
-    .form-inline { display: inline; }
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .positive { color: #10b981; }
-  .negative { color: #ef4444; }
-  
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  .stat-item {
-    text-align: center;
-    padding: 1rem;
-    background: var(--bg-hover);
-    border-radius: 6px;
-  }
-  
-  .stat-value {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-  }
-  
-  .stat-label {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-  }
-  
-  .trade-type-badge {
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-  
-  .trade-type-badge.buy {
-    background: #10b981;
-    color: white;
-  }
-  
-  .trade-type-badge.sell {
-    background: #ef4444;
-    color: white;
-  }
-  
-  .magic-badge {
-    background: var(--primary-color);
-    color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-  
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
+<% content_for :title, "Client - #{@client.full_name}" %>
 
-  .invoice-card {
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    margin-bottom: 12px;
-    background: rgba(255,255,255,0.02);
-    overflow: hidden;
-  }
-
-  .invoice-summary {
-    width: 100%;
-    border: none;
-    background: transparent;
-    color: inherit;
-    padding: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-  }
-
-  .invoice-summary-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .invoice-amount span,
-  .invoice-balance span {
-    display: block;
-    font-size: 11px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  .invoice-amount strong,
-  .invoice-balance strong {
-    font-size: 15px;
-  }
-
-  .invoice-badge {
-    color: white;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-
-  .invoice-details {
-    padding: 0 16px 16px;
-    border-top: 1px solid rgba(255,255,255,0.05);
-  }
-
-  .invoice-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    margin: 16px 0;
-  }
-
-  .section-title {
-    font-size: 14px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin: 18px 0 8px;
-    letter-spacing: 0.05em;
-  }
-
-  .table-flat {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 12px;
-  }
-
-  .table-flat th {
-    text-align: left;
-    font-size: 12px;
-    color: var(--text-muted);
-    padding-bottom: 6px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-  }
-
-  .table-flat td {
-    padding: 6px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
-  }
-
-  .payments-form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    align-items: end;
-  }
-
-  .payments-form button {
-    grid-column: span 2;
-    justify-self: flex-start;
-  }
-
-  .notes-field {
-    grid-column: span 2;
-  }
-
-  .payments-form input,
-  .payments-form select {
-    width: 100%;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.15);
-    background: rgba(0,0,0,0.2);
-    color: white;
-  }
-
-  .payments-form label {
-    font-size: 12px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .empty-text {
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-  
-  .empty-state {
-    text-align: center;
-    padding: 3rem;
-    color: var(--text-muted);
-  }
-
-  .status-pill {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-
-  .status-pill.status-sent { background: rgba(16,185,129,0.2); color: #10b981; }
-  .status-pill.status-pending { background: rgba(245,158,11,0.2); color: #f59e0b; }
-  .status-pill.status-failed { background: rgba(239,68,68,0.2); color: #ef4444; }
-  .status-pill.status-skipped { background: rgba(148,163,184,0.2); color: #94a3b8; }
-
-  .sms-message {
-    max-width: 420px;
-    font-size: 12px;
-    color: var(--text-muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-
-  .modal-card {
-    background: var(--bg-card);
-    padding: 24px;
-    border-radius: 16px;
-    width: min(520px, 90vw);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-    position: relative;
-  }
-
-  .modal-card h3 {
-    margin-top: 0;
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    font-size: 20px;
-    cursor: pointer;
-  }
-
-  .sms-preview-box {
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
-    padding: 14px;
-    font-size: 14px;
-    margin: 16px 0;
-    line-height: 1.5;
-  }
-  
-  .empty-state-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-  }
-  
-  .empty-state h3 {
-    margin-bottom: 0.5rem;
-    color: var(--text-color);
-  }
-  
-  .empty-state ul {
-    text-align: left;
-    max-width: 400px;
-    margin: 0 auto;
-  }
-  
-  .card-header-actions {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-  }
-  
-  .action-btn {
-    background: var(--bg-hover);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .action-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  }
-  
-  .action-btn:active {
-    transform: translateY(0);
-  }
-  
-  .action-btn-start {
-    background: linear-gradient(135deg, #10b981, #059669);
-    border-color: #10b981;
-    color: white;
-  }
-  
-  .action-btn-start:hover {
-    background: linear-gradient(135deg, #059669, #047857);
-  }
-  
-  .action-btn-stop {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    border-color: #f59e0b;
-    color: white;
-  }
-  
-  .action-btn-stop:hover {
-    background: linear-gradient(135deg, #d97706, #b45309);
-  }
-  
-  .action-btn-delete {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    border-color: #ef4444;
-    color: white;
-  }
-  
-  .action-btn-delete:hover {
-    background: linear-gradient(135deg, #dc2626, #b91c1c);
-  }
-  
-  .action-btn i {
-    font-size: 12px;
-  }
-</style>
-</head>
-<body>
-  <% @page_title = "Client Details" %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
-      
-      <div class="container">
-    <% if flash[:notice] %>
-      <div class="notice"><%= flash[:notice] %></div>
-    <% end %>
-    <% if flash[:alert] %>
-      <div class="alert"><%= flash[:alert] %></div>
-    <% end %>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-      <% if current_user.is_admin? %>
-        <%= link_to admin_clients_path, class: "back-link", style: "margin: 0;" do %>
-          <i class="fa-icon fa-md fa-arrow-left"></i> Retour aux Clients
-        <% end %>
-      <% else %>
-        <h1 style="margin: 0;">Mon Profil</h1>
-      <% end %>
-      <%= link_to edit_admin_client_path(@client), class: "btn btn-primary" do %>
-        <i class="fa-icon fa-md fa-edit"></i> Modifier <%= current_user.is_admin? ? 'le Profil Utilisateur' : 'Mon Profil' %>
-      <% end %>
-    </div>
-
-    <% if @client.phone.blank? %>
-      <div style="background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px;">
-        ⚠️ Aucun numéro renseigné. Ajoute un téléphone pour activer les rappels SMS de commission.
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white text-2xl font-bold">
+        <%= @client.first_name&.first&.upcase %><%= @client.last_name&.first&.upcase %>
       </div>
-    <% end %>
-
-    <% if current_user.is_admin? %>
-    <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
-        <h2 style="margin: 0;"><i class="fa-icon fa-md fa-file-invoice"></i> Factures & Règlements</h2>
-        <% if @client.phone.present? %>
-          <%= link_to "Prévisualiser le SMS", sms_preview_admin_client_path(@client),
-                class: "btn btn-outline",
-                data: { turbo_frame: "sms_modal" } %>
-        <% else %>
-          <button class="btn btn-outline" style="opacity: 0.5; cursor: not-allowed;" disabled>
-            Enregistrer un numéro pour envoyer un SMS
-          </button>
-        <% end %>
-      </div>
-    <%= turbo_frame_tag "sms_modal" %>
-      
-      <div style="background: rgba(138, 255, 163, 0.08); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 12px; padding: 16px; margin-bottom: 18px;">
-        <h3 style="margin-top: 0; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-          <i class="fa-icon fa-md fa-plus-square"></i> Créer une facture manuelle
-        </h3>
-        <% if @available_bot_purchases.any? || @available_vps.any? %>
-          <%= form_with url: admin_invoices_path, method: :post, local: true, style: "display: flex; flex-direction: column; gap: 12px;" do %>
-            <%= hidden_field_tag :user_id, @client.id %>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-              <div>
-                <label style="font-size: 12px; text-transform: uppercase; color: var(--text-muted);">Échéance</label>
-                <input type="date" name="due_date" value="<%= (Date.current + 7.days).to_s %>"
-                       style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.2); color: white;">
-              </div>
-            </div>
-
-            <% if @available_bot_purchases.any? %>
-              <div>
-                <div style="font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Bots</div>
-                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                  <% @available_bot_purchases.each do |purchase| %>
-                    <label style="flex: 1 1 240px; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 10px; background: rgba(0,0,0,0.2); display: flex; gap: 10px; align-items: center;">
-                      <input type="checkbox" name="bot_purchase_ids[]" value="<%= purchase.id %>" style="transform: scale(1.2);">
-                      <div>
-                        <div style="font-weight: 600;"><%= purchase.trading_bot.name %></div>
-                        <div style="font-size: 12px; color: var(--text-muted);">
-                          Prix: <%= number_to_currency(purchase.price_paid, unit: "€", format: "%n %u") %>
-                        </div>
-                      </div>
-                    </label>
-                  <% end %>
-                </div>
-              </div>
-            <% else %>
-              <div style="font-size: 12px; color: var(--text-muted);">Aucun bot disponible (tous déjà facturés).</div>
-            <% end %>
-
-            <% if @available_vps.any? %>
-              <div>
-                <div style="font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">VPS</div>
-                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                  <% @available_vps.each do |vps| %>
-                    <label style="flex: 1 1 240px; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 10px; background: rgba(0,0,0,0.2); display: flex; gap: 10px; align-items: center;">
-                      <input type="checkbox" name="vps_ids[]" value="<%= vps.id %>" style="transform: scale(1.2);">
-                      <div>
-                        <div style="font-weight: 600;"><%= vps.name %></div>
-                        <div style="font-size: 12px; color: var(--text-muted);">
-                          Annuel: <%= number_to_currency(vps.monthly_price.to_f * 12, unit: "€", format: "%n %u") %>
-                        </div>
-                      </div>
-                    </label>
-                  <% end %>
-                </div>
-              </div>
-            <% else %>
-              <div style="font-size: 12px; color: var(--text-muted);">Aucun VPS à facturer.</div>
-            <% end %>
-
-            <button type="submit" class="btn btn-success" style="align-self: flex-start; padding: 10px 20px;">
-              Générer la facture
-            </button>
-          <% end %>
-        <% else %>
-          <div style="font-size: 13px; color: var(--text-muted);">
-            Aucun bot ou VPS disponible pour une nouvelle facture.
-          </div>
-        <% end %>
-      </div>
-
-      <% if @invoices.any? %>
-        <% @invoices.each do |invoice| %>
-          <% expanded = invoice.balance_due.positive? ? true : false %>
-          <% badge = invoice.status_badge %>
-          <div class="invoice-card">
-            <button class="invoice-summary" onclick="toggleInvoice('<%= invoice.id %>')" type="button" aria-expanded="<%= expanded %>">
-              <div>
-                <div class="invoice-ref"><%= invoice.reference %></div>
-                <div class="invoice-meta">
-                  Émise le <%= invoice.created_at.strftime("%d/%m/%Y") %>
-                  <% if invoice.due_date %> · Échéance <%= invoice.due_date.strftime("%d/%m/%Y") %><% end %>
-                </div>
-              </div>
-              <div class="invoice-summary-right">
-                <div class="invoice-amount">
-                  <span>Total</span>
-                  <strong><%= number_to_currency(invoice.total_amount, unit: "€", format: "%n %u") %></strong>
-                </div>
-                <div class="invoice-balance <%= invoice.balance_due.positive? ? 'negative' : 'positive' %>">
-                  <span>Restant</span>
-                  <strong><%= number_to_currency(invoice.balance_due, unit: "€", format: "%n %u") %></strong>
-                </div>
-                <span class="invoice-badge" style="background: <%= badge[:color] %>;">
-                  <%= badge[:label] %>
-                </span>
-                <i class="fa-icon" id="invoice-chevron-<%= invoice.id %>" style="margin-left: 12px; transition: transform 0.2s; transform: rotate(<%= expanded ? 180 : 0 %>deg);">⌄</i>
-              </div>
-            </button>
-
-            <div id="invoice-details-<%= invoice.id %>" class="invoice-details" style="display: <%= expanded ? 'block' : 'none' %>;">
-              <div class="invoice-grid">
-                <div>
-                  <div class="label">Source</div>
-                  <div class="value"><%= invoice.source || "N/A" %></div>
-                </div>
-                <div>
-                  <div class="label">Statut</div>
-                  <div class="value"><%= badge[:label] %></div>
-                </div>
-                <div>
-                  <div class="label">Émise par</div>
-                  <div class="value"><%= invoice.metadata&.dig("created_by") ? User.find_by(id: invoice.metadata["created_by"])&.email : "Système" %></div>
-                </div>
-              </div>
-
-              <div class="section-title">Détails</div>
-              <table class="table-flat">
-                <thead>
-                  <tr>
-                    <th>Élément</th>
-                    <th>Quantité</th>
-                    <th>Prix</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% invoice.invoice_items.each do |item| %>
-                    <tr>
-                      <td><%= item.label %></td>
-                      <td><%= item.quantity %></td>
-                      <td><%= number_to_currency(item.total_price, unit: "€", format: "%n %u") %></td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-
-              <div class="section-title">Règlements</div>
-              <% if invoice.invoice_payments.any? %>
-                <table class="table-flat">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Montant</th>
-                      <th>Méthode</th>
-                      <th>Notes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <% invoice.invoice_payments.each do |payment| %>
-                      <tr>
-                        <td><%= payment.paid_at.strftime("%d/%m/%Y") %></td>
-                        <td><%= number_to_currency(payment.amount, unit: "€", format: "%n %u") %></td>
-                        <td><%= payment.payment_method.presence || "N/A" %></td>
-                        <td><%= payment.notes.presence || "-" %></td>
-                      </tr>
-                    <% end %>
-                  </tbody>
-                </table>
-              <% else %>
-                <div class="empty-text">Aucun règlement enregistré</div>
-              <% end %>
-
-              <% if invoice.balance_due.positive? %>
-                <div class="section-title">Ajouter un règlement</div>
-                <%= form_with url: admin_invoice_payments_path(invoice), method: :post, local: true, class: "payments-form" do %>
-                  <div>
-                    <label>Montant</label>
-                    <input type="number" name="amount" step="0.01" min="0" value="<%= invoice.balance_due %>" required>
-                  </div>
-                  <div>
-                    <label>Date</label>
-                    <input type="date" name="paid_at" value="<%= Date.current %>">
-                  </div>
-                  <div>
-                    <label>Méthode</label>
-                    <select name="payment_method">
-                      <option value="cash">Cash</option>
-                      <option value="bank_transfer">Virement</option>
-                      <option value="paypal">PayPal</option>
-                      <option value="credit_card">Carte</option>
-                      <option value="check">Chèque</option>
-                      <option value="other">Autre</option>
-                    </select>
-                  </div>
-                  <div class="notes-field">
-                    <label>Notes</label>
-                    <input type="text" name="notes" placeholder="Référence, conditions, etc.">
-                  </div>
-                  <button type="submit" class="btn btn-success">
-                    Enregistrer le règlement
-                  </button>
-                <% end %>
-              <% end %>
-            </div>
-          </div>
-        <% end %>
-      <% else %>
-        <p style="color: var(--text-muted);">Aucune facture pour ce client.</p>
-      <% end %>
-
-      <% if @recent_commission_reminders.any? %>
-        <div class="section-title" style="margin-top: 24px;">Historique des SMS</div>
-        <table class="table-flat">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Type</th>
-              <th>Montant</th>
-              <th>Référence</th>
-              <th>Message</th>
-              <th>Statut</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @recent_commission_reminders.each do |reminder| %>
-              <tr>
-                <td><%= reminder.created_at.strftime("%d/%m/%Y %H:%M") %></td>
-                <td><%= reminder.kind.humanize %></td>
-                <td><%= number_to_currency(reminder.amount, unit: "€", format: "%n %u") %></td>
-                <td><%= reminder.watermark_reference.present? ? "REF #{reminder.watermark_reference.round(2)}" : "-" %></td>
-                <td>
-                  <div class="sms-message" title="<%= reminder.message_content %>">
-                    <%= reminder.message_content.presence || "-" %>
-                  </div>
-                </td>
-                <td>
-                  <span class="status-pill status-<%= reminder.status %>">
-                    <%= reminder.status_label %>
-                  </span>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      <% end %>
-    </div>
-    <% end %>
-
-    <% if flash[:notice] %>
-      <div class="notice"><%= flash[:notice] %></div>
-    <% end %>
-    <% if flash[:alert] %>
-      <div class="alert"><%= flash[:alert] %></div>
-    <% end %>
-
-    <div class="card">
-      <h2><%= current_user.is_admin? ? "Client : #{@client.email}" : "Informations Personnelles" %></h2>
-      
-      <% if @client.mt5_api_token.present? && current_user.is_admin? %>
-        <div style="background: #e3f2fd; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #2196F3;">
-          <div style="font-weight: 600; color: #1976D2; margin-bottom: 8px;">
-            <i class="fa-icon fa-md fa-shield-alt"></i>
-            Token API MT5
-          </div>
-          <div style="font-family: monospace; font-size: 14px; color: #333; word-break: break-all; background: white; padding: 10px; border-radius: 4px;">
-            <%= @client.mt5_api_token %>
-          </div>
-          <div style="font-size: 12px; color: #666; margin-top: 8px;">
-            <i class="fa-icon fa-md fa-info-circle"></i> Ce token doit être configuré dans le script MT5 (TrayoSync.mq5) pour la synchronisation du compte
-          </div>
-        </div>
-      <% end %>
-      
-      <div class="info-grid">
-        <% if current_user.is_admin? %>
-          <div class="info-item">
-            <div class="info-label">Capital à l'instant T</div>
-            <div class="info-value positive">
-              <%= number_to_currency(@mt5_accounts.sum { |account| account.balance || 0 }, unit: "€", format: "%n %u") %>
-            </div>
-            <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
-              Balance actuelle totale
-            </div>
-          </div>
-        <% end %>
-        <% if current_user.is_admin? %>
-          <div class="info-item">
-            <div class="info-label">High Watermark</div>
-            <div class="info-value positive">
-              <%= number_to_currency(@mt5_accounts.sum { |account| account.high_watermark || 0 }, unit: "€", format: "%n %u") %>
-            </div>
-            <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
-              Plus haut niveau atteint
-            </div>
-          </div>
-        <% end %>
-        <% if current_user.is_admin? %>
-          <div class="info-item">
-            <div class="info-label">Taux de Commission</div>
-            <div class="info-value"><%= number_to_percentage(@client.commission_rate, precision: 1) %></div>
-          </div>
-        <% end %>
-        <div class="info-item">
-          <div class="info-label">Gains Totaux</div>
-          <div class="info-value <%= @client.total_profits >= 0 ? 'positive' : 'negative' %>">
-            <%= number_to_currency(@client.total_profits, unit: "€", format: "%n %u") %>
-          </div>
-          <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
-            Gains réels + retraits effectués
-          </div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Gain Moyen Journalier (30j)</div>
-          <div class="info-value <%= @average_daily_gain >= 0 ? 'positive' : 'negative' %>">
-            <%= number_to_currency(@average_daily_gain, unit: "€", format: "%n %u") %>
-          </div>
-          <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
-            Moyenne sur les jours avec trades clos
-          </div>
-        </div>
-        <% if current_user.is_admin? %>
-          <div class="info-item">
-            <div class="info-label">Gains Commissionnables</div>
-            <div class="info-value <%= @client.total_commissionable_gains >= 0 ? 'positive' : 'negative' %>">
-              <%= number_to_currency(@client.total_commissionable_gains, unit: "€", format: "%n %u") %>
-            </div>
-          </div>
-        <% end %>
-        <% if current_user.is_admin? %>
-          <div class="info-item">
-            <div class="info-label">Commission Due</div>
-            <div class="info-value <%= @client.total_commission_due >= 0 ? 'positive' : 'negative' %>">
-              <%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %>
-            </div>
-            <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
-              <%= number_to_percentage(@client.commission_rate, precision: 1) %> des gains commissionnables
-            </div>
-          </div>
-        <% end %>
-        <% if current_user.is_admin? %>
-          <div class="info-item">
-            <div class="info-label">Crédits Appliqués</div>
-            <div class="info-value positive"><%= number_to_currency(@client.total_credits, unit: "€", format: "%n %u") %></div>
-          </div>
-        <% end %>
-        <% if current_user.is_admin? %>
-          <div class="info-item">
-            <% if @client.balance_due > 0 %>
-              <div class="info-label">Solde à Payer</div>
-              <div class="info-value negative">
-                <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
-              </div>
-              <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
-                <% if @client.balance_due == @client.total_commission_due %>
-                  Commission due (aucun paiement ni crédit)
-                <% else %>
-                  Commission due (<%= number_to_currency(@client.total_commission_due, unit: "€", format: "%n %u") %>) - Crédits (<%= number_to_currency(@client.total_credits, unit: "€", format: "%n %u") %>) - Paiements (<%= number_to_currency(@client.total_validated_payments, unit: "€", format: "%n %u") %>)
-                <% end %>
-              </div>
-            <% elsif @client.balance_due < 0 %>
-              <div class="info-label">Solde Créditeur</div>
-              <div class="info-value positive">
-                <%= number_to_currency(@client.balance_due.abs, unit: "€", format: "%n %u") %>
-              </div>
-              <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
-                Crédit à appliquer aux futures commissions
-              </div>
-            <% else %>
-              <div class="info-label">Solde à Payer</div>
-              <div class="info-value" style="color: #4CAF50;">
-                0 € <i class="fa-icon fa-md fa-check-circle"></i>
-              </div>
-              <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
-                Aucun solde dû
-              </div>
-            <% end %>
-          </div>
-        <% end %>
-        <div class="info-item">
-          <div class="info-label">Historique Paiements</div>
-          <div class="info-value" style="font-size: 16px; color: #666;">
-            <%= number_to_currency(@client.total_validated_payments, unit: "€", format: "%n %u") %> payés
-          </div>
-        </div>
-        <% if current_user.is_admin? %>
-        <% outstanding_count = @invoices.select { |inv| inv.pending? || inv.partial? }.count %>
-        <div class="info-item">
-          <div class="info-label">Factures à Régler</div>
-          <div class="info-value <%= @invoices_total_due.positive? ? 'negative' : 'positive' %>">
-            <%= number_to_currency(@invoices_total_due, unit: "€", format: "%n %u") %>
-          </div>
-          <div class="help-text" style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
-            <%= outstanding_count %> facture(s) en attente
-          </div>
-        </div>
-        <% end %>
-      </div>
-
-      <% if current_user.is_admin? %>
-        <h3>Mettre à Jour le Taux de Commission</h3>
-        <%= form_with model: @client, url: admin_client_path(@client), method: :patch do |f| %>
-          <div class="form-group">
-            <%= f.label :commission_rate, "Taux de Commission (%)" %>
-            <%= f.number_field :commission_rate, step: 0.01, min: 0, max: 100 %>
-          </div>
-          <%= f.submit "Mettre à Jour", class: "btn" %>
-        <% end %>
-        
-        <div class="mt-4">
-          <h3>Gestion MT5</h3>
-          <div class="mt5-controls">
-            <% if @client.init_mt5? %>
-              <div class="status-indicator">
-                <span class="status-badge status-validated">
-                  <i class="fa-icon fa-md fa-check-circle"></i>
-                  <span style="color: white;">MT5 Initialisé</span>
-                </span>
-                <p class="help-text">Le compte MT5 a été synchronisé avec l'historique complet.</p>
-              </div>
-              <%= button_to "Réinitialiser MT5", reset_mt5_admin_client_path(@client), 
-                    method: :post,
-                    class: "btn btn-outline",
-                    data: { turbo_confirm: "Réinitialiser la synchronisation MT5 ? Cela forcera une nouvelle synchronisation complète de l'historique." } %>
-            <% else %>
-              <div class="status-indicator">
-                <span class="status-badge status-pending">
-                  <span style="color: white;">
-                    <i class="fa-icon fa-md fa-clock"></i>
-                    MT5 Non Initialisé
-                  </span>
-                </span>
-                <p class="help-text">Le compte MT5 nécessite une synchronisation complète de l'historique.</p>
-              </div>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
-    </div>
-
-    <% if current_user.is_admin? %>
-      <div class="card">
-        <h2>Comptes MT5</h2>
-        <div class="info-box" style="background: var(--bg-hover); padding: 12px; border-radius: 6px; margin-bottom: 15px;">
-          <div style="font-size: 13px; color: var(--text-muted);">
-            <strong>💡 Calcul des gains :</strong><br>
-            • <strong>Gains Nets</strong> = Balance actuelle - Capital initial + Retraits effectués<br>
-            • <strong>Gains Commissionnables</strong> = Balance actuelle - High Watermark ajusté<br>
-            • Les retraits augmentent les gains nets car ils représentent de l'argent gagné et retiré
-          </div>
-        </div>
-      <% if @mt5_accounts.any? %>
-        <table>
-          <thead>
-            <tr>
-              <th>Balance Initiale</th>
-              <th>Balance Actuelle</th>
-              <th>Gains Nets</th>
-              <th>High Watermark</th>
-              <th>Retraits</th>
-              <th>Commissionnable</th>
-              <% if current_user.is_admin? %>
-                <th>Actions</th>
-              <% end %>
-            </tr>
-          </thead>
-          <tbody>
-            <% @mt5_accounts.each do |account| %>
-              <tr>
-                <td><%= number_to_currency(account.auto_calculated_initial_balance && account.calculated_initial_balance.present? ? account.calculated_initial_balance : account.initial_balance, unit: "€", format: "%n %u") %></td>
-                <td><%= number_to_currency(account.balance, unit: "€", format: "%n %u") %></td>
-                <td class="<%= account.net_gains > 0 ? 'positive' : 'negative' %>">
-                  <%= number_to_currency(account.net_gains, unit: "€", format: "%n %u") %>
-                </td>
-                <td><%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %></td>
-                <td><%= number_to_currency(account.total_withdrawals, unit: "€", format: "%n %u") %></td>
-                <td class="<%= account.commissionable_gains >= 0 ? 'positive' : 'negative' %>">
-                  <%= number_to_currency(account.commissionable_gains, unit: "€", format: "%n %u") %>
-                </td>
-                <% if current_user.is_admin? %>
-                  <td>
-                    <% unauthorized_count = account.trades.unauthorized_manual.count %>
-                    <% if unauthorized_count > 0 %>
-                      <div class="warning-badge" style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; margin-bottom: 4px;">
-                        ⚠️ <%= unauthorized_count %> trade(s) manuel(s)
-                      </div>
-                    <% end %>
-                    <div class="action-buttons">
-                      <button onclick="document.getElementById('edit-account-<%= account.id %>').style.display='block'" class="btn btn-outline btn-sm">
-                        Modifier
-                      </button>
-                      <%= button_to "Recalculer Balance", admin_mt5_account_path(account, action: 'recalculate_initial_balance'), 
-                            method: :patch,
-                            data: { turbo_confirm: "Recalculer la balance initiale basée sur les dépôts ?" },
-                            class: "btn btn-primary btn-sm",
-                            style: "margin-left: 5px;" %>
-                    </div>
-                  </td>
-                <% end %>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      <% else %>
-        <p style="color: #999;">Aucun compte MT5 pour le moment</p>
-      <% end %>
-      </div>
-    <% end %>
-
-    <!-- Section Trades Manuels -->
-    <% if current_user.is_admin? && @mt5_accounts.any? %>
-      <% manual_trades = Trade.joins(:mt5_account).where(mt5_accounts: { user_id: @client.id })
-                             .where(trade_originality: ['manual_pending_review', 'manual_client', 'manual_admin']) %>
-      
-      <% if manual_trades.any? %>
-        <div class="card">
-          <h2>⚠️ Trades Manuels (Trade Defender)</h2>
-          <div class="info-box" style="background: #fef3c7; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #f59e0b;">
-            <div style="font-size: 13px; color: #78350f;">
-              <strong>⚠️ Détection des trades manuels :</strong><br>
-              • Les trades avec magic_number = 0 sont des trades manuels<br>
-              • Ils doivent être validés dans la page Trade Defender<br>
-              • Les trades clients non autorisés sont automatiquement sanctionnés
-            </div>
-          </div>
-
-          <div class="info-grid" style="margin-bottom: 1rem;">
-            <div class="stat-item">
-              <div class="stat-value" style="color: #f59e0b;">
-                ⏳ <%= manual_trades.where(trade_originality: 'manual_pending_review').count %>
-              </div>
-              <div class="stat-label">En attente</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value positive">
-                ✓ <%= manual_trades.where(trade_originality: 'manual_admin').count %>
-              </div>
-              <div class="stat-label">Mes trades</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value" style="color: #ef4444;">
-                ⚠️ <%= manual_trades.where(trade_originality: 'manual_client').count %>
-              </div>
-              <div class="stat-label">Clients sanctionnés</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value" style="color: #ef4444;">
-                <%= number_to_currency(manual_trades.where(trade_originality: 'manual_client').sum(:profit), unit: "€") %>
-              </div>
-              <div class="stat-label">Impact total</div>
-            </div>
-          </div>
-
-          <%= link_to "Voir dans Trade Defender →", admin_trade_defenders_path(status: 'manual_pending_review', account_id: @mt5_accounts.first.id), class: "btn btn-primary" %>
-        </div>
-      <% end %>
-    <% end %>
-
-    <!-- Résumé des Trades -->
-    <% if current_user.is_admin? && @mt5_accounts.any? %>
-      <div class="card">
-        <div class="card-header">
-          <h2>Résumé des Trades</h2>
-          <div class="card-header-actions">
-            <%= link_to "Analyse des Bots", bots_admin_client_path(@client), class: "btn btn-primary btn-sm" %>
-            <%= link_to "Voir tous les trades", trades_admin_client_path(@client), class: "btn btn-outline btn-sm" %>
-          </div>
-        </div>
-        
-        <% 
-          all_trades = Trade.joins(:mt5_account).where(mt5_accounts: { user_id: @client.id })
-          recent_trades = all_trades.order(close_time: :desc).limit(10)
-          total_trades = all_trades.count
-          total_profit = all_trades.sum(:profit)
-          winning_trades = all_trades.where('profit > 0').count
-          losing_trades = all_trades.where('profit < 0').count
-          win_rate = total_trades > 0 ? (winning_trades.to_f / total_trades * 100).round(2) : 0
-        %>
-        
-        <div class="stats-grid" style="margin-bottom: 1.5rem;">
-          <div class="stat-item">
-            <div class="stat-value">
-              <%= stat_icon(:trades, size: 'sm') %>
-              <%= total_trades %>
-            </div>
-            <div class="stat-label">Total Trades</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value <%= total_profit >= 0 ? 'positive' : 'negative' %>">
-              <%= profit_icon(total_profit) %>
-              <%= number_to_currency(total_profit, unit: "€", format: "%n %u") %>
-            </div>
-            <div class="stat-label">Profit Total</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">
-              <%= stat_icon(:win_rate, size: 'sm') %>
-              <%= win_rate %>%
-            </div>
-            <div class="stat-label">Taux de Réussite</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">
-              <%= stat_icon(:trades, size: 'sm') %>
-              <%= winning_trades %>/<%= losing_trades %>
-            </div>
-            <div class="stat-label">Gagnants/Perdants</div>
-          </div>
-        </div>
-        
-        <% if recent_trades.any? %>
-          <div style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #2196F3;">
-            <div style="font-size: 13px; color: #1976D2;">
-              <strong>💡 Calcul du Profit :</strong><br>
-              • <strong>Profit Net</strong> : Profit final (déjà net des commissions et swap)<br>
-              • <strong>Commission</strong> : Commission du broker pour ce trade<br>
-              • <strong>Swap</strong> : Frais de report (positif ou négatif)<br>
-              • Les données MT5 arrivent déjà avec le profit net calculé
-            </div>
-          </div>
-          <h4>
-            <%= stat_icon(:trades, size: 'md') %>
-            Derniers Trades
-          </h4>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>
-                    <%= stat_icon(:monthly, size: 'sm') %>
-                    Date
-                  </th>
-                  <th>
-                    <%= stat_icon(:symbols, size: 'sm') %>
-                    Symbole
-                  </th>
-                  <th>
-                    <%= stat_icon(:trades, size: 'sm') %>
-                    Type
-                  </th>
-                  <th>
-                    <%= stat_icon(:volume, size: 'sm') %>
-                    Volume
-                  </th>
-                  <th>
-                    <%= stat_icon(:profit, size: 'sm') %>
-                    Profit Net
-                  </th>
-                  <th>
-                    <%= stat_icon(:profit, size: 'sm') %>
-                    Commission
-                  </th>
-                  <th>
-                    <%= stat_icon(:profit, size: 'sm') %>
-                    Swap
-                  </th>
-                  <th>
-                    <%= stat_icon(:bots, size: 'sm') %>
-                    Bot
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <% recent_trades.each do |trade| %>
-                  <tr>
-                    <td><%= trade.close_time&.strftime("%d/%m/%Y %H:%M") %></td>
-                    <td><%= trade.symbol %></td>
-                    <td>
-                      <span class="trade-type-badge <%= trade.trade_type %>">
-                        <%= trade.trade_type&.upcase %>
-                      </span>
-                    </td>
-                    <td><%= trade.volume %></td>
-                    <td class="<%= trade.profit >= 0 ? 'positive' : 'negative' %>">
-                      <%= number_to_currency(trade.profit, unit: "€", format: "%n %u") %>
-                    </td>
-                    <td>
-                      <%= number_to_currency(trade.commission || 0, unit: "€", format: "%n %u") %>
-                    </td>
-                    <td>
-                      <%= number_to_currency(trade.swap || 0, unit: "€", format: "%n %u") %>
-                    </td>
-                    <td>
-                      <% if trade.magic_number.present? %>
-                        <span class="magic-badge"><%= bot_name_for_magic_number(trade.magic_number, @bots_cache) %></span>
-                      <% else %>
-                        <span class="text-muted">-</span>
-                      <% end %>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-        <% else %>
-          <p style="color: #999;">Aucun trade trouvé</p>
-        <% end %>
-      </div>
-    <% end %>
-    
-    <!-- Positions Ouvertes -->
-    <% if current_user.is_admin? && @mt5_accounts.any? %>
-      <% open_positions = Trade.joins(:mt5_account).where(mt5_accounts: { user_id: @client.id }).where(status: 'open').order(open_time: :desc) %>
-      <% if open_positions.any? %>
-        <div class="card">
-          <div class="card-header">
-            <h2>⚡ Positions Ouvertes</h2>
-            <div style="font-size: 14px; color: var(--text-muted);">
-              <%= open_positions.count %> position(s) en cours
-            </div>
-          </div>
-          
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Symbole</th>
-                  <th>Type</th>
-                  <th>Volume</th>
-                  <th>Prix Ouverture</th>
-                  <th>Prix Actuel</th>
-                  <th>Profit FL</th>
-                  <th>Swap</th>
-                  <th>Durée</th>
-                  <th>Bot</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% open_positions.each do |position| %>
-                  <% duration_minutes = ((Time.current - position.open_time) / 60).round if position.open_time %>
-                  <tr>
-                    <td><strong><%= position.symbol %></strong></td>
-                    <td>
-                      <span class="trade-type-badge <%= position.trade_type %>">
-                        <%= position.trade_type&.upcase %>
-                      </span>
-                    </td>
-                    <td><%= position.volume %></td>
-                    <td><%= number_to_currency(position.open_price, unit: "€", format: "%n %u") %></td>
-                    <td><%= number_to_currency(position.close_price, unit: "€", format: "%n %u") %></td>
-                    <td class="<%= position.profit >= 0 ? 'positive' : 'negative' %>">
-                      <%= number_to_currency(position.profit, unit: "€", format: "%n %u") %>
-                    </td>
-                    <td><%= number_to_currency(position.swap || 0, unit: "€", format: "%n %u") %></td>
-                    <td>
-                      <%= format_duration(duration_minutes) %>
-                    </td>
-                    <td>
-                      <% if position.magic_number.present? %>
-                        <span class="magic-badge"><%= bot_name_for_magic_number(position.magic_number, @bots_cache) %></span>
-                      <% else %>
-                        <span class="text-muted">-</span>
-                      <% end %>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      <% end %>
-    <% end %>
-    
-    <% if current_user.is_admin? && @mt5_accounts.any? %>
-      <% has_withdrawals = @mt5_accounts.any? { |account| account.withdrawals.any? } %>
-      <% if has_withdrawals %>
-        <div class="card">
-          <div class="card-header">
-            <h2>Historique des Retraits</h2>
-            <div style="display: flex; gap: 10px; align-items: center;">
-              <button onclick="showAddWithdrawalModal()" class="btn btn-outline btn-sm">
-                <i class="fa-icon fa-md fa-plus"></i> Ajouter un retrait
-              </button>
-              <button type="button" class="btn btn-danger btn-sm" id="bulk-destroy-withdrawals-btn" disabled>
-                Supprimer la sélection
-              </button>
-            </div>
-          </div>
-          
-          <form id="bulk-destroy-withdrawals-form" action="<%= bulk_destroy_admin_withdrawals_path %>" method="post" style="display: none;">
-            <%= hidden_field_tag :authenticity_token, form_authenticity_token, id: "bulk-destroy-withdrawals-auth-token" %>
-            <%= hidden_field_tag :user_id, @client.id, id: "bulk-destroy-withdrawals-user-id" %>
-          </form>
-          
-          <% @mt5_accounts.each do |account| %>
-            <% if account.withdrawals.any? %>
-              <h4><%= account.account_name %> (<%= account.mt5_id %>)</h4>
-              <div class="table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th style="width: 40px;">
-                        <input type="checkbox" id="select-all-withdrawals-<%= account.id %>" onchange="window.toggleAllWithdrawals(<%= account.id %>)">
-                      </th>
-                      <th>Date</th>
-                      <th>Montant</th>
-                      <th>Notes</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <% account.withdrawals.order(withdrawal_date: :desc).each do |withdrawal| %>
-                      <tr>
-                        <td>
-                          <input type="checkbox" value="<%= withdrawal.id %>" class="withdrawal-checkbox withdrawal-checkbox-<%= account.id %>" onchange="window.updateBulkDestroyWithdrawalsButton(); window.updateSelectAllWithdrawals(<%= account.id %>);">
-                        </td>
-                        <td><%= withdrawal.withdrawal_date.strftime("%d/%m/%Y") %></td>
-                        <td class="negative"><%= number_to_currency(withdrawal.amount, unit: "€", format: "%n %u") %></td>
-                        <td><%= withdrawal.notes.present? ? withdrawal.notes : "-" %></td>
-                        <td>
-                          <div class="action-buttons">
-                            <%= button_to "Supprimer", admin_withdrawal_path(withdrawal), 
-                                  method: :delete,
-                                  data: { turbo_confirm: "Supprimer ce retrait ?" },
-                                  class: "btn btn-danger btn-sm" %>
-                          </div>
-                        </td>
-                      </tr>
-                    <% end %>
-                  </tbody>
-                </table>
-              </div>
-            <% end %>
-          <% end %>
-        </div>
-      <% end %>
-    <% end %>
-
-    <!-- Historique des Dépôts -->
-    <% if current_user.is_admin? && @mt5_accounts.any? %>
-      <% has_deposits = @mt5_accounts.any? { |account| account.deposits.any? } %>
-      <% if has_deposits %>
-        <div class="card">
-          <div class="card-header">
-            <h2>Historique des Dépôts</h2>
-            <div style="display: flex; gap: 10px; align-items: center;">
-              <button onclick="showAddDepositModal()" class="btn btn-outline btn-sm">
-                <i class="fa-icon fa-md fa-plus"></i> Ajouter un dépôt
-              </button>
-              <button type="button" class="btn btn-danger btn-sm" id="bulk-destroy-deposits-btn" disabled>
-                Supprimer la sélection
-              </button>
-            </div>
-          </div>
-          
-          <form id="bulk-destroy-deposits-form" action="<%= bulk_destroy_admin_deposits_path %>" method="post" style="display: none;">
-            <%= hidden_field_tag :authenticity_token, form_authenticity_token, id: "bulk-destroy-deposits-auth-token" %>
-            <%= hidden_field_tag :user_id, @client.id, id: "bulk-destroy-deposits-user-id" %>
-          </form>
-          
-          <% @mt5_accounts.each do |account| %>
-            <% if account.deposits.any? %>
-              <h4><%= account.account_name %> (<%= account.mt5_id %>)</h4>
-              <div class="table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th style="width: 40px;">
-                        <input type="checkbox" id="select-all-deposits-<%= account.id %>" onchange="window.toggleAllDeposits(<%= account.id %>)">
-                      </th>
-                      <th>Date</th>
-                      <th>Montant</th>
-                      <th>Notes</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <% account.deposits.order(deposit_date: :desc).each do |deposit| %>
-                      <tr>
-                        <td>
-                          <input type="checkbox" value="<%= deposit.id %>" class="deposit-checkbox deposit-checkbox-<%= account.id %>" onchange="window.updateBulkDestroyDepositsButton(); window.updateSelectAllDeposits(<%= account.id %>);">
-                        </td>
-                        <td><%= deposit.deposit_date.strftime("%d/%m/%Y") %></td>
-                        <td class="positive"><%= number_to_currency(deposit.amount, unit: "€", format: "%n %u") %></td>
-                        <td><%= deposit.notes.present? ? deposit.notes : "-" %></td>
-                        <td>
-                          <div class="action-buttons">
-                            <%= button_to "Supprimer", admin_deposit_path(deposit), 
-                                  method: :delete,
-                                  data: { turbo_confirm: "Supprimer ce dépôt ?" },
-                                  class: "btn btn-danger btn-sm" %>
-                          </div>
-                        </td>
-                      </tr>
-                    <% end %>
-                  </tbody>
-                </table>
-              </div>
-            <% end %>
-          <% end %>
-        </div>
-      <% end %>
-    <% end %>
-
-    <!-- Formulaire de modification MT5 - En dehors du tableau pour utiliser toute la largeur -->
-    <% @mt5_accounts.each do |account| %>
-      <% if current_user.is_admin? %>
-        <div id="edit-account-<%= account.id %>" class="edit-account-panel" style="display: none;">
-          <div class="edit-account-content edit-account-full-width">
-            <div class="edit-account-header">
-              <h4>Modifier le Compte MT5</h4>
-              <button type="button" onclick="document.getElementById('edit-account-<%= account.id %>').style.display='none'" class="btn btn-outline btn-sm">
-                ✕ Fermer
-              </button>
-            </div>
-            
-            <%= form_with model: account, url: admin_mt5_account_path(account), method: :patch, class: "edit-account-form" do |f| %>
-              <div class="edit-account-main">
-                <div class="edit-account-inputs">
-                  <div class="input-group">
-                    <div class="input-field">
-                      <%= f.label :initial_balance, "Balance Initiale", class: "form-label" %>
-                      <div class="input-container">
-                        <%= f.number_field :initial_balance, step: 0.01, class: "form-input-large", placeholder: "0.00" %>
-                        <span class="currency-symbol">€</span>
-                      </div>
-                      <div class="help-text">
-                        Capital de départ pour ce compte
-                      </div>
-                    </div>
-                    
-                    <div class="input-field">
-                      <%= f.label :high_watermark, "High Watermark", class: "form-label" %>
-                      <div class="input-container">
-                        <%= f.number_field :high_watermark, step: 0.01, class: "form-input-large", placeholder: "0.00" %>
-                        <span class="currency-symbol">€</span>
-                      </div>
-                      <div class="help-text">
-                        Actuel : <%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %>
-                      </div>
-                    </div>
-                    
-                    <div class="input-field">
-                      <%= f.label :total_withdrawals, "Total Retraits", class: "form-label" %>
-                      <div class="input-container">
-                        <%= f.number_field :total_withdrawals, step: 0.01, class: "form-input-large", placeholder: "0.00" %>
-                        <span class="currency-symbol">€</span>
-                      </div>
-                      <div class="help-text">
-                        Montant total des retraits effectués
-                      </div>
-                    </div>
-                    
-                    <div class="input-field">
-                      <div class="checkbox-container" style="margin-top: 20px;">
-                        <%= f.check_box :is_admin_account, class: "form-checkbox" %>
-                        <%= f.label :is_admin_account, "Compte Admin (trades manuels autorisés)", class: "form-label", style: "margin-left: 8px;" %>
-                      </div>
-                      <div class="help-text">
-                        ✓ Compte autorisé pour les trades manuels (hedging). Les trades sur ce compte ne seront pas sanctionnés.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="withdrawal-section">
-                  <h5>Enregistrer un Nouveau Retrait</h5>
-                  <div class="withdrawal-form">
-                    <%= fields_for "withdrawal", nil do |wf| %>
-                      <div class="input-group">
-                        <div class="input-field">
-                          <%= wf.label :amount, "Montant du Retrait", class: "form-label" %>
-                          <div class="input-container">
-                            <%= wf.number_field :amount, step: 0.01, class: "form-input", placeholder: "0.00", name: "withdrawal_amount" %>
-                            <span class="currency-symbol">€</span>
-                          </div>
-                        </div>
-                        
-                        <div class="input-field">
-                          <%= wf.label :date, "Date du Retrait", class: "form-label" %>
-                          <%= wf.date_field :date, class: "form-input", name: "withdrawal_date", value: Date.current %>
-                        </div>
-                      </div>
-                    <% end %>
-                  </div>
-                </div>
-                
-                <div class="calculation-section">
-                  <h5>Calcul Actuel</h5>
-                  <div class="calculation-grid">
-                    <div class="calculation-item">
-                      <div class="calculation-label">Gains Nets</div>
-                      <div class="calculation-formula">
-                        Balance (<%= number_to_currency(account.balance, unit: "€", format: "%n %u") %>) - Initial (<%= number_to_currency(account.initial_balance, unit: "€", format: "%n %u") %>)
-                      </div>
-                      <div class="calculation-result">
-                        <%= number_to_currency(account.net_gains, unit: "€", format: "%n %u") %>
-                      </div>
-                    </div>
-                    
-                    <div class="calculation-item">
-                      <div class="calculation-label">WM Ajusté</div>
-                      <div class="calculation-formula">
-                        High WM (<%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %>) - Retraits (<%= number_to_currency(account.total_withdrawals, unit: "€", format: "%n %u") %>)
-                      </div>
-                      <div class="calculation-result">
-                        <%= number_to_currency(account.adjusted_watermark, unit: "€", format: "%n %u") %>
-                      </div>
-                    </div>
-                    
-                    <div class="calculation-item">
-                      <div class="calculation-label">Commissionnable</div>
-                      <div class="calculation-formula">
-                        Balance (<%= number_to_currency(account.balance, unit: "€", format: "%n %u") %>) - WM Ajusté (<%= number_to_currency(account.adjusted_watermark, unit: "€", format: "%n %u") %>)
-                      </div>
-                      <div class="calculation-result">
-                        <%= number_to_currency(account.commissionable_gains, unit: "€", format: "%n %u") %>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="edit-account-actions">
-                <%= f.submit "Mettre à Jour", class: "btn btn-primary btn-large" %>
-                <button type="button" onclick="document.getElementById('edit-account-<%= account.id %>').style.display='none'" class="btn btn-outline btn-large">
-                  Annuler
-                </button>
-              </div>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
-    <% end %>
-
-    <% if current_user.is_admin? %>
-    <div class="card">
-      <h2>Bots de Trading</h2>
-      
-      <% client_bots = @client.bot_purchases.includes(:trading_bot).order(created_at: :desc) %>
-      
-      <div style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #2196F3;">
-        <div style="font-size: 13px; color: #1976D2;">
-          <strong>💡 Analyse des Performances :</strong><br>
-          • <strong>Profit Net</strong> : Profit après déduction de toutes les commissions et swaps<br>
-          • <strong>Commissions</strong> : Total des commissions broker payées<br>
-          • <strong>Swaps</strong> : Total des frais de report (peuvent être positifs ou négatifs)<br>
-          • <strong>Total Coûts</strong> : Somme des commissions + swaps<br>
-          • <strong>ROI</strong> : Retour sur investissement calculé sur le profit net
-        </div>
-      </div>
-      
-      <% if client_bots.any? %>
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Bot</th>
-                <th>Performance</th>
-                <th>Statut</th>
-                <th>Coûts</th>
-                <th>Détails</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% client_bots.each do |purchase| %>
-                <tr onclick="window.location.href='<%= admin_bot_path(purchase.trading_bot, from: 'client', client_id: @client.id) %>'" style="cursor: pointer;">
-                  <td>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                      <div>
-                        <strong style="color: white; font-size: 15px;"><%= purchase.trading_bot.name %></strong>
-                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-                          Acheté le <%= purchase.created_at.strftime("%d/%m/%Y") %>
-                          · <%= number_to_currency(purchase.price_paid, unit: "€", format: "%n %u") %>
-                        </div>
-                      </div>
-                      <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <span style="background: <%= purchase.trading_bot.risk_badge_color %>; color: white; padding: 3px 8px; border-radius: 12px; font-size: 10px; text-align: center;">
-                          <%= purchase.trading_bot.risk_label %>
-                        </span>
-                        <% if purchase.purchase_type == 'auto_detected' %>
-                          <span style="background: #2196F3; color: white; padding: 3px 8px; border-radius: 12px; font-size: 10px; text-align: center;">
-                            🤖 Auto
-                          </span>
-                        <% end %>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div style="display: flex; flex-direction: column; gap: 6px;">
-                      <div class="<%= purchase.total_profit > 0 ? 'positive' : 'negative' %>" style="font-size: 15px; font-weight: bold;">
-                        <%= number_to_currency(purchase.total_profit, unit: "€", format: "%n %u") %>
-                      </div>
-                      <div class="<%= purchase.roi_percentage > 0 ? 'positive' : 'negative' %>" style="font-size: 12px;">
-                        ROI: <%= number_to_percentage(purchase.roi_percentage, precision: 1) %>%
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <%= purchase.status_badge %>
-                    <% billing_badge = purchase.billing_status_badge %>
-                    <div style="margin-top: 6px;">
-                      <span style="background: <%= billing_badge[:color] %>; color: white; padding: 3px 8px; border-radius: 999px; font-size: 10px;">
-                        <%= billing_badge[:label] %>
-                      </span>
-                    </div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-                      <%= purchase.trades_count %> trades
-                    </div>
-                  </td>
-                  <td>
-                    <div style="font-size: 11px; line-height: 1.4;">
-                      <div style="color: var(--text-muted);">
-                        Comm: <span style="color: <%= purchase.total_commission >= 0 ? '#10b981' : '#ef4444' %>"><%= format_cost_with_sign(purchase.total_commission) %></span>
-                      </div>
-                      <div style="color: var(--text-muted);">
-                        Swap: <span style="color: <%= purchase.total_swap >= 0 ? '#10b981' : '#ef4444' %>"><%= format_cost_with_sign(purchase.total_swap) %></span>
-                      </div>
-                      <div style="margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--border-color);">
-                        <span style="color: var(--text-muted);"><strong>Total:</strong></span> <strong style="color: <%= purchase.total_costs >= 0 ? '#10b981' : '#ef4444' %>;"><%= format_cost_with_sign(purchase.total_costs) %></strong>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div style="font-size: 11px; color: var(--text-muted);">
-                      <div class="<%= purchase.within_drawdown_limit? ? '' : 'negative' %>" style="margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
-                        DD: <%= number_to_percentage(purchase.drawdown_percentage, precision: 1) %>%
-                        <span class="help-icon" title="Drawdown: Perte maximale depuis le pic de capital. Un drawdown trop élevé (>80%) indique un risque important.">
-                          <i class="fa-icon fa-sm fa-info-circle" style="color: #9ca3af; cursor: help; margin-left: 4px;"></i>
-                        </span>
-                        <% unless purchase.within_drawdown_limit? %>
-                          <i class="fa-icon fa-md fa-exclamation-triangle" style="color: #F44336;"></i>
-                        <% end %>
-                      </div>
-                      <div style="font-size: 10px; opacity: 0.7;">
-                        Limite: <%= number_to_percentage(purchase.trading_bot.max_drawdown_limit / purchase.price_paid * 100, precision: 1) %>%
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
-      <% else %>
-        <p style="text-align: center; color: var(--text-muted); padding: 20px;">
-          Aucun bot assigné pour le moment
-        </p>
-      <% end %>
-      
-      <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <h3 style="margin: 0;">Assigner un Nouveau Bot</h3>
-          <%= button_to "🤖 Détecter Automatiquement", 
-                auto_detect_bots_admin_client_path(@client), 
-                method: :patch,
-                data: { turbo_confirm: "Détecter automatiquement les bots basés sur les magic numbers des trades ?" },
-                class: "btn btn-outline btn-sm",
-                style: "margin-left: auto;" %>
-        </div>
-        <%= form_tag assign_to_user_admin_bots_path, method: :post, data: { turbo: false }, style: "display: flex; gap: 12px; align-items: end;" do %>
-          <%= hidden_field_tag :user_id, @client.id %>
-          
-          <div class="form-group" style="flex: 1; margin-bottom: 0;">
-            <%= label_tag :bot_id, "Sélectionner un Bot" %>
-            <%= select_tag :bot_id,
-                options_from_collection_for_select(TradingBot.available.order(:name), :id, :name),
-                prompt: 'Choisir un bot...',
-                required: true,
-                class: "filter-select" %>
-          </div>
-          
-          <div class="form-group" style="flex: 0 0 200px; margin-bottom: 0;">
-            <%= label_tag :price_paid, "Prix (€)" %>
-            <%= number_field_tag :price_paid, nil, step: 0.01, min: 0, placeholder: "Optionnel",
-                style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" %>
-          </div>
-          
-          <%= submit_tag "Assigner", class: "btn btn-success", style: "margin-top: 27px;" do %>
-            <i class="fa-icon fa-md fa-plus"></i> Assigner
-          <% end %>
-        <% end %>
+      <div>
+        <h1 class="text-2xl font-bold text-white"><%= @client.full_name %></h1>
+        <p class="text-neutral-400"><%= @client.email %></p>
       </div>
     </div>
-
-    <script>
-      function toggleInvoice(id) {
-        const details = document.getElementById(`invoice-details-${id}`);
-        const icon = document.getElementById(`invoice-chevron-${id}`);
-        const isVisible = details.style.display !== 'none';
-        details.style.display = isVisible ? 'none' : 'block';
-        icon.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)';
-      }
-    </script>
-    <% end %>
-
-    <% if current_user.is_admin? %>
-    <div class="card">
-      <h2><i class="fa-icon fa-md fa-building"></i> Credentials Broker</h2>
-      
-      <% if @mt5_accounts&.any? %>
-        <% @mt5_accounts.each do |account| %>
-          <div class="card" style="margin-bottom: 24px; border: 1px solid rgba(255, 255, 255, 0.1);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-              <div>
-                <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700;">
-                  <%= svg_tag "wallet", size: "20" %>
-                  <%= account.account_name %>
-                </h3>
-                <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">
-                  ID: <code style="background: var(--bg-hover); padding: 3px 8px; border-radius: 4px; color: #60a5fa;">#<%= account.mt5_id %></code>
-                </p>
-              </div>
-              <button onclick="toggleEditMode('<%= account.id %>')" class="btn btn-primary" id="btn-edit-<%= account.id %>">
-                Modifier
-              </button>
-            </div>
-            
-            <div id="display-<%= account.id %>">
-              <div class="credentials-display" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                <div style="background: var(--bg-hover); padding: 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);">
-                  <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 8px;">
-                    Broker
-                  </div>
-                  <div style="font-size: 16px; font-weight: 600; color: var(--text-primary);">
-                    <%= account.broker_name.present? ? account.broker_name : '<span style="color: var(--text-muted);">Non renseigné</span>'.html_safe %>
-                  </div>
-                </div>
-                
-                <div style="background: var(--bg-hover); padding: 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);">
-                  <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 8px;">
-                    Serveur
-                  </div>
-                  <div style="font-size: 16px; font-weight: 600; color: var(--text-primary);">
-                    <%= account.broker_server.present? ? account.broker_server : '<span style="color: var(--text-muted);">Non renseigné</span>'.html_safe %>
-                  </div>
-                </div>
-                
-                <div style="background: var(--bg-hover); padding: 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); position: relative;">
-                  <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 8px;">
-                    Mot de passe
-                  </div>
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <div id="password-display-<%= account.id %>" data-has-password="<%= account.broker_password.present? ? 'true' : 'false' %>" style="font-size: 16px; font-weight: 600; color: var(--text-primary);">
-                      <%= account.broker_password.present? ? '••••••••' : '<span style="color: var(--text-muted);">Non défini</span>'.html_safe %>
-                    </div>
-                    <% if account.broker_password.present? %>
-                    <button onclick="togglePassword('<%= account.id %>', '<%= j(account.broker_password) %>')" 
-                            type="button"
-                            style="background: transparent; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: background 0.2s; color: var(--text-primary); font-weight: 600;"
-                            onmouseover="this.style.background='rgba(255,255,255,0.1)'"
-                            onmouseout="this.style.background='transparent'"
-                            title="Afficher/Masquer le mot de passe">
-                      <span id="toggle-label-<%= account.id %>" style="margin-right: 8px;">Afficher</span>
-                      <i class="fa-icon fa-md fa-eye" id="toggle-icon-<%= account.id %>" style="font-size: 18px; color: rgba(255, 255, 255, 0.8);"></i>
-                    </button>
-                    <% else %>
-                    <button type="button"
-                            style="background: transparent; border: none; cursor: not-allowed; padding: 4px 8px; border-radius: 4px; opacity: 0.3;"
-                            title="Aucun mot de passe défini"
-                            disabled>
-                      <i class="fa-icon fa-md fa-eye" style="font-size: 18px; color: rgba(255, 255, 255, 0.3);"></i>
-                    </button>
-                    <% end %>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div id="edit-<%= account.id %>" style="display: none;">
-              <%= form_with url: admin_mt5_account_path(account), method: :patch, local: true, class: "credentials-form" do |f| %>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px;">
-                  <div>
-                    <%= f.label :broker_name, "Broker", style: "display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 8px;" %>
-                    <%= f.text_field :broker_name, value: account.broker_name, placeholder: "Nom du broker", class: "form-control", style: "width: 100%; padding: 10px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.05);" %>
-                  </div>
-                  
-                  <div>
-                    <%= f.label :broker_server, "Serveur", style: "display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 8px;" %>
-                    <%= f.text_field :broker_server, value: account.broker_server, placeholder: "Serveur de connexion", class: "form-control", style: "width: 100%; padding: 10px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.05);" %>
-                  </div>
-                  
-                  <div>
-                    <%= f.label :new_password, "Mot de passe", style: "display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 8px;" %>
-                    <%= f.password_field :new_password, placeholder: "Nouveau mot de passe", class: "form-control", style: "width: 100%; padding: 10px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.05);" %>
-                  </div>
-                </div>
-                
-                <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                  <%= f.submit "Enregistrer", class: "btn btn-success" %>
-                  <button type="button" onclick="toggleEditMode('<%= account.id %>')" class="btn">Annuler</button>
-                </div>
-              <% end %>
-            </div>
-          </div>
-        <% end %>
-      <% else %>
-        <div class="empty-state">
-          <p>Aucun compte MT5 trouvé</p>
-        </div>
+    <div class="flex items-center gap-3">
+      <%= link_to admin_clients_path, class: "inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-neutral-700 text-neutral-300 hover:bg-neutral-800 transition-colors" do %>
+        <i class="fa-solid fa-arrow-left"></i>
+        Retour
       <% end %>
-      
-      <script>
-      function toggleEditMode(accountId) {
-        const displayDiv = document.getElementById('display-' + accountId);
-        const editDiv = document.getElementById('edit-' + accountId);
-        const btn = document.getElementById('btn-edit-' + accountId);
-        
-        if (displayDiv.style.display === 'none') {
-          displayDiv.style.display = 'block';
-          editDiv.style.display = 'none';
-          btn.textContent = 'Modifier';
-        } else {
-          displayDiv.style.display = 'none';
-          editDiv.style.display = 'block';
-          btn.textContent = 'Annuler';
-        }
-      }
-      
-      function togglePassword(accountId, password) {
-        const displayDiv = document.getElementById('password-display-' + accountId);
-        const icon = document.getElementById('toggle-icon-' + accountId);
-        
-        const label = document.getElementById('toggle-label-' + accountId);
-        if (displayDiv.textContent.trim() === '••••••••' || displayDiv.textContent.trim() === '•'.repeat(8)) {
-          displayDiv.textContent = password;
-          icon.classList.remove('fa-eye');
-          icon.classList.add('fa-eye-slash');
-          if (label) { label.textContent = 'Masquer'; }
-        } else {
-          displayDiv.textContent = '••••••••';
-          icon.classList.remove('fa-eye-slash');
-          icon.classList.add('fa-eye');
-          if (label) { label.textContent = 'Afficher'; }
-        }
-      }
-      </script>
-      
-      <h2 style="margin-top: 32px;"><i class="fa-icon fa-md fa-desktop"></i> VPS</h2>
-      
-      <% if @client.vps.any? %>
-        <table style="margin-bottom: 24px;">
-          <thead>
-            <tr>
-              <th>Nom</th>
-              <th>Emplacement</th>
-              <th>IP</th>
-              <th>Statut</th>
-              <th>Prix/mois</th>
-              <th>Commandé</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @client.vps.each do |vps| %>
-              <tr>
-                <td><strong><%= vps.name %></strong></td>
-                <td><%= vps.server_location || '-' %></td>
-                <td><code style="background: var(--bg-hover); padding: 4px 8px; border-radius: 4px;"><%= vps.ip_address || 'En attente' %></code></td>
-                <td>
-                  <span style="background: <%= vps.status_color %>; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700;">
-                    <%= vps.status_icon %> <%= vps.status_label %>
-                  </span>
-                  <% vps_badge = vps.billing_status_badge %>
-                  <div style="margin-top: 6px;">
-                    <span style="background: <%= vps_badge[:color] %>; color: white; padding: 3px 8px; border-radius: 999px; font-size: 10px;">
-                      <%= vps_badge[:label] %>
-                    </span>
-                  </div>
-                </td>
-                <td><%= number_to_currency(vps.monthly_price, unit: "€", format: "%n %u") %></td>
-                <td><%= vps.ordered_at&.strftime("%d/%m/%Y") || '-' %></td>
-                <td>
-                  <div class="action-buttons">
-                    <%= link_to admin_vp_path(vps), class: "icon-btn primary sm", title: "Voir" do %>
-                      <i class="fa-icon fa-md fa-eye"></i>
-                    <% end %>
-                    <%= link_to edit_admin_vp_path(vps), class: "icon-btn warning sm", title: "Modifier" do %>
-                      <i class="fa-icon fa-md fa-edit"></i>
-                    <% end %>
-                    <%= button_to admin_vp_path(vps), method: :delete,
-                        data: { turbo_confirm: "Supprimer ce VPS ?" },
-                        class: "icon-btn danger sm", title: "Supprimer" do %>
-                      <i class="fa-icon fa-md fa-trash"></i>
-                    <% end %>
-                  </div>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      <% else %>
-        <p style="text-align: center; color: var(--text-muted); padding: 20px;">
-          Aucun VPS pour ce client
-        </p>
+      <%= link_to edit_admin_client_path(@client), class: "inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-neutral-900 hover:bg-neutral-100 transition-colors" do %>
+        <i class="fa-solid fa-pen"></i>
+        Modifier
       <% end %>
-      
-      <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
-        <h3 style="margin-bottom: 16px;">Créer un Nouveau VPS</h3>
-        <%= link_to new_admin_vp_path(user_id: @client.id), class: "btn btn-success" do %>
-          <i class="fa-icon fa-md fa-plus"></i> Créer un VPS pour ce Client
-        <% end %>
-      </div>
-    </div>
-    <% end %>
-
-    <% if current_user.is_admin? %>
-    <div class="two-col">
-      <div class="card">
-        <h2>Ajouter un Paiement</h2>
-        
-        <% if @client.balance_due > 0 %>
-          <div style="background: #fff3cd; padding: 12px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
-            <div style="font-weight: 600; color: #856404; margin-bottom: 5px;"><i class="fa-icon fa-md fa-wallet"></i> Solde à Payer</div>
-            <div style="font-size: 24px; font-weight: 700; color: #856404;">
-              <%= number_to_currency(@client.balance_due, unit: "€", format: "%n %u") %>
-            </div>
-            <div style="font-size: 12px; color: #856404; margin-top: 5px;">
-              Crédits appliqués : -<%= number_to_currency(@client.total_credits, unit: "€", format: "%n %u") %>
-            </div>
-          </div>
-        <% elsif @client.balance_due < 0 %>
-          <div style="background: #d4edda; padding: 12px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #28a745;">
-            <div style="font-weight: 600; color: #155724; margin-bottom: 5px;"><i class="fa-icon fa-md fa-university"></i> Solde Créditeur</div>
-            <div style="font-size: 24px; font-weight: 700; color: #155724;">
-              <%= number_to_currency(@client.balance_due.abs, unit: "€", format: "%n %u") %>
-            </div>
-            <div style="font-size: 12px; color: #155724; margin-top: 5px;">
-              Le client a un crédit qui sera appliqué aux futures commissions
-            </div>
-          </div>
-        <% else %>
-          <div style="background: #d4edda; padding: 12px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #28a745;">
-            <div style="font-weight: 600; color: #155724; margin-bottom: 5px;"><i class="fa-icon fa-md fa-check-circle"></i> Entièrement Payé</div>
-            <div style="font-size: 18px; color: #155724;">
-              Aucun solde restant
-            </div>
-          </div>
-        <% end %>
-
-        <% if @mt5_accounts.any? %>
-          <div style="background: #e3f2fd; padding: 12px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #2196F3;">
-            <div style="font-weight: 600; color: #1976D2; margin-bottom: 10px;">
-              <i class="fa-icon fa-md fa-chart-bar"></i> Watermarks par Compte
-            </div>
-            <% @mt5_accounts.each do |account| %>
-              <% unauthorized_penalty = account.unauthorized_manual_trades_total %>
-              <% pending_count = account.trades.where(trade_originality: 'manual_pending_review').count %>
-              <% client_count = account.trades.where(trade_originality: 'manual_client').count %>
-              
-              <div style="font-size: 13px; color: #1976D2; margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.3); border-radius: 4px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <div>
-                    <strong><%= account.account_name %> (<%= account.mt5_id %>)</strong>
-                  </div>
-                  <div style="font-size: 14px; font-weight: 700; color: #0d47a1;">
-                    WM = <%= number_to_currency(account.high_watermark, unit: "€", format: "%n %u") %>
-                  </div>
-                </div>
-                
-                <% if unauthorized_penalty > 0 %>
-                  <div style="margin-top: 6px; font-size: 12px; color: #c62828; background: rgba(244,67,54,0.1); padding: 6px; border-radius: 4px;">
-                    <i class="fa-icon fa-sm fa-exclamation-triangle"></i>
-                    <strong>Pénalités Trade Defender :</strong> <%= number_to_currency(unauthorized_penalty, unit: "€", format: "%n %u") %>
-                    <br/>
-                    <span style="font-size: 11px; opacity: 0.8;">
-                      (<%= client_count %> trade<%= client_count > 1 ? 's' : '' %> manuel<%= client_count > 1 ? 's' : '' %> sanctionné<%= client_count > 1 ? 's' : '' %>)
-                    </span>
-                  </div>
-                <% end %>
-                
-                <% if pending_count > 0 %>
-                  <div style="margin-top: 6px; font-size: 12px; color: #f57c00; background: rgba(255,152,0,0.1); padding: 6px; border-radius: 4px;">
-                    <i class="fa-icon fa-sm fa-clock"></i>
-                    ⏳ <%= pending_count %> trade<%= pending_count > 1 ? 's' : '' %> en attente de validation
-                  </div>
-                <% end %>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
-
-        <%= form_with model: [:admin, Payment.new], method: :post, id: "payment-form" do |f| %>
-          <%= f.hidden_field :user_id, value: @client.id %>
-          
-          <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-              <%= svg_tag "info", size: "20" %>
-              <h4 style="margin: 0; font-size: 14px; font-weight: 600;">💡 Calcul automatique du montant commissionnable</h4>
-            </div>
-            <p style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
-              Pour les clients ajoutés au système avec un historique existant, renseignez le High Watermark (WM).<br>
-              <strong>Montant commissionnable = Balance actuelle - High Watermark</strong><br>
-              <small>Exemple: Balance 1000€, WM 700€ → Commissionnable = 300€</small>
-            </p>
-          </div>
-
-          <div class="form-group">
-            <%= f.label :manual_watermark, "High Watermark (€)" %>
-            <%= f.number_field :manual_watermark, step: 0.01, min: 0, id: "manual_watermark_input", placeholder: "Ex: 700.00", oninput: "calculateAmount()" %>
-            <div class="help-text">Le WM sera appliqué au compte lors de la validation du paiement</div>
-          </div>
-
-          <div class="form-group">
-            <%= f.label :amount, "Montant Commission (€)" %>
-            <%= f.number_field :amount, step: 0.01, min: 0, required: true, value: @client.balance_due > 0 ? @client.balance_due : nil, id: "amount_input", placeholder: "Calculé automatiquement" %>
-            <div class="help-text" id="amount_help">Commission facturée au client</div>
-          </div>
-
-          <div class="form-group">
-            <%= f.label :payment_method, "Méthode de Paiement" %>
-            <%= f.select :payment_method, 
-                options_for_select([
-                  ['Virement Bancaire', 'bank_transfer'],
-                  ['Espèces', 'cash'],
-                  ['PayPal', 'paypal'],
-                  ['Carte de Crédit', 'credit_card'],
-                  ['Chèque', 'check'],
-                  ['Autre', 'other']
-                ]), 
-                { prompt: 'Sélectionner la méthode' },
-                { class: "filter-select" } 
-            %>
-          </div>
-
-          <div class="form-group">
-            <%= f.label :payment_date, "Date de Paiement" %>
-            <%= f.date_field :payment_date, value: Date.today, required: true %>
-          </div>
-
-          <div class="form-group">
-            <%= f.label :reference, "Référence / ID Transaction" %>
-            <%= f.text_field :reference, placeholder: "ex. VIREMENT123456" %>
-          </div>
-
-          <div class="form-group">
-            <%= f.label :notes, "Notes" %>
-            <%= f.text_area :notes, placeholder: "Informations supplémentaires..." %>
-          </div>
-
-          <%= submit_tag "Créer le Paiement", class: "btn" do %>
-            <i class="fa-icon fa-md fa-credit-card"></i> Créer le Paiement
-          <% end %>
-        <% end %>
-        
-        <script>
-        function calculateAmount() {
-          const watermarkInput = document.getElementById('manual_watermark_input');
-          const amountInput = document.getElementById('amount_input');
-          const helpText = document.getElementById('amount_help');
-          
-          const currentBalance = <%= @client.mt5_accounts.sum(:balance) || 0 %>;
-          const commissionRateRaw = <%= @client.commission_rate || 25 %>;
-          // Le taux est stocké en pourcentage (25 pour 25%), on le convertit en décimal (0.25)
-          const commissionRate = commissionRateRaw / 100.0;
-          const watermark = parseFloat(watermarkInput.value) || 0;
-          
-          if (watermark > 0) {
-            const commissionableAmount = currentBalance - watermark;
-            const commission = commissionableAmount * commissionRate;
-            amountInput.value = commission.toFixed(2);
-            helpText.innerHTML = `<strong>Commissionnable:</strong> ${currentBalance.toFixed(2)}€ (balance) - ${watermark.toFixed(2)}€ (WM) = ${commissionableAmount.toFixed(2)}€<br><strong>Commission (${commissionRateRaw.toFixed(1)}%):</strong> ${commission.toFixed(2)}€`;
-          } else {
-            const balanceDue = <%= @client.balance_due || 0 %>;
-            amountInput.value = balanceDue > 0 ? balanceDue.toFixed(2) : '';
-            helpText.textContent = balanceDue > 0 ? 'Pré-rempli avec le solde actuel dû' : (balanceDue < 0 ? 'Le client a un solde créditeur' : 'Aucun solde dû');
-          }
-        }
-        </script>
-      </div>
-
-      <div class="card">
-        <h2>Ajouter un Crédit</h2>
-        <%= form_with model: [:admin, Credit.new], method: :post do |f| %>
-          <%= f.hidden_field :user_id, value: @client.id %>
-          
-          <div class="form-group">
-            <%= f.label :amount, "Montant (€)" %>
-            <%= f.number_field :amount, step: 0.01, min: 0, required: true %>
-          </div>
-
-          <div class="form-group">
-            <%= f.label :reason, "Raison" %>
-            <%= f.select :reason, 
-                options_for_select([
-                  ['Bonus de bienvenue', 'welcome_bonus'],
-                  ['Compensation', 'compensation'],
-                  ['Promotion', 'promotion'],
-                  ['Erreur système', 'system_error'],
-                  ['Remboursement', 'refund'],
-                  ['Autre', 'other']
-                ]), 
-                { prompt: 'Sélectionner une raison' },
-                { class: "filter-select" } 
-            %>
-          </div>
-
-          <%= f.submit "Créer le Crédit", class: "btn" do %>
-            <span class="material-icons md-18" style="vertical-align: middle;">add_circle</span> Créer le Crédit
-          <% end %>
-        <% end %>
-      </div>
-    </div>
-    <% end %>
-
-    <% if current_user.is_admin? && @payments.any? %>
-      <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h2 style="margin: 0;">Historique des Paiements</h2>
-        <% if current_user.is_admin? %>
-          <button onclick="toggleDeleteMode()" id="lockButton" class="btn" style="background: #666; padding: 8px 16px; font-size: 14px;">
-            <i class="fa-icon fa-md fa-lock"></i> Déverrouiller Mode Suppression
-          </button>
-        <% end %>
-      </div>
-      <div id="deleteModeWarning" style="display: none; background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 15px; border-radius: 4px;">
-        <strong style="color: #856404;"><i class="fa-icon fa-md fa-exclamation-triangle"></i> Mode Suppression Actif</strong>
-        <p style="color: #856404; margin: 5px 0 0 0; font-size: 13px;">Vous pouvez maintenant supprimer des paiements. Cliquez à nouveau sur le verrou pour désactiver ce mode.</p>
-      </div>
-      <% if @payments.any? %>
-        <table style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr>
-              <th style="text-align: left; padding: 12px; font-weight: 600;">Date</th>
-              <th style="text-align: left; padding: 12px; font-weight: 600;">Montant</th>
-              <th style="text-align: left; padding: 12px; font-weight: 600;">Méthode</th>
-              <th style="text-align: left; padding: 12px; font-weight: 600;">Référence</th>
-              <th style="text-align: left; padding: 12px; font-weight: 600; min-width: 280px;">Détails Watermark</th>
-              <th style="text-align: left; padding: 12px; font-weight: 600;">Statut</th>
-              <th style="text-align: left; padding: 12px; font-weight: 600;">Notes</th>
-              <% if current_user.is_admin? %>
-                <th style="text-align: left; padding: 12px; font-weight: 600;">Actions</th>
-              <% end %>
-            </tr>
-          </thead>
-          <tbody>
-            <% @payments.each do |payment| %>
-              <tr style="cursor: default; border-bottom: 1px solid var(--border-color);" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
-                <td style="cursor: pointer; padding: 12px; vertical-align: top;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= payment.payment_date.strftime("%Y-%m-%d") %></td>
-                <td style="cursor: pointer; padding: 12px; vertical-align: top; font-weight: 600;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= number_to_currency(payment.amount, unit: "€", format: "%n %u") %></td>
-                <td style="cursor: pointer; padding: 12px; vertical-align: top;" onclick="window.location='<%= admin_payment_path(payment) %>'"><%= payment.payment_method_label %></td>
-                <td style="cursor: pointer; padding: 12px; vertical-align: top;" onclick="window.location='<%= admin_payment_path(payment) %>'">
-                  <%= payment.reference.presence || content_tag(:span, "-", style: "color: var(--text-muted); font-style: italic;") %>
-                </td>
-                <td style="cursor: pointer; min-width: 280px; max-width: 350px; padding: 12px; vertical-align: top;" onclick="window.location='<%= admin_payment_path(payment) %>'">
-                  <% if payment.status == "validated" && payment.watermark_data.any? %>
-                    <% payment.watermark_data.each do |mt5_id, data| %>
-                      <div style="font-size: 13px; margin-bottom: 8px; padding: 8px; background: rgba(34, 197, 94, 0.1); border-radius: 4px; border-left: 3px solid #4CAF50;">
-                        <div style="font-weight: 600; margin-bottom: 6px; color: var(--text-primary);">
-                          <%= data["account_name"] %> <span style="color: var(--text-muted); font-weight: 400;">(<%= mt5_id %>)</span>
-                        </div>
-                        <div style="margin-bottom: 4px; line-height: 1.6;">
-                          <span style="color: var(--text-muted);">WM:</span> 
-                          <span style="font-weight: 500;"><%= number_to_currency(data["watermark"], unit: "€", format: "%n %u") %></span>
-                          <i class='fa-icon fa-sm fa-arrow-right' style="margin: 0 4px; color: var(--text-muted);"></i>
-                          <span style="font-weight: 500;"><%= number_to_currency(data["balance"], unit: "€", format: "%n %u") %></span>
-                        </div>
-                        <div style="color: #4CAF50; font-weight: 600;">
-                          Commissionnable: <%= number_to_currency(data["commissionable"], unit: "€", format: "%n %u") %>
-                        </div>
-                      </div>
-                    <% end %>
-                  <% elsif payment.status == "validated" %>
-                    <span style="color: var(--text-muted); font-size: 13px; font-style: italic;">Pas de données</span>
-                  <% else %>
-                    <span style="color: var(--text-muted); font-size: 13px;">-</span>
-                  <% end %>
-                </td>
-                <td style="cursor: pointer; padding: 12px; vertical-align: top;" onclick="window.location='<%= admin_payment_path(payment) %>'">
-                  <span class="status-badge status-<%= payment.status %>" style="font-size: 12px; font-weight: 700; color: white !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); letter-spacing: 0.5px;">
-                    <% case payment.status %>
-                    <% when "pending" %>
-                      EN ATTENTE
-                    <% when "validated" %>
-                      VALIDÉ
-                    <% when "rejected" %>
-                      REJETÉ
-                    <% else %>
-                      <%= payment.status.upcase %>
-                    <% end %>
-                  </span>
-                </td>
-                <td style="cursor: pointer; max-width: 200px; padding: 12px; vertical-align: top;" onclick="window.location='<%= admin_payment_path(payment) %>'">
-                  <%= payment.notes.presence || content_tag(:span, "-", style: "color: var(--text-muted); font-style: italic;") %>
-                </td>
-                <% if current_user.is_admin? %>
-                  <td style="padding: 12px; vertical-align: top;" onclick="event.stopPropagation();">
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-                      <%= link_to admin_payment_path(payment), class: "btn btn-sm", style: "padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;", title: "Voir les détails" do %>
-                        <i class="fa-icon fa-sm fa-eye"></i>
-                        <span>Voir</span>
-                      <% end %>
-                      <a href="<%= download_pdf_admin_payment_path(payment) %>" target="_blank" class="btn btn-sm" style="padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;" title="Télécharger PDF">
-                        <i class="fa-icon fa-sm fa-download"></i>
-                        <span>PDF</span>
-                      </a>
-                      <% if payment.status == "pending" %>
-                        <%= button_to admin_payment_path(payment, action_type: "validate"), method: :patch, class: "btn btn-sm", style: "padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; background: #4CAF50; color: white; border-color: #4CAF50;", title: "Valider", onclick: "event.stopPropagation();" do %>
-                          <i class="fa-icon fa-sm fa-check"></i>
-                          <span>Valider</span>
-                        <% end %>
-                        <%= button_to admin_payment_path(payment, action_type: "reject"), method: :patch, class: "btn btn-danger btn-sm", style: "padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;", title: "Rejeter", onclick: "event.stopPropagation();" do %>
-                          <i class="fa-icon fa-sm fa-times"></i>
-                          <span>Rejeter</span>
-                        <% end %>
-                      <% end %>
-                      <%= button_to admin_payment_path(payment), method: :delete, data: { turbo_confirm: "Supprimer ce paiement ?" }, class: "btn btn-danger btn-sm delete-btn", style: "display: none; padding: 6px 12px; font-size: 12px; align-items: center; gap: 6px;", title: "Supprimer", onclick: "event.stopPropagation();" do %>
-                        <i class="fa-icon fa-sm fa-trash"></i>
-                        <span>Supprimer</span>
-                      <% end %>
-                    </div>
-                  </td>
-                <% end %>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-        
-        <script>
-          let deleteModeActive = false;
-          
-          function toggleDeleteMode() {
-            deleteModeActive = !deleteModeActive;
-            const lockButton = document.getElementById('lockButton');
-            const warning = document.getElementById('deleteModeWarning');
-            const deleteButtons = document.querySelectorAll('.delete-btn');
-            
-            if (deleteModeActive) {
-              lockButton.innerHTML = '<span class="material-icons md-18" style="vertical-align: middle;">lock_open</span> Verrouiller Mode Suppression';
-              lockButton.style.background = '#f44336';
-              warning.style.display = 'block';
-              deleteButtons.forEach(btn => btn.style.display = 'inline-block');
-            } else {
-              lockButton.innerHTML = '<i class="fa-icon fa-md fa-lock"></i> Déverrouiller Mode Suppression';
-              lockButton.style.background = '#666';
-              warning.style.display = 'none';
-              deleteButtons.forEach(btn => btn.style.display = 'none');
-            }
-          }
-        </script>
-        
-        <script>
-          window.showAddWithdrawalModal = function() {
-            window.location.href = '<%= new_admin_withdrawal_path %>';
-          };
-          
-          window.showAddDepositModal = function() {
-            window.location.href = '<%= new_admin_deposit_path %>';
-          };
-        </script>
-      <% end %>
-    </div>
-    <% end %>
-
-    <% if current_user.is_admin? && @credits.any? %>
-      <div class="card">
-        <h2>Historique des Crédits</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Montant</th>
-              <th>Raison</th>
-              <% if current_user.is_admin? %>
-                <th>Actions</th>
-              <% end %>
-            </tr>
-          </thead>
-          <tbody>
-            <% @credits.each do |credit| %>
-              <tr>
-                <td><%= credit.created_at.strftime("%d/%m/%Y") %></td>
-                <td><%= number_to_currency(credit.amount, unit: "€", format: "%n %u") %></td>
-                <td><%= credit.reason %></td>
-                <% if current_user.is_admin? %>
-                  <td>
-                    <%= button_to "Supprimer", admin_credit_path(credit), method: :delete, data: { turbo_confirm: "Êtes-vous sûr ?" }, class: "btn btn-danger" %>
-                  </td>
-                <% end %>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    <% end %>
-    
-    <% if current_user.is_admin? %>
-      <div class="card" style="margin-top: 2rem; border: 2px solid var(--color-danger); background: rgba(239, 68, 68, 0.05);">
-        <h2 style="color: var(--color-danger); margin-bottom: 1rem;">
-          <i class="fa-icon fa-md fa-exclamation-triangle"></i> Zone de Danger
-        </h2>
-        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6;">
-          La suppression d'un client est une action irréversible. Cela supprimera définitivement :
-        </p>
-        <ul style="color: var(--text-secondary); margin-bottom: 1.5rem; padding-left: 1.5rem; line-height: 1.8;">
-          <li>Le compte utilisateur</li>
-          <li>Tous les comptes MT5 associés</li>
-          <li>Tous les trades</li>
-          <li>Tous les paiements</li>
-          <li>Tous les crédits</li>
-        </ul>
-        <%= button_to "Supprimer ce Client", admin_client_path(@client), method: :delete,
-            data: { turbo_confirm: "⚠️ ATTENTION : Suppression définitive !\n\nÊtes-vous ABSOLUMENT sûr de vouloir supprimer #{@client.email} ?\n\nCette action NE PEUT PAS être annulée !\n\nTapez 'SUPPRIMER' pour confirmer.", client_email: @client.email },
-            class: "btn btn-danger",
-            style: "font-size: 16px; padding: 12px 24px; font-weight: 600;",
-            id: "delete-client-btn" %>
-        <script>
-          (function() {
-            var btn = document.getElementById('delete-client-btn');
-            if (btn) {
-              btn.addEventListener('click', function(e) {
-                var email = btn.getAttribute('data-client-email');
-                var confirmText = prompt('⚠️ ATTENTION : Tapez SUPPRIMER pour confirmer la suppression définitive de ' + email);
-                if (confirmText !== 'SUPPRIMER') {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  return false;
-                }
-              });
-            }
-          })();
-        </script>
-      </div>
-    <% end %>
     </div>
   </div>
-</body>
-</html>
 
-<!-- Debug JavaScript pour les dropdowns -->
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <% balance = @client.mt5_accounts.sum(:balance) %>
+    <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+      <div class="text-sm text-neutral-400 mb-1">Solde Total</div>
+      <div class="text-2xl font-bold <%= balance >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+        <%= number_to_currency(balance, unit: "€", format: "%n%u") %>
+      </div>
+    </div>
+    
+    <% total_profit = @client.bot_purchases.sum(:total_profit) %>
+    <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+      <div class="text-sm text-neutral-400 mb-1">Profit Total</div>
+      <div class="text-2xl font-bold <%= total_profit >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+        <%= number_to_currency(total_profit, unit: "€", format: "%n%u") %>
+      </div>
+    </div>
+    
+    <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+      <div class="text-sm text-neutral-400 mb-1">Bots Actifs</div>
+      <div class="text-2xl font-bold text-white">
+        <%= @client.bot_purchases.where(is_running: true).count %> / <%= @client.bot_purchases.count %>
+      </div>
+    </div>
+    
+    <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+      <div class="text-sm text-neutral-400 mb-1">Commission</div>
+      <div class="text-2xl font-bold text-blue-400">
+        <%= @client.commission_rate %>%
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div data-controller="tabs" data-tabs-default-value="overview">
+    <div class="flex items-center gap-1 p-1 rounded-xl bg-neutral-900 border border-neutral-800 overflow-x-auto">
+      <button type="button" data-tabs-target="tab" data-action="click->tabs#select" data-tab="overview" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors">
+        <i class="fa-solid fa-chart-pie mr-2"></i>Vue d'ensemble
+      </button>
+      <button type="button" data-tabs-target="tab" data-action="click->tabs#select" data-tab="mt5" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors">
+        <i class="fa-solid fa-wallet mr-2"></i>Comptes MT5
+      </button>
+      <button type="button" data-tabs-target="tab" data-action="click->tabs#select" data-tab="bots" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors">
+        <i class="fa-solid fa-robot mr-2"></i>Bots
+      </button>
+      <button type="button" data-tabs-target="tab" data-action="click->tabs#select" data-tab="trades" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors">
+        <i class="fa-solid fa-chart-line mr-2"></i>Trades
+      </button>
+      <button type="button" data-tabs-target="tab" data-action="click->tabs#select" data-tab="invoices" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors">
+        <i class="fa-solid fa-file-invoice mr-2"></i>Factures
+      </button>
+      <button type="button" data-tabs-target="tab" data-action="click->tabs#select" data-tab="subscriptions" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors">
+        <i class="fa-solid fa-repeat mr-2"></i>Abonnements
+        <% if @client.subscriptions.active.any? %>
+          <span class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-emerald-500/20 text-emerald-400"><%= @client.subscriptions.active.count %></span>
+        <% end %>
+      </button>
+      <button type="button" data-tabs-target="tab" data-action="click->tabs#select" data-tab="vps" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors">
+        <i class="fa-solid fa-server mr-2"></i>VPS
+      </button>
+      <% if current_user.is_admin? %>
+        <button type="button" data-tabs-target="tab" data-action="click->tabs#select" data-tab="admin" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors">
+          <i class="fa-solid fa-shield mr-2"></i>Admin
+        </button>
+      <% end %>
+    </div>
+
+    <!-- Tab: Overview -->
+    <div data-tabs-target="panel" data-tab="overview" class="mt-6 space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Informations Client -->
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6">
+          <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-user text-blue-400"></i>
+            Informations
+          </h3>
+          <div class="space-y-3">
+            <div class="flex justify-between py-2 border-b border-neutral-800">
+              <span class="text-neutral-400">Email</span>
+              <span class="text-white font-medium"><%= @client.email %></span>
+            </div>
+            <div class="flex justify-between py-2 border-b border-neutral-800">
+              <span class="text-neutral-400">Téléphone</span>
+              <span class="text-white font-medium"><%= @client.phone || "—" %></span>
+            </div>
+            <div class="flex justify-between py-2 border-b border-neutral-800">
+              <span class="text-neutral-400">Inscrit le</span>
+              <span class="text-white font-medium"><%= @client.created_at.strftime("%d/%m/%Y") %></span>
+            </div>
+            <div class="flex justify-between py-2">
+              <span class="text-neutral-400">Commission</span>
+              <span class="text-blue-400 font-bold"><%= @client.commission_rate %>%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Résumé Financier ou Abonnement -->
+        <% active_subscription = @client.subscriptions.active.first %>
+        <% if active_subscription %>
+          <!-- Abonnement Actif -->
+          <div class="rounded-xl bg-gradient-to-br from-emerald-900/50 to-green-900/30 border border-emerald-700/50 p-6">
+            <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-repeat text-emerald-400"></i>
+              Abonnement Actif
+            </h3>
+            <div class="flex items-center gap-4 mb-4">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center">
+                <i class="fa-solid fa-crown text-white text-xl"></i>
+              </div>
+              <div>
+                <div class="text-2xl font-bold text-white"><%= active_subscription.plan_name %></div>
+                <div class="text-emerald-400"><%= number_to_currency(active_subscription.monthly_price, unit: "€", format: "%n%u") %>/mois</div>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div class="flex justify-between py-2 border-b border-emerald-800/50">
+                <span class="text-neutral-400">Statut</span>
+                <span class="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400">✓ Actif</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-emerald-800/50">
+                <span class="text-neutral-400">Prochain prélèvement</span>
+                <span class="text-white font-medium"><%= active_subscription.current_period_end&.strftime("%d/%m/%Y") || "—" %></span>
+              </div>
+              <div class="flex justify-between py-2">
+                <span class="text-neutral-400">Inclus</span>
+                <span class="text-emerald-400 font-medium">Bots + VPS</span>
+              </div>
+            </div>
+          </div>
+        <% else %>
+          <!-- Résumé Financier (pas d'abonnement) -->
+          <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6">
+            <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-coins text-amber-400"></i>
+              Résumé Financier
+            </h3>
+            <% invoices = @client.invoices.order(created_at: :desc) %>
+            <% total_invoiced = invoices.sum(:total_amount) %>
+            <% total_due = invoices.sum(:balance_due) %>
+            <% total_paid = total_invoiced - total_due %>
+            <div class="space-y-3">
+              <div class="flex justify-between py-2 border-b border-neutral-800">
+                <span class="text-neutral-400">Total Facturé</span>
+                <span class="text-white font-medium"><%= number_to_currency(total_invoiced, unit: "€", format: "%n%u") %></span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-neutral-800">
+                <span class="text-neutral-400">Total Payé</span>
+                <span class="text-emerald-400 font-medium"><%= number_to_currency(total_paid, unit: "€", format: "%n%u") %></span>
+              </div>
+              <div class="flex justify-between py-2">
+                <span class="text-neutral-400">Reste à Payer</span>
+                <span class="<%= total_due > 0 ? 'text-red-400' : 'text-emerald-400' %> font-bold"><%= number_to_currency(total_due, unit: "€", format: "%n%u") %></span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Dernières Factures -->
+      <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+            <i class="fa-solid fa-file-invoice text-purple-400"></i>
+            Dernières Factures
+          </h3>
+        </div>
+        <% recent_invoices = @client.invoices.order(created_at: :desc).limit(5) %>
+        <% if recent_invoices.any? %>
+          <div class="space-y-3">
+            <% recent_invoices.each do |invoice| %>
+              <div class="flex items-center justify-between p-4 rounded-lg bg-neutral-800/50 hover:bg-neutral-800 transition-colors">
+                <div class="flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-lg bg-neutral-700 flex items-center justify-center">
+                    <i class="fa-solid fa-file-invoice text-neutral-400"></i>
+                  </div>
+                  <div>
+                    <div class="font-medium text-white"><%= invoice.reference %></div>
+                    <div class="text-sm text-neutral-400"><%= invoice.created_at.strftime("%d/%m/%Y") %></div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="text-right">
+                    <div class="font-bold text-white"><%= number_to_currency(invoice.total_amount, unit: "€", format: "%n%u") %></div>
+                    <% if invoice.balance_due <= 0 %>
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">Payée</span>
+                    <% elsif invoice.balance_due < invoice.total_amount %>
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400">Partiel</span>
+                    <% else %>
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-400">En attente</span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-8 text-neutral-500">
+            <i class="fa-solid fa-file-invoice text-4xl mb-2"></i>
+            <p>Aucune facture</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Tab: MT5 -->
+    <div data-tabs-target="panel" data-tab="mt5" class="mt-6 hidden space-y-6">
+      <% @client.mt5_accounts.each do |account| %>
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                <i class="fa-solid fa-wallet text-white text-xl"></i>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white"><%= account.account_name %></h3>
+                <p class="text-sm text-neutral-400">ID: <%= account.mt5_id %> • <%= account.broker_name %></p>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-bold <%= account.balance >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+                <%= number_to_currency(account.balance, unit: "€", format: "%n%u") %>
+              </div>
+              <div class="text-sm text-neutral-400">Solde</div>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-neutral-800">
+            <div>
+              <div class="text-sm text-neutral-400">Balance Initiale</div>
+              <div class="font-semibold text-white"><%= number_to_currency(account.initial_balance, unit: "€", format: "%n%u") %></div>
+            </div>
+            <div>
+              <div class="text-sm text-neutral-400">High Watermark</div>
+              <div class="font-semibold text-white"><%= number_to_currency(account.high_watermark, unit: "€", format: "%n%u") %></div>
+            </div>
+            <div>
+              <div class="text-sm text-neutral-400">Serveur</div>
+              <div class="font-semibold text-white"><%= account.broker_server %></div>
+            </div>
+            <div>
+              <div class="text-sm text-neutral-400">Mot de passe</div>
+              <div class="font-mono text-sm text-neutral-400 bg-neutral-800 px-2 py-1 rounded"><%= account.broker_password&.gsub(/./, '•') || '—' %></div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      
+      <% if @client.mt5_accounts.empty? %>
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
+          <i class="fa-solid fa-wallet text-4xl text-neutral-600 mb-4"></i>
+          <p class="text-neutral-400">Aucun compte MT5</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Tab: Bots -->
+    <div data-tabs-target="panel" data-tab="bots" class="mt-6 hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% @client.bot_purchases.includes(:trading_bot).each do |purchase| %>
+          <% bot = purchase.trading_bot %>
+          <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-5 hover:border-neutral-700 transition-colors">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br <%= purchase.is_running ? 'from-emerald-500 to-green-600' : 'from-neutral-600 to-neutral-700' %> flex items-center justify-center">
+                  <i class="fa-solid fa-robot text-white"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-white"><%= bot.name %></h4>
+                  <p class="text-xs text-neutral-400">Magic: <%= purchase.magic_number %></p>
+                </div>
+              </div>
+              <span class="px-2 py-1 rounded-full text-xs font-medium <%= purchase.is_running ? 'bg-emerald-500/20 text-emerald-400' : 'bg-neutral-700 text-neutral-400' %>">
+                <%= purchase.is_running ? 'Actif' : 'Inactif' %>
+              </span>
+            </div>
+            
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-neutral-400">Profit Total</span>
+                <span class="font-semibold <%= purchase.total_profit >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+                  <%= number_to_currency(purchase.total_profit, unit: "€", format: "%n%u") %>
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-neutral-400">Trades</span>
+                <span class="text-white"><%= purchase.trades_count %></span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-neutral-400">Drawdown</span>
+                <span class="text-amber-400"><%= number_to_currency(purchase.current_drawdown, unit: "€", format: "%n%u") %></span>
+              </div>
+            </div>
+
+          </div>
+        <% end %>
+      </div>
+      
+      <% if @client.bot_purchases.empty? %>
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
+          <i class="fa-solid fa-robot text-4xl text-neutral-600 mb-4"></i>
+          <p class="text-neutral-400">Aucun bot assigné</p>
+        </div>
+      <% end %>
+
+      <% if current_user.is_admin? %>
+        <!-- Assigner un Bot -->
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6">
+          <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-plus text-blue-400"></i>
+            Assigner un Bot
+          </h3>
+          <%= form_with url: assign_to_user_admin_bots_path, method: :post, local: true, class: "flex flex-col md:flex-row gap-4" do |f| %>
+            <input type="hidden" name="user_id" value="<%= @client.id %>">
+            <div class="flex-1">
+              <select name="trading_bot_id" required class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                <option value="">Sélectionner un bot...</option>
+                <% TradingBot.active.each do |bot| %>
+                  <option value="<%= bot.id %>"><%= bot.name %> - <%= number_to_currency(bot.price, unit: "€", format: "%n%u") %></option>
+                <% end %>
+              </select>
+            </div>
+            <button type="submit" class="px-6 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">
+              <i class="fa-solid fa-plus mr-2"></i>Assigner
+            </button>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Tab: Trades -->
+    <div data-tabs-target="panel" data-tab="trades" class="mt-6 hidden space-y-6">
+      <% trades = Trade.joins(mt5_account: :user).where(users: { id: @client.id }).order(close_time: :desc).limit(50) %>
+      
+      <div class="rounded-xl bg-neutral-900 border border-neutral-800 overflow-hidden">
+        <div class="p-4 border-b border-neutral-800">
+          <h3 class="text-lg font-semibold text-white">Derniers Trades</h3>
+        </div>
+        <% if trades.any? %>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-neutral-800/50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Symbol</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Type</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Volume</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Prix Entrée</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Prix Sortie</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Profit</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Date</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-neutral-800">
+                <% trades.each do |trade| %>
+                  <tr class="hover:bg-neutral-800/30">
+                    <td class="px-4 py-3 text-white font-medium"><%= trade.symbol %></td>
+                    <td class="px-4 py-3">
+                      <span class="px-2 py-1 rounded text-xs font-semibold <%= trade.trade_type&.downcase == 'buy' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400' %>">
+                        <%= trade.trade_type %>
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-neutral-300"><%= trade.volume %></td>
+                    <td class="px-4 py-3 text-neutral-300"><%= trade.open_price %></td>
+                    <td class="px-4 py-3 text-neutral-300"><%= trade.close_price %></td>
+                    <td class="px-4 py-3 font-semibold <%= trade.profit >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+                      <%= number_to_currency(trade.profit, unit: "€", format: "%n%u") %>
+                    </td>
+                    <td class="px-4 py-3 text-neutral-400 text-sm"><%= trade.close_time&.strftime("%d/%m/%Y %H:%M") %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="p-12 text-center">
+            <i class="fa-solid fa-chart-line text-4xl text-neutral-600 mb-4"></i>
+            <p class="text-neutral-400">Aucun trade</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Tab: Invoices -->
+    <div data-tabs-target="panel" data-tab="invoices" class="mt-6 hidden space-y-6">
+      <% @client.invoices.order(created_at: :desc).each do |invoice| %>
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 overflow-hidden">
+          <div class="p-4 flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-lg bg-neutral-800 flex items-center justify-center">
+                <i class="fa-solid fa-file-invoice text-neutral-400"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-white"><%= invoice.reference %></h4>
+                <p class="text-sm text-neutral-400"><%= invoice.created_at.strftime("%d/%m/%Y") %></p>
+              </div>
+            </div>
+            <div class="flex items-center gap-6 flex-wrap">
+              <div class="text-right">
+                <div class="text-sm text-neutral-400">Total</div>
+                <div class="font-bold text-white"><%= number_to_currency(invoice.total_amount, unit: "€", format: "%n%u") %></div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm text-neutral-400">Payé</div>
+                <div class="font-bold text-emerald-400"><%= number_to_currency(invoice.total_amount - invoice.balance_due, unit: "€", format: "%n%u") %></div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm text-neutral-400">Reste</div>
+                <div class="font-bold <%= invoice.balance_due > 0 ? 'text-red-400' : 'text-emerald-400' %>"><%= number_to_currency(invoice.balance_due, unit: "€", format: "%n%u") %></div>
+              </div>
+              <% if invoice.balance_due <= 0 %>
+                <span class="px-3 py-1 rounded-full text-sm font-medium bg-emerald-500/20 text-emerald-400">Payée</span>
+              <% elsif invoice.balance_due < invoice.total_amount %>
+                <span class="px-3 py-1 rounded-full text-sm font-medium bg-amber-500/20 text-amber-400">Partiel</span>
+              <% else %>
+                <span class="px-3 py-1 rounded-full text-sm font-medium bg-red-500/20 text-red-400">En attente</span>
+              <% end %>
+              
+              <% if invoice.stripe_payment_intent_id.present? %>
+                <a href="https://dashboard.stripe.com/payments/<%= invoice.stripe_payment_intent_id %>" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="px-3 py-1 rounded-lg text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 transition-colors flex items-center gap-2">
+                  <i class="fa-brands fa-stripe"></i>
+                  Voir sur Stripe
+                </a>
+              <% end %>
+            </div>
+          </div>
+          
+          <% if invoice.invoice_items.any? %>
+            <div class="border-t border-neutral-800 p-4">
+              <div class="space-y-2">
+                <% invoice.invoice_items.each do |item| %>
+                  <div class="flex justify-between py-2 px-3 rounded bg-neutral-800/50">
+                    <span class="text-neutral-300"><%= item.label %></span>
+                    <span class="text-white font-medium"><%= number_to_currency(item.total_price, unit: "€", format: "%n%u") %></span>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+          
+          <% if invoice.invoice_payments.any? %>
+            <div class="border-t border-neutral-800 p-4">
+              <h5 class="text-sm font-semibold text-neutral-400 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-credit-card"></i>
+                Paiements enregistrés
+              </h5>
+              <div class="space-y-2">
+                <% invoice.invoice_payments.each do |payment| %>
+                  <div class="flex justify-between items-center py-2 px-3 rounded bg-emerald-500/10">
+                    <div class="flex items-center gap-3">
+                      <i class="fa-solid fa-check-circle text-emerald-400"></i>
+                      <div>
+                        <span class="text-neutral-300"><%= payment.payment_method == 'stripe' ? 'Paiement Stripe' : payment.payment_method %></span>
+                        <% if payment.notes.present? %>
+                          <p class="text-xs text-neutral-500"><%= payment.notes.truncate(50) %></p>
+                        <% end %>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <span class="text-emerald-400 font-medium"><%= number_to_currency(payment.amount, unit: "€", format: "%n%u") %></span>
+                      <span class="text-xs text-neutral-500 block"><%= payment.paid_at&.strftime("%d/%m/%Y %H:%M") %></span>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+      
+      <% if @client.invoices.empty? %>
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
+          <i class="fa-solid fa-file-invoice text-4xl text-neutral-600 mb-4"></i>
+          <p class="text-neutral-400">Aucune facture</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Tab: Subscriptions -->
+    <div data-tabs-target="panel" data-tab="subscriptions" class="mt-6 hidden space-y-6">
+      <% @client.subscriptions.order(created_at: :desc).each do |subscription| %>
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 overflow-hidden">
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-xl bg-gradient-to-br <%= subscription.active? ? 'from-emerald-500 to-green-600' : 'from-neutral-600 to-neutral-700' %> flex items-center justify-center">
+                  <i class="fa-solid fa-repeat text-white text-2xl"></i>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-white">Abonnement <%= subscription.plan_name %></h3>
+                  <p class="text-sm text-neutral-400">
+                    Depuis le <%= subscription.created_at.strftime("%d/%m/%Y") %>
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="text-right">
+                  <div class="text-2xl font-bold text-white"><%= number_to_currency(subscription.monthly_price, unit: "€", format: "%n%u") %></div>
+                  <div class="text-sm text-neutral-400">par mois</div>
+                </div>
+                <span class="px-4 py-2 rounded-full text-sm font-semibold <%= 
+                  case subscription.status
+                  when 'active' then 'bg-emerald-500/20 text-emerald-400'
+                  when 'past_due' then 'bg-amber-500/20 text-amber-400'
+                  when 'canceled' then 'bg-red-500/20 text-red-400'
+                  else 'bg-neutral-700 text-neutral-400'
+                  end
+                %>">
+                  <%= case subscription.status
+                      when 'active' then '✓ Actif'
+                      when 'past_due' then '⚠️ Impayé'
+                      when 'canceled' then '✕ Annulé'
+                      when 'paused' then '⏸ En pause'
+                      else subscription.status.titleize
+                      end
+                  %>
+                </span>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-neutral-800">
+              <div>
+                <div class="text-sm text-neutral-400">Prochain prélèvement</div>
+                <div class="font-semibold text-white"><%= subscription.current_period_end&.strftime("%d/%m/%Y") || "—" %></div>
+              </div>
+              <div>
+                <div class="text-sm text-neutral-400">Échecs de paiement</div>
+                <div class="font-semibold <%= subscription.failed_payment_count > 0 ? 'text-amber-400' : 'text-white' %>">
+                  <%= subscription.failed_payment_count %>
+                </div>
+              </div>
+              <div>
+                <div class="text-sm text-neutral-400">ID Stripe</div>
+                <div class="font-mono text-xs text-neutral-400 truncate"><%= subscription.stripe_subscription_id %></div>
+              </div>
+              <div>
+                <div class="text-sm text-neutral-400">Dernier rappel</div>
+                <div class="font-semibold text-white"><%= subscription.last_reminder_sent_at&.strftime("%d/%m/%Y %H:%M") || "—" %></div>
+              </div>
+            </div>
+            
+            <% if subscription.stripe_subscription_id.present? && !subscription.stripe_subscription_id.start_with?('sub_manual') %>
+              <div class="mt-6 pt-6 border-t border-neutral-800 flex gap-3">
+                <a href="https://dashboard.stripe.com/subscriptions/<%= subscription.stripe_subscription_id %>" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="px-4 py-2 rounded-lg bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 transition-colors flex items-center gap-2">
+                  <i class="fa-brands fa-stripe"></i>
+                  Voir sur Stripe
+                </a>
+                
+                <% if subscription.active? && current_user.is_admin? %>
+                  <%= button_to "#", method: :post, class: "px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 transition-colors", disabled: true do %>
+                    <i class="fa-solid fa-pause mr-2"></i>Mettre en pause
+                  <% end %>
+                  <%= button_to "#", method: :delete, class: "px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors", disabled: true, data: { confirm: "Annuler cet abonnement ?" } do %>
+                    <i class="fa-solid fa-times mr-2"></i>Annuler
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+          
+          <% if subscription.past_due? && subscription.failed_payment_count > 0 %>
+            <div class="bg-amber-500/10 border-t border-amber-500/30 p-4">
+              <div class="flex items-center gap-3 text-amber-400">
+                <i class="fa-solid fa-exclamation-triangle text-lg"></i>
+                <div>
+                  <span class="font-semibold">Paiement échoué</span>
+                  <p class="text-sm text-amber-300/80">
+                    <% if subscription.last_reminder_sent_at %>
+                      Dernier SMS de relance envoyé le <%= subscription.last_reminder_sent_at.strftime("%d/%m/%Y à %H:%M") %>
+                    <% else %>
+                      Un SMS de relance sera envoyé automatiquement.
+                    <% end %>
+                  </p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+      
+      <% if @client.subscriptions.empty? %>
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
+          <i class="fa-solid fa-repeat text-4xl text-neutral-600 mb-4"></i>
+          <p class="text-neutral-400">Aucun abonnement</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Tab: VPS -->
+    <div data-tabs-target="panel" data-tab="vps" class="mt-6 hidden space-y-6">
+      <% @client.vps.each do |vps| %>
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                <i class="fa-solid fa-server text-white text-xl"></i>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white"><%= vps.name %></h3>
+                <p class="text-sm text-neutral-400"><%= vps.ip_address || "IP non assignée" %></p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-sm font-medium" style="background: <%= vps.status_color %>20; color: <%= vps.status_color %>;">
+              <%= vps.status_icon %> <%= vps.status_label %>
+            </span>
+          </div>
+          
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-neutral-800">
+            <div>
+              <div class="text-sm text-neutral-400">Prix Mensuel</div>
+              <div class="font-semibold text-white"><%= number_to_currency(vps.monthly_price, unit: "€", format: "%n%u") %></div>
+            </div>
+            <div>
+              <div class="text-sm text-neutral-400">Commandé le</div>
+              <div class="font-semibold text-white"><%= vps.ordered_at&.strftime("%d/%m/%Y") || "—" %></div>
+            </div>
+            <div>
+              <div class="text-sm text-neutral-400">Renouvellement</div>
+              <div class="font-semibold text-white"><%= vps.renewal_date&.strftime("%d/%m/%Y") || "—" %></div>
+            </div>
+            <div>
+              <div class="text-sm text-neutral-400">Localisation</div>
+              <div class="font-semibold text-white"><%= vps.server_location || "—" %></div>
+            </div>
+          </div>
+
+        </div>
+      <% end %>
+      
+      <% if @client.vps.empty? %>
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
+          <i class="fa-solid fa-server text-4xl text-neutral-600 mb-4"></i>
+          <p class="text-neutral-400">Aucun VPS</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Tab: Admin -->
+    <% if current_user.is_admin? %>
+      <div data-tabs-target="panel" data-tab="admin" class="mt-6 hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Modifier Commission -->
+          <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6">
+            <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-percent text-amber-400"></i>
+              Taux de Commission
+            </h3>
+            <%= form_with url: admin_client_path(@client), method: :patch, local: true, class: "flex gap-4" do |f| %>
+              <div class="flex-1">
+                <input type="number" name="user[commission_rate]" value="<%= @client.commission_rate %>" step="0.1" min="0" max="100" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-blue-500">
+              </div>
+              <button type="submit" class="px-6 py-2.5 rounded-lg bg-amber-600 text-white font-medium hover:bg-amber-700 transition-colors">
+                Mettre à jour
+              </button>
+            <% end %>
+          </div>
+
+          <!-- Ajouter Paiement -->
+          <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6">
+            <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-credit-card text-emerald-400"></i>
+              Ajouter un Paiement
+            </h3>
+            <%= form_with url: admin_payments_path, method: :post, local: true, class: "space-y-4" do |f| %>
+              <input type="hidden" name="payment[user_id]" value="<%= @client.id %>">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm text-neutral-400 mb-1">Montant</label>
+                  <input type="number" name="payment[amount]" step="0.01" required class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-blue-500">
+                </div>
+                <div>
+                  <label class="block text-sm text-neutral-400 mb-1">Méthode</label>
+                  <select name="payment[payment_method]" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-blue-500">
+                    <option value="bank_transfer">Virement</option>
+                    <option value="card">Carte</option>
+                    <option value="cash">Espèces</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="w-full px-6 py-2.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors">
+                <i class="fa-solid fa-plus mr-2"></i>Enregistrer le paiement
+              </button>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Zone Danger -->
+        <div class="rounded-xl bg-red-950/20 border border-red-900/50 p-6">
+          <h3 class="text-lg font-semibold text-red-400 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            Zone Dangereuse
+          </h3>
+          <div class="flex flex-wrap gap-4">
+            <%= button_to admin_client_path(@client), method: :delete, data: { confirm: "Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible." }, class: "px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors" do %>
+              <i class="fa-solid fa-trash mr-2"></i>Supprimer le client
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
 <script>
-console.log('=== CLIENT SHOW PAGE DROPDOWN DEBUG ===');
-console.log('Page des détails client chargée');
-
-// Vérifier que les styles sont chargés
-const adminStyles = document.querySelector('link[href*="admin"]');
-console.log('Styles admin chargés:', adminStyles !== null);
-
-// Vérifier les selects avec la classe filter-select
-const filterSelects = document.querySelectorAll('.filter-select');
-console.log('Nombre de selects avec classe filter-select:', filterSelects.length);
-
-filterSelects.forEach((select, index) => {
-  console.log(`Select ${index}:`, select);
-  console.log(`  Classes:`, select.className);
-  console.log(`  ID:`, select.id);
-  console.log(`  Name:`, select.name);
-  console.log(`  Options count:`, select.options.length);
+document.addEventListener('DOMContentLoaded', function() {
+  const controller = document.querySelector('[data-controller="tabs"]');
+  if (!controller) return;
   
-  const computedStyle = window.getComputedStyle(select);
-  console.log(`  Computed styles:`);
-  console.log(`    Display:`, computedStyle.display);
-  console.log(`    Visibility:`, computedStyle.visibility);
-  console.log(`    Opacity:`, computedStyle.opacity);
-  console.log(`    Background:`, computedStyle.backgroundColor);
-  console.log(`    Border:`, computedStyle.border);
-  console.log(`    Padding:`, computedStyle.padding);
-});
-
-// Vérifier les dropdowns personnalisés
-const customDropdowns = document.querySelectorAll('.dropdown');
-console.log('Nombre de dropdowns personnalisés:', customDropdowns.length);
-
-customDropdowns.forEach((dropdown, index) => {
-  console.log(`Dropdown ${index}:`, dropdown);
-  const toggle = dropdown.querySelector('.dropdown-toggle');
-  const menu = dropdown.querySelector('.dropdown-menu');
-  console.log(`  Toggle:`, toggle);
-  console.log(`  Menu:`, menu);
-});
-
-// Vérifier tous les selects sur la page
-const allSelects = document.querySelectorAll('select');
-console.log('Nombre total de selects:', allSelects.length);
-
-allSelects.forEach((select, index) => {
-  console.log(`Select ${index}:`, select);
-  console.log(`  Classes:`, select.className);
-  console.log(`  Style:`, select.style.cssText);
-  console.log(`  Computed display:`, window.getComputedStyle(select).display);
-});
-
-console.log('=== END CLIENT SHOW PAGE DROPDOWN DEBUG ===');
-</script>
-
-<script>
-  window.showAddWithdrawalModal = window.showAddWithdrawalModal || function() {
-    window.location.href = '<%= new_admin_withdrawal_path %>';
-  };
+  const tabs = controller.querySelectorAll('[data-tabs-target="tab"]');
+  const panels = controller.querySelectorAll('[data-tabs-target="panel"]');
+  const defaultTab = controller.dataset.tabsDefaultValue || 'overview';
   
-  window.showAddDepositModal = window.showAddDepositModal || function() {
-    window.location.href = '<%= new_admin_deposit_path %>';
-  };
-
-  window.toggleAllWithdrawals = function(accountId) {
-    const selectAll = document.getElementById('select-all-withdrawals-' + accountId);
-    if (!selectAll) return;
-    
-    const checkboxes = document.querySelectorAll('.withdrawal-checkbox-' + accountId);
-    checkboxes.forEach(checkbox => {
-      checkbox.checked = selectAll.checked;
-    });
-    window.updateBulkDestroyWithdrawalsButton();
-    window.updateSelectAllWithdrawals(accountId);
-  };
-
-  window.toggleAllDeposits = function(accountId) {
-    const selectAll = document.getElementById('select-all-deposits-' + accountId);
-    if (!selectAll) return;
-    
-    const checkboxes = document.querySelectorAll('.deposit-checkbox-' + accountId);
-    checkboxes.forEach(checkbox => {
-      checkbox.checked = selectAll.checked;
-    });
-    window.updateBulkDestroyDepositsButton();
-    window.updateSelectAllDeposits(accountId);
-  };
-
-  window.updateSelectAllWithdrawals = function(accountId) {
-    const selectAll = document.getElementById('select-all-withdrawals-' + accountId);
-    if (!selectAll) return;
-    
-    const checkboxes = document.querySelectorAll('.withdrawal-checkbox-' + accountId);
-    const checkedCount = document.querySelectorAll('.withdrawal-checkbox-' + accountId + ':checked').length;
-    selectAll.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
-    selectAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
-  };
-
-  window.updateSelectAllDeposits = function(accountId) {
-    const selectAll = document.getElementById('select-all-deposits-' + accountId);
-    if (!selectAll) return;
-    
-    const checkboxes = document.querySelectorAll('.deposit-checkbox-' + accountId);
-    const checkedCount = document.querySelectorAll('.deposit-checkbox-' + accountId + ':checked').length;
-    selectAll.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
-    selectAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
-  };
-
-  window.updateBulkDestroyWithdrawalsButton = function() {
-    const checkboxes = document.querySelectorAll('.withdrawal-checkbox:checked');
-    const button = document.getElementById('bulk-destroy-withdrawals-btn');
-    if (button) {
-      button.disabled = checkboxes.length === 0;
-      if (!button.disabled && !button.hasAttribute('data-listener-added')) {
-        button.addEventListener('click', function(e) {
-          e.preventDefault();
-          window.submitBulkDestroyWithdrawals();
-        });
-        button.setAttribute('data-listener-added', 'true');
-      }
-    }
-    
-    document.querySelectorAll('[id^="select-all-withdrawals-"]').forEach(selectAll => {
-      const accountId = selectAll.id.replace('select-all-withdrawals-', '');
-      window.updateSelectAllWithdrawals(accountId);
-    });
-  };
-
-  window.updateBulkDestroyDepositsButton = function() {
-    const checkboxes = document.querySelectorAll('.deposit-checkbox:checked');
-    const button = document.getElementById('bulk-destroy-deposits-btn');
-    if (button) {
-      button.disabled = checkboxes.length === 0;
-      if (!button.disabled && !button.hasAttribute('data-listener-added')) {
-        button.addEventListener('click', function(e) {
-          e.preventDefault();
-          window.submitBulkDestroyDeposits();
-        });
-        button.setAttribute('data-listener-added', 'true');
-      }
-    }
-    
-    document.querySelectorAll('[id^="select-all-deposits-"]').forEach(selectAll => {
-      const accountId = selectAll.id.replace('select-all-deposits-', '');
-      window.updateSelectAllDeposits(accountId);
-    });
-  };
-
-  window.submitBulkDestroyWithdrawals = function() {
-    const checkboxes = document.querySelectorAll('.withdrawal-checkbox:checked');
-    if (checkboxes.length === 0) {
-      alert('Veuillez sélectionner au moins un retrait à supprimer.');
-      return false;
-    }
-    
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ' + checkboxes.length + ' retrait(s) sélectionné(s) ?')) {
-      return false;
-    }
-    
-    const ids = Array.from(checkboxes).map(cb => cb.value);
-    const form = document.getElementById('bulk-destroy-withdrawals-form');
-    
-    if (!form) {
-      alert('Erreur: formulaire introuvable.');
-      return false;
-    }
-    
-    document.querySelectorAll('#bulk-destroy-withdrawals-form input[name="withdrawal_ids[]"]').forEach(input => input.remove());
-    
-    ids.forEach(id => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'withdrawal_ids[]';
-      input.value = id;
-      form.appendChild(input);
+  function selectTab(tabName) {
+    tabs.forEach(tab => {
+      const isActive = tab.dataset.tab === tabName;
+      tab.classList.toggle('bg-white', isActive);
+      tab.classList.toggle('text-neutral-900', isActive);
+      tab.classList.toggle('text-neutral-400', !isActive);
+      tab.classList.toggle('hover:text-white', !isActive);
+      tab.classList.toggle('hover:bg-neutral-800', !isActive);
     });
     
-    const submitButton = document.createElement('button');
-    submitButton.type = 'submit';
-    submitButton.style.display = 'none';
-    form.appendChild(submitButton);
-    submitButton.click();
-    
-    return false;
-  };
-
-  window.submitBulkDestroyDeposits = function() {
-    const checkboxes = document.querySelectorAll('.deposit-checkbox:checked');
-    if (checkboxes.length === 0) {
-      alert('Veuillez sélectionner au moins un dépôt à supprimer.');
-      return false;
-    }
-    
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ' + checkboxes.length + ' dépôt(s) sélectionné(s) ?')) {
-      return false;
-    }
-    
-    const ids = Array.from(checkboxes).map(cb => cb.value);
-    const form = document.getElementById('bulk-destroy-deposits-form');
-    
-    if (!form) {
-      alert('Erreur: formulaire introuvable.');
-      return false;
-    }
-    
-    document.querySelectorAll('#bulk-destroy-deposits-form input[name="deposit_ids[]"]').forEach(input => input.remove());
-    
-    ids.forEach(id => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'deposit_ids[]';
-      input.value = id;
-      form.appendChild(input);
+    panels.forEach(panel => {
+      const isActive = panel.dataset.tab === tabName;
+      panel.classList.toggle('hidden', !isActive);
     });
-    
-    const submitButton = document.createElement('button');
-    submitButton.type = 'submit';
-    submitButton.style.display = 'none';
-    form.appendChild(submitButton);
-    submitButton.click();
-    
-    return false;
-  };
-
-  document.addEventListener('DOMContentLoaded', function() {
-    window.updateBulkDestroyWithdrawalsButton();
-    window.updateBulkDestroyDepositsButton();
+  }
+  
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => selectTab(tab.dataset.tab));
   });
+  
+  selectTab(defaultTab);
+});
 </script>
-
-

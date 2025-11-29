@@ -16,6 +16,7 @@ Rails.application.routes.draw do
 
   # Webhooks
   post "webhooks/sms", to: "webhooks/sms#receive"
+  post "webhooks/stripe", to: "webhooks/stripe#receive"
 
   # Public ticket access
   get "ticket/:token", to: "public_tickets#show", as: :ticket
@@ -28,6 +29,8 @@ Rails.application.routes.draw do
   get "join/:code/step/:step", to: "onboarding#step", as: :onboarding_step
   post "join/:code/next", to: "onboarding#next_step", as: :onboarding_next_step
   post "join/:code/payment_intent", to: "onboarding#create_payment_intent", as: :onboarding_payment_intent
+  post "join/:code/confirm_payment", to: "onboarding#confirm_payment", as: :onboarding_confirm_payment
+  patch "join/:code/update_step", to: "onboarding#update_step", as: :onboarding_update_step
   get "join/:code/complete", to: "onboarding#complete", as: :onboarding_complete
 
   namespace :admin do
