@@ -1,447 +1,477 @@
 <% @page_title = "Rejoindre Trayo" %>
 
-<div class="mx-auto w-full max-w-4xl">
-  <%= form_with url: onboarding_next_step_path(code: @invitation.code), method: :post, local: true, id: "onboarding-form" do |f| %>
-    <div data-controller="stepper"
-         data-stepper-current-step-value="<%= [@invitation.step - 1, 0].max %>"
-         data-stepper-validate-on-next-value="true"
-         data-stepper-save-progress-value="true"
-         data-stepper-storage-key-value="trayo-onboarding-<%= @invitation.code %>">
-      
-      <!-- Step Indicators -->
-      <div class="max-w-sm mx-auto mb-6 md:mb-12 md:max-w-lg">
-        <ul class="relative flex flex-row gap-x-2">
-          <% steps = ["Bienvenue", "Avantages", "Offre", "Compte", "Broker", "Paiement"] %>
-          <% steps.each_with_index do |label, index| %>
-            <li class="group relative shrink flex-1 last:flex-none">
-              <div class="w-full inline-flex items-center align-middle text-xs">
-                <div class="relative inline-flex flex-col items-center">
-                  <button type="button" data-stepper-target="indicator" data-action="click->stepper#goToStep" data-step="<%= index %>" class="flex size-6 shrink-0 items-center justify-center rounded-full text-sm font-semibold md:size-7">
-                    <span class="step-number"><%= index + 1 %></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="step-check hidden size-4" width="12" height="12" viewBox="0 0 12 12"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" stroke="currentColor"><path d="m1.75,6c1.047,1.048,1.803,2.153,2.461,3.579,1.524-3.076,3.659-5.397,6.039-7.158"></path></g></svg>
-                  </button>
-                  <span class="absolute top-10 hidden text-xs font-medium whitespace-nowrap text-neutral-600 md:block dark:text-neutral-400"><%= label %></span>
-                </div>
-                <div data-stepper-target="line" class="ms-2 h-0.5 w-full flex-1 group-last:hidden"></div>
-              </div>
-            </li>
-          <% end %>
-        </ul>
-      </div>
-
-      <!-- Step Content -->
-      <div class="min-h-[500px] rounded-xl border border-black/10 bg-white p-6 md:p-8 dark:border-white/10 dark:bg-neutral-900">
+<div class="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950">
+  <div class="mx-auto w-full max-w-4xl px-4 py-8 md:py-12">
+    <%= form_with url: onboarding_next_step_path(code: @invitation.code), method: :post, local: true, id: "onboarding-form" do |f| %>
+      <div data-controller="stepper"
+           data-stepper-current-step-value="<%= [@invitation.step - 1, 0].max %>"
+           data-stepper-validate-on-next-value="true"
+           data-stepper-save-progress-value="true"
+           data-stepper-storage-key-value="trayo-onboarding-<%= @invitation.code %>">
         
-        <!-- Step 1: Bienvenue -->
-        <div data-stepper-target="step" class="hidden">
-          <h2 class="mb-2 text-xl font-bold text-neutral-900 dark:text-white">Bienvenue chez Trayo</h2>
-          <p class="mb-6 text-sm text-neutral-600 dark:text-neutral-400">Découvrez le trading automatisé en quelques points</p>
-
-          <div class="space-y-4">
-            <div class="rounded-lg bg-neutral-50 p-4 dark:bg-neutral-800">
-              <div class="flex items-start gap-4">
-                <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 shrink-0">
-                  <i class="fa-solid fa-robot text-blue-600 dark:text-blue-400"></i>
+        <!-- Step Indicators -->
+        <div class="max-w-2xl mx-auto mb-8 md:mb-12">
+          <ul class="relative flex flex-row gap-x-2">
+            <% steps = ["Bienvenue", "Avantages", "Offre", "Compte", "Broker", "Paiement"] %>
+            <% steps.each_with_index do |label, index| %>
+              <li class="group relative shrink flex-1 last:flex-none">
+                <div class="w-full inline-flex items-center align-middle text-xs">
+                  <div class="relative inline-flex flex-col items-center">
+                    <button type="button" data-stepper-target="indicator" data-action="click->stepper#goToStep" data-step="<%= index %>" class="flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold md:size-9 transition-all duration-300 step-indicator">
+                      <span class="step-number"><%= index + 1 %></span>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="step-check hidden size-4" width="12" height="12" viewBox="0 0 12 12"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="currentColor"><path d="m1.75,6c1.047,1.048,1.803,2.153,2.461,3.579,1.524-3.076,3.659-5.397,6.039-7.158"></path></g></svg>
+                    </button>
+                    <span class="absolute top-12 hidden text-xs font-medium whitespace-nowrap text-neutral-500 md:block"><%= label %></span>
+                  </div>
+                  <div data-stepper-target="line" class="ms-2 h-1 w-full flex-1 group-last:hidden rounded-full transition-all duration-500"></div>
                 </div>
-                <div>
-                  <h3 class="font-semibold text-neutral-900 dark:text-white mb-1">Trading 100% Automatisé</h3>
-                  <p class="text-sm text-neutral-600 dark:text-neutral-400">Nos robots tradent pour vous 24h/24, 7j/7 sur les marchés financiers.</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="rounded-lg bg-neutral-50 p-4 dark:bg-neutral-800">
-              <div class="flex items-start gap-4">
-                <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 shrink-0">
-                  <i class="fa-solid fa-shield-halved text-emerald-600 dark:text-emerald-400"></i>
-                </div>
-                <div>
-                  <h3 class="font-semibold text-neutral-900 dark:text-white mb-1">Vos fonds restent chez vous</h3>
-                  <p class="text-sm text-neutral-600 dark:text-neutral-400">Votre argent reste sur votre compte broker. Nous n'avons jamais accès à vos fonds.</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="rounded-lg bg-neutral-50 p-4 dark:bg-neutral-800">
-              <div class="flex items-start gap-4">
-                <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 shrink-0">
-                  <i class="fa-solid fa-chart-line text-amber-600 dark:text-amber-400"></i>
-                </div>
-                <div>
-                  <h3 class="font-semibold text-neutral-900 dark:text-white mb-1">Performance transparente</h3>
-                  <p class="text-sm text-neutral-600 dark:text-neutral-400">Suivez vos trades et performances en temps réel depuis votre tableau de bord.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+              </li>
+            <% end %>
+          </ul>
         </div>
 
-        <!-- Step 2: Avantages -->
-        <div data-stepper-target="step" class="hidden">
-          <h2 class="mb-2 text-xl font-bold text-neutral-900 dark:text-white">Pourquoi choisir Trayo ?</h2>
-          <p class="mb-6 text-sm text-neutral-600 dark:text-neutral-400">Les avantages qui font la différence</p>
-
-          <div class="space-y-4">
-            <div class="rounded-lg bg-neutral-50 p-4 dark:bg-neutral-800">
-              <div class="flex items-center gap-3 mb-2">
-                <i class="fa-solid fa-check-circle text-emerald-500"></i>
-                <h3 class="font-semibold text-neutral-900 dark:text-white">VPS Dédié inclus</h3>
+        <!-- Step Content -->
+        <div class="relative rounded-2xl border border-neutral-800 bg-neutral-900/80 backdrop-blur-xl p-6 md:p-8 shadow-2xl shadow-black/20 overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
+          
+          <!-- Step 1: Bienvenue -->
+          <div data-stepper-target="step" class="hidden relative">
+            <div class="text-center mb-8">
+              <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25 mb-4">
+                <i class="fa-solid fa-rocket text-white text-2xl"></i>
               </div>
-              <p class="text-sm text-neutral-600 dark:text-neutral-400 ml-7">Un serveur dédié pour faire tourner vos robots 24h/24 sans interruption.</p>
+              <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Bienvenue chez Trayo</h2>
+              <p class="text-neutral-400">Découvrez le trading automatisé en quelques points</p>
             </div>
 
-            <div class="rounded-lg bg-neutral-50 p-4 dark:bg-neutral-800">
-              <div class="flex items-center gap-3 mb-2">
-                <i class="fa-solid fa-check-circle text-emerald-500"></i>
-                <h3 class="font-semibold text-neutral-900 dark:text-white">Support prioritaire</h3>
+            <div class="space-y-4">
+              <div class="group rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 p-5 transition-all hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/10">
+                <div class="flex items-start gap-4">
+                  <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 shadow-lg shadow-blue-500/25 shrink-0">
+                    <i class="fa-solid fa-robot text-white text-lg"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-white mb-1 text-lg">Trading 100% Automatisé</h3>
+                    <p class="text-neutral-400">Nos robots tradent pour vous 24h/24, 7j/7 sur les marchés financiers.</p>
+                  </div>
+                </div>
               </div>
-              <p class="text-sm text-neutral-600 dark:text-neutral-400 ml-7">Une équipe dédiée pour vous accompagner dans votre expérience de trading.</p>
-            </div>
 
-            <div class="rounded-lg bg-neutral-50 p-4 dark:bg-neutral-800">
-              <div class="flex items-center gap-3 mb-2">
-                <i class="fa-solid fa-check-circle text-emerald-500"></i>
-                <h3 class="font-semibold text-neutral-900 dark:text-white">Commission sur profits uniquement</h3>
+              <div class="group rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 p-5 transition-all hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/10">
+                <div class="flex items-start gap-4">
+                  <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25 shrink-0">
+                    <i class="fa-solid fa-shield-halved text-white text-lg"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-white mb-1 text-lg">Vos fonds restent chez vous</h3>
+                    <p class="text-neutral-400">Votre argent reste sur votre compte broker. Nous n'avons jamais accès à vos fonds.</p>
+                  </div>
+                </div>
               </div>
-              <p class="text-sm text-neutral-600 dark:text-neutral-400 ml-7">Nous ne gagnons que si vous gagnez. Aucune commission sur vos pertes.</p>
-            </div>
 
-            <div class="rounded-lg bg-neutral-50 p-4 dark:bg-neutral-800">
-              <div class="flex items-center gap-3 mb-2">
-                <i class="fa-solid fa-check-circle text-emerald-500"></i>
-                <h3 class="font-semibold text-neutral-900 dark:text-white">Bots testés et optimisés</h3>
+              <div class="group rounded-xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 p-5 transition-all hover:border-purple-500/40 hover:shadow-lg hover:shadow-purple-500/10">
+                <div class="flex items-start gap-4">
+                  <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg shadow-purple-500/25 shrink-0">
+                    <i class="fa-solid fa-chart-line text-white text-lg"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-white mb-1 text-lg">Performance transparente</h3>
+                    <p class="text-neutral-400">Suivez vos trades et performances en temps réel depuis votre tableau de bord.</p>
+                  </div>
+                </div>
               </div>
-              <p class="text-sm text-neutral-600 dark:text-neutral-400 ml-7">Tous nos robots sont backtestés et optimisés avant mise en production.</p>
             </div>
           </div>
-        </div>
 
-        <!-- Step 3: Choix de l'offre -->
-        <div data-stepper-target="step" class="hidden" data-validate-offer="true">
-          <h2 class="mb-2 text-xl font-bold text-neutral-900 dark:text-white">Choisissez votre formule</h2>
-          <p class="mb-6 text-sm text-neutral-600 dark:text-neutral-400">Deux options pour démarrer votre aventure trading</p>
-
-          <div id="offer-error" class="hidden mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-            <i class="fa-solid fa-exclamation-circle mr-2"></i>
-            Veuillez sélectionner une offre
-          </div>
-
-          <!-- Toggle Abonnement / Licence -->
-          <div class="flex items-center justify-center gap-2 mb-6 p-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800">
-            <button type="button" id="toggle-subscription" class="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm">
-              🚀 Abonnements tout inclus
-            </button>
-            <button type="button" id="toggle-licence" class="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200">
-              💎 Licences à vie
-            </button>
-          </div>
-
-          <!-- Section Licences -->
-          <div id="section-licence" class="hidden space-y-4">
-            <div class="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 dark:border-blue-500/30 mb-4">
-              <p class="text-sm text-blue-700 dark:text-blue-300">
-                <i class="fa-solid fa-infinity mr-2"></i>
-                <strong>Achat unique</strong> — Payez une fois, utilisez à vie. Idéal pour un investissement long terme.
-              </p>
+          <!-- Step 2: Avantages -->
+          <div data-stepper-target="step" class="hidden relative">
+            <div class="text-center mb-8">
+              <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg shadow-purple-500/25 mb-4">
+                <i class="fa-solid fa-star text-white text-2xl"></i>
+              </div>
+              <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Pourquoi choisir Trayo ?</h2>
+              <p class="text-neutral-400">Les avantages qui font la différence</p>
             </div>
 
-            <div class="grid gap-3 max-h-[280px] overflow-y-auto pr-2">
-              <% @trading_bots.each do |bot| %>
-                <label class="flex items-center gap-4 p-4 rounded-lg bg-neutral-50 dark:bg-neutral-800 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors border border-transparent hover:border-neutral-200 dark:hover:border-neutral-600">
-                  <input type="checkbox" name="selected_bots[]" value="<%= bot.id %>" data-price="<%= bot.price %>" data-bot-checkbox class="size-5 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500">
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                      <span class="font-medium text-neutral-900 dark:text-white"><%= bot.name %></span>
-                      <span class="font-bold text-neutral-900 dark:text-white"><%= number_to_currency(bot.price, unit: "€", format: "%n%u") %></span>
+            <div class="grid gap-4 md:grid-cols-2">
+              <div class="rounded-xl bg-neutral-800/50 border border-neutral-700/50 p-5 hover:border-emerald-500/30 transition-all">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-server text-emerald-400"></i>
+                  </div>
+                  <h3 class="font-bold text-white">VPS Dédié inclus</h3>
+                </div>
+                <p class="text-sm text-neutral-400">Un serveur dédié pour faire tourner vos robots 24h/24 sans interruption.</p>
+              </div>
+
+              <div class="rounded-xl bg-neutral-800/50 border border-neutral-700/50 p-5 hover:border-blue-500/30 transition-all">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-headset text-blue-400"></i>
+                  </div>
+                  <h3 class="font-bold text-white">Support prioritaire</h3>
+                </div>
+                <p class="text-sm text-neutral-400">Une équipe dédiée pour vous accompagner dans votre expérience de trading.</p>
+              </div>
+
+              <div class="rounded-xl bg-neutral-800/50 border border-neutral-700/50 p-5 hover:border-amber-500/30 transition-all">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-percent text-amber-400"></i>
+                  </div>
+                  <h3 class="font-bold text-white">Commission sur profits</h3>
+                </div>
+                <p class="text-sm text-neutral-400">Nous ne gagnons que si vous gagnez. Aucune commission sur vos pertes.</p>
+              </div>
+
+              <div class="rounded-xl bg-neutral-800/50 border border-neutral-700/50 p-5 hover:border-purple-500/30 transition-all">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-flask text-purple-400"></i>
+                  </div>
+                  <h3 class="font-bold text-white">Bots testés et optimisés</h3>
+                </div>
+                <p class="text-sm text-neutral-400">Tous nos robots sont backtestés et optimisés avant mise en production.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Choix de l'offre -->
+          <div data-stepper-target="step" class="hidden relative" data-validate-offer="true">
+            <div class="text-center mb-8">
+              <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/25 mb-4">
+                <i class="fa-solid fa-gem text-white text-2xl"></i>
+              </div>
+              <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Choisissez votre formule</h2>
+              <p class="text-neutral-400">Deux options pour démarrer votre aventure trading</p>
+            </div>
+
+            <div id="offer-error" class="hidden mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-exclamation-circle"></i>
+              Veuillez sélectionner une offre
+            </div>
+
+            <!-- Toggle Abonnement / Licence -->
+            <div class="flex items-center justify-center gap-1 mb-6 p-1 rounded-xl bg-neutral-800 border border-neutral-700">
+              <button type="button" id="toggle-subscription" class="flex-1 px-4 py-3 rounded-lg text-sm font-bold transition-all bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg">
+                🚀 Abonnements tout inclus
+              </button>
+              <button type="button" id="toggle-licence" class="flex-1 px-4 py-3 rounded-lg text-sm font-bold transition-all text-neutral-400 hover:text-white">
+                💎 Licences à vie
+              </button>
+            </div>
+
+            <!-- Section Licences -->
+            <div id="section-licence" class="hidden space-y-4">
+              <div class="p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30">
+                <p class="text-sm text-blue-300">
+                  <i class="fa-solid fa-infinity mr-2"></i>
+                  <strong>Achat unique</strong> — Payez une fois, utilisez à vie. Idéal pour un investissement long terme.
+                </p>
+              </div>
+
+              <div class="grid gap-3 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
+                <% @trading_bots.each do |bot| %>
+                  <label class="flex items-center gap-4 p-4 rounded-xl bg-neutral-800/50 border border-neutral-700 cursor-pointer hover:bg-neutral-800 hover:border-purple-500/50 transition-all">
+                    <input type="checkbox" name="selected_bots[]" value="<%= bot.id %>" data-price="<%= bot.price %>" data-bot-checkbox class="size-5 rounded border-neutral-600 text-purple-500 focus:ring-purple-500 bg-neutral-700">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center justify-between">
+                        <span class="font-bold text-white"><%= bot.name %></span>
+                        <span class="font-bold text-emerald-400"><%= number_to_currency(bot.price, unit: "€", format: "%n%u") %></span>
+                      </div>
+                      <p class="text-sm text-neutral-400 truncate"><%= bot.description %></p>
                     </div>
-                    <p class="text-sm text-neutral-500 dark:text-neutral-400 truncate"><%= bot.description %></p>
-                  </div>
-                </label>
-              <% end %>
-            </div>
-
-            <div class="mt-4 space-y-2">
-              <div class="flex items-center justify-between p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800">
-                <span class="text-neutral-600 dark:text-neutral-400">Total Bots</span>
-                <span class="font-bold text-neutral-900 dark:text-white" data-bots-total>0 €</span>
-              </div>
-              <div class="flex items-center justify-between p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800">
-                <span class="text-neutral-600 dark:text-neutral-400">VPS Dédié</span>
-                <span class="font-bold text-neutral-900 dark:text-white">399.99 €/an</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Section Abonnements -->
-          <div id="section-subscription" class="space-y-4">
-            <div class="p-4 rounded-lg bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 dark:border-emerald-500/30 mb-4">
-              <p class="text-sm text-emerald-700 dark:text-emerald-300">
-                <i class="fa-solid fa-rocket mr-2"></i>
-                <strong>Tout inclus</strong> — Bots + VPS + Mises à jour + Support prioritaire. Sans engagement.
-              </p>
-            </div>
-
-            <div class="grid gap-4">
-              <!-- Starter -->
-              <label class="relative flex flex-col p-5 rounded-xl cursor-pointer transition-all border-2 hover:shadow-lg subscription-card" data-plan="starter">
-                <input type="radio" name="subscription_plan" value="starter" data-price="99" class="sr-only subscription-radio">
-                <div class="absolute top-4 right-4">
-                  <div class="w-5 h-5 rounded-full border-2 border-neutral-300 dark:border-neutral-600 subscription-check flex items-center justify-center">
-                    <div class="w-2.5 h-2.5 rounded-full bg-white scale-0 transition-transform"></div>
-                  </div>
-                </div>
-                <div class="flex items-center gap-3 mb-3">
-                  <span class="text-2xl">🥉</span>
-                  <div>
-                    <h4 class="font-bold text-lg text-neutral-900 dark:text-white">Starter</h4>
-                    <p class="text-sm text-neutral-500 dark:text-neutral-400">Pour débuter sereinement</p>
-                  </div>
-                </div>
-                <div class="flex items-baseline gap-1 mb-4">
-                  <span class="text-3xl font-bold text-neutral-900 dark:text-white">99€</span>
-                  <span class="text-neutral-500 dark:text-neutral-400">/mois</span>
-                </div>
-                <ul class="space-y-2 text-sm">
-                  <li class="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
-                    <i class="fa-solid fa-check text-emerald-500"></i> Bot GBP/USD
-                  </li>
-                  <li class="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
-                    <i class="fa-solid fa-check text-emerald-500"></i> VPS Dédié inclus
-                  </li>
-                  <li class="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
-                    <i class="fa-solid fa-check text-emerald-500"></i> Support email
-                  </li>
-                </ul>
-              </label>
-
-              <!-- Pro - Recommandé -->
-              <label class="relative flex flex-col p-5 rounded-xl cursor-pointer transition-all border-2 hover:shadow-lg subscription-card ring-2 ring-blue-500 selected" data-plan="pro">
-                <input type="radio" name="subscription_plan" value="pro" data-price="149.99" class="sr-only subscription-radio" checked>
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span class="px-3 py-1 rounded-full bg-blue-500 text-white text-xs font-bold">POPULAIRE</span>
-                </div>
-                <div class="absolute top-4 right-4">
-                  <div class="w-5 h-5 rounded-full border-2 border-neutral-300 dark:border-neutral-600 subscription-check flex items-center justify-center">
-                    <div class="w-2.5 h-2.5 rounded-full bg-white scale-0 transition-transform"></div>
-                  </div>
-                </div>
-                <div class="flex items-center gap-3 mb-3">
-                  <span class="text-2xl">🥈</span>
-                  <div>
-                    <h4 class="font-bold text-lg text-neutral-900 dark:text-white">Pro</h4>
-                    <p class="text-sm text-neutral-500 dark:text-neutral-400">Le meilleur rapport qualité/prix</p>
-                  </div>
-                </div>
-                <div class="flex items-baseline gap-1 mb-4">
-                  <span class="text-3xl font-bold text-neutral-900 dark:text-white">149,99€</span>
-                  <span class="text-neutral-500 dark:text-neutral-400">/mois</span>
-                </div>
-                <ul class="space-y-2 text-sm">
-                  <li class="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
-                    <i class="fa-solid fa-check text-emerald-500"></i> Bot GBP/USD
-                  </li>
-                  <li class="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
-                    <i class="fa-solid fa-check text-emerald-500"></i> Bot Or (XAU/USD)
-                  </li>
-                  <li class="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
-                    <i class="fa-solid fa-check text-emerald-500"></i> VPS Dédié inclus
-                  </li>
-                  <li class="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
-                    <i class="fa-solid fa-check text-emerald-500"></i> Support prioritaire
-                  </li>
-                </ul>
-              </label>
-
-              <!-- Premium -->
-              <label class="relative flex flex-col p-5 rounded-xl cursor-pointer transition-all border-2 hover:shadow-lg subscription-card" data-plan="premium">
-                <input type="radio" name="subscription_plan" value="premium" data-price="299.99" class="sr-only subscription-radio">
-                <div class="absolute top-4 right-4">
-                  <div class="w-5 h-5 rounded-full border-2 border-neutral-300 dark:border-neutral-600 subscription-check flex items-center justify-center">
-                    <div class="w-2.5 h-2.5 rounded-full bg-white scale-0 transition-transform"></div>
-                  </div>
-                </div>
-                <div class="flex items-center gap-3 mb-3">
-                  <span class="text-2xl">🥇</span>
-                  <div>
-                    <h4 class="font-bold text-lg text-neutral-900 dark:text-white">Premium</h4>
-                    <p class="text-sm text-neutral-500 dark:text-neutral-400">Accès complet à tous les bots</p>
-                  </div>
-                </div>
-                <div class="flex items-baseline gap-1 mb-4">
-                  <span class="text-3xl font-bold text-neutral-900 dark:text-white">299,99€</span>
-                  <span class="text-neutral-500 dark:text-neutral-400">/mois</span>
-                </div>
-                <ul class="space-y-2 text-sm">
-                  <li class="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
-                    <i class="fa-solid fa-check text-emerald-500"></i> <strong>Tous les bots inclus</strong>
-                  </li>
-                  <li class="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
-                    <i class="fa-solid fa-check text-emerald-500"></i> VPS Dédié inclus
-                  </li>
-                  <li class="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
-                    <i class="fa-solid fa-check text-emerald-500"></i> Support VIP 24/7
-                  </li>
-                  <li class="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
-                    <i class="fa-solid fa-check text-emerald-500"></i> Nouveaux bots en avant-première
-                  </li>
-                </ul>
-              </label>
-            </div>
-          </div>
-
-          <input type="hidden" name="offer_type" id="offer-type" value="subscription">
-        </div>
-
-        <!-- Step 4: Création de compte -->
-        <div data-stepper-target="step" class="hidden">
-          <h2 class="mb-2 text-xl font-bold text-neutral-900 dark:text-white">Créez votre compte</h2>
-          <p class="mb-6 text-sm text-neutral-600 dark:text-neutral-400">Vos informations personnelles</p>
-
-          <div class="space-y-4">
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Prénom <span class="text-red-500">*</span></label>
-              <input type="text" name="first_name" required placeholder="Jean" class="form-control" value="<%= @invitation.first_name %>">
-            </div>
-
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Nom <span class="text-red-500">*</span></label>
-              <input type="text" name="last_name" required placeholder="Dupont" class="form-control" value="<%= @invitation.last_name %>">
-            </div>
-
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Email <span class="text-red-500">*</span></label>
-              <input type="email" name="email" required placeholder="jean.dupont@email.com" class="form-control" value="<%= @invitation.email %>">
-            </div>
-
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Téléphone <span class="text-red-500">*</span></label>
-              <input type="tel" name="phone" required placeholder="+33 6 12 34 56 78" class="form-control" value="<%= @invitation.phone %>">
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 5: Broker -->
-        <div data-stepper-target="step" class="hidden">
-          <h2 class="mb-2 text-xl font-bold text-neutral-900 dark:text-white">Connectez votre broker</h2>
-          <p class="mb-6 text-sm text-neutral-600 dark:text-neutral-400">Entrez vos identifiants MetaTrader 5</p>
-
-          <div class="space-y-4">
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Broker <span class="text-red-500">*</span></label>
-              <select name="broker_name" required class="form-control">
-                <option value="">Sélectionnez un broker...</option>
-                <% @brokers.each do |broker| %>
-                  <option value="<%= broker[:name] %>"><%= broker[:name] %></option>
+                  </label>
                 <% end %>
-              </select>
-            </div>
+              </div>
 
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Numéro de compte MT5 <span class="text-red-500">*</span></label>
-              <input type="text" name="account_id" required placeholder="123456789" class="form-control">
-            </div>
-
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Mot de passe MT5 <span class="text-red-500">*</span></label>
-              <input type="password" name="account_password" required placeholder="••••••••" class="form-control">
-            </div>
-
-            <div class="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50">
-              <div class="flex items-start gap-3">
-                <i class="fa-solid fa-info-circle text-blue-500 mt-0.5"></i>
-                <p class="text-sm text-blue-700 dark:text-blue-300">Vos identifiants sont chiffrés et ne servent qu'à connecter nos robots à votre compte MT5.</p>
+              <div class="mt-4 space-y-2">
+                <div class="flex items-center justify-between p-4 rounded-xl bg-neutral-800/50 border border-neutral-700">
+                  <span class="text-neutral-400">Total Bots</span>
+                  <span class="font-bold text-white" data-bots-total>0 €</span>
+                </div>
+                <div class="flex items-center justify-between p-4 rounded-xl bg-neutral-800/50 border border-neutral-700">
+                  <span class="text-neutral-400">VPS Dédié</span>
+                  <span class="font-bold text-white">399.99 €/an</span>
+                </div>
               </div>
             </div>
+
+            <!-- Section Abonnements -->
+            <div id="section-subscription" class="space-y-4">
+              <div class="p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30">
+                <p class="text-sm text-emerald-300">
+                  <i class="fa-solid fa-rocket mr-2"></i>
+                  <strong>Tout inclus</strong> — Bots + VPS + Mises à jour + Support prioritaire. Sans engagement.
+                </p>
+              </div>
+
+              <div class="grid gap-4">
+                <!-- Starter -->
+                <label class="subscription-card relative flex flex-col p-5 rounded-xl cursor-pointer transition-all border-2 border-neutral-700 bg-neutral-800/50 hover:border-neutral-600" data-plan="starter">
+                  <input type="radio" name="subscription_plan" value="starter" data-price="99" class="sr-only subscription-radio">
+                  <div class="absolute top-4 right-4">
+                    <div class="subscription-check w-6 h-6 rounded-full border-2 border-neutral-600 flex items-center justify-center transition-all">
+                      <i class="fa-solid fa-check text-white text-xs opacity-0 transition-opacity"></i>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3 mb-3">
+                    <span class="text-3xl">🥉</span>
+                    <div>
+                      <h4 class="font-bold text-lg text-white">Starter</h4>
+                      <p class="text-sm text-neutral-400">Pour débuter sereinement</p>
+                    </div>
+                  </div>
+                  <div class="flex items-baseline gap-1 mb-4">
+                    <span class="text-3xl font-black text-white">99€</span>
+                    <span class="text-neutral-400">/mois</span>
+                  </div>
+                  <ul class="space-y-2 text-sm">
+                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> Bot GBP/USD</li>
+                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> VPS Dédié inclus</li>
+                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> Support email</li>
+                  </ul>
+                </label>
+
+                <!-- Pro - Recommandé -->
+                <label class="subscription-card selected relative flex flex-col p-5 rounded-xl cursor-pointer transition-all border-2 border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/50" data-plan="pro">
+                  <input type="radio" name="subscription_plan" value="pro" data-price="149.99" class="sr-only subscription-radio" checked>
+                  <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span class="px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-bold shadow-lg shadow-blue-500/30">⭐ POPULAIRE</span>
+                  </div>
+                  <div class="absolute top-4 right-4">
+                    <div class="subscription-check w-6 h-6 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center transition-all">
+                      <i class="fa-solid fa-check text-white text-xs transition-opacity"></i>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3 mb-3">
+                    <span class="text-3xl">🥈</span>
+                    <div>
+                      <h4 class="font-bold text-lg text-white">Pro</h4>
+                      <p class="text-sm text-blue-300">Le meilleur rapport qualité/prix</p>
+                    </div>
+                  </div>
+                  <div class="flex items-baseline gap-1 mb-4">
+                    <span class="text-3xl font-black text-white">149,99€</span>
+                    <span class="text-neutral-400">/mois</span>
+                  </div>
+                  <ul class="space-y-2 text-sm">
+                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> Bot GBP/USD</li>
+                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> Bot Or (XAU/USD)</li>
+                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> VPS Dédié inclus</li>
+                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> Support prioritaire</li>
+                  </ul>
+                </label>
+
+                <!-- Premium -->
+                <label class="subscription-card relative flex flex-col p-5 rounded-xl cursor-pointer transition-all border-2 border-neutral-700 bg-neutral-800/50 hover:border-neutral-600" data-plan="premium">
+                  <input type="radio" name="subscription_plan" value="premium" data-price="299.99" class="sr-only subscription-radio">
+                  <div class="absolute top-4 right-4">
+                    <div class="subscription-check w-6 h-6 rounded-full border-2 border-neutral-600 flex items-center justify-center transition-all">
+                      <i class="fa-solid fa-check text-white text-xs opacity-0 transition-opacity"></i>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3 mb-3">
+                    <span class="text-3xl">🥇</span>
+                    <div>
+                      <h4 class="font-bold text-lg text-white">Premium</h4>
+                      <p class="text-sm text-neutral-400">Accès complet à tous les bots</p>
+                    </div>
+                  </div>
+                  <div class="flex items-baseline gap-1 mb-4">
+                    <span class="text-3xl font-black text-white">299,99€</span>
+                    <span class="text-neutral-400">/mois</span>
+                  </div>
+                  <ul class="space-y-2 text-sm">
+                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> <strong>Tous les bots inclus</strong></li>
+                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> VPS Dédié inclus</li>
+                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> Support VIP 24/7</li>
+                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> Nouveaux bots en avant-première</li>
+                  </ul>
+                </label>
+              </div>
+            </div>
+
+            <input type="hidden" name="offer_type" id="offer-type" value="subscription">
           </div>
-        </div>
 
-        <!-- Step 6: Paiement -->
-        <div data-stepper-target="step" class="hidden">
-          <h2 class="mb-2 text-xl font-bold text-neutral-900 dark:text-white">Finalisez votre commande</h2>
-          <p class="mb-6 text-sm text-neutral-600 dark:text-neutral-400">Récapitulatif et paiement sécurisé</p>
-
-          <div class="space-y-6">
-            <div class="rounded-lg bg-neutral-50 p-4 dark:bg-neutral-800">
-              <h3 class="mb-3 text-sm font-semibold text-neutral-900 dark:text-white">Récapitulatif</h3>
-              <div class="space-y-2 text-sm">
-                <div class="flex justify-between">
-                  <span class="text-neutral-600 dark:text-neutral-400">Nom</span>
-                  <span class="font-medium text-neutral-900 dark:text-white" data-review-field="full_name">—</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-neutral-600 dark:text-neutral-400">Email</span>
-                  <span class="font-medium text-neutral-900 dark:text-white" data-review-field="email">—</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-neutral-600 dark:text-neutral-400">Broker</span>
-                  <span class="font-medium text-neutral-900 dark:text-white" data-review-field="broker_name">—</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-neutral-600 dark:text-neutral-400">Formule</span>
-                  <span class="font-medium text-neutral-900 dark:text-white" id="review-offer">—</span>
-                </div>
+          <!-- Step 4: Création de compte -->
+          <div data-stepper-target="step" class="hidden relative">
+            <div class="text-center mb-8">
+              <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 shadow-lg shadow-blue-500/25 mb-4">
+                <i class="fa-solid fa-user-plus text-white text-2xl"></i>
               </div>
+              <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Créez votre compte</h2>
+              <p class="text-neutral-400">Vos informations personnelles</p>
             </div>
 
-            <div class="rounded-lg bg-neutral-50 p-4 dark:bg-neutral-800">
-              <div class="flex justify-between items-center mb-4">
-                <span class="text-neutral-600 dark:text-neutral-400">Total à payer</span>
-                <span class="text-2xl font-bold text-neutral-900 dark:text-white" id="total-amount">—</span>
-              </div>
-              <div id="subscription-notice" class="hidden mb-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-sm text-blue-700 dark:text-blue-300">
-                <i class="fa-solid fa-sync mr-2"></i>
-                Abonnement mensuel renouvelé automatiquement. Annulable à tout moment.
-              </div>
+            <div class="space-y-5 max-w-md mx-auto">
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Carte bancaire</label>
-                <div id="card-element" class="form-control"></div>
-                <div id="card-errors" class="mt-2 text-sm text-red-500"></div>
+                <label class="mb-2 block text-sm font-medium text-neutral-300">Prénom <span class="text-red-400">*</span></label>
+                <input type="text" name="first_name" required placeholder="Jean" class="w-full px-4 py-3 rounded-xl bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all" value="<%= @invitation.first_name %>">
+              </div>
+
+              <div>
+                <label class="mb-2 block text-sm font-medium text-neutral-300">Nom <span class="text-red-400">*</span></label>
+                <input type="text" name="last_name" required placeholder="Dupont" class="w-full px-4 py-3 rounded-xl bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all" value="<%= @invitation.last_name %>">
+              </div>
+
+              <div>
+                <label class="mb-2 block text-sm font-medium text-neutral-300">Email <span class="text-red-400">*</span></label>
+                <input type="email" name="email" required placeholder="jean.dupont@email.com" class="w-full px-4 py-3 rounded-xl bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all" value="<%= @invitation.email %>">
+              </div>
+
+              <div>
+                <label class="mb-2 block text-sm font-medium text-neutral-300">Téléphone <span class="text-red-400">*</span></label>
+                <input type="tel" name="phone" required placeholder="+33 6 12 34 56 78" class="w-full px-4 py-3 rounded-xl bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all" value="<%= @invitation.phone %>">
               </div>
             </div>
+          </div>
 
-            <div class="flex items-center gap-2 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-sm">
-              <i class="fa-solid fa-shield-halved"></i>
-              <span>Paiement 100% sécurisé par Stripe</span>
+          <!-- Step 5: Broker -->
+          <div data-stepper-target="step" class="hidden relative">
+            <div class="text-center mb-8">
+              <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/25 mb-4">
+                <i class="fa-solid fa-link text-white text-2xl"></i>
+              </div>
+              <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Connectez votre broker</h2>
+              <p class="text-neutral-400">Entrez vos identifiants MetaTrader 5</p>
+            </div>
+
+            <div class="space-y-5 max-w-md mx-auto">
+              <div>
+                <label class="mb-2 block text-sm font-medium text-neutral-300">Broker <span class="text-red-400">*</span></label>
+                <select name="broker_name" required class="w-full px-4 py-3 rounded-xl bg-neutral-800 border border-neutral-700 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all">
+                  <option value="">Sélectionnez un broker...</option>
+                  <% @brokers.each do |broker| %>
+                    <option value="<%= broker[:name] %>"><%= broker[:name] %></option>
+                  <% end %>
+                </select>
+              </div>
+
+              <div>
+                <label class="mb-2 block text-sm font-medium text-neutral-300">Numéro de compte MT5 <span class="text-red-400">*</span></label>
+                <input type="text" name="account_id" required placeholder="123456789" class="w-full px-4 py-3 rounded-xl bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all">
+              </div>
+
+              <div>
+                <label class="mb-2 block text-sm font-medium text-neutral-300">Mot de passe MT5 <span class="text-red-400">*</span></label>
+                <input type="password" name="account_password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all">
+              </div>
+
+              <div class="rounded-xl bg-blue-500/10 border border-blue-500/30 p-4">
+                <div class="flex items-start gap-3">
+                  <i class="fa-solid fa-shield-halved text-blue-400 mt-0.5"></i>
+                  <p class="text-sm text-blue-300">Vos identifiants sont chiffrés et ne servent qu'à connecter nos robots à votre compte MT5.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 6: Paiement -->
+          <div data-stepper-target="step" class="hidden relative">
+            <div class="text-center mb-8">
+              <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25 mb-4">
+                <i class="fa-solid fa-credit-card text-white text-2xl"></i>
+              </div>
+              <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Finalisez votre commande</h2>
+              <p class="text-neutral-400">Récapitulatif et paiement sécurisé</p>
+            </div>
+
+            <div class="space-y-6 max-w-md mx-auto">
+              <div class="rounded-xl bg-neutral-800/50 border border-neutral-700 p-5">
+                <h3 class="mb-4 text-sm font-bold text-neutral-400 uppercase tracking-wide">Récapitulatif</h3>
+                <div class="space-y-3 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-neutral-400">Nom</span>
+                    <span class="font-medium text-white" data-review-field="full_name">—</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-neutral-400">Email</span>
+                    <span class="font-medium text-white" data-review-field="email">—</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-neutral-400">Broker</span>
+                    <span class="font-medium text-white" data-review-field="broker_name">—</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-neutral-400">Formule</span>
+                    <span class="font-medium text-white" id="review-offer">—</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 p-5">
+                <div class="flex justify-between items-center mb-5">
+                  <span class="text-neutral-300">Total à payer</span>
+                  <span class="text-3xl font-black text-emerald-400" id="total-amount">—</span>
+                </div>
+                <div id="subscription-notice" class="hidden mb-5 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-sm text-blue-300">
+                  <i class="fa-solid fa-sync mr-2"></i>
+                  Abonnement mensuel renouvelé automatiquement. Annulable à tout moment.
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-neutral-300">Carte bancaire</label>
+                  <div id="card-element" class="p-4 rounded-xl bg-neutral-800 border border-neutral-700"></div>
+                  <div id="card-errors" class="mt-2 text-sm text-red-400"></div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+                <i class="fa-solid fa-shield-halved text-emerald-400 text-lg"></i>
+                <span class="text-emerald-300 text-sm font-medium">Paiement 100% sécurisé par Stripe</span>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- Navigation Buttons -->
+        <div class="mt-6 flex items-center justify-between gap-3">
+          <button type="button" data-stepper-target="prevButton" data-action="click->stepper#previous" class="hidden flex-1 flex items-center justify-center gap-2 h-14 rounded-xl border border-neutral-700 bg-neutral-800/50 text-sm font-bold text-neutral-300 transition-all hover:bg-neutral-800 hover:border-neutral-600">
+            <i class="fa-solid fa-arrow-left"></i>
+            Retour
+          </button>
+
+          <button type="button" data-stepper-target="nextButton" data-action="click->stepper#next" class="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-base font-bold text-white shadow-lg shadow-emerald-500/25 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40">
+            Suivant
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+
+          <button type="button" data-stepper-target="submitButton" data-action="click->stepper#submit" class="hidden flex-1 flex items-center justify-center gap-2 h-14 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-base font-bold text-white shadow-lg shadow-emerald-500/25 transition-all hover:scale-[1.02] hover:shadow-emerald-500/40" id="submit-payment">
+            <i class="fa-solid fa-lock"></i>
+            Payer maintenant
+          </button>
+        </div>
       </div>
-
-      <!-- Navigation Buttons -->
-      <div class="mt-6 flex items-center justify-between gap-2">
-        <button type="button" data-stepper-target="prevButton" data-action="click->stepper#previous" class="hidden w-full flex items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-white/90 px-3.5 py-2 text-sm font-medium whitespace-nowrap text-neutral-800 shadow-xs select-none hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-800/50 dark:text-neutral-50 dark:hover:bg-neutral-700/50 dark:focus-visible:outline-neutral-200">
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" width="12" height="12" viewBox="0 0 12 12"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" stroke="currentColor"><line x1="11" y1="6" x2="1.25" y2="6"></line><polyline points="4.25 2.75 1 6 4.25 9.25"></polyline></g></svg>
-          Retour
-        </button>
-
-        <button type="button" data-stepper-target="nextButton" data-action="click->stepper#next" class="w-full flex items-center justify-center gap-1.5 rounded-lg border border-neutral-400/30 bg-neutral-800 px-3.5 py-2 text-sm font-medium whitespace-nowrap text-white shadow-sm select-none hover:bg-neutral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-100 dark:focus-visible:outline-neutral-200">
-          Suivant
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" width="12" height="12" viewBox="0 0 12 12"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" stroke="currentColor"><line x1="1" y1="6" x2="10.75" y2="6"></line><polyline points="7.75 9.25 11 6 7.75 2.75"></polyline></g></svg>
-        </button>
-
-        <button type="button" data-stepper-target="submitButton" data-action="click->stepper#submit" class="hidden w-full flex items-center justify-center gap-1.5 rounded-lg border border-neutral-400/30 bg-neutral-800 px-3.5 py-2 text-sm font-medium whitespace-nowrap text-white shadow-sm select-none hover:bg-neutral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-100 dark:focus-visible:outline-neutral-200" id="submit-payment">
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" width="12" height="12" viewBox="0 0 12 12"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" stroke="currentColor"><path d="m1.75,6c1.047,1.048,1.803,2.153,2.461,3.579,1.524-3.076,3.659-5.397,6.039-7.158"></path></g></svg>
-          Payer
-        </button>
-      </div>
-    </div>
-  <% end %>
+    <% end %>
+  </div>
 </div>
 
 <style>
-  .subscription-card {
-    border-color: #e5e5e5;
-    background: #fafafa;
-  }
-  .dark .subscription-card {
-    border-color: #404040;
+  .step-indicator {
     background: #262626;
+    border: 2px solid #404040;
+    color: #737373;
   }
+  .step-indicator.active {
+    background: linear-gradient(135deg, #10b981, #14b8a6);
+    border-color: #10b981;
+    color: white;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+  }
+  .step-indicator.completed {
+    background: linear-gradient(135deg, #10b981, #14b8a6);
+    border-color: #10b981;
+    color: white;
+  }
+  [data-stepper-target="line"] {
+    background: #404040;
+  }
+  [data-stepper-target="line"].completed {
+    background: linear-gradient(90deg, #10b981, #14b8a6);
+  }
+  
   .subscription-card.selected {
-    border-color: #3b82f6;
-    background: #eff6ff;
-  }
-  .dark .subscription-card.selected {
     border-color: #3b82f6;
     background: rgba(59, 130, 246, 0.1);
   }
@@ -449,8 +479,23 @@
     border-color: #3b82f6;
     background: #3b82f6;
   }
-  .subscription-card.selected .subscription-check div {
-    transform: scale(1);
+  .subscription-card.selected .subscription-check i {
+    opacity: 1;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #262626;
+    border-radius: 3px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #525252;
+    border-radius: 3px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #737373;
   }
 </style>
 
