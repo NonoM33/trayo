@@ -64,32 +64,32 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <div>
           <label class="block text-sm font-medium text-neutral-400 mb-1.5">Symbole</label>
-          <%= form.text_field :symbol, value: params[:symbol], placeholder: "EURUSD, XAUUSD...", class: "w-full px-3 py-2.5 bg-neutral-800 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+          <%= form.text_field :symbol, value: params[:symbol], placeholder: "EURUSD, XAUUSD...", class: "w-full px-3 py-2.5 !bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
         </div>
         
         <div>
           <label class="block text-sm font-medium text-neutral-400 mb-1.5">Magic Number</label>
-          <%= form.text_field :magic_number, value: params[:magic_number], placeholder: "0, 1234...", class: "w-full px-3 py-2.5 bg-neutral-800 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+          <%= form.text_field :magic_number, value: params[:magic_number], placeholder: "0, 1234...", class: "w-full px-3 py-2.5 !bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
         </div>
         
         <div>
           <label class="block text-sm font-medium text-neutral-400 mb-1.5">Statut</label>
-          <%= form.select :status, options_for_select([['Tous', ''], ['Ouvert', 'open'], ['Fermé', 'closed']], params[:status]), {}, class: "w-full px-3 py-2.5 bg-neutral-800 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+          <%= form.select :status, options_for_select([['Tous', ''], ['Ouvert', 'open'], ['Fermé', 'closed']], params[:status]), {}, class: "w-full px-3 py-2.5 !bg-neutral-800 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
         </div>
         
         <div>
           <label class="block text-sm font-medium text-neutral-400 mb-1.5">Date de début</label>
-          <%= form.date_field :date_from, value: params[:date_from], class: "w-full px-3 py-2.5 bg-neutral-800 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+          <%= form.date_field :date_from, value: params[:date_from], class: "w-full px-3 py-2.5 !bg-neutral-800 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all [color-scheme:dark]" %>
         </div>
         
         <div>
           <label class="block text-sm font-medium text-neutral-400 mb-1.5">Date de fin</label>
-          <%= form.date_field :date_to, value: params[:date_to], class: "w-full px-3 py-2.5 bg-neutral-800 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+          <%= form.date_field :date_to, value: params[:date_to], class: "w-full px-3 py-2.5 !bg-neutral-800 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all [color-scheme:dark]" %>
         </div>
         
         <div>
           <label class="block text-sm font-medium text-neutral-400 mb-1.5">Tri</label>
-          <%= form.select :sort, options_for_select([['Date (récent)', ''], ['Symbole', 'symbol'], ['Profit', 'profit'], ['Magic Number', 'magic_number']], params[:sort]), {}, class: "w-full px-3 py-2.5 bg-neutral-800 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+          <%= form.select :sort, options_for_select([['Date (récent)', ''], ['Symbole', 'symbol'], ['Profit', 'profit'], ['Magic Number', 'magic_number']], params[:sort]), {}, class: "w-full px-3 py-2.5 !bg-neutral-800 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
         </div>
       </div>
       
@@ -176,10 +176,10 @@
         </h3>
       </div>
       <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead>
-            <tr class="bg-neutral-800/50 border-b border-neutral-800">
-              <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wide">Symbole</th>
+        <table class="w-full !bg-transparent !border-0">
+          <thead class="!bg-transparent">
+            <tr class="border-b border-neutral-800">
+              <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wide">Symbole</th>
               <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wide">Trades</th>
               <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wide">Profit Total</th>
               <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wide">Taux Réussite</th>
@@ -228,10 +228,10 @@
 
     <% if @trades.present? && @trades.any? %>
       <div class="max-h-[600px] overflow-auto bg-neutral-950">
-        <table class="w-full min-w-[900px]">
-          <thead class="sticky top-0 z-10">
-            <tr class="bg-neutral-900 border-b border-neutral-800">
-              <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wide">Date</th>
+        <table class="w-full min-w-[900px] !bg-transparent !border-0">
+          <thead class="sticky top-0 z-10 !bg-neutral-950">
+            <tr class="border-b border-neutral-800">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wide">Date</th>
               <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wide">Symbole</th>
               <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wide">Type</th>
               <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wide">Volume</th>

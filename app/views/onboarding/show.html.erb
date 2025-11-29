@@ -455,10 +455,14 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  let stripe, cardElement, elements;
-  let currentOfferType = 'subscription';
-  let selectedPlan = 'pro'; // Pro sélectionné par défaut
+let stripe, cardElement, elements;
+let currentOfferType = 'subscription';
+let selectedPlan = 'pro';
+let onboardingInitialized = false;
+
+function initOnboarding() {
+  if (onboardingInitialized) return;
+  onboardingInitialized = true;
   
   // Toggle Licence / Subscription
   const toggleLicence = document.getElementById('toggle-licence');
@@ -695,5 +699,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   updateTotal();
-});
+}
+
+document.addEventListener('DOMContentLoaded', initOnboarding);
+document.addEventListener('turbo:load', function() { onboardingInitialized = false; initOnboarding(); });
+document.addEventListener('turbo:render', function() { onboardingInitialized = false; initOnboarding(); });
 </script>

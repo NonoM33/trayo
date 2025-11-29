@@ -20,7 +20,7 @@
   <div data-scroll-area-target="viewport"
        data-action="scroll->scroll-area#onViewportScroll"
        class="max-h-[600px] overflow-auto scrollbar-hide bg-neutral-950">
-    <table class="w-full min-w-[<%= local_assigns[:min_width] || '800px' %>]">
+    <table class="w-full min-w-[<%= local_assigns[:min_width] || '800px' %>] !bg-transparent !border-0">
       <%= yield %>
     </table>
   </div>

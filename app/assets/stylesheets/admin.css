@@ -24,14 +24,14 @@
   --gradient-ocean: linear-gradient(135deg, #667eea 0%, #06b6d4 100%);
   
   --bg-body: #1a1a1a;
-  --bg-card: rgba(255, 255, 255, 0.8);
+  --bg-card: #1a1a1a;
   --bg-navbar: rgba(30, 30, 30, 0.8);
   --bg-sidebar: rgba(30, 30, 30, 0.8);
-  --bg-input: rgba(255, 255, 255, 0.6);
-  --card-background: rgba(255, 255, 255, 0.8);
-  --background-secondary: rgba(247, 247, 248, 0.8);
-  --bg-hover: rgba(0, 0, 0, 0.04);
-  --bg-active: rgba(0, 0, 0, 0.08);
+  --bg-input: #262626;
+  --card-background: #1a1a1a;
+  --background-secondary: #262626;
+  --bg-hover: rgba(255, 255, 255, 0.05);
+  --bg-active: rgba(255, 255, 255, 0.08);
   --bg-info-box: rgba(102, 126, 234, 0.1);
   --bg-success-box: rgba(46, 204, 113, 0.1);
   --bg-warning-box: rgba(255, 193, 7, 0.1);

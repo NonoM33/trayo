@@ -1,5 +1,5 @@
-<thead class="sticky top-0 z-10 bg-neutral-900">
-  <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+<thead class="sticky top-0 z-10 !bg-neutral-950">
+  <tr class="*:py-3 *:text-left *:align-middle border-b border-neutral-800">
     <% (local_assigns[:columns] || []).each do |col| %>
       <% 
         align_class = col[:align] == 'right' ? 'text-right' : (col[:align] == 'center' ? 'text-center' : 'text-left')

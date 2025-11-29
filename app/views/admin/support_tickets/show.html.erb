@@ -198,6 +198,10 @@
         }
       });
     }
-  });
+  }
+  
+  document.addEventListener('DOMContentLoaded', initTicketStatusForm);
+  document.addEventListener('turbo:load', initTicketStatusForm);
+  document.addEventListener('turbo:render', initTicketStatusForm);
 </script>
 
