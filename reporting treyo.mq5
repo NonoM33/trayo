@@ -1115,7 +1115,7 @@ string GetOpenPositionsJSON()
             open_time_iso,
             current_time_iso,
             magic_number,
-            comment
+            comment_safe
          );
          
          count++;

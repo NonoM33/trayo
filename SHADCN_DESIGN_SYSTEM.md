@@ -142,21 +142,98 @@ background: hsl(var(--muted) / 0.5);
 ### Table
 
 ```html
-<div class="table-wrapper">
-  <table>
+<div class="rounded-xl border border-neutral-800 overflow-hidden">
+  <table class="w-full">
     <thead>
-      ...
+      <tr class="border-b border-neutral-800">
+        <th
+          class="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wide"
+        >
+          Colonne
+        </th>
+      </tr>
     </thead>
-    <tbody>
-      ...
+    <tbody class="divide-y divide-neutral-800/50">
+      <tr class="hover:bg-neutral-800/30 transition-colors">
+        <td class="px-6 py-4">Contenu</td>
+      </tr>
     </tbody>
   </table>
 </div>
 ```
 
-- Hover: Subtle `hsl(var(--muted) / 0.3)`
-- Border: Entre les lignes
-- Responsive: Overflow-x auto
+**Règles importantes :**
+
+- **PAS de fond gris** sur les lignes (`bg-neutral-900/50` interdit)
+- **PAS de fond gris** sur le header (`bg-neutral-900/30` interdit)
+- Header: `border-b border-neutral-800` uniquement
+- Texte header: `text-neutral-500` (pas neutral-400, trop clair)
+- Séparateurs: `divide-neutral-800/50` (subtil, semi-transparent)
+- Hover: `hover:bg-neutral-800/30` (très léger)
+- Responsive: `overflow-x-auto` sur le wrapper
+
+## 📋 Tables & Listes (IMPORTANT)
+
+Les tableaux doivent être **lisibles** avec un fond transparent, pas de gris.
+
+### Structure d'un tableau
+
+```html
+<!-- Container avec bordure, PAS de bg-neutral-900 -->
+<div class="rounded-xl border border-neutral-800 overflow-hidden">
+  <!-- Header de section (optionnel) - PAS de bg-neutral-900/50 -->
+  <div
+    class="px-6 py-4 border-b border-neutral-800 flex items-center justify-between"
+  >
+    <span class="font-medium text-white">Titre</span>
+    <button>Action</button>
+  </div>
+
+  <!-- Table -->
+  <table class="w-full">
+    <thead>
+      <!-- PAS de bg-neutral-900/30, juste la bordure -->
+      <tr class="border-b border-neutral-800">
+        <th
+          class="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wide"
+        >
+          Colonne
+        </th>
+      </tr>
+    </thead>
+    <!-- Séparateurs subtils semi-transparents -->
+    <tbody class="divide-y divide-neutral-800/50">
+      <!-- Hover très léger, PAS de bg par défaut -->
+      <tr class="hover:bg-neutral-800/30 transition-colors">
+        <td class="px-6 py-4">
+          <span class="text-white">Valeur</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+```
+
+### Règles strictes
+
+| Élément           | ✅ Correct                    | ❌ Interdit               |
+| ----------------- | ----------------------------- | ------------------------- |
+| Container table   | `border border-neutral-800`   | `bg-neutral-900`          |
+| Header section    | `border-b border-neutral-800` | `bg-neutral-900/50`       |
+| Header table      | `border-b border-neutral-800` | `bg-neutral-900/30`       |
+| Texte header      | `text-neutral-500`            | `text-neutral-400`        |
+| Séparateurs       | `divide-neutral-800/50`       | `divide-neutral-800`      |
+| Lignes hover      | `hover:bg-neutral-800/30`     | `hover:bg-neutral-900/50` |
+| Lignes par défaut | (aucun bg)                    | `bg-neutral-800`          |
+
+### Pourquoi ?
+
+- Les fonds gris réduisent le contraste et la lisibilité
+- Le fond transparent laisse respirer le contenu
+- Le hover léger suffit pour l'interactivité
+- Les bordures subtiles structurent sans alourdir
+
+---
 
 ## 📏 Spacing
 
@@ -282,6 +359,8 @@ transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 - Pas de transformations excessives
 - Pas d'emojis partout
 - Pas de badges flashy
+- **Pas de fond gris sur les lignes de tableau** (`bg-neutral-900/50` interdit)
+- **Pas de fond gris sur les headers de section** (sauf cards avec bordure)
 
 ## 🎨 Exemples
 
