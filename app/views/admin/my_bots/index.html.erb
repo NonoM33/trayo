@@ -1,146 +1,176 @@
 <% @page_title = "Mes Bots" %>
 
-<h1 style="margin-bottom: 32px;"><i class="fa-icon fa-md fa-robot"></i> Mes Bots de Trading</h1>
-
-<% if flash[:notice] %>
-  <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg mb-4">
-    <%= flash[:notice] %>
+<div class="space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-neutral-900 dark:text-white tracking-tight flex items-center gap-3">
+        <i class="fa-solid fa-robot text-purple-500"></i>
+        Mes Bots de Trading
+      </h1>
+      <p class="text-neutral-500 dark:text-neutral-400 mt-1">
+        Gérez et surveillez vos bots de trading
+      </p>
+    </div>
+    <div>
+      <%= link_to admin_shop_index_path, class: "flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg transition-all hover:scale-[1.02]" do %>
+        <i class="fa-solid fa-shopping-cart"></i>
+        <span>Explorer les bots</span>
+      <% end %>
+    </div>
   </div>
-<% end %>
-<% if flash[:alert] %>
-  <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg mb-4">
-    <%= flash[:alert] %>
-  </div>
-<% end %>
 
-
-        <% if @purchases.any? %>
-          <% @purchases.each do |purchase| %>
-            <% bot = purchase.trading_bot %>
-            <div class="my-bot-card" onclick="window.location.href='<%= admin_bot_path(bot, from: 'my_bots') %>'" style="cursor: pointer;">
-              <div class="bot-header">
-                <div class="bot-info">
-             
-                  <div class="bot-details">
-                    <h3><%= bot.name %></h3>
-                    <div>
-                      <span class="bot-status-badge" style="background: <%= bot.risk_badge_color %>; color: white;">
-                        <%= bot.risk_label %>
-                      </span>
-                      <span class="bot-status-badge" style="background: <%= purchase.status_color %>; color: white;">
-                        <%= purchase.status_badge %>
-                      </span>
-                    </div>
-                  </div>
+  <% if @purchases.any? %>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <% @purchases.each do |purchase| %>
+        <% bot = purchase.trading_bot %>
+        <div class="bg-neutral-900 rounded-2xl overflow-hidden border border-neutral-800 hover:border-purple-500/50 transition-all">
+          <div class="p-6">
+            <div class="flex items-start justify-between gap-4 mb-6">
+              <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-2xl shadow-lg shadow-purple-500/20">
+                  🤖
                 </div>
-                
-                <% if current_user.is_admin? %>
-                  <div class="bot-controls" onclick="event.stopPropagation();">
-                    <%= button_to toggle_status_admin_my_bot_path(purchase), method: :post, 
-                        class: "toggle-btn #{purchase.is_running? ? 'toggle-btn-stop' : 'toggle-btn-start'}" do %>
-                      <% if purchase.is_running? %>
-                        <i class="fa-icon fa-md fa-pause"></i> Arrêter
-                      <% else %>
-                        <i class="fa-icon fa-md fa-play"></i> Démarrer
-                      <% end %>
+                <div>
+                  <h3 class="text-xl font-bold text-white"><%= bot.name %></h3>
+                  <div class="flex items-center gap-2 mt-1.5">
+                    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold" style="background: <%= bot.risk_badge_color %>20; color: <%= bot.risk_badge_color %>; border: 1px solid <%= bot.risk_badge_color %>40;">
+                      <%= bot.risk_label %>
+                    </span>
+                    <% if purchase.is_running? %>
+                      <%= render 'admin/shared/status_badge', variant: 'success', label: 'Actif', pulse: true %>
+                    <% else %>
+                      <%= render 'admin/shared/status_badge', variant: 'danger', label: 'Inactif' %>
                     <% end %>
                   </div>
-                <% else %>
-                  <div style="text-align: right;">
-                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
-                      Gestion du bot
-                    </div>
-                    <div style="font-size: 12px; padding: 8px 16px; background: var(--bg-hover); border-radius: 8px;">
-                      Contactez l'admin
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-              
-              <div class="bot-stats-grid">
-                <div class="bot-stat-box">
-                  <div class="bot-stat-label">Profit Total</div>
-                  <div class="bot-stat-value <%= purchase.total_profit > 0 ? 'profit-positive' : 'profit-negative' %>">
-                    <%= number_to_currency(purchase.total_profit, unit: "€", format: "%n %u") %>
-                  </div>
-                </div>
-                
-                <div class="bot-stat-box">
-                  <div class="bot-stat-label">Trades</div>
-                  <div class="bot-stat-value" style="color: var(--color-accent);">
-                    <%= purchase.trades_count %>
-                  </div>
-                </div>
-                
-                <div class="bot-stat-box">
-                  <div class="bot-stat-label">ROI</div>
-                  <div class="bot-stat-value <%= purchase.roi_percentage > 0 ? 'profit-positive' : 'profit-negative' %>">
-                    <%= number_to_percentage(purchase.roi_percentage, precision: 1) %>
-                  </div>
-                </div>
-                
-                <div class="bot-stat-box">
-                  <div class="bot-stat-label">Jours Actifs</div>
-                  <div class="bot-stat-value" style="color: var(--text-primary);">
-                    <%= purchase.days_active %>
-                  </div>
                 </div>
               </div>
               
-              <div style="background: var(--bg-hover); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <span style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">
-                    Drawdown : <%= number_to_percentage(purchase.drawdown_percentage, precision: 1) %>% / <%= number_to_percentage(bot.max_drawdown_limit, precision: 1) %>%
-                  </span>
-                  <span style="font-size: 13px; font-weight: 700; color: <%= purchase.within_drawdown_limit? ? 'var(--color-success)' : 'var(--color-danger)' %>;">
-                    <%= purchase.drawdown_percentage.round(1) %>%
+              <% if current_user.is_admin? %>
+                <div onclick="event.stopPropagation();">
+                  <%= button_to toggle_status_admin_my_bot_path(purchase), method: :post, 
+                      class: "flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors #{purchase.is_running? ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 ring-1 ring-red-500/30' : 'bg-green-500/10 text-green-400 hover:bg-green-500/20 ring-1 ring-green-500/30'}" do %>
+                    <% if purchase.is_running? %>
+                      <i class="fa-solid fa-pause text-xs"></i> Arrêter
+                    <% else %>
+                      <i class="fa-solid fa-play text-xs"></i> Démarrer
+                    <% end %>
+                  <% end %>
+                </div>
+              <% else %>
+                <div class="text-right">
+                  <p class="text-xs text-neutral-500 mb-1">Gestion du bot</p>
+                  <span class="inline-flex items-center gap-1.5 rounded-lg bg-neutral-800 px-3 py-1.5 text-xs text-neutral-400">
+                    <i class="fa-solid fa-headset"></i>
+                    Contactez l'admin
                   </span>
                 </div>
-                <div class="progress-bar">
-                  <div class="progress-fill" style="width: <%= [purchase.drawdown_percentage, 100].min %>%; background: <%= purchase.within_drawdown_limit? ? 'linear-gradient(90deg, var(--color-success), var(--color-accent))' : 'var(--color-danger)' %>;"></div>
-                </div>
-                <% unless purchase.within_drawdown_limit? %>
-                  <div style="margin-top: 8px; font-size: 12px; color: var(--color-danger); font-weight: 600;">
-                    <i class="fa-icon fa-md fa-exclamation-triangle"></i> Attention : Limite de drawdown dépassée !
-                  </div>
-                <% end %>
+              <% end %>
+            </div>
+            
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+              <div class="bg-neutral-800/50 rounded-xl p-4">
+                <p class="text-xs font-medium text-neutral-500 mb-1">Profit Total</p>
+                <p class="text-xl font-bold <%= purchase.total_profit >= 0 ? 'text-green-400' : 'text-red-400' %>">
+                  <%= number_to_currency(purchase.total_profit, unit: "€", format: "%n %u") %>
+                </p>
               </div>
               
-              <div style="display: flex; gap: 12px;">
-                <div style="flex: 1; background: var(--bg-hover); padding: 12px; border-radius: 8px;">
-                  <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Prix d'Achat</div>
-                  <div style="font-size: 18px; font-weight: 700;"><%= number_to_currency(purchase.price_paid, unit: "€", format: "%n %u") %></div>
-                </div>
-                <div style="flex: 1; background: var(--bg-hover); padding: 12px; border-radius: 8px;">
-                  <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Date d'Achat</div>
-                  <div style="font-size: 18px; font-weight: 700;"><%= purchase.created_at.strftime("%d/%m/%Y") %></div>
-                </div>
-                <% if purchase.started_at %>
-                  <div style="flex: 1; background: var(--bg-hover); padding: 12px; border-radius: 8px;">
-                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">
-                      <%= purchase.is_running? ? 'Démarré le' : 'Arrêté le' %>
-                    </div>
-                    <div style="font-size: 18px; font-weight: 700;">
-                      <%= (purchase.is_running? ? purchase.started_at : purchase.stopped_at)&.strftime("%d/%m/%Y") %>
-                    </div>
-                  </div>
-                <% end %>
+              <div class="bg-neutral-800/50 rounded-xl p-4">
+                <p class="text-xs font-medium text-neutral-500 mb-1">Trades</p>
+                <p class="text-xl font-bold text-blue-400">
+                  <%= purchase.trades_count %>
+                </p>
               </div>
               
-              <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); text-align: center;" onclick="event.stopPropagation();">
-                <%= link_to admin_bot_path(bot, from: 'my_bots'), class: "btn", style: "background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover)); color: white; padding: 10px 32px; font-size: 14px; text-decoration: none; display: inline-block;" do %>
-                  <i class="fa-icon fa-md fa-eye"></i> Voir les Détails Complets
-                <% end %>
+              <div class="bg-neutral-800/50 rounded-xl p-4">
+                <p class="text-xs font-medium text-neutral-500 mb-1">ROI</p>
+                <p class="text-xl font-bold <%= purchase.roi_percentage >= 0 ? 'text-green-400' : 'text-red-400' %>">
+                  <%= number_to_percentage(purchase.roi_percentage, precision: 1) %>
+                </p>
+              </div>
+              
+              <div class="bg-neutral-800/50 rounded-xl p-4">
+                <p class="text-xs font-medium text-neutral-500 mb-1">Jours Actifs</p>
+                <p class="text-xl font-bold text-white">
+                  <%= purchase.days_active %>
+                </p>
               </div>
             </div>
-          <% end %>
-        <% else %>
-          <div class="card empty-state">
-            <div class="empty-state-icon"><i class="fa-icon fa-md fa-robot"></i></div>
-            <h2 style="margin: 0 0 12px 0; color: var(--text-primary);">Aucun Bot Pour le Moment</h2>
-            <p style="margin: 0 0 24px 0; color: var(--text-muted);">
-              Découvrez nos bots de trading dans la boutique
-            </p>
-            <%= link_to "<i class='fa-icon fa-md fa-shopping-cart'></i> Voir la Boutique".html_safe, admin_shop_index_path, class: "btn btn-success", style: "font-size: 16px; padding: 14px 32px;" %>
+            
+            <div class="bg-neutral-800/30 rounded-xl p-4 mb-6">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-neutral-400">
+                  Drawdown : <%= number_to_percentage(purchase.drawdown_percentage, precision: 1) %> / <%= number_to_percentage(bot.max_drawdown_limit, precision: 1) %>
+                </span>
+                <span class="text-sm font-bold <%= purchase.within_drawdown_limit? ? 'text-green-400' : 'text-red-400' %>">
+                  <%= purchase.drawdown_percentage.round(1) %>%
+                </span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-neutral-700 overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-500" 
+                     style="width: <%= [purchase.drawdown_percentage, 100].min %>%; background: <%= purchase.within_drawdown_limit? ? 'linear-gradient(90deg, #10b981, #3b82f6)' : '#ef4444' %>;">
+                </div>
+              </div>
+              <% unless purchase.within_drawdown_limit? %>
+                <div class="flex items-center gap-2 mt-3 text-red-400 text-xs font-semibold">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                  Attention : Limite de drawdown dépassée !
+                </div>
+              <% end %>
+            </div>
+            
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+              <div class="bg-neutral-800/50 rounded-xl p-4">
+                <p class="text-xs font-medium text-neutral-500 mb-1">Prix d'Achat</p>
+                <p class="text-lg font-bold text-white">
+                  <%= number_to_currency(purchase.price_paid, unit: "€", format: "%n %u") %>
+                </p>
+              </div>
+              
+              <div class="bg-neutral-800/50 rounded-xl p-4">
+                <p class="text-xs font-medium text-neutral-500 mb-1">Date d'Achat</p>
+                <p class="text-lg font-bold text-white">
+                  <%= purchase.created_at.strftime("%d/%m/%Y") %>
+                </p>
+              </div>
+              
+              <% if purchase.started_at %>
+                <div class="bg-neutral-800/50 rounded-xl p-4">
+                  <p class="text-xs font-medium text-neutral-500 mb-1">
+                    <%= purchase.is_running? ? 'Démarré le' : 'Arrêté le' %>
+                  </p>
+                  <p class="text-lg font-bold text-white">
+                    <%= (purchase.is_running? ? purchase.started_at : purchase.stopped_at)&.strftime("%d/%m/%Y") %>
+                  </p>
+                </div>
+              <% end %>
+            </div>
           </div>
+          
+          <div class="border-t border-neutral-800 p-4 bg-neutral-800/30">
+            <%= link_to admin_bot_path(bot, from: 'my_bots'), class: "flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.01] hover:shadow-blue-500/30" do %>
+              <i class="fa-solid fa-eye"></i>
+              Voir les Détails Complets
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="bg-neutral-900 rounded-2xl border border-neutral-800 overflow-hidden">
+      <div class="text-center py-20 px-6">
+        <div class="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-robot text-5xl text-purple-400"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-3">Aucun Bot Pour le Moment</h3>
+        <p class="text-neutral-400 mb-8 max-w-md mx-auto">
+          Découvrez nos bots de trading performants dans la boutique et commencez à automatiser vos trades.
+        </p>
+        <%= link_to admin_shop_index_path, class: "inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-blue-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02]" do %>
+          <i class="fa-solid fa-shopping-cart"></i>
+          Voir la Boutique
         <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

@@ -18,13 +18,18 @@
       <%= @page_title || 'Dashboard' %>
     </h2>
   </div>
-  <div class="flex items-center gap-4">
+  <div class="flex items-center gap-3">
     <% total_credits = current_user.total_credits %>
-    <div class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-sm">
-      <i class="fa-solid fa-gift text-white"></i>
+    <%= link_to admin_shop_index_path(anchor: 'credits'), class: "group flex items-center gap-2.5 px-4 py-2 rounded-xl transition-all #{total_credits > 0 ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40' : 'bg-gradient-to-r from-violet-500 to-purple-600 shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40'} hover:scale-105" do %>
+      <i class="fa-solid fa-wallet text-white"></i>
       <span class="text-white font-bold text-sm">
-        <%= number_to_currency(total_credits, unit: "€", format: "%n %u", precision: 2) %> crédits
+        <%= number_to_currency(total_credits, unit: "€", format: "%n%u", precision: 2) %> crédits
       </span>
-    </div>
+      <% if total_credits < 100 %>
+        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-white/20 text-white group-hover:bg-white/30">
+          +10%
+        </span>
+      <% end %>
+    <% end %>
   </div>
 </div>
