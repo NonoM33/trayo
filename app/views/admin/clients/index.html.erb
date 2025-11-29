@@ -1,100 +1,74 @@
 <% @page_title = 'Gestion des Clients' %>
 
-<div class="space-y-6">
+<div class="space-y-4 md:space-y-6">
   <% if flash[:notice] %>
-    <div class="flex items-center gap-3 p-4 rounded-xl border border-green-200 dark:border-green-800/50 bg-green-50 dark:bg-green-900/20">
+    <div class="flex items-center gap-3 p-3 md:p-4 rounded-xl border border-green-200 dark:border-green-800/50 bg-green-50 dark:bg-green-900/20">
       <i class="fa-solid fa-check-circle text-green-600 dark:text-green-400"></i>
-      <p class="text-green-800 dark:text-green-200"><%= flash[:notice] %></p>
+      <p class="text-green-800 dark:text-green-200 text-sm"><%= flash[:notice] %></p>
     </div>
   <% end %>
   <% if flash[:alert] %>
-    <div class="flex items-center gap-3 p-4 rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/20">
+    <div class="flex items-center gap-3 p-3 md:p-4 rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/20">
       <i class="fa-solid fa-exclamation-circle text-red-600 dark:text-red-400"></i>
-      <p class="text-red-800 dark:text-red-200"><%= flash[:alert] %></p>
+      <p class="text-red-800 dark:text-red-200 text-sm"><%= flash[:alert] %></p>
     </div>
   <% end %>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4">
     <div class="bg-neutral-900 overflow-hidden rounded-xl">
-      <div class="px-4 py-5 sm:p-6">
-        <dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400 truncate">Total Clients</dt>
-        <dd class="mt-1 text-3xl font-semibold text-neutral-900 dark:text-white"><%= @clients.count %></dd>
-        <div class="mt-4">
-          <span class="text-sm font-medium text-blue-600 dark:text-blue-400">
-            <i class="fa-solid fa-users mr-1"></i>Actifs
-          </span>
-        </div>
+      <div class="p-3 md:px-4 md:py-5 sm:p-6">
+        <dt class="text-xs md:text-sm font-medium text-neutral-400 truncate">Clients</dt>
+        <dd class="mt-1 text-xl md:text-3xl font-bold text-white"><%= @clients.count %></dd>
       </div>
     </div>
 
     <div class="bg-neutral-900 overflow-hidden rounded-xl">
-      <div class="px-4 py-5 sm:p-6">
-        <dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400 truncate">Profits Totaux</dt>
-        <dd class="mt-1 text-3xl font-semibold <%= @clients.sum(&:total_profits) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
-        <%= number_to_currency(@clients.sum(&:total_profits), unit: "€", format: "%n %u") %>
+      <div class="p-3 md:px-4 md:py-5 sm:p-6">
+        <dt class="text-xs md:text-sm font-medium text-neutral-400 truncate">Profits</dt>
+        <dd class="mt-1 text-xl md:text-3xl font-bold <%= @clients.sum(&:total_profits) >= 0 ? 'text-green-400' : 'text-red-400' %>">
+        <%= number_to_currency(@clients.sum(&:total_profits), unit: "€", format: "%n%u", precision: 0) %>
         </dd>
-        <div class="mt-4">
-          <span class="text-sm font-medium <%= @clients.sum(&:total_profits) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
-            <i class="fa-solid fa-arrow-<%= @clients.sum(&:total_profits) >= 0 ? 'up' : 'down' %> mr-1"></i>
-            <%= @clients.sum(&:total_profits) >= 0 ? 'Positif' : 'Négatif' %>
-          </span>
-        </div>
       </div>
     </div>
 
     <div class="bg-neutral-900 overflow-hidden rounded-xl">
-      <div class="px-4 py-5 sm:p-6">
-        <dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400 truncate">Gain Moyen / Jour</dt>
-        <dd class="mt-1 text-3xl font-semibold <%= @average_daily_gain_all >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
-        <%= number_to_currency(@average_daily_gain_all, unit: "€", format: "%n %u") %>
+      <div class="p-3 md:px-4 md:py-5 sm:p-6">
+        <dt class="text-xs md:text-sm font-medium text-neutral-400 truncate">Gain/Jour</dt>
+        <dd class="mt-1 text-xl md:text-3xl font-bold <%= @average_daily_gain_all >= 0 ? 'text-green-400' : 'text-red-400' %>">
+        <%= number_to_currency(@average_daily_gain_all, unit: "€", format: "%n%u", precision: 0) %>
         </dd>
-        <div class="mt-4">
-          <span class="text-sm font-medium text-neutral-500 dark:text-neutral-400">
-            <i class="fa-solid fa-calendar mr-1"></i>Sur 30 jours
-          </span>
-        </div>
       </div>
     </div>
 
     <div class="bg-neutral-900 overflow-hidden rounded-xl">
-      <div class="px-4 py-5 sm:p-6">
-        <dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400 truncate">Commissions Dues</dt>
-        <dd class="mt-1 text-3xl font-semibold text-green-600 dark:text-green-400">
-        <%= number_to_currency(@clients.sum { |c| c.total_commission_due || 0 }, unit: "€", format: "%n %u") %>
+      <div class="p-3 md:px-4 md:py-5 sm:p-6">
+        <dt class="text-xs md:text-sm font-medium text-neutral-400 truncate">Commissions</dt>
+        <dd class="mt-1 text-xl md:text-3xl font-bold text-green-400">
+        <%= number_to_currency(@clients.sum { |c| c.total_commission_due || 0 }, unit: "€", format: "%n%u", precision: 0) %>
         </dd>
-        <div class="mt-4">
-          <span class="text-sm font-medium text-green-600 dark:text-green-400">
-            <i class="fa-solid fa-coins mr-1"></i>À percevoir
-          </span>
-        </div>
       </div>
     </div>
 
-    <div class="bg-neutral-900 overflow-hidden rounded-xl">
-      <div class="px-4 py-5 sm:p-6">
-        <dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400 truncate">Administrateurs</dt>
-        <dd class="mt-1 text-3xl font-semibold text-neutral-900 dark:text-white"><%= @admins.count %></dd>
-        <div class="mt-4">
-          <span class="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-            <i class="fa-solid fa-shield mr-1"></i>Avec accès admin
-          </span>
-        </div>
+    <div class="bg-neutral-900 overflow-hidden rounded-xl col-span-2 md:col-span-1">
+      <div class="p-3 md:px-4 md:py-5 sm:p-6">
+        <dt class="text-xs md:text-sm font-medium text-neutral-400 truncate">Admins</dt>
+        <dd class="mt-1 text-xl md:text-3xl font-bold text-white"><%= @admins.count %></dd>
       </div>
     </div>
   </div>
 
-  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
-       data-controller="scroll-area"
-       data-scroll-area-target="root"
-       data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
+  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden">
 
-    <div class="px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-neutral-900">
-      <h2 class="text-lg font-semibold text-white">Liste des Clients</h2>
-      <div class="flex gap-2">
+    <div class="px-4 md:px-6 py-4 md:py-5 flex flex-col gap-3 bg-neutral-900">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base md:text-lg font-semibold text-white">Liste des Clients</h2>
+        <span class="text-xs text-neutral-400 md:hidden"><%= @clients.count %> clients</span>
+      </div>
+      <div class="flex flex-wrap gap-2">
         <div data-controller="slideover">
-          <button type="button" data-action="slideover#show:prevent" class="flex items-center justify-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-800 px-3.5 py-2 text-sm font-medium whitespace-nowrap text-neutral-100 shadow-xs transition-all duration-100 ease-in-out select-none hover:bg-neutral-700">
+          <button type="button" data-action="slideover#show:prevent" class="flex items-center justify-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-xs md:text-sm font-medium whitespace-nowrap text-neutral-100 shadow-xs transition-all select-none hover:bg-neutral-700">
             <i class="fa-solid fa-key"></i>
-            <span>Token MT5</span>
+            <span class="hidden sm:inline">Token MT5</span>
           </button>
 
           <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
@@ -153,9 +127,9 @@
         </div>
         
         <div data-controller="slideover">
-          <button type="button" data-action="slideover#show:prevent" class="flex items-center justify-center gap-1.5 rounded-lg border border-emerald-400/30 bg-emerald-600 px-3.5 py-2 text-sm font-medium whitespace-nowrap text-white shadow-sm transition-all duration-100 ease-in-out select-none hover:bg-emerald-500">
+          <button type="button" data-action="slideover#show:prevent" class="flex items-center justify-center gap-1.5 rounded-lg border border-emerald-400/30 bg-emerald-600 px-3 py-2 text-xs md:text-sm font-medium whitespace-nowrap text-white shadow-sm transition-all select-none hover:bg-emerald-500">
             <i class="fa-solid fa-envelope"></i>
-            <span>Invitation</span>
+            <span class="hidden sm:inline">Invitation</span>
           </button>
 
           <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
@@ -223,9 +197,9 @@
         </div>
         
         <div data-controller="slideover">
-          <button type="button" data-action="slideover#show:prevent" class="flex items-center justify-center gap-1.5 rounded-lg border border-blue-400/30 bg-blue-600 px-3.5 py-2 text-sm font-medium whitespace-nowrap text-white shadow-sm transition-all duration-100 ease-in-out select-none hover:bg-blue-500">
+          <button type="button" data-action="slideover#show:prevent" class="flex items-center justify-center gap-1.5 rounded-lg border border-blue-400/30 bg-blue-600 px-3 py-2 text-xs md:text-sm font-medium whitespace-nowrap text-white shadow-sm transition-all select-none hover:bg-blue-500">
           <i class="fa-solid fa-plus"></i>
-            <span>Utilisateur</span>
+            <span class="hidden sm:inline">Utilisateur</span>
           </button>
 
           <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
