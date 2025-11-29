@@ -20,7 +20,80 @@
       <p class="text-neutral-400 mt-1">Gérez vos bots de trading automatisés</p>
     </div>
     
-    <div data-controller="slideover">
+    <div class="flex items-center gap-3">
+      <div class="relative" data-controller="dropdown">
+        <button type="button" data-action="dropdown#toggle" class="flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white">
+          <i class="fa-solid fa-file-export"></i>
+          Exporter
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+        </button>
+        <div data-dropdown-target="menu" class="hidden absolute right-0 mt-2 w-48 rounded-xl bg-neutral-900 border border-neutral-800 shadow-xl z-50">
+          <%= link_to export_admin_bots_path(format: :json), class: "flex items-center gap-2 px-4 py-3 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white transition-colors rounded-t-xl" do %>
+            <i class="fa-solid fa-file-code text-blue-400"></i>
+            Exporter en JSON
+          <% end %>
+          <%= link_to export_admin_bots_path(format: :csv), class: "flex items-center gap-2 px-4 py-3 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white transition-colors rounded-b-xl" do %>
+            <i class="fa-solid fa-file-csv text-green-400"></i>
+            Exporter en CSV
+          <% end %>
+        </div>
+      </div>
+      
+      <div data-controller="slideover">
+        <button type="button" data-action="slideover#show:prevent" class="flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white">
+          <i class="fa-solid fa-file-import"></i>
+          Importer
+        </button>
+        
+        <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
+          <div class="flex h-full w-80 flex-col bg-neutral-950 shadow-2xl sm:w-[400px]">
+            <div class="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-6 py-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-green-500/20">
+                  <i class="fa-solid fa-file-import"></i>
+                </div>
+                <h4 class="text-lg font-semibold text-white">Importer des Bots</h4>
+              </div>
+              <button type="button" data-action="slideover#hide:prevent" class="rounded-full p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" x2="6" y1="6" y2="18"></line>
+                  <line x1="6" x2="18" y1="6" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            
+            <%= form_with url: import_admin_bots_path, method: :post, multipart: true, class: "flex flex-1 flex-col min-h-0" do |f| %>
+              <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-neutral-950">
+                <div class="p-4 rounded-xl border border-blue-500/20 bg-blue-500/10">
+                  <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-info-circle text-blue-400 mt-0.5"></i>
+                    <div>
+                      <p class="text-sm font-medium text-blue-300">Formats supportés</p>
+                      <p class="text-xs text-blue-300/70 mt-1">JSON ou CSV exporté depuis cette page</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Fichier à importer</label>
+                  <div class="relative">
+                    <input type="file" name="file" accept=".json,.csv" required 
+                           class="w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
+                  </div>
+                  <p class="text-xs text-neutral-500 mt-2">Les bots existants avec le même nom seront mis à jour</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3 border-t border-neutral-800 bg-neutral-900 px-6 py-5">
+                <%= f.submit "Importer", class: "flex-1 flex items-center justify-center gap-2 rounded-lg bg-green-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-green-600/25 transition-all hover:bg-green-500 cursor-pointer" %>
+                <button data-action="slideover#hide:prevent" type="button" class="flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-5 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white">Annuler</button>
+              </div>
+            <% end %>
+          </div>
+        </dialog>
+      </div>
+
+      <div data-controller="slideover">
       <button type="button" data-action="slideover#show:prevent" class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-500 hover:shadow-blue-500/30">
         <i class="fa-solid fa-plus"></i>
         Nouveau Bot

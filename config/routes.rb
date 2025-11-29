@@ -122,6 +122,11 @@ Rails.application.routes.draw do
       member do
         delete :remove_from_user
       end
+      
+      collection do
+        get :export
+        post :import
+      end
     end
     
     resources :bot_purchases, only: [:update] do
