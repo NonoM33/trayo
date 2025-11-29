@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_29_030108) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_29_133558) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -126,6 +126,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_030108) do
     t.string "purchase_type", default: "manual"
     t.bigint "invoice_id"
     t.string "billing_status", default: "paid", null: false
+    t.string "version_purchased", default: "1.0.0"
+    t.boolean "has_update_pass", default: false
+    t.datetime "update_pass_expires_at"
     t.index ["invoice_id"], name: "index_bot_purchases_on_invoice_id"
     t.index ["magic_number"], name: "index_bot_purchases_on_magic_number"
     t.index ["purchase_type"], name: "index_bot_purchases_on_purchase_type"
@@ -133,6 +136,43 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_030108) do
     t.index ["trading_bot_id"], name: "index_bot_purchases_on_trading_bot_id"
     t.index ["user_id", "trading_bot_id"], name: "index_bot_purchases_on_user_id_and_trading_bot_id"
     t.index ["user_id"], name: "index_bot_purchases_on_user_id"
+  end
+
+  create_table "bot_update_purchases", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "bot_purchase_id", null: false
+    t.bigint "bot_update_id", null: false
+    t.string "purchase_type", default: "single"
+    t.decimal "price_paid", precision: 10, scale: 2, null: false
+    t.string "stripe_payment_intent_id"
+    t.string "status", default: "pending"
+    t.datetime "paid_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bot_purchase_id"], name: "index_bot_update_purchases_on_bot_purchase_id"
+    t.index ["bot_update_id"], name: "index_bot_update_purchases_on_bot_update_id"
+    t.index ["status"], name: "index_bot_update_purchases_on_status"
+    t.index ["user_id", "bot_update_id"], name: "index_bot_update_purchases_on_user_id_and_bot_update_id", unique: true
+    t.index ["user_id"], name: "index_bot_update_purchases_on_user_id"
+  end
+
+  create_table "bot_updates", force: :cascade do |t|
+    t.bigint "trading_bot_id", null: false
+    t.string "version", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.text "changelog"
+    t.text "highlights"
+    t.boolean "is_major", default: false
+    t.boolean "is_free", default: false
+    t.datetime "released_at", default: -> { "CURRENT_TIMESTAMP" }
+    t.boolean "notify_users", default: true
+    t.integer "upgrade_count", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["released_at"], name: "index_bot_updates_on_released_at"
+    t.index ["trading_bot_id", "version"], name: "index_bot_updates_on_trading_bot_id_and_version", unique: true
+    t.index ["trading_bot_id"], name: "index_bot_updates_on_trading_bot_id"
   end
 
   create_table "campaigns", force: :cascade do |t|
@@ -596,6 +636,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_030108) do
     t.boolean "is_active", default: true
     t.string "symbol"
     t.integer "magic_number_prefix"
+    t.string "current_version", default: "1.0.0"
+    t.decimal "update_price", precision: 10, scale: 2, default: "49.99"
+    t.decimal "update_pass_yearly_price", precision: 10, scale: 2, default: "99.0"
     t.index ["status"], name: "index_trading_bots_on_status"
   end
 
@@ -683,6 +726,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_030108) do
   add_foreign_key "bot_purchases", "invoices"
   add_foreign_key "bot_purchases", "trading_bots"
   add_foreign_key "bot_purchases", "users"
+  add_foreign_key "bot_update_purchases", "bot_purchases"
+  add_foreign_key "bot_update_purchases", "bot_updates"
+  add_foreign_key "bot_update_purchases", "users"
+  add_foreign_key "bot_updates", "trading_bots"
   add_foreign_key "commission_invoices", "invoices"
   add_foreign_key "commission_invoices", "users"
   add_foreign_key "commission_reminders", "users"

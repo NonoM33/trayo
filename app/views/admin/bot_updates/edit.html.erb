@@ -1,0 +1,98 @@
+<% @page_title = "Modifier - #{@update.title}" %>
+
+<div class="space-y-6">
+  <div class="flex items-center gap-4">
+    <%= link_to admin_bot_bot_updates_path(@bot), class: "flex items-center justify-center w-10 h-10 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors" do %>
+      <i class="fa-solid fa-arrow-left"></i>
+    <% end %>
+    
+    <div class="flex items-center gap-4">
+      <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+        <i class="fa-solid fa-pen text-2xl"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold text-white">Modifier la mise à jour</h1>
+        <p class="text-neutral-400"><%= @bot.name %> - v<%= @update.version %></p>
+      </div>
+    </div>
+  </div>
+
+  <%= form_with model: @update, url: admin_bot_bot_update_path(@bot, @update), method: :patch, class: "space-y-6" do |f| %>
+    <div class="bg-neutral-950 border border-neutral-800 rounded-xl overflow-hidden">
+      <div class="bg-neutral-900 px-6 py-4 border-b border-neutral-800">
+        <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+          <i class="fa-solid fa-info-circle text-blue-400"></i>
+          Informations de la mise à jour
+        </h2>
+      </div>
+      
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-neutral-300 mb-2">Version *</label>
+            <%= f.text_field :version, required: true, class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all" %>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-neutral-300 mb-2">Titre *</label>
+            <%= f.text_field :title, required: true, class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all" %>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">Description</label>
+          <%= f.text_area :description, rows: 3, class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none" %>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">Points clés (un par ligne)</label>
+          <%= f.text_area :highlights, rows: 4, class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none font-mono text-sm" %>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">Changelog technique</label>
+          <%= f.text_area :changelog, rows: 4, class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none font-mono text-sm" %>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-neutral-300 mb-2">Date de publication</label>
+            <%= f.datetime_local_field :released_at, class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all" %>
+          </div>
+          
+          <div class="flex items-end">
+            <div class="space-y-4 w-full">
+              <label class="flex items-center gap-3 p-3 rounded-lg border border-neutral-800 bg-neutral-900 cursor-pointer hover:border-orange-500/50 transition-colors">
+                <%= f.check_box :is_major, class: "w-4 h-4 text-orange-600 bg-neutral-800 border-neutral-700 rounded focus:ring-orange-500" %>
+                <div>
+                  <p class="text-sm font-medium text-white flex items-center gap-2">
+                    <i class="fa-solid fa-fire text-orange-400"></i>
+                    Mise à jour MAJEURE
+                  </p>
+                </div>
+              </label>
+              
+              <label class="flex items-center gap-3 p-3 rounded-lg border border-neutral-800 bg-neutral-900 cursor-pointer hover:border-green-500/50 transition-colors">
+                <%= f.check_box :is_free, class: "w-4 h-4 text-green-600 bg-neutral-800 border-neutral-700 rounded focus:ring-green-500" %>
+                <div>
+                  <p class="text-sm font-medium text-white flex items-center gap-2">
+                    <i class="fa-solid fa-gift text-green-400"></i>
+                    Mise à jour GRATUITE
+                  </p>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-end gap-3">
+      <%= link_to admin_bot_bot_updates_path(@bot), class: "flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-5 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white" do %>
+        Annuler
+      <% end %>
+      <%= f.submit "Enregistrer les modifications", class: "flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-amber-500/25 transition-all hover:bg-amber-400 cursor-pointer" %>
+    </div>
+  <% end %>
+</div>
+

@@ -4,6 +4,7 @@ class BotPurchase < ApplicationRecord
   belongs_to :user
   belongs_to :trading_bot
   belongs_to :invoice, optional: true
+  has_many :bot_update_purchases, dependent: :destroy
 
   validates :price_paid, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :status, presence: true, inclusion: { in: %w[active inactive] }
@@ -251,6 +252,41 @@ class BotPurchase < ApplicationRecord
     hours = analyze_by_hour
     return nil if hours.empty?
     hours.max_by { |h| h[:total_trades] }
+  end
+
+  def needs_update?
+    return false if has_update_pass? && update_pass_expires_at&.future?
+    (version_purchased || "1.0.0") < (trading_bot.current_version || "1.0.0")
+  end
+
+  def update_pass_active?
+    has_update_pass? && update_pass_expires_at&.future?
+  end
+
+  def days_until_pass_expires
+    return nil unless update_pass_active?
+    (update_pass_expires_at.to_date - Date.current).to_i
+  end
+
+  def version_behind
+    return 0 unless needs_update?
+    current = trading_bot.current_version || "1.0.0"
+    purchased = version_purchased || "1.0.0"
+    
+    current_parts = current.split('.').map(&:to_i)
+    purchased_parts = purchased.split('.').map(&:to_i)
+    
+    (current_parts[0] - purchased_parts[0]) * 100 + 
+    (current_parts[1] - purchased_parts[1]) * 10 + 
+    (current_parts[2].to_i - purchased_parts[2].to_i)
+  end
+
+  def pending_updates
+    trading_bot.bot_updates.released.where("version > ?", version_purchased || "0.0.0").recent
+  end
+
+  def upgrade_to_latest!
+    update!(version_purchased: trading_bot.current_version)
   end
 
   private

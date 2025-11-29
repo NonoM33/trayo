@@ -50,6 +50,29 @@ module Webhooks
     def handle_payment_intent_succeeded(payment_intent)
       Rails.logger.info "PaymentIntent succeeded: #{payment_intent.id}"
       
+      type = payment_intent.metadata['type']
+      
+      case type
+      when 'bot_update_single', 'bot_update_yearly_pass'
+        handle_bot_update_payment(payment_intent)
+      else
+        handle_other_payment_intent(payment_intent)
+      end
+    end
+
+    def handle_bot_update_payment(payment_intent)
+      update_purchase = BotUpdatePurchase.find_by(stripe_payment_intent_id: payment_intent.id, status: 'pending')
+      
+      if update_purchase
+        update_purchase.update!(
+          status: 'completed',
+          paid_at: Time.current
+        )
+        Rails.logger.info "Bot update payment completed: #{payment_intent.id}"
+      end
+    end
+
+    def handle_other_payment_intent(payment_intent)
       invitation_code = payment_intent.metadata['invitation_code']
       
       if invitation_code.present?
@@ -101,6 +124,79 @@ module Webhooks
     def handle_checkout_session_completed(session)
       Rails.logger.info "Checkout session completed: #{session.id}"
       
+      type = session.metadata['type']
+      
+      case type
+      when 'bot_update_single'
+        handle_bot_update_purchase(session)
+      when 'bot_update_yearly_pass'
+        handle_bot_update_pass_purchase(session)
+      else
+        handle_product_purchase(session)
+      end
+    end
+
+    def handle_bot_update_purchase(session)
+      user_id = session.metadata['user_id']
+      bot_update_id = session.metadata['bot_update_id']
+      
+      return unless user_id.present? && bot_update_id.present?
+      
+      user = User.find_by(id: user_id)
+      bot_update = BotUpdate.find_by(id: bot_update_id)
+      
+      return unless user && bot_update
+      
+      user.update(stripe_customer_id: session.customer) if session.customer.present?
+      
+      update_purchase = BotUpdatePurchase.find_by(
+        user_id: user_id,
+        bot_update_id: bot_update_id,
+        status: 'pending'
+      )
+      
+      if update_purchase
+        update_purchase.update!(
+          status: 'completed',
+          paid_at: Time.current,
+          stripe_payment_intent_id: session.payment_intent
+        )
+        Rails.logger.info "Bot update purchased: #{bot_update.trading_bot.name} v#{bot_update.version} for #{user.email}"
+      end
+    end
+
+    def handle_bot_update_pass_purchase(session)
+      user_id = session.metadata['user_id']
+      bot_purchase_id = session.metadata['bot_purchase_id']
+      bot_update_id = session.metadata['bot_update_id']
+      
+      return unless user_id.present? && bot_purchase_id.present?
+      
+      user = User.find_by(id: user_id)
+      bot_purchase = BotPurchase.find_by(id: bot_purchase_id)
+      
+      return unless user && bot_purchase
+      
+      user.update(stripe_customer_id: session.customer) if session.customer.present?
+      
+      update_purchase = BotUpdatePurchase.find_by(
+        user_id: user_id,
+        bot_update_id: bot_update_id,
+        purchase_type: 'yearly_pass',
+        status: 'pending'
+      )
+      
+      if update_purchase
+        update_purchase.update!(
+          status: 'completed',
+          paid_at: Time.current,
+          stripe_payment_intent_id: session.payment_intent
+        )
+        Rails.logger.info "Bot update yearly pass purchased: #{bot_purchase.trading_bot.name} for #{user.email}"
+      end
+    end
+
+    def handle_product_purchase(session)
       user_id = session.metadata['user_id']
       product_id = session.metadata['product_id']
       

@@ -2,6 +2,7 @@ class TradingBot < ApplicationRecord
   has_many :bot_purchases, dependent: :destroy
   has_many :users, through: :bot_purchases
   has_many :backtests, dependent: :destroy
+  has_many :bot_updates, dependent: :destroy
 
   RISK_LEVELS = %w[low medium high].freeze
 
@@ -231,12 +232,10 @@ class TradingBot < ApplicationRecord
   end
   
   def calculate_global_win_rate
-    # Priorité 1: Utiliser le backtest actif
     if active_backtest&.win_rate
       return active_backtest.win_rate
     end
     
-    # Priorité 2: Calculer depuis les trades
     return 0 unless magic_number_prefix.present?
     
     trades = Trade.where("magic_number >= ? AND magic_number < ?", magic_number_prefix, magic_number_prefix + 1000)
@@ -246,6 +245,49 @@ class TradingBot < ApplicationRecord
     
     winning_trades = trades.where("profit > 0").count
     (winning_trades.to_f / trades.count * 100).round(2)
+  end
+
+  def latest_update
+    bot_updates.released.recent.first
+  end
+
+  def has_pending_updates_for?(user)
+    return false unless user
+    
+    bot_purchase = bot_purchases.find_by(user: user)
+    return false unless bot_purchase
+    
+    current_version > (bot_purchase.version_purchased || "0.0.0")
+  end
+
+  def pending_updates_for(user)
+    return BotUpdate.none unless user
+    
+    bot_purchase = bot_purchases.find_by(user: user)
+    return BotUpdate.none unless bot_purchase
+    
+    bot_updates.released.where("version > ?", bot_purchase.version_purchased || "0.0.0").recent
+  end
+
+  def users_needing_update
+    bot_purchases.where("version_purchased < ?", current_version || "1.0.0")
+                 .where(has_update_pass: false)
+                 .includes(:user)
+                 .map(&:user)
+  end
+
+  def users_with_update_pass
+    bot_purchases.where(has_update_pass: true)
+                 .where("update_pass_expires_at > ?", Time.current)
+                 .includes(:user)
+                 .map(&:user)
+  end
+
+  def update_revenue
+    BotUpdatePurchase.joins(:bot_update)
+                     .where(bot_updates: { trading_bot_id: id })
+                     .completed
+                     .sum(:price_paid)
   end
 end
 

@@ -1,6 +1,42 @@
 <% @page_title = "Mes Bots" %>
 
 <div class="space-y-6">
+  <% if params[:update_success] %>
+    <div class="flex items-center gap-4 p-5 rounded-2xl border border-green-500/30 bg-gradient-to-r from-green-500/10 to-emerald-500/10">
+      <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
+        <i class="fa-solid fa-check text-white text-xl"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-green-400">🎉 Mise à jour achetée avec succès!</h3>
+        <p class="text-neutral-300 text-sm">
+          Votre bot <strong class="text-white"><%= params[:bot] %></strong> est maintenant en 
+          <span class="text-green-400 font-bold">v<%= params[:version] %></span>
+        </p>
+      </div>
+    </div>
+  <% end %>
+
+  <% if params[:pass_success] %>
+    <div class="flex items-center gap-4 p-5 rounded-2xl border border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+      <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
+        <i class="fa-solid fa-gem text-white text-xl"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-purple-400">💎 Pack Annuel activé!</h3>
+        <p class="text-neutral-300 text-sm">
+          Vous avez maintenant accès à toutes les mises à jour de <strong class="text-white"><%= params[:bot] %></strong> pendant 1 an!
+        </p>
+      </div>
+    </div>
+  <% end %>
+
+  <% if params[:canceled] %>
+    <div class="flex items-center gap-4 p-4 rounded-xl border border-amber-500/30 bg-amber-500/10">
+      <i class="fa-solid fa-info-circle text-amber-400"></i>
+      <p class="text-amber-300 text-sm">Paiement annulé. Vous pouvez réessayer quand vous le souhaitez.</p>
+    </div>
+  <% end %>
+
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
     <div>
       <h1 class="text-3xl font-bold text-neutral-900 dark:text-white tracking-tight flex items-center gap-3">
@@ -18,6 +54,63 @@
       <% end %>
     </div>
   </div>
+
+  <%# BANNER: Mises à jour disponibles %>
+  <% purchases_needing_update = @purchases.select(&:needs_update?) %>
+  <% if purchases_needing_update.any? %>
+    <div class="relative overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-br from-orange-500/10 via-red-500/10 to-pink-500/10">
+      <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZjY2MDAiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iNCIvPjwvZz48L2c+PC9zdmc+')] opacity-50"></div>
+      <div class="relative p-6 sm:p-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div class="flex items-start gap-5">
+            <div class="shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/30 animate-pulse">
+              <i class="fa-solid fa-arrow-up-from-bracket text-2xl"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-3 mb-2">
+                <h3 class="text-xl sm:text-2xl font-bold text-white">🔥 Mises à jour disponibles!</h3>
+                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold bg-red-500 text-white animate-bounce">
+                  NOUVEAU
+                </span>
+              </div>
+              <p class="text-neutral-300 text-sm sm:text-base max-w-2xl">
+                <strong class="text-orange-400"><%= purchases_needing_update.count %> bot<%= purchases_needing_update.count > 1 ? 's' : '' %></strong> 
+                <%= purchases_needing_update.count > 1 ? 'ont' : 'a' %> des mises à jour importantes! 
+                Profitez des dernières améliorations de performance, corrections de bugs et nouvelles fonctionnalités.
+              </p>
+              <div class="mt-4 flex flex-wrap gap-3">
+                <% purchases_needing_update.first(3).each do |purchase| %>
+                  <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-neutral-800/80 text-sm">
+                    <span class="text-white font-medium"><%= purchase.trading_bot.name %></span>
+                    <span class="text-orange-400">v<%= purchase.version_purchased %></span>
+                    <i class="fa-solid fa-arrow-right text-neutral-500 text-xs"></i>
+                    <span class="text-green-400 font-bold">v<%= purchase.trading_bot.current_version %></span>
+                  </span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+          
+          <div class="shrink-0 flex flex-col items-end gap-4">
+            <div class="text-right">
+              <p class="text-xs text-neutral-400 uppercase tracking-wide">À partir de</p>
+              <p class="text-3xl font-black text-white">49,99€<span class="text-base font-normal text-neutral-400">/bot</span></p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <a href="#updates-section" class="flex items-center justify-center gap-2.5 h-12 px-8 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-sm font-bold text-white shadow-lg shadow-orange-500/30 transition-all hover:scale-[1.02] hover:shadow-orange-500/50">
+                <i class="fa-solid fa-bolt"></i>
+                Mettre à jour
+              </a>
+              <a href="#updates-section" class="flex items-center justify-center gap-2.5 h-12 px-6 rounded-xl border-2 border-purple-500/50 bg-purple-500/10 text-sm font-bold text-purple-300 transition-all hover:bg-purple-500/20 hover:border-purple-400">
+                <i class="fa-solid fa-gem"></i>
+                99€/an illimité
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
 
   <% if @purchases.any? %>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -147,8 +240,90 @@
             </div>
           </div>
           
-          <div class="border-t border-neutral-800 p-4 bg-neutral-800/30">
-            <%= link_to admin_bot_path(bot, from: 'my_bots'), class: "flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.01] hover:shadow-blue-500/30" do %>
+          <%# Section Mise à jour %>
+          <% if purchase.needs_update? %>
+            <div id="updates-section" class="border-t border-orange-500/30 p-5 bg-gradient-to-r from-orange-500/10 to-red-500/10">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-orange-500/25">
+                    <i class="fa-solid fa-arrow-up-from-bracket text-white text-lg"></i>
+                  </div>
+                  <div>
+                    <p class="text-base font-bold text-white flex items-center gap-2">
+                      Nouvelle version disponible!
+                      <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold bg-orange-500 text-white">
+                        v<%= bot.current_version %>
+                      </span>
+                    </p>
+                    <p class="text-sm text-neutral-400 mt-0.5">
+                      Vous avez: v<%= purchase.version_purchased %> • 
+                      <span class="text-orange-400 font-medium"><%= purchase.pending_updates.count %> mise(s) à jour</span>
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button type="button" 
+                          onclick="openUpdatePayment('<%= purchase_admin_bot_bot_update_path(bot, purchase.pending_updates.first) %>', '<%= bot.name %>', 'v<%= bot.current_version %>', <%= bot.update_price %>, 'single')"
+                          class="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 h-12 px-6 text-sm font-bold text-white shadow-lg shadow-orange-500/30 transition-all hover:scale-[1.02] hover:shadow-orange-500/50">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span><%= number_to_currency(bot.update_price, unit: "€", format: "%n%u") %></span>
+                  </button>
+                  <button type="button"
+                          onclick="openUpdatePayment('<%= purchase_pass_admin_bot_bot_updates_path(bot) %>', '<%= bot.name %>', 'Pack Annuel', <%= bot.update_pass_yearly_price %>, 'yearly')"
+                          class="flex items-center justify-center gap-2 rounded-xl border-2 border-purple-500/50 bg-purple-500/10 h-12 px-6 text-sm font-bold text-purple-300 transition-all hover:bg-purple-500/20 hover:border-purple-400">
+                    <i class="fa-solid fa-gem"></i>
+                    <span>Pack Annuel</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          <% elsif purchase.update_pass_active? %>
+            <div class="border-t border-emerald-500/30 p-5 bg-gradient-to-r from-emerald-500/10 to-green-500/10">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+                    <i class="fa-solid fa-gem text-white text-lg"></i>
+                  </div>
+                  <div>
+                    <p class="text-base font-bold text-emerald-400 flex items-center gap-2">
+                      <i class="fa-solid fa-shield-check"></i>
+                      Pack Mises à Jour Annuel Actif
+                    </p>
+                    <p class="text-sm text-neutral-400 mt-0.5">
+                      Expire le <%= purchase.update_pass_expires_at.strftime("%d/%m/%Y") %> • 
+                      Version: v<%= purchase.version_purchased %>
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="flex items-center gap-2 h-12 px-5 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
+                    <i class="fa-solid fa-clock text-emerald-400"></i>
+                    <span class="text-sm font-bold text-emerald-400"><%= purchase.days_until_pass_expires %> jours</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% else %>
+            <div class="border-t border-neutral-700/50 p-4 bg-neutral-800/30">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-check text-green-400 text-sm"></i>
+                  </div>
+                  <span class="text-sm text-neutral-400">
+                    Version: <span class="text-white font-medium">v<%= purchase.version_purchased %></span>
+                  </span>
+                </div>
+                <span class="inline-flex items-center gap-1.5 text-sm text-green-400 font-medium">
+                  <i class="fa-solid fa-circle-check"></i>
+                  À jour
+                </span>
+              </div>
+            </div>
+          <% end %>
+
+          <div class="border-t border-neutral-800 p-5 bg-neutral-900/50">
+            <%= link_to admin_bot_path(bot, from: 'my_bots'), class: "flex items-center justify-center gap-2.5 w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.01] hover:shadow-blue-500/40" do %>
               <i class="fa-solid fa-eye"></i>
               Voir les Détails Complets
             <% end %>
@@ -174,3 +349,195 @@
     </div>
   <% end %>
 </div>
+
+<!-- Slideover Paiement Mise à jour -->
+<dialog id="update-payment-dialog" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
+  <div class="flex h-full w-80 flex-col bg-neutral-950 shadow-2xl sm:w-[420px]">
+    <div class="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-6 py-5">
+      <div class="flex items-center gap-3">
+        <div id="payment-icon" class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
+          <i class="fa-solid fa-arrow-up-from-bracket"></i>
+        </div>
+        <div>
+          <h4 id="payment-title" class="text-lg font-semibold text-white">Mise à jour</h4>
+          <p id="payment-subtitle" class="text-sm text-neutral-400"></p>
+        </div>
+      </div>
+      <button type="button" onclick="closeUpdatePayment()" class="rounded-full p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" x2="6" y1="6" y2="18"></line>
+          <line x1="6" x2="18" y1="6" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-neutral-950">
+      <!-- Récapitulatif -->
+      <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-neutral-400">Bot</span>
+          <span id="recap-bot" class="text-white font-semibold"></span>
+        </div>
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-neutral-400">Produit</span>
+          <span id="recap-product" class="text-white font-semibold"></span>
+        </div>
+        <div class="border-t border-neutral-800 pt-3 mt-3">
+          <div class="flex items-center justify-between">
+            <span class="text-lg font-bold text-white">Total</span>
+            <span id="recap-price" class="text-2xl font-black text-orange-400"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulaire Stripe -->
+      <div class="space-y-4">
+        <label class="block text-sm font-medium text-neutral-300">Carte bancaire</label>
+        <div id="card-element-update" class="p-4 bg-neutral-900 border border-neutral-700 rounded-xl"></div>
+        <div id="card-errors-update" class="text-sm text-red-400"></div>
+      </div>
+
+      <!-- Sécurité -->
+      <div class="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+        <i class="fa-solid fa-shield-halved text-emerald-400 text-lg"></i>
+        <div>
+          <p class="text-sm font-medium text-emerald-400">Paiement 100% sécurisé</p>
+          <p class="text-xs text-neutral-400">Vos données sont protégées par Stripe</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-3 border-t border-neutral-800 bg-neutral-900 px-6 py-5">
+      <button id="pay-update-btn" type="button" onclick="processUpdatePayment()" class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 h-12 text-sm font-bold text-white shadow-lg shadow-orange-600/25 transition-all hover:from-orange-400 hover:to-red-500 disabled:opacity-50 disabled:cursor-not-allowed">
+        <i class="fa-solid fa-lock"></i>
+        <span id="pay-btn-text">Payer</span>
+      </button>
+      <button type="button" onclick="closeUpdatePayment()" class="flex items-center justify-center gap-2 rounded-xl border border-neutral-700 bg-neutral-800 h-12 px-6 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700">
+        Annuler
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+let stripe, elements, cardElement;
+let currentPaymentUrl = '';
+let currentPaymentType = '';
+
+document.addEventListener('DOMContentLoaded', function() {
+  const stripeKey = '<%= Rails.application.credentials.dig(:stripe, :publishable_key) || ENV["STRIPE_PUBLISHABLE_KEY"] %>';
+  if (stripeKey) {
+    stripe = Stripe(stripeKey);
+    elements = stripe.elements({
+      appearance: {
+        theme: 'night',
+        variables: {
+          colorPrimary: '#f97316',
+          colorBackground: '#171717',
+          colorText: '#ffffff',
+          colorDanger: '#ef4444',
+          borderRadius: '8px',
+          fontFamily: 'system-ui, sans-serif'
+        }
+      }
+    });
+    cardElement = elements.create('card', {
+      style: {
+        base: {
+          fontSize: '16px',
+          color: '#ffffff',
+          '::placeholder': { color: '#737373' }
+        }
+      }
+    });
+    cardElement.mount('#card-element-update');
+    cardElement.on('change', function(event) {
+      document.getElementById('card-errors-update').textContent = event.error ? event.error.message : '';
+    });
+  }
+});
+
+function openUpdatePayment(url, botName, version, price, type) {
+  currentPaymentUrl = url;
+  currentPaymentType = type;
+  
+  document.getElementById('payment-subtitle').textContent = botName;
+  document.getElementById('recap-bot').textContent = botName;
+  document.getElementById('recap-product').textContent = type === 'yearly' ? 'Pack Annuel (1 an)' : 'Mise à jour ' + version;
+  document.getElementById('recap-price').textContent = price.toFixed(2).replace('.', ',') + ' €';
+  document.getElementById('pay-btn-text').textContent = 'Payer ' + price.toFixed(2).replace('.', ',') + ' €';
+  
+  if (type === 'yearly') {
+    document.getElementById('payment-icon').className = 'w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/20';
+    document.getElementById('payment-icon').innerHTML = '<i class="fa-solid fa-gem"></i>';
+    document.getElementById('payment-title').textContent = 'Pack Annuel';
+  } else {
+    document.getElementById('payment-icon').className = 'w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/20';
+    document.getElementById('payment-icon').innerHTML = '<i class="fa-solid fa-arrow-up-from-bracket"></i>';
+    document.getElementById('payment-title').textContent = 'Mise à jour ' + version;
+  }
+  
+  document.getElementById('update-payment-dialog').showModal();
+}
+
+function closeUpdatePayment() {
+  document.getElementById('update-payment-dialog').close();
+}
+
+async function processUpdatePayment() {
+  const payBtn = document.getElementById('pay-update-btn');
+  const errorEl = document.getElementById('card-errors-update');
+  const originalText = document.getElementById('pay-btn-text').textContent;
+  
+  payBtn.disabled = true;
+  document.getElementById('pay-btn-text').innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Traitement...';
+  errorEl.textContent = '';
+  
+  try {
+    const response = await fetch(currentPaymentUrl, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    
+    if (data.free) {
+      window.location.href = '/admin/my_bots?update_success=true&bot=' + encodeURIComponent(data.bot_name) + '&version=' + encodeURIComponent(data.version);
+      return;
+    }
+    
+    const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+      payment_method: { card: cardElement }
+    });
+    
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    if (paymentIntent.status === 'succeeded') {
+      if (currentPaymentType === 'yearly') {
+        window.location.href = '/admin/my_bots?pass_success=true&bot=' + encodeURIComponent(data.bot_name);
+      } else {
+        window.location.href = '/admin/my_bots?update_success=true&bot=' + encodeURIComponent(data.bot_name) + '&version=' + encodeURIComponent(data.version);
+      }
+    }
+  } catch (error) {
+    errorEl.textContent = error.message || 'Une erreur est survenue. Veuillez réessayer.';
+    payBtn.disabled = false;
+    document.getElementById('pay-btn-text').textContent = originalText;
+  }
+}
+
+document.getElementById('update-payment-dialog').addEventListener('click', function(e) {
+  if (e.target === this) closeUpdatePayment();
+});
+</script>

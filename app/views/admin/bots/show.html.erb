@@ -52,6 +52,14 @@
     
     <% if current_user.is_admin? %>
       <div class="flex items-center gap-2">
+        <%= link_to admin_bot_bot_updates_path(@bot), class: "flex items-center justify-center gap-2 rounded-lg border border-orange-500/30 bg-gradient-to-r from-orange-500 to-red-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-orange-400 hover:to-red-500 shadow-lg shadow-orange-500/20" do %>
+          <i class="fa-solid fa-arrow-up-from-bracket text-xs"></i>
+          Mises à jour
+          <% users_needing = @bot.users_needing_update.count %>
+          <% if users_needing > 0 %>
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-xs font-bold"><%= users_needing %></span>
+          <% end %>
+        <% end %>
         <%= link_to admin_bot_backtests_path(@bot), class: "flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-100 transition-all hover:bg-neutral-700" do %>
           <i class="fa-solid fa-chart-line text-xs"></i>
           Backtests

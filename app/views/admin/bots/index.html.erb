@@ -141,7 +141,7 @@
                   </div>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-3 gap-4">
                   <div>
                     <label class="block text-sm font-medium text-neutral-300 mb-2">Symbol MT5</label>
                     <%= f.text_field :symbol, placeholder: "EURUSD", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
@@ -149,6 +149,10 @@
                   <div>
                     <label class="block text-sm font-medium text-neutral-300 mb-2">Magic Number</label>
                     <%= f.number_field :magic_number_prefix, placeholder: "10000", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Version</label>
+                    <%= f.text_field :current_version, value: "1.0.0", placeholder: "1.0.0", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
                   </div>
                 </div>
                 
@@ -367,11 +371,32 @@
             </div>
           </div>
           
+          <% users_needing_update = bot.users_needing_update.count %>
+          <% if users_needing_update > 0 %>
+            <div class="px-5 py-3 border-t border-orange-500/30 bg-gradient-to-r from-orange-500/10 to-red-500/10">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-arrow-up-from-bracket text-orange-400"></i>
+                  <span class="text-sm text-orange-300">
+                    <strong><%= users_needing_update %></strong> client<%= users_needing_update > 1 ? 's' : '' %> à mettre à jour
+                  </span>
+                </div>
+                <span class="text-sm font-bold text-emerald-400">
+                  +<%= number_to_currency(users_needing_update * bot.update_price, unit: "€", format: "%n%u") %>
+                </span>
+              </div>
+            </div>
+          <% end %>
+
           <div class="bg-neutral-900 px-5 py-4 border-t border-neutral-800">
             <div class="flex items-center gap-2">
               <%= link_to admin_bot_path(bot), class: "flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm font-medium text-neutral-100 transition-all hover:bg-neutral-700" do %>
                 <i class="fa-solid fa-eye text-xs"></i>
                 Voir
+              <% end %>
+              <%= link_to admin_bot_bot_updates_path(bot), class: "flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-orange-500/30 bg-orange-500 px-3 py-2 text-sm font-medium text-white transition-all hover:bg-orange-400" do %>
+                <i class="fa-solid fa-arrow-up-from-bracket text-xs"></i>
+                MAJ
               <% end %>
               <%= link_to edit_admin_bot_path(bot), class: "flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-amber-400/30 bg-amber-500 px-3 py-2 text-sm font-medium text-white transition-all hover:bg-amber-400" do %>
                 <i class="fa-solid fa-pen text-xs"></i>

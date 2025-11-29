@@ -115,6 +115,32 @@
     </div>
   </div>
 
+  <div class="card" style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(239, 68, 68, 0.1)); border: 2px solid #f97316;">
+    <h3><i class="fa-icon fa-md fa-arrow-up-from-bracket" style="color: #f97316;"></i> 💰 Mises à Jour Payantes</h3>
+    <p style="color: #666; margin-bottom: 20px;">Configurez les prix pour générer des revenus supplémentaires avec les mises à jour!</p>
+    
+    <div class="two-col">
+      <div class="form-group">
+        <%= f.label :update_price, "Prix Mise à Jour Unitaire (€)" %>
+        <%= f.number_field :update_price, step: 0.01, min: 0, placeholder: "49.99" %>
+        <div class="help-text">Prix pour une seule mise à jour (par bot)</div>
+      </div>
+      
+      <div class="form-group">
+        <%= f.label :update_pass_yearly_price, "Prix Pack Annuel (€)" %>
+        <%= f.number_field :update_pass_yearly_price, step: 0.01, min: 0, placeholder: "99.00" %>
+        <div class="help-text">Accès à toutes les mises à jour pendant 1 an</div>
+      </div>
+    </div>
+    
+    <div class="form-group" style="background: rgba(34, 197, 94, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);">
+      <p style="margin: 0; color: #16a34a; font-weight: 600;">
+        <i class="fa-icon fa-md fa-lightbulb" style="color: #fbbf24;"></i>
+        Conseil: Le pack annuel à 99€ offre un meilleur rapport qualité-prix et fidélise vos clients!
+      </p>
+    </div>
+  </div>
+
   <div class="card">
     <h3><i class="fa-icon fa-md fa-bullhorn"></i> Stratégie & Fonctionnalités</h3>
     

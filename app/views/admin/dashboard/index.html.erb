@@ -730,94 +730,107 @@
   </div>
     
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="p-6 rounded-2xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
-      <div class="mb-5">
-        <h2 class="text-xl font-bold text-neutral-900 dark:text-white flex items-center gap-2">
-          <i class="fa-solid fa-wallet text-blue-500"></i>
-          Comptes MT5
-        </h2>
+    <div class="rounded-2xl overflow-hidden border border-neutral-800 bg-gradient-to-br from-neutral-900 via-neutral-900 to-neutral-950">
+      <div class="relative px-6 py-5 border-b border-neutral-800 bg-gradient-to-r from-blue-600/10 via-cyan-600/5 to-transparent">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div class="relative flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+            <i class="fa-solid fa-wallet text-white"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-white">Comptes MT5</h2>
+            <p class="text-xs text-neutral-400"><%= @mt5_accounts&.count || 0 %> compte<%= (@mt5_accounts&.count || 0) > 1 ? 's' : '' %> connecté<%= (@mt5_accounts&.count || 0) > 1 ? 's' : '' %></p>
+          </div>
+        </div>
       </div>
       
       <% if @mt5_accounts&.any? %>
-        <div class="overflow-x-auto -mx-6">
-          <table class="w-full !bg-transparent !border-0">
-            <thead class="!bg-transparent">
-              <tr class="border-b border-neutral-800">
-                <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wide">Compte</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wide">Balance</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wide">Gains</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-neutral-800/50">
-              <% @mt5_accounts.each do |account| %>
-                <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700/30 transition-colors">
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-2">
-                      <i class="fa-regular fa-user text-neutral-400"></i>
-                      <span class="font-medium text-neutral-900 dark:text-white"><%= account.account_name %></span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 font-semibold text-neutral-900 dark:text-white">
-                    <%= number_to_currency(account.balance, unit: "€", format: "%n %u") %>
-                  </td>
-                  <td class="px-6 py-4 font-semibold <%= account.net_gains > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400' %>">
-                    <%= number_to_currency(account.net_gains, unit: "€", format: "%n %u") %>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
+        <div class="divide-y divide-neutral-800/50">
+          <% @mt5_accounts.each do |account| %>
+            <div class="px-6 py-4 hover:bg-neutral-800/30 transition-colors group">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-neutral-800 flex items-center justify-center group-hover:bg-neutral-700 transition-colors">
+                    <i class="fa-solid fa-user text-neutral-400 text-sm"></i>
+                  </div>
+                  <div>
+                    <p class="font-semibold text-white"><%= account.account_name %></p>
+                    <p class="text-xs text-neutral-500">ID: <%= account.mt5_id %></p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="font-bold text-white"><%= number_to_currency(account.balance, unit: "€", format: "%n%u") %></p>
+                  <p class="text-sm font-semibold <%= account.net_gains >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+                    <%= account.net_gains >= 0 ? '+' : '' %><%= number_to_currency(account.net_gains, unit: "€", format: "%n%u") %>
+                  </p>
+                </div>
+              </div>
+            </div>
+          <% end %>
         </div>
       <% else %>
-        <div class="text-center py-12 text-neutral-400">
-          <i class="fa-solid fa-wallet text-4xl mb-3 opacity-50"></i>
-          <h3 class="font-semibold text-neutral-600 dark:text-neutral-300 mb-1">Aucun compte MT5</h3>
-          <p class="text-sm">Connectez vos comptes pour commencer</p>
+        <div class="p-8 text-center">
+          <div class="w-16 h-16 mx-auto rounded-2xl bg-neutral-800 flex items-center justify-center mb-4">
+            <i class="fa-solid fa-wallet text-neutral-600 text-2xl"></i>
+          </div>
+          <h3 class="font-semibold text-white mb-1">Aucun compte MT5</h3>
+          <p class="text-sm text-neutral-400">Connectez vos comptes pour commencer</p>
         </div>
       <% end %>
     </div>
     
-    <div class="p-6 rounded-2xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
-      <div class="mb-5">
-        <h2 class="text-xl font-bold text-neutral-900 dark:text-white flex items-center gap-2">
-          <i class="fa-solid fa-bolt text-blue-500"></i>
-          Activité Récente
-        </h2>
+    <div class="rounded-2xl overflow-hidden border border-neutral-800 bg-gradient-to-br from-neutral-900 via-neutral-900 to-neutral-950">
+      <div class="relative px-6 py-5 border-b border-neutral-800 bg-gradient-to-r from-amber-600/10 via-orange-600/5 to-transparent">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div class="relative flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25">
+            <i class="fa-solid fa-bolt text-white"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-white">Activité Récente</h2>
+            <p class="text-xs text-neutral-400">Dernières transactions</p>
+          </div>
+        </div>
       </div>
       
       <% recent_trades = @client.trades.order(close_time: :desc).limit(5) %>
       <% if recent_trades.any? %>
-        <div class="overflow-x-auto -mx-6">
-          <table class="w-full !bg-transparent !border-0">
-            <thead class="!bg-transparent">
-              <tr class="border-b border-neutral-800">
-                <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wide">Date</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wide">Symbole</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wide">Profit</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-neutral-800/50">
-              <% recent_trades.each do |trade| %>
-                <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700/30 transition-colors">
-                  <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400">
-                    <%= trade.close_time&.strftime("%d/%m/%Y") || "Ouvert" %>
-                  </td>
-                  <td class="px-6 py-4 font-medium text-neutral-900 dark:text-white">
-                    <%= trade.symbol %>
-                  </td>
-                  <td class="px-6 py-4 font-semibold <%= trade.profit > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400' %>">
-                    <%= number_to_currency(trade.profit, unit: "€", format: "%n %u") %>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
+        <div class="divide-y divide-neutral-800/50">
+          <% recent_trades.each do |trade| %>
+            <div class="px-6 py-4 hover:bg-neutral-800/30 transition-colors group">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg <%= trade.profit >= 0 ? 'bg-emerald-500/20' : 'bg-red-500/20' %> flex items-center justify-center">
+                    <i class="fa-solid fa-arrow-<%= trade.profit >= 0 ? 'up' : 'down' %> <%= trade.profit >= 0 ? 'text-emerald-400' : 'text-red-400' %> text-sm"></i>
+                  </div>
+                  <div>
+                    <p class="font-semibold text-white"><%= trade.symbol %></p>
+                    <p class="text-xs text-neutral-500"><%= trade.close_time&.strftime("%d/%m/%Y %H:%M") || "En cours" %></p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="font-bold <%= trade.profit >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+                    <%= trade.profit >= 0 ? '+' : '' %><%= number_to_currency(trade.profit, unit: "€", format: "%n%u") %>
+                  </p>
+                  <p class="text-xs text-neutral-500"><%= trade.volume %> lot<%= trade.volume > 1 ? 's' : '' %></p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="px-6 py-3 border-t border-neutral-800 bg-neutral-900/50">
+          <%= link_to admin_my_trades_path, class: "flex items-center justify-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors" do %>
+            <span>Voir toutes les transactions</span>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          <% end %>
         </div>
       <% else %>
-        <div class="text-center py-12 text-neutral-400">
-          <i class="fa-solid fa-bolt text-4xl mb-3 opacity-50"></i>
-          <h3 class="font-semibold text-neutral-600 dark:text-neutral-300 mb-1">Aucune transaction récente</h3>
-          <p class="text-sm">Vos trades apparaîtront ici</p>
+        <div class="p-8 text-center">
+          <div class="w-16 h-16 mx-auto rounded-2xl bg-neutral-800 flex items-center justify-center mb-4">
+            <i class="fa-solid fa-bolt text-neutral-600 text-2xl"></i>
+          </div>
+          <h3 class="font-semibold text-white mb-1">Aucune transaction récente</h3>
+          <p class="text-sm text-neutral-400">Vos trades apparaîtront ici</p>
         </div>
       <% end %>
     </div>
@@ -854,19 +867,20 @@ async function initializeBotsChart() {
                          .where(magic_number: bp.magic_number)
       winning_trades = user_trades.where("profit > 0").count
       total_trades = user_trades.count
+      total_profit = user_trades.sum(:profit)
       success_rate = total_trades > 0 ? (winning_trades.to_f / total_trades * 100).round(2) : 0
       
       {
         name: bp.trading_bot.name,
-        profit: bp.total_profit || 0,
-        trades: bp.trades_count || 0,
+        profit: total_profit,
+        trades: total_trades,
         success_rate: success_rate,
         magic_number: bp.magic_number
       }
     }.to_json %>;
     
     if (botsData.length === 0) {
-      loadingDiv.innerHTML = '<div class="flex flex-col items-center justify-center text-neutral-400"><i class="fa-solid fa-robot text-4xl mb-3 opacity-50"></i><h3 class="font-semibold text-neutral-600 dark:text-neutral-300 mb-1">Aucun bot trouvé</h3><p class="text-sm">Vous n\'avez pas encore de bots assignés</p></div>';
+      if (loadingDiv) loadingDiv.style.display = 'none';
       return;
     }
     
@@ -874,14 +888,23 @@ async function initializeBotsChart() {
     ctx.classList.remove('hidden');
     ctx.style.display = 'block';
     
-    const textColor = '#94a3b8';
-    const gridColor = 'rgba(148, 163, 184, 0.1)';
+    const textColor = '#64748b';
+    const gridColor = 'rgba(100, 116, 139, 0.1)';
     const botNames = botsData.map(bot => bot.name);
     const profits = botsData.map(bot => bot.profit);
     const tradesCount = botsData.map(bot => bot.trades);
     
-    const profitColors = profits.map(profit => profit >= 0 ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)');
-    const borderColors = profits.map(profit => profit >= 0 ? 'rgba(16, 185, 129, 1)' : 'rgba(239, 68, 68, 1)');
+    const profitGradients = profits.map((profit, i) => {
+      const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
+      if (profit >= 0) {
+        gradient.addColorStop(0, 'rgba(16, 185, 129, 0.9)');
+        gradient.addColorStop(1, 'rgba(20, 184, 166, 0.6)');
+      } else {
+        gradient.addColorStop(0, 'rgba(239, 68, 68, 0.9)');
+        gradient.addColorStop(1, 'rgba(249, 115, 22, 0.6)');
+      }
+      return gradient;
+    });
     
     new Chart(ctx, {
       type: 'bar',
@@ -889,26 +912,31 @@ async function initializeBotsChart() {
         labels: botNames,
         datasets: [
           {
-            label: 'Profit Total (€)',
+            label: 'Profit',
             data: profits,
-            backgroundColor: profitColors,
-            borderColor: borderColors,
-            borderWidth: 2,
-            borderRadius: 8,
-            yAxisID: 'y-profit'
+            backgroundColor: profitGradients,
+            borderWidth: 0,
+            borderRadius: { topLeft: 8, topRight: 8 },
+            borderSkipped: false,
+            yAxisID: 'y-profit',
+            barPercentage: 0.6,
+            order: 2
           },
           {
-            label: 'Nombre de Trades',
+            label: 'Trades',
             data: tradesCount,
             type: 'line',
             borderColor: '#3b82f6',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             borderWidth: 3,
             pointBackgroundColor: '#3b82f6',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
+            pointBorderColor: '#1a1a1a',
+            pointBorderWidth: 3,
             pointRadius: 6,
-            yAxisID: 'y-trades'
+            pointHoverRadius: 8,
+            tension: 0.4,
+            yAxisID: 'y-trades',
+            order: 1
           }
         ]
       },
@@ -916,48 +944,73 @@ async function initializeBotsChart() {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            display: true,
-            position: 'top',
-            labels: { color: textColor, font: { size: 12, family: 'Inter, sans-serif' } }
-          },
+          legend: { display: false },
           tooltip: {
-            backgroundColor: 'rgba(23, 23, 23, 0.95)',
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
             titleColor: '#fff',
+            titleFont: { size: 13, weight: 'bold' },
             bodyColor: '#e2e8f0',
-            borderColor: 'rgba(255, 255, 255, 0.1)',
+            bodyFont: { size: 12 },
+            borderColor: 'rgba(59, 130, 246, 0.5)',
             borderWidth: 1,
-            cornerRadius: 8,
-            padding: 12,
+            cornerRadius: 12,
+            padding: 14,
+            displayColors: true,
+            boxPadding: 6,
             callbacks: {
+              title: function(context) {
+                return '🤖 ' + context[0].label;
+              },
+              label: function(context) {
+                const value = context.parsed.y;
+                if (context.dataset.label === 'Profit') {
+                  const formatted = Math.abs(value).toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €';
+                  return (value >= 0 ? '💰 +' : '📉 -') + formatted;
+                } else {
+                  return '📊 ' + value + ' trades';
+                }
+              },
               afterBody: function(context) {
                 const index = context[0].dataIndex;
                 const bot = botsData[index];
-                return [`Magic Number: ${bot.magic_number}`, `Taux de réussite: ${bot.success_rate}%`];
+                return ['', '🎯 Réussite: ' + bot.success_rate + '%'];
               }
             }
           }
         },
         scales: {
           x: {
-            ticks: { color: textColor, font: { size: 11 } },
-            grid: { color: gridColor }
+            ticks: { color: textColor, font: { size: 11, weight: '500' }, padding: 8 },
+            grid: { display: false },
+            border: { display: false }
           },
           'y-profit': {
             type: 'linear',
             display: true,
             position: 'left',
-            title: { display: true, text: 'Profit (€)', color: textColor },
-            ticks: { color: textColor, callback: function(value) { return value.toFixed(0) + '€'; } },
-            grid: { color: gridColor }
+            grid: { color: gridColor, drawBorder: false },
+            ticks: { 
+              color: textColor, 
+              font: { size: 10 },
+              padding: 8,
+              callback: function(value) { 
+                if (Math.abs(value) >= 1000) return (value / 1000).toFixed(1) + 'k€';
+                return value.toFixed(0) + '€'; 
+              } 
+            },
+            border: { display: false }
           },
           'y-trades': {
             type: 'linear',
             display: true,
             position: 'right',
-            title: { display: true, text: 'Nombre de Trades', color: textColor },
-            ticks: { color: textColor },
-            grid: { drawOnChartArea: false }
+            grid: { display: false },
+            ticks: { 
+              color: '#3b82f6', 
+              font: { size: 10, weight: '600' },
+              padding: 8
+            },
+            border: { display: false }
           }
         },
         interaction: { intersect: false, mode: 'index' }

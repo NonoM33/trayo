@@ -119,6 +119,16 @@ Rails.application.routes.draw do
         end
       end
       
+      resources :bot_updates, path: 'updates' do
+        member do
+          post :notify_users
+          post :purchase
+        end
+        collection do
+          post :purchase_pass
+        end
+      end
+      
       member do
         delete :remove_from_user
       end

@@ -1,0 +1,175 @@
+<% @page_title = "#{@update.title} - v#{@update.version}" %>
+
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <%= link_to admin_bot_bot_updates_path(@bot), class: "flex items-center justify-center w-10 h-10 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors" do %>
+        <i class="fa-solid fa-arrow-left"></i>
+      <% end %>
+      
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl flex items-center justify-center text-white shadow-lg <%= @update.is_major? ? 'bg-gradient-to-br from-orange-500 to-red-600 shadow-orange-500/20' : 'bg-gradient-to-br from-blue-500 to-cyan-600 shadow-blue-500/20' %>">
+          <i class="fa-solid <%= @update.is_major? ? 'fa-star' : 'fa-code-merge' %> text-2xl"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-2xl font-bold text-white"><%= @update.title %></h1>
+            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold bg-blue-400/10 text-blue-400 ring-1 ring-inset ring-blue-400/25">
+              v<%= @update.version %>
+            </span>
+          </div>
+          <p class="text-neutral-400"><%= @bot.name %></p>
+        </div>
+      </div>
+    </div>
+    
+    <% if current_user.is_admin? %>
+      <div class="flex items-center gap-2">
+        <%= link_to edit_admin_bot_bot_update_path(@bot, @update), class: "flex items-center justify-center gap-2 rounded-lg border border-amber-400/30 bg-amber-500 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-amber-400" do %>
+          <i class="fa-solid fa-pen text-xs"></i>
+          Modifier
+        <% end %>
+        <%= button_to admin_bot_bot_update_path(@bot, @update), method: :delete, data: { turbo_confirm: "Supprimer cette mise à jour ?" }, class: "flex items-center justify-center gap-2 rounded-lg border border-red-400/30 bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-red-500" do %>
+          <i class="fa-solid fa-trash text-xs"></i>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if flash[:notice] %>
+    <div class="flex items-center gap-3 p-4 rounded-xl border border-green-500/20 bg-green-500/10">
+      <i class="fa-solid fa-check-circle text-green-400"></i>
+      <p class="text-green-300"><%= flash[:notice] %></p>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+      <p class="text-xs text-neutral-500 uppercase tracking-wide mb-1">Version</p>
+      <p class="text-2xl font-bold text-white">v<%= @update.version %></p>
+    </div>
+    
+    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+      <p class="text-xs text-neutral-500 uppercase tracking-wide mb-1">Upgrades</p>
+      <p class="text-2xl font-bold text-emerald-400"><%= @update.upgrade_count %></p>
+    </div>
+    
+    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+      <p class="text-xs text-neutral-500 uppercase tracking-wide mb-1">Revenus</p>
+      <p class="text-2xl font-bold text-emerald-400">
+        <%= number_to_currency(@update.upgrade_count * @bot.update_price, unit: "€", format: "%n%u") %>
+      </p>
+    </div>
+    
+    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+      <p class="text-xs text-neutral-500 uppercase tracking-wide mb-1">En attente</p>
+      <p class="text-2xl font-bold text-orange-400"><%= @pending_users.count %></p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+      <% if @update.description.present? %>
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-6">
+          <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-align-left text-blue-400"></i>
+            Description
+          </h3>
+          <p class="text-neutral-300"><%= @update.description %></p>
+        </div>
+      <% end %>
+
+      <% if @update.highlights_list.any? %>
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-6">
+          <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-star text-yellow-400"></i>
+            Points clés
+          </h3>
+          <div class="space-y-3">
+            <% @update.highlights_list.each do |highlight| %>
+              <div class="flex items-start gap-3 p-3 rounded-lg bg-neutral-900 border border-neutral-800">
+                <i class="fa-solid fa-check-circle text-green-400 mt-0.5"></i>
+                <span class="text-neutral-300"><%= highlight %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @update.changelog_list.any? %>
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-6">
+          <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-code text-purple-400"></i>
+            Changelog
+          </h3>
+          <div class="space-y-2 font-mono text-sm">
+            <% @update.changelog_list.each do |change| %>
+              <p class="text-neutral-400"><%= change %></p>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="space-y-6">
+      <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-6">
+        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-users text-emerald-400"></i>
+          Clients ayant upgradé (<%= @purchased_users.count %>)
+        </h3>
+        <% if @purchased_users.any? %>
+          <div class="space-y-2 max-h-64 overflow-y-auto">
+            <% @purchased_users.each do |user| %>
+              <%= link_to admin_client_path(user), class: "flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-800 transition-colors" do %>
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-semibold text-xs">
+                  <%= user.email[0].upcase %>
+                </div>
+                <span class="text-sm text-neutral-300 truncate"><%= user.email %></span>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-neutral-500 text-sm">Aucun upgrade pour le moment</p>
+        <% end %>
+      </div>
+
+      <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-6">
+        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-clock text-orange-400"></i>
+          En attente d'upgrade (<%= @pending_users.count %>)
+        </h3>
+        <% if @pending_users.any? %>
+          <div class="space-y-2 max-h-64 overflow-y-auto">
+            <% @pending_users.first(10).each do |user| %>
+              <%= link_to admin_client_path(user), class: "flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-800 transition-colors" do %>
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-semibold text-xs">
+                  <%= user.email[0].upcase %>
+                </div>
+                <span class="text-sm text-neutral-300 truncate"><%= user.email %></span>
+              <% end %>
+            <% end %>
+            <% if @pending_users.count > 10 %>
+              <p class="text-neutral-500 text-sm text-center">+<%= @pending_users.count - 10 %> autres clients...</p>
+            <% end %>
+          </div>
+          
+          <div class="mt-4 pt-4 border-t border-neutral-800">
+            <p class="text-sm text-neutral-400 mb-3">
+              Revenu potentiel: 
+              <span class="text-emerald-400 font-bold">
+                <%= number_to_currency(@pending_users.count * @bot.update_price, unit: "€", format: "%n%u") %>
+              </span>
+            </p>
+            <%= button_to notify_users_admin_bot_bot_update_path(@bot, @update), method: :post, class: "w-full flex items-center justify-center gap-2 rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-orange-400" do %>
+              <i class="fa-solid fa-paper-plane"></i>
+              Notifier ces clients
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-neutral-500 text-sm">Tous les clients sont à jour!</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
