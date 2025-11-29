@@ -93,7 +93,6 @@ Rails.application.routes.draw do
       end
     end
     
-    resources :campaigns, only: [:index]
     
     resources :mt5_accounts, only: [:update]
     resources :withdrawals, only: [:destroy]
@@ -132,6 +131,9 @@ Rails.application.routes.draw do
         post :purchase
       end
     end
+    
+    get 'shop/product/:id', to: 'shop#show_product', as: :shop_product
+    post 'shop/product/:id/purchase', to: 'shop#purchase_product', as: :purchase_shop_product
     
     resources :my_bots, only: [:index, :show] do
       member do
