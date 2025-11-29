@@ -382,7 +382,125 @@ Un design **professionnel, élégant et intemporel** qui :
 
 ---
 
-**Design System** : Shadcn-inspired
-**Palette** : Monochrome avec accents
+## 📱 Composants Admin Avancés
+
+### Centre SMS (Slideover)
+
+Le Centre SMS utilise un slideover RailsBlocks pour une expérience fluide :
+
+```html
+<dialog data-slideover-target="dialog" class="slideover slideover-right">
+  <!-- Header avec gradient -->
+  <div
+    class="bg-gradient-to-r from-emerald-600/20 via-teal-600/10 to-transparent"
+  >
+    <h4>Envoyer un SMS</h4>
+  </div>
+
+  <!-- Templates en grille 2x2 -->
+  <div class="grid grid-cols-2 gap-2">
+    <button onclick="fillTemplate('commission')">Commission</button>
+    <button onclick="fillTemplate('paiement')">Paiement</button>
+  </div>
+
+  <!-- Formulaire avec programmation -->
+  <textarea name="message" />
+  <input type="datetime-local" name="scheduled_at" />
+</dialog>
+```
+
+**Comportement des templates :**
+
+- Clic = pré-remplir le textarea (pas d'envoi direct)
+- Variables dynamiques : `{prenom}`, `{solde}`, `{commission}`
+- Option de programmation avec date/heure
+- Historique des SMS envoyés et programmés
+
+### Turbo Streams (Mises à jour sans rechargement)
+
+Les changements de statut utilisent Turbo Stream pour rester sur la page :
+
+```ruby
+respond_to do |format|
+  format.turbo_stream do
+    render turbo_stream: [
+      turbo_stream.replace("bot_purchase_#{@bot.id}", partial: "bot_card"),
+      turbo_stream.replace("flash_messages", partial: "flash_toast")
+    ]
+  end
+end
+```
+
+**Avantages :**
+
+- Pas de rechargement de page
+- Reste sur le même onglet
+- Toast de confirmation visuel
+- Expérience fluide
+
+### Toast de confirmation
+
+```html
+<div
+  class="fixed bottom-4 right-4 z-50 animate-fade-in-up"
+  data-controller="auto-dismiss"
+  data-auto-dismiss-delay-value="3000"
+>
+  <div class="bg-emerald-900/90 border-emerald-700/50">
+    <i class="fa-check-circle text-emerald-400"></i>
+    <span>Statut mis à jour</span>
+  </div>
+</div>
+```
+
+### Cartes Bot/VPS avec contrôles inline
+
+```html
+<!-- Toggle Running -->
+<button
+  class="relative inline-flex h-7 w-12 items-center rounded-full 
+               bg-emerald-500 /* ou bg-neutral-700 si off */"
+>
+  <span class="translate-x-6 /* ou translate-x-1 si off */"></span>
+</button>
+
+<!-- Dropdown Status -->
+<select onchange="this.form.requestSubmit()">
+  <option value="active">✓ Actif</option>
+  <option value="inactive">⏸ Inactif</option>
+</select>
+```
+
+## 🔔 Système de Notifications SMS
+
+### SMS Programmés
+
+```ruby
+# Modèle ScheduledSms
+class ScheduledSms < ApplicationRecord
+  belongs_to :user
+  scope :pending, -> { where(status: 'pending') }
+  scope :due, -> { pending.where('scheduled_at <= ?', Time.current) }
+end
+
+# Job périodique (toutes les 5 min)
+class ScheduledSmsJob < ApplicationJob
+  def perform
+    ScheduledSms.due.find_each(&:send_now!)
+  end
+end
+```
+
+### Onglet SMS dans fiche client
+
+- Liste des SMS programmés avec option d'annulation
+- Historique complet des SMS envoyés
+- Indicateur de badge sur l'onglet si SMS en attente
+
+---
+
+**Design System** : Shadcn-inspired + RailsBlocks
+**Palette** : Monochrome avec accents (emerald, amber, red, purple)
 **Style** : Minimal, Sobre, Élégant
-**Date** : Octobre 2025
+**Frameworks** : Tailwind CSS, Turbo, Stimulus
+**Date** : Novembre 2025

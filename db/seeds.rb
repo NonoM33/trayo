@@ -179,6 +179,10 @@ else
   puts "Trading bots already exist (#{TradingBot.count} bots)"
 end
 
+puts "Checking shop products..."
+ShopProduct.seed_maintenance_pack!
+puts "✓ Shop products seeded (#{ShopProduct.count} products)"
+
 puts "Checking campaigns..."
 campaign = Campaign.find_by(title: "🎯 Promotion Black Friday 2024")
 if campaign

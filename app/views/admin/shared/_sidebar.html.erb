@@ -201,9 +201,12 @@
                   
                   <div class="my-2 border-t border-neutral-800"></div>
                   
-                  <%= link_to admin_shop_index_path, class: "group w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors #{request.path.start_with?('/admin/shop') ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'}" do %>
-                    <i class="fa-solid fa-shopping-cart w-5"></i>
-                    <span>Boutique</span>
+                  <%= link_to admin_shop_index_path, class: "group w-full flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-sm transition-all #{request.path.start_with?('/admin/shop') ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25' : 'bg-gradient-to-r from-emerald-500/10 to-teal-500/10 text-emerald-400 hover:from-emerald-500/20 hover:to-teal-500/20 ring-1 ring-emerald-500/20'}" do %>
+                    <div class="flex items-center gap-2">
+                      <i class="fa-solid fa-shopping-cart w-5"></i>
+                      <span class="font-semibold">Boutique</span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-white animate-pulse">NEW</span>
                   <% end %>
                   
                   <%= link_to admin_my_bots_path, class: "group w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors #{request.path.start_with?('/admin/my_bots') ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'}" do %>

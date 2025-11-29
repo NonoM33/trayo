@@ -1,5 +1,8 @@
 <% content_for :title, "Client - #{@client.full_name}" %>
 
+<!-- Conteneur pour les messages flash Turbo -->
+<div id="flash_messages"></div>
+
 <div class="space-y-6">
   <!-- Bannière Impayé Commission -->
   <% if @client.commission_payment_failed? || @client.bots_suspended_for_payment? %>
@@ -62,123 +65,245 @@
 
         <!-- Slideover SMS Complet -->
         <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-white/10 outline-hidden">
-          <div class="inset-y-0 flex h-dvh w-full flex-col bg-neutral-900 shadow-lg outline-hidden sm:w-[420px] lg:w-[500px] text-neutral-100 shadow-neutral-950">
-            <button type="button" data-action="slideover#hide:prevent" class="absolute top-4 right-4 mt-1 rounded-full p-1.5 opacity-70 transition-opacity hover:cursor-pointer hover:bg-neutral-500/15 hover:opacity-100 focus:outline-hidden md:top-5">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
-            </button>
-
-            <div class="flex items-center gap-3 border-b border-white/10 p-5 pr-12 md:p-6">
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-                <i class="fa-solid fa-comment-sms text-white text-xl"></i>
-              </div>
-              <div>
-                <h4 class="font-semibold text-lg text-white">Centre SMS</h4>
-                <p class="text-sm text-neutral-400"><%= @client.phone %></p>
+          <div class="inset-y-0 flex h-dvh w-full flex-col bg-gradient-to-b from-neutral-900 via-neutral-900 to-neutral-950 shadow-2xl outline-hidden sm:w-[440px] lg:w-[480px] text-neutral-100">
+            
+            <!-- Header avec dégradé -->
+            <div class="relative overflow-hidden flex-shrink-0">
+              <div class="absolute inset-0 bg-gradient-to-r from-emerald-600/20 via-teal-600/10 to-transparent"></div>
+              <button type="button" data-action="slideover#hide:prevent" class="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white/10 backdrop-blur flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-all">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+              
+              <div class="relative p-6 pb-5">
+                <div class="flex items-center gap-4">
+                  <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+                    <i class="fa-solid fa-paper-plane text-white text-xl"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xl font-bold text-white">Centre SMS</h4>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                      <span class="text-sm text-emerald-400 font-medium"><%= @client.phone %></span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-5 md:p-6 space-y-6">
-              <!-- Campagnes en cours -->
-              <% active_campaigns = SmsCampaign.where(status: ['sending', 'scheduled']).limit(3) %>
-              <% if active_campaigns.any? %>
-                <div>
-                  <h5 class="text-sm font-semibold text-neutral-300 mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-bullhorn text-purple-400"></i>
-                    Campagnes en cours
-                  </h5>
-                  <div class="space-y-2">
-                    <% active_campaigns.each do |campaign| %>
-                      <div class="p-3 rounded-lg bg-neutral-800/50 border border-neutral-700 flex items-center justify-between">
-                        <div>
-                          <div class="text-sm font-medium text-white"><%= campaign.name %></div>
-                          <div class="text-xs text-neutral-400"><%= campaign.audience_label %></div>
-                        </div>
-                        <span class="px-2 py-1 rounded-full text-xs bg-blue-500/20 text-blue-400">
-                          <%= campaign.status == 'sending' ? 'En cours' : 'Programmée' %>
-                        </span>
-                      </div>
-                    <% end %>
+            <div class="flex-1 overflow-y-auto">
+              <!-- Destinataire -->
+              <div class="px-6 py-3 bg-neutral-800/30 border-y border-white/5">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">
+                    <%= @client.first_name&.first&.upcase %><%= @client.last_name&.first&.upcase %>
                   </div>
-                </div>
-              <% end %>
-
-              <!-- Relances rapides -->
-              <div>
-                <h5 class="text-sm font-semibold text-neutral-300 mb-3 flex items-center gap-2">
-                  <i class="fa-solid fa-bolt text-amber-400"></i>
-                  Relances rapides
-                </h5>
-                <div class="grid grid-cols-2 gap-2">
-                  <%= button_to send_sms_admin_client_path(@client), params: { sms_type: 'relance_commission', message: "TRAYO: Bonjour #{@client.first_name}, votre commission de #{number_to_currency(@performance[:pending_commission], unit: '€', format: '%n%u')} est en attente. Merci de régulariser." }, method: :post, class: "p-3 rounded-lg bg-neutral-800 border border-neutral-700 hover:border-emerald-500 hover:bg-neutral-700 transition-all text-left group" do %>
-                    <div class="text-lg mb-1">📢</div>
-                    <div class="text-sm font-medium text-white group-hover:text-emerald-400">Commission</div>
-                    <div class="text-xs text-neutral-500">Relance paiement</div>
-                  <% end %>
-                  
-                  <%= button_to send_sms_admin_client_path(@client), params: { sms_type: 'rappel_paiement', message: "TRAYO: Bonjour #{@client.first_name}, un paiement est en attente sur votre compte. Réglez-le pour éviter la suspension." }, method: :post, class: "p-3 rounded-lg bg-neutral-800 border border-neutral-700 hover:border-emerald-500 hover:bg-neutral-700 transition-all text-left group" do %>
-                    <div class="text-lg mb-1">💰</div>
-                    <div class="text-sm font-medium text-white group-hover:text-emerald-400">Paiement</div>
-                    <div class="text-xs text-neutral-500">Rappel facture</div>
-                  <% end %>
-                  
-                  <%= button_to send_sms_admin_client_path(@client), params: { sms_type: 'performance', message: "TRAYO: Bonjour #{@client.first_name}! Votre solde actuel: #{number_to_currency(@performance[:total_balance], unit: '€', format: '%n%u')}. Continuez! 🚀" }, method: :post, class: "p-3 rounded-lg bg-neutral-800 border border-neutral-700 hover:border-emerald-500 hover:bg-neutral-700 transition-all text-left group" do %>
-                    <div class="text-lg mb-1">📊</div>
-                    <div class="text-sm font-medium text-white group-hover:text-emerald-400">Performance</div>
-                    <div class="text-xs text-neutral-500">Mise à jour solde</div>
-                  <% end %>
-                  
-                  <%= button_to send_sms_admin_client_path(@client), params: { sms_type: 'activation_bot', message: "TRAYO: Bonjour #{@client.first_name}, votre bot est maintenant actif! Bon trading!" }, method: :post, class: "p-3 rounded-lg bg-neutral-800 border border-neutral-700 hover:border-emerald-500 hover:bg-neutral-700 transition-all text-left group" do %>
-                    <div class="text-lg mb-1">🤖</div>
-                    <div class="text-sm font-medium text-white group-hover:text-emerald-400">Activation</div>
-                    <div class="text-xs text-neutral-500">Bot activé</div>
-                  <% end %>
+                  <div>
+                    <div class="font-medium text-white text-sm"><%= @client.full_name %></div>
+                    <div class="text-xs text-neutral-400"><%= @client.email %></div>
+                  </div>
                 </div>
               </div>
 
-              <!-- Message personnalisé -->
-              <div>
-                <h5 class="text-sm font-semibold text-neutral-300 mb-3 flex items-center gap-2">
-                  <i class="fa-solid fa-pen text-blue-400"></i>
-                  Message personnalisé
-                </h5>
-                <%= form_with url: send_sms_admin_client_path(@client), method: :post, local: true, class: "space-y-3" do %>
-                  <input type="hidden" name="sms_type" value="personnalise">
-                  <textarea name="message" rows="4" class="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm" placeholder="TRAYO: Bonjour <%= @client.first_name %>, ..."></textarea>
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs text-neutral-500">Variables: {prenom}, {nom}, {solde}</span>
-                    <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors text-sm">
-                      <i class="fa-solid fa-paper-plane mr-2"></i>Envoyer
+              <div class="p-5 space-y-5">
+                <!-- Templates rapides -->
+                <div>
+                  <div class="flex items-center justify-between mb-3">
+                    <h5 class="text-sm font-semibold text-white flex items-center gap-2">
+                      <i class="fa-solid fa-bolt text-amber-400"></i>
+                      Templates
+                    </h5>
+                    <span class="text-xs text-neutral-500">Cliquer pour pré-remplir</span>
+                  </div>
+                  
+                  <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="fillTemplate('commission')" class="p-3 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20 hover:border-amber-400/50 transition-all text-left group">
+                      <div class="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center mb-2">
+                        <i class="fa-solid fa-coins text-amber-400"></i>
+                      </div>
+                      <div class="text-sm font-medium text-white group-hover:text-amber-300">Commission</div>
+                      <div class="text-xs text-neutral-500">Relance paiement</div>
+                    </button>
+                    
+                    <button type="button" onclick="fillTemplate('paiement')" class="p-3 rounded-xl bg-gradient-to-br from-red-500/10 to-red-600/5 border border-red-500/20 hover:border-red-400/50 transition-all text-left group">
+                      <div class="w-9 h-9 rounded-lg bg-red-500/20 flex items-center justify-center mb-2">
+                        <i class="fa-solid fa-credit-card text-red-400"></i>
+                      </div>
+                      <div class="text-sm font-medium text-white group-hover:text-red-300">Paiement</div>
+                      <div class="text-xs text-neutral-500">Rappel facture</div>
+                    </button>
+                    
+                    <button type="button" onclick="fillTemplate('performance')" class="p-3 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 hover:border-emerald-400/50 transition-all text-left group">
+                      <div class="w-9 h-9 rounded-lg bg-emerald-500/20 flex items-center justify-center mb-2">
+                        <i class="fa-solid fa-chart-line text-emerald-400"></i>
+                      </div>
+                      <div class="text-sm font-medium text-white group-hover:text-emerald-300">Performance</div>
+                      <div class="text-xs text-neutral-500">Mise à jour</div>
+                    </button>
+                    
+                    <button type="button" onclick="fillTemplate('bienvenue')" class="p-3 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 hover:border-purple-400/50 transition-all text-left group">
+                      <div class="w-9 h-9 rounded-lg bg-purple-500/20 flex items-center justify-center mb-2">
+                        <i class="fa-solid fa-sparkles text-purple-400"></i>
+                      </div>
+                      <div class="text-sm font-medium text-white group-hover:text-purple-300">Bienvenue</div>
+                      <div class="text-xs text-neutral-500">Accueil</div>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Formulaire SMS -->
+                <%= form_with url: send_sms_admin_client_path(@client), method: :post, local: true, id: "sms-form", class: "space-y-4" do %>
+                  <input type="hidden" name="sms_type" id="sms-type" value="personnalise">
+                  
+                  <div>
+                    <label class="text-sm font-medium text-neutral-300 mb-2 block">Message</label>
+                    <div class="relative">
+                      <textarea name="message" id="sms-message" rows="4" class="w-full px-4 py-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:bg-neutral-800 transition-all resize-none text-sm" placeholder="TRAYO: Bonjour <%= @client.first_name %>..."></textarea>
+                      <div class="absolute bottom-2 right-3 text-xs text-neutral-500">
+                        <span id="char-count">0</span>/160
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-1 mt-2">
+                      <span class="text-xs text-neutral-500">Variables:</span>
+                      <button type="button" onclick="insertVar('{prenom}')" class="px-1.5 py-0.5 rounded bg-neutral-800 text-xs text-neutral-400 hover:text-emerald-400 hover:bg-neutral-700 transition-colors">{prenom}</button>
+                      <button type="button" onclick="insertVar('{solde}')" class="px-1.5 py-0.5 rounded bg-neutral-800 text-xs text-neutral-400 hover:text-emerald-400 hover:bg-neutral-700 transition-colors">{solde}</button>
+                      <button type="button" onclick="insertVar('{commission}')" class="px-1.5 py-0.5 rounded bg-neutral-800 text-xs text-neutral-400 hover:text-emerald-400 hover:bg-neutral-700 transition-colors">{commission}</button>
+                    </div>
+                  </div>
+
+                  <!-- Programmation -->
+                  <div class="p-3 rounded-xl bg-neutral-800/30 border border-neutral-700/30">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                      <input type="checkbox" id="schedule-toggle" name="schedule" class="w-4 h-4 rounded bg-neutral-700 border-neutral-600 text-emerald-500 focus:ring-emerald-500">
+                      <div>
+                        <span class="text-sm text-white">Programmer l'envoi</span>
+                        <p class="text-xs text-neutral-500">Envoyer à une date/heure précise</p>
+                      </div>
+                    </label>
+                    <div id="schedule-options" class="hidden mt-3 pt-3 border-t border-neutral-700/50">
+                      <input type="datetime-local" name="scheduled_at" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white text-sm focus:border-emerald-500">
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex items-center gap-2">
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium hover:from-emerald-600 hover:to-emerald-700 transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+                      <i class="fa-solid fa-paper-plane"></i>
+                      <span id="send-btn-text">Envoyer maintenant</span>
                     </button>
                   </div>
                 <% end %>
-              </div>
 
-              <!-- Historique SMS -->
-              <% recent_sms = SmsCampaignLog.where(user: @client).order(sent_at: :desc).limit(5) %>
-              <% if recent_sms.any? %>
+                <!-- Historique -->
+                <% recent_sms = SmsCampaignLog.where(user: @client).order(sent_at: :desc).limit(5) %>
+                <% scheduled_sms = ScheduledSms.where(user: @client, status: 'pending').order(scheduled_at: :asc) rescue [] %>
+                
                 <div>
-                  <h5 class="text-sm font-semibold text-neutral-300 mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-clock-rotate-left text-neutral-400"></i>
-                    Historique récent
-                  </h5>
-                  <div class="space-y-2">
-                    <% recent_sms.each do |sms| %>
-                      <div class="p-3 rounded-lg bg-neutral-800/30 border border-neutral-800">
-                        <div class="flex items-center justify-between mb-1">
-                          <span class="text-xs text-neutral-500"><%= sms.sent_at&.strftime("%d/%m %H:%M") %></span>
-                          <span class="px-1.5 py-0.5 rounded text-xs <%= sms.status == 'sent' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400' %>">
-                            <%= sms.status == 'sent' ? '✓' : '✗' %>
-                          </span>
+                  <div class="flex items-center justify-between mb-3">
+                    <h5 class="text-sm font-semibold text-white flex items-center gap-2">
+                      <i class="fa-solid fa-clock-rotate-left text-neutral-400"></i>
+                      Historique
+                    </h5>
+                    <%= link_to admin_client_path(@client, tab: 'sms'), class: "text-xs text-emerald-400 hover:text-emerald-300" do %>
+                      Voir tout →
+                    <% end %>
+                  </div>
+                  
+                  <% has_scheduled = (scheduled_sms.any? rescue false) %>
+                  <% if has_scheduled %>
+                    <div class="mb-3">
+                      <div class="text-xs text-amber-400 font-medium mb-2 flex items-center gap-1">
+                        <i class="fa-solid fa-clock"></i> Programmés
+                      </div>
+                      <% scheduled_sms.each do |sms| %>
+                        <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center gap-2 mb-1">
+                          <i class="fa-solid fa-clock text-amber-400 text-xs"></i>
+                          <span class="text-xs text-neutral-300 flex-1 truncate"><%= sms.message.to_s.truncate(40) %></span>
+                          <span class="text-xs text-amber-400"><%= sms.scheduled_at&.strftime("%d/%m %H:%M") %></span>
                         </div>
-                        <p class="text-xs text-neutral-400 line-clamp-2"><%= sms.message.to_s.truncate(100) %></p>
+                      <% end %>
+                    </div>
+                  <% end %>
+                  
+                  <div class="space-y-1.5">
+                    <% recent_sms.each do |sms| %>
+                      <div class="p-2 rounded-lg bg-neutral-800/30 border border-neutral-800/50 flex items-center gap-2">
+                        <div class="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 <%= sms.status == 'sent' ? 'bg-emerald-500/20' : 'bg-red-500/20' %>">
+                          <i class="fa-solid <%= sms.status == 'sent' ? 'fa-check text-emerald-400' : 'fa-xmark text-red-400' %> text-xs"></i>
+                        </div>
+                        <span class="text-xs text-neutral-300 flex-1 truncate"><%= sms.message.to_s.truncate(35) %></span>
+                        <span class="text-xs text-neutral-500"><%= sms.sent_at&.strftime("%d/%m") %></span>
+                      </div>
+                    <% end %>
+                    <% if recent_sms.empty? %>
+                      <div class="text-center py-4 text-neutral-500 text-xs">
+                        Aucun SMS envoyé
                       </div>
                     <% end %>
                   </div>
                 </div>
-              <% end %>
+              </div>
             </div>
           </div>
         </dialog>
+        
+        <script>
+          const templates = {
+            commission: "TRAYO: Bonjour <%= @client.first_name %>, votre commission de <%= number_to_currency(@performance[:pending_commission], unit: '€', format: '%n%u') %> est en attente de règlement. Merci de régulariser votre situation.",
+            paiement: "TRAYO: Bonjour <%= @client.first_name %>, un paiement est en attente sur votre compte. Réglez-le rapidement pour éviter toute interruption de service.",
+            performance: "TRAYO: Bonjour <%= @client.first_name %>! 📈 Mise à jour: Solde actuel <%= number_to_currency(@performance[:total_balance], unit: '€', format: '%n%u') %>. Continuez comme ça!",
+            bienvenue: "TRAYO: Bienvenue <%= @client.first_name %>! 🎉 Votre compte est prêt. Vos bots de trading sont configurés. Bon trading!"
+          };
+
+          function fillTemplate(type) {
+            const ta = document.getElementById('sms-message');
+            const typeInput = document.getElementById('sms-type');
+            if (ta && templates[type]) {
+              ta.value = templates[type];
+              typeInput.value = type;
+              updateCharCount();
+              ta.focus();
+            }
+          }
+
+          function insertVar(v) {
+            const ta = document.getElementById('sms-message');
+            if (ta) {
+              const start = ta.selectionStart;
+              const end = ta.selectionEnd;
+              ta.value = ta.value.substring(0, start) + v + ta.value.substring(end);
+              ta.focus();
+              ta.selectionStart = ta.selectionEnd = start + v.length;
+              updateCharCount();
+            }
+          }
+
+          function updateCharCount() {
+            const ta = document.getElementById('sms-message');
+            const counter = document.getElementById('char-count');
+            if (ta && counter) {
+              counter.textContent = ta.value.length;
+              counter.className = ta.value.length > 160 ? 'text-amber-400' : '';
+            }
+          }
+
+          document.addEventListener('DOMContentLoaded', function() {
+            const ta = document.getElementById('sms-message');
+            if (ta) {
+              ta.addEventListener('input', updateCharCount);
+            }
+
+            const scheduleToggle = document.getElementById('schedule-toggle');
+            const scheduleOptions = document.getElementById('schedule-options');
+            const sendBtnText = document.getElementById('send-btn-text');
+            
+            if (scheduleToggle) {
+              scheduleToggle.addEventListener('change', function() {
+                scheduleOptions.classList.toggle('hidden', !this.checked);
+                sendBtnText.textContent = this.checked ? 'Programmer' : 'Envoyer maintenant';
+              });
+            }
+          });
+        </script>
       </div>
 
       <!-- Bouton Modifier -->
@@ -395,6 +520,13 @@
       </button>
       <button type="button" data-tabs-target="tab" data-action="click->tabs#select" data-tab="vps" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors">
         <i class="fa-solid fa-server mr-2"></i>VPS
+      </button>
+      <button type="button" data-tabs-target="tab" data-action="click->tabs#select" data-tab="sms" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors">
+        <i class="fa-solid fa-comment-sms mr-2"></i>SMS
+        <% pending_sms = ScheduledSms.where(user: @client, status: 'pending').count rescue 0 %>
+        <% if pending_sms > 0 %>
+          <span class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-amber-500/20 text-amber-400"><%= pending_sms %></span>
+        <% end %>
       </button>
       <% if current_user.is_admin? %>
         <button type="button" data-tabs-target="tab" data-action="click->tabs#select" data-tab="admin" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors">
@@ -695,43 +827,9 @@
 
     <!-- Tab: Bots -->
     <div data-tabs-target="panel" data-tab="bots" class="mt-6 hidden space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <% @client.bot_purchases.includes(:trading_bot).each do |purchase| %>
-          <% bot = purchase.trading_bot %>
-          <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-5 hover:border-neutral-700 transition-colors">
-            <div class="flex items-start justify-between mb-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-gradient-to-br <%= purchase.is_running ? 'from-emerald-500 to-green-600' : 'from-neutral-600 to-neutral-700' %> flex items-center justify-center">
-                  <i class="fa-solid fa-robot text-white"></i>
-                </div>
-                <div>
-                  <h4 class="font-semibold text-white"><%= bot.name %></h4>
-                  <p class="text-xs text-neutral-400">Magic: <%= purchase.magic_number %></p>
-                </div>
-              </div>
-              <span class="px-2 py-1 rounded-full text-xs font-medium <%= purchase.is_running ? 'bg-emerald-500/20 text-emerald-400' : 'bg-neutral-700 text-neutral-400' %>">
-                <%= purchase.is_running ? 'Actif' : 'Inactif' %>
-              </span>
-            </div>
-            
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between">
-                <span class="text-neutral-400">Profit Total</span>
-                <span class="font-semibold <%= purchase.total_profit >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
-                  <%= number_to_currency(purchase.total_profit, unit: "€", format: "%n%u") %>
-                </span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-neutral-400">Trades</span>
-                <span class="text-white"><%= purchase.trades_count %></span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-neutral-400">Drawdown</span>
-                <span class="text-amber-400"><%= number_to_currency(purchase.current_drawdown, unit: "€", format: "%n%u") %></span>
-              </div>
-            </div>
-
-          </div>
+          <%= render partial: "admin/clients/bot_purchase_card", locals: { bot: purchase } %>
         <% end %>
       </div>
       
@@ -749,7 +847,7 @@
             <i class="fa-solid fa-plus text-blue-400"></i>
             Assigner un Bot
           </h3>
-          <%= form_with url: assign_to_user_admin_bots_path, method: :post, local: true, class: "flex flex-col md:flex-row gap-4" do |f| %>
+          <%= form_with url: assign_to_user_admin_bot_purchases_path, method: :post, local: true, class: "flex flex-col md:flex-row gap-4" do |f| %>
             <input type="hidden" name="user_id" value="<%= @client.id %>">
             <div class="flex-1">
               <select name="trading_bot_id" required class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
@@ -1252,42 +1350,7 @@
     <!-- Tab: VPS -->
     <div data-tabs-target="panel" data-tab="vps" class="mt-6 hidden space-y-6">
       <% @client.vps.each do |vps| %>
-        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <i class="fa-solid fa-server text-white text-xl"></i>
-              </div>
-              <div>
-                <h3 class="font-semibold text-white"><%= vps.name %></h3>
-                <p class="text-sm text-neutral-400"><%= vps.ip_address || "IP non assignée" %></p>
-              </div>
-            </div>
-            <span class="px-3 py-1 rounded-full text-sm font-medium" style="background: <%= vps.status_color %>20; color: <%= vps.status_color %>;">
-              <%= vps.status_icon %> <%= vps.status_label %>
-            </span>
-          </div>
-          
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-neutral-800">
-            <div>
-              <div class="text-sm text-neutral-400">Prix Mensuel</div>
-              <div class="font-semibold text-white"><%= number_to_currency(vps.monthly_price, unit: "€", format: "%n%u") %></div>
-            </div>
-            <div>
-              <div class="text-sm text-neutral-400">Commandé le</div>
-              <div class="font-semibold text-white"><%= vps.ordered_at&.strftime("%d/%m/%Y") || "—" %></div>
-            </div>
-            <div>
-              <div class="text-sm text-neutral-400">Renouvellement</div>
-              <div class="font-semibold text-white"><%= vps.renewal_date&.strftime("%d/%m/%Y") || "—" %></div>
-            </div>
-            <div>
-              <div class="text-sm text-neutral-400">Localisation</div>
-              <div class="font-semibold text-white"><%= vps.server_location || "—" %></div>
-            </div>
-          </div>
-
-        </div>
+        <%= render partial: "admin/clients/vps_card", locals: { vps: vps } %>
       <% end %>
       
       <% if @client.vps.empty? %>
@@ -1296,6 +1359,85 @@
           <p class="text-neutral-400">Aucun VPS</p>
         </div>
       <% end %>
+    </div>
+
+    <!-- Tab: SMS -->
+    <div data-tabs-target="panel" data-tab="sms" class="mt-6 hidden space-y-6">
+      <% scheduled_sms = ScheduledSms.where(user: @client).order(created_at: :desc) rescue [] %>
+      <% sent_sms = SmsCampaignLog.where(user: @client).order(sent_at: :desc) %>
+      
+      <!-- SMS Programmés -->
+      <% pending_sms = scheduled_sms.select(&:pending?) rescue [] %>
+      <% if pending_sms.any? %>
+        <div class="rounded-xl bg-gradient-to-br from-amber-900/20 to-orange-900/10 border border-amber-500/30 p-6">
+          <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-clock text-amber-400"></i>
+            SMS Programmés
+            <span class="px-2 py-0.5 rounded-full text-xs bg-amber-500/20 text-amber-400"><%= pending_sms.count %></span>
+          </h3>
+          <div class="space-y-3">
+            <% pending_sms.each do |sms| %>
+              <div class="p-4 rounded-xl bg-neutral-900/50 border border-neutral-800 flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                  <i class="fa-solid fa-clock text-amber-400"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm text-white"><%= sms.message.truncate(100) %></p>
+                  <div class="flex items-center gap-3 mt-2 text-xs text-neutral-400">
+                    <span><i class="fa-solid fa-calendar mr-1"></i><%= sms.scheduled_at.strftime("%d/%m/%Y à %H:%M") %></span>
+                    <span><i class="fa-solid fa-user mr-1"></i><%= sms.created_by&.full_name || 'Système' %></span>
+                  </div>
+                </div>
+                <%= button_to cancel_scheduled_sms_admin_client_path(@client, sms_id: sms.id), method: :post, data: { confirm: "Annuler ce SMS programmé ?" }, class: "px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 text-xs font-medium" do %>
+                  <i class="fa-solid fa-xmark mr-1"></i>Annuler
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Historique des SMS -->
+      <div class="rounded-xl bg-neutral-900 border border-neutral-800 overflow-hidden">
+        <div class="p-4 border-b border-neutral-800 flex items-center justify-between">
+          <h3 class="font-semibold text-white flex items-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left text-neutral-400"></i>
+            Historique des SMS
+          </h3>
+          <span class="text-sm text-neutral-400"><%= sent_sms.count %> envoyé(s)</span>
+        </div>
+        
+        <% if sent_sms.any? %>
+          <div class="divide-y divide-neutral-800">
+            <% sent_sms.limit(20).each do |sms| %>
+              <div class="p-4 hover:bg-neutral-800/30 transition-colors">
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 <%= sms.status == 'sent' ? 'bg-emerald-500/20' : 'bg-red-500/20' %>">
+                    <i class="fa-solid <%= sms.status == 'sent' ? 'fa-check text-emerald-400' : 'fa-xmark text-red-400' %> text-sm"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm text-white"><%= sms.message %></p>
+                    <div class="flex items-center gap-4 mt-2 text-xs text-neutral-500">
+                      <span><i class="fa-solid fa-calendar mr-1"></i><%= sms.sent_at&.strftime("%d/%m/%Y à %H:%M") %></span>
+                      <% if sms.sms_type.present? %>
+                        <span class="px-2 py-0.5 rounded bg-neutral-800 text-neutral-400"><%= sms.sms_type %></span>
+                      <% end %>
+                      <% if sms.sent_by.present? %>
+                        <span><i class="fa-solid fa-user mr-1"></i><%= sms.sent_by.full_name rescue 'Admin' %></span>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="p-12 text-center">
+            <i class="fa-solid fa-comment-sms text-4xl text-neutral-600 mb-4"></i>
+            <p class="text-neutral-400">Aucun SMS envoyé à ce client</p>
+          </div>
+        <% end %>
+      </div>
     </div>
 
     <!-- Tab: Admin -->

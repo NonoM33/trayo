@@ -1,0 +1,48 @@
+<%= turbo_frame_tag "vps_#{vps.id}" do %>
+  <div id="vps_<%= vps.id %>" class="rounded-xl bg-neutral-900 border border-neutral-800 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+          <i class="fa-solid fa-server text-white text-xl"></i>
+        </div>
+        <div>
+          <h3 class="font-semibold text-white"><%= vps.name %></h3>
+          <p class="text-sm text-neutral-400"><%= vps.ip_address || "IP non assignée" %></p>
+        </div>
+      </div>
+      
+      <!-- Sélecteur de statut VPS -->
+      <div class="flex items-center gap-2">
+        <%= form_with url: update_status_admin_vp_path(vps), method: :post, data: { turbo: true }, class: "flex items-center gap-2" do %>
+          <select name="new_status" onchange="this.form.requestSubmit()" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-neutral-800 border border-neutral-700 text-white cursor-pointer hover:border-neutral-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500">
+            <% Vps::STATUSES.each do |key, label| %>
+              <option value="<%= key %>" <%= 'selected' if vps.status == key %>>
+                <%= label %>
+              </option>
+            <% end %>
+          </select>
+        <% end %>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-neutral-800">
+      <div>
+        <div class="text-sm text-neutral-400">Prix Annuel</div>
+        <div class="font-semibold text-white"><%= number_to_currency(vps.monthly_price, unit: "€", format: "%n%u") %></div>
+      </div>
+      <div>
+        <div class="text-sm text-neutral-400">Commandé le</div>
+        <div class="font-semibold text-white"><%= vps.ordered_at&.strftime("%d/%m/%Y") || "—" %></div>
+      </div>
+      <div>
+        <div class="text-sm text-neutral-400">Renouvellement</div>
+        <div class="font-semibold text-white"><%= vps.renewal_date&.strftime("%d/%m/%Y") || "—" %></div>
+      </div>
+      <div>
+        <div class="text-sm text-neutral-400">Localisation</div>
+        <div class="font-semibold text-white"><%= vps.server_location || "—" %></div>
+      </div>
+    </div>
+  </div>
+<% end %>
+

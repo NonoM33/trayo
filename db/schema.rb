@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_29_012341) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_29_013518) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -389,6 +389,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_012341) do
     t.index ["user_id"], name: "index_product_purchases_on_user_id"
   end
 
+  create_table "scheduled_sms", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "created_by_id"
+    t.text "message", null: false
+    t.string "sms_type"
+    t.string "phone_number"
+    t.datetime "scheduled_at", null: false
+    t.string "status", default: "pending"
+    t.datetime "sent_at"
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_scheduled_sms_on_created_by_id"
+    t.index ["scheduled_at"], name: "index_scheduled_sms_on_scheduled_at"
+    t.index ["status"], name: "index_scheduled_sms_on_status"
+    t.index ["user_id"], name: "index_scheduled_sms_on_user_id"
+  end
+
   create_table "shop_products", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -654,6 +672,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_012341) do
   add_foreign_key "payments", "users"
   add_foreign_key "product_purchases", "shop_products"
   add_foreign_key "product_purchases", "users"
+  add_foreign_key "scheduled_sms", "users"
+  add_foreign_key "scheduled_sms", "users", column: "created_by_id"
   add_foreign_key "sms_campaign_logs", "sms_campaigns"
   add_foreign_key "sms_campaign_logs", "users"
   add_foreign_key "sms_campaign_logs", "users", column: "sent_by_id"

@@ -269,26 +269,43 @@ module Admin
 
       message = params[:message]
       sms_type = params[:sms_type]
+      scheduled_at = params[:scheduled_at]
+      is_scheduled = params[:schedule] == "1" && scheduled_at.present?
 
       message = message.gsub('{prenom}', @client.first_name.to_s)
                        .gsub('{nom}', @client.last_name.to_s)
                        .gsub('{solde}', @client.mt5_accounts.sum(:balance).round(2).to_s)
                        .gsub('{commission}', (CommissionBillingService.calculate_user_performance(@client)[:pending_commission] || 0).round(2).to_s)
 
-      begin
-        SmsService.send_sms(@client.phone, message)
-        
-        SmsCampaignLog.create(
+      if is_scheduled
+        ScheduledSms.create!(
           user: @client,
-          sms_type: sms_type,
+          created_by: current_user,
           message: message,
-          sent_at: Time.current,
-          sent_by: current_user
-        ) rescue nil
+          sms_type: sms_type,
+          phone_number: @client.phone,
+          scheduled_at: DateTime.parse(scheduled_at),
+          status: 'pending'
+        )
+        redirect_to admin_client_path(@client), notice: "SMS programmé pour le #{DateTime.parse(scheduled_at).strftime('%d/%m/%Y à %H:%M')}"
+      else
+        begin
+          SmsService.send_sms(@client.phone, message)
+          
+          SmsCampaignLog.create(
+            user: @client,
+            sms_type: sms_type,
+            message: message,
+            phone_number: @client.phone,
+            status: 'sent',
+            sent_at: Time.current,
+            sent_by: current_user
+          ) rescue nil
 
-        redirect_to admin_client_path(@client), notice: "SMS envoyé avec succès à #{@client.phone}"
-      rescue => e
-        redirect_to admin_client_path(@client), alert: "Erreur lors de l'envoi: #{e.message}"
+          redirect_to admin_client_path(@client), notice: "SMS envoyé avec succès à #{@client.phone}"
+        rescue => e
+          redirect_to admin_client_path(@client), alert: "Erreur lors de l'envoi: #{e.message}"
+        end
       end
     end
 
@@ -296,6 +313,18 @@ module Admin
       @client = User.find(params[:id])
       result = CommissionReminderSender.new(@client).preview(kind: "manual")
       render partial: "admin/clients/sms_preview_modal", locals: { client: @client, result: result }
+    end
+
+    def cancel_scheduled_sms
+      @client = User.find(params[:id])
+      sms = ScheduledSms.find(params[:sms_id])
+      
+      if sms.user_id == @client.id && sms.pending?
+        sms.cancel!
+        redirect_to admin_client_path(@client, tab: 'sms'), notice: "SMS programmé annulé"
+      else
+        redirect_to admin_client_path(@client, tab: 'sms'), alert: "Impossible d'annuler ce SMS"
+      end
     end
 
     private

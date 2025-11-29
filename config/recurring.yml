@@ -53,3 +53,9 @@ production:
     command: "CommissionBillingService.check_overdue_invoices"
     schedule: every 6 hours
     priority: 3
+
+  scheduled_sms_sender:
+    class: ScheduledSmsJob
+    queue: default
+    schedule: every 5 minutes
+    priority: 2

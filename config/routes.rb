@@ -55,6 +55,7 @@ Rails.application.routes.draw do
         post :reset_mt5
         post :send_commission_sms
         post :send_sms
+        post :cancel_scheduled_sms
         get :sms_preview
         get :trades
         get :bots
@@ -120,6 +121,12 @@ Rails.application.routes.draw do
       
       member do
         delete :remove_from_user
+      end
+    end
+    
+    resources :bot_purchases, only: [:update] do
+      member do
+        post :toggle_running
       end
       collection do
         post :assign_to_user

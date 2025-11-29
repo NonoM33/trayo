@@ -26,6 +26,8 @@ module Webhooks
         handle_payment_intent_succeeded(event.data.object)
       when 'payment_intent.payment_failed'
         handle_payment_intent_failed(event.data.object)
+      when 'checkout.session.completed'
+        handle_checkout_session_completed(event.data.object)
       when 'customer.subscription.created'
         handle_subscription_created(event.data.object)
       when 'customer.subscription.updated'
@@ -93,6 +95,43 @@ module Webhooks
             ).to_json
           )
         end
+      end
+    end
+
+    def handle_checkout_session_completed(session)
+      Rails.logger.info "Checkout session completed: #{session.id}"
+      
+      user_id = session.metadata['user_id']
+      product_id = session.metadata['product_id']
+      
+      return unless user_id.present? && product_id.present?
+      
+      user = User.find_by(id: user_id)
+      product = ShopProduct.find_by(id: product_id)
+      
+      return unless user && product
+      
+      user.update(stripe_customer_id: session.customer) if session.customer.present?
+      
+      purchase = user.product_purchases.find_by(shop_product_id: product.id, status: 'pending')
+      
+      if purchase
+        purchase.activate!(
+          payment_intent_id: session.payment_intent,
+          subscription_id: session.subscription
+        )
+        Rails.logger.info "Product purchase activated: #{product.name} for user #{user.email}"
+      else
+        user.product_purchases.create!(
+          shop_product: product,
+          price_paid: product.price,
+          status: 'active',
+          starts_at: Time.current,
+          expires_at: product.subscription? ? 1.year.from_now : nil,
+          stripe_payment_intent_id: session.payment_intent,
+          stripe_subscription_id: session.subscription
+        )
+        Rails.logger.info "New product purchase created: #{product.name} for user #{user.email}"
       end
     end
 
