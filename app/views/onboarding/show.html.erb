@@ -472,15 +472,17 @@
   }
   
   .subscription-card.selected {
-    border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
+    border-color: #10b981 !important;
+    background: #171717 !important;
+    box-shadow: 0 10px 40px rgba(16, 185, 129, 0.2);
   }
-  .subscription-card.selected .subscription-check {
-    border-color: #3b82f6;
-    background: #3b82f6;
+  .subscription-card.selected .subscription-btn {
+    background: linear-gradient(135deg, #10b981, #14b8a6);
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
   }
-  .subscription-card.selected .subscription-check i {
-    opacity: 1;
+  .subscription-card:not(.selected) .subscription-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
   }
   
   .custom-scrollbar::-webkit-scrollbar {
@@ -544,11 +546,8 @@ function initOnboarding() {
     card.addEventListener('click', function() {
       document.querySelectorAll('.subscription-card').forEach(c => {
         c.classList.remove('selected');
-        c.classList.add('border-neutral-700', 'bg-neutral-800/50');
-        c.classList.remove('border-blue-500', 'bg-blue-500/10', 'ring-2', 'ring-blue-500/50');
       });
-      this.classList.add('selected', 'border-blue-500', 'bg-blue-500/10', 'ring-2', 'ring-blue-500/50');
-      this.classList.remove('border-neutral-700', 'bg-neutral-800/50');
+      this.classList.add('selected');
       this.querySelector('.subscription-radio').checked = true;
       selectedPlan = this.dataset.plan;
       updateTotal();
@@ -756,4 +755,6 @@ function initOnboarding() {
 document.addEventListener('DOMContentLoaded', initOnboarding);
 document.addEventListener('turbo:load', function() { onboardingInitialized = false; initOnboarding(); });
 document.addEventListener('turbo:render', function() { onboardingInitialized = false; initOnboarding(); });
+</script>
+
 </script>
