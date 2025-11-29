@@ -543,9 +543,25 @@
               <span class="text-neutral-400">Inscrit le</span>
               <span class="text-white font-medium"><%= @client.created_at.strftime("%d/%m/%Y") %></span>
             </div>
-            <div class="flex justify-between py-2">
+            <div class="flex justify-between py-2 border-b border-neutral-800">
               <span class="text-neutral-400">Commission</span>
               <span class="text-blue-400 font-bold"><%= @client.commission_rate %>%</span>
+            </div>
+            <div class="flex justify-between items-center py-2">
+              <span class="text-neutral-400">Token MT5</span>
+              <% if @client.mt5_api_token.present? %>
+                <div class="flex items-center gap-2">
+                  <code class="text-xs font-mono text-emerald-400 bg-neutral-800 px-2 py-1 rounded max-w-[200px] truncate" id="mt5-token-display"><%= @client.mt5_api_token %></code>
+                  <button type="button" 
+                          onclick="copyMt5Token()"
+                          class="p-1.5 rounded hover:bg-neutral-700 text-neutral-400 hover:text-emerald-400 transition-colors"
+                          title="Copier le token">
+                    <i class="fa-solid fa-copy text-xs" id="mt5-token-copy-icon"></i>
+                  </button>
+                </div>
+              <% else %>
+                <span class="text-neutral-500">—</span>
+              <% end %>
             </div>
           </div>
         </div>
@@ -1593,6 +1609,19 @@ function copyPassword(accountId) {
     }, 1500);
   });
   input.type = originalType;
+}
+
+function copyMt5Token() {
+  const tokenDisplay = document.getElementById('mt5-token-display');
+  const icon = document.getElementById('mt5-token-copy-icon');
+  if (tokenDisplay) {
+    navigator.clipboard.writeText(tokenDisplay.textContent).then(() => {
+      icon.className = 'fa-solid fa-check text-xs';
+      setTimeout(() => {
+        icon.className = 'fa-solid fa-copy text-xs';
+      }, 1500);
+    });
+  }
 }
 
 // Sub-tabs for Trading section
