@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_29_010208) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_29_012341) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -371,6 +371,45 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_010208) do
     t.index ["user_id"], name: "index_payments_on_user_id"
   end
 
+  create_table "product_purchases", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "shop_product_id", null: false
+    t.decimal "price_paid", precision: 10, scale: 2, null: false
+    t.string "status", default: "pending"
+    t.string "stripe_payment_intent_id"
+    t.string "stripe_subscription_id"
+    t.datetime "expires_at"
+    t.datetime "starts_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_product_id"], name: "index_product_purchases_on_shop_product_id"
+    t.index ["status"], name: "index_product_purchases_on_status"
+    t.index ["stripe_payment_intent_id"], name: "index_product_purchases_on_stripe_payment_intent_id"
+    t.index ["stripe_subscription_id"], name: "index_product_purchases_on_stripe_subscription_id"
+    t.index ["user_id"], name: "index_product_purchases_on_user_id"
+  end
+
+  create_table "shop_products", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.string "product_type", default: "subscription", null: false
+    t.decimal "price", precision: 10, scale: 2, null: false
+    t.string "stripe_price_id"
+    t.string "stripe_product_id"
+    t.text "features"
+    t.string "interval", default: "year"
+    t.boolean "active", default: true
+    t.integer "position", default: 0
+    t.string "icon", default: "fa-box"
+    t.string "badge"
+    t.string "badge_color"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_shop_products_on_active"
+    t.index ["position"], name: "index_shop_products_on_position"
+    t.index ["product_type"], name: "index_shop_products_on_product_type"
+  end
+
   create_table "sms_campaign_logs", force: :cascade do |t|
     t.bigint "user_id"
     t.bigint "sent_by_id"
@@ -613,6 +652,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_010208) do
   add_foreign_key "invoices", "users"
   add_foreign_key "mt5_accounts", "users"
   add_foreign_key "payments", "users"
+  add_foreign_key "product_purchases", "shop_products"
+  add_foreign_key "product_purchases", "users"
   add_foreign_key "sms_campaign_logs", "sms_campaigns"
   add_foreign_key "sms_campaign_logs", "users"
   add_foreign_key "sms_campaign_logs", "users", column: "sent_by_id"
