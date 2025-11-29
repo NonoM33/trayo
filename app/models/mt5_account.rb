@@ -147,7 +147,10 @@ class Mt5Account < ApplicationRecord
   end
 
   def account_name_with_user
-    "#{account_name} (#{user.first_name} #{user.last_name})"
+    name = "#{account_name} (#{user.first_name} #{user.last_name})"
+    name.encode('UTF-8', invalid: :replace, undef: :replace, replace: '')
+  rescue Encoding::InvalidByteSequenceError, Encoding::UndefinedConversionError
+    account_name.to_s
   end
 
   def apply_trade_defender_penalty(profit_amount)
