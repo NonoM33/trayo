@@ -126,8 +126,8 @@
                 </td>
                 <td class="px-4 font-mono text-sm font-semibold text-white"><%= trade.trade_id %></td>
                 <td class="px-4">
-                  <p class="text-sm text-white"><%= trade.mt5_account.user.email %></p>
-                  <p class="text-xs text-neutral-500"><%= trade.mt5_account.account_name %></p>
+                  <p class="text-sm text-white"><%= trade.mt5_account&.user&.email || 'N/A' %></p>
+                  <p class="text-xs text-neutral-500"><%= trade.mt5_account&.account_name || 'N/A' %></p>
                 </td>
                 <td class="px-4 text-sm text-neutral-300"><%= trade.symbol %></td>
                 <td class="px-4 text-sm text-neutral-300 text-right"><%= trade.volume %></td>
@@ -136,7 +136,7 @@
                     <%= number_to_currency(trade.profit, unit: "€", format: "%n%u") %>
                   </span>
                 </td>
-                <td class="px-4 text-sm text-neutral-400"><%= trade.close_time.strftime("%d/%m/%Y %H:%M") %></td>
+                <td class="px-4 text-sm text-neutral-400"><%= trade.close_time&.strftime("%d/%m/%Y %H:%M") || '-' %></td>
                 <td class="px-4">
                   <div class="flex items-center justify-end gap-1">
                     <% if trade.trade_originality == 'manual_pending_review' %>
@@ -188,8 +188,8 @@
           <% client_count = account.trades.where(trade_originality: 'manual_client').count %>
           <% penalty = account.trades.where(trade_originality: 'manual_client').sum(:profit) %>
           <div class="bg-neutral-800 rounded-lg p-4">
-            <p class="font-semibold text-white mb-1"><%= account.user.email %></p>
-            <p class="text-xs text-neutral-500 mb-3"><%= account.account_name %></p>
+            <p class="font-semibold text-white mb-1"><%= account.user&.email || 'N/A' %></p>
+            <p class="text-xs text-neutral-500 mb-3"><%= account.account_name || 'N/A' %></p>
             <div class="space-y-1 text-sm">
               <% if pending_count > 0 %>
                 <p class="text-amber-400"><i class="fa-solid fa-clock mr-1"></i> <%= pending_count %> en attente</p>
