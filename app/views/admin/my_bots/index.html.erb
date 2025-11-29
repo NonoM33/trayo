@@ -113,10 +113,10 @@
   <% end %>
 
   <% if @purchases.any? %>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
       <% @purchases.each do |purchase| %>
         <% bot = purchase.trading_bot %>
-        <div class="bg-neutral-900 rounded-2xl overflow-hidden border border-neutral-800 hover:border-purple-500/50 transition-all flex flex-col">
+        <div class="bg-neutral-900 rounded-2xl overflow-hidden border border-neutral-800 hover:border-purple-500/50 transition-all flex flex-col h-full">
           <div class="p-6 flex-1">
             <div class="flex items-start justify-between gap-4 mb-6">
               <div class="flex items-center gap-4">

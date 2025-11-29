@@ -293,12 +293,12 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-stretch">
           <% @bots.each do |bot| %>
         <% projections = bot.calculate_real_projections %>
         <% win_rate = bot.calculate_global_win_rate %>
         
-        <div class="bg-neutral-950 rounded-xl overflow-hidden transition-colors group hover:bg-neutral-900">
+        <div class="bg-neutral-950 rounded-xl overflow-hidden transition-colors group hover:bg-neutral-900 flex flex-col h-full">
           <div class="bg-neutral-900 px-5 py-4 border-b border-neutral-800">
             <div class="flex items-start justify-between gap-3">
               <div class="flex items-center gap-3 min-w-0">
