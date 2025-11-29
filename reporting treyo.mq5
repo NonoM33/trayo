@@ -8,12 +8,59 @@
 input string API_URL = "https://trayo.fr/api/v1/mt5/sync";
 input string API_COMPLETE_HISTORY_URL = "https://trayo.fr/api/v1/mt5/sync_complete_history";
 input string API_KEY = "mt5_secret_key_change_in_production";
-input string MT5_API_TOKEN = "25eb820906140c0eea3eae64f465542137533e931239fc2af5757916e6cb032a";
-input string CLIENT_EMAIL = "renaud@renaud.com";
+input string MT5_API_TOKEN = "a6fcc1a9b5d667d9dfdeb2eeb4a1db2360622841d023e96eb9a686c9cf417a09";
+input string CLIENT_EMAIL = "oce92160@gmail.com";
 input int REFRESH_INTERVAL = 10;
 input bool INIT_COMPLETE_HISTORY = true;
 
 datetime last_sync_time = 0;
+
+//+------------------------------------------------------------------+
+//| Sanitize string for JSON (remove/replace problematic characters)  |
+//+------------------------------------------------------------------+
+string SanitizeForJSON(string text)
+{
+   string result = text;
+   
+   StringReplace(result, "\\", "\\\\");
+   StringReplace(result, "\"", "'");
+   StringReplace(result, "\n", " ");
+   StringReplace(result, "\r", " ");
+   StringReplace(result, "\t", " ");
+   
+   StringReplace(result, "é", "e");
+   StringReplace(result, "è", "e");
+   StringReplace(result, "ê", "e");
+   StringReplace(result, "ë", "e");
+   StringReplace(result, "à", "a");
+   StringReplace(result, "â", "a");
+   StringReplace(result, "ä", "a");
+   StringReplace(result, "ù", "u");
+   StringReplace(result, "û", "u");
+   StringReplace(result, "ü", "u");
+   StringReplace(result, "ô", "o");
+   StringReplace(result, "ö", "o");
+   StringReplace(result, "î", "i");
+   StringReplace(result, "ï", "i");
+   StringReplace(result, "ç", "c");
+   StringReplace(result, "É", "E");
+   StringReplace(result, "È", "E");
+   StringReplace(result, "Ê", "E");
+   StringReplace(result, "Ë", "E");
+   StringReplace(result, "À", "A");
+   StringReplace(result, "Â", "A");
+   StringReplace(result, "Ä", "A");
+   StringReplace(result, "Ù", "U");
+   StringReplace(result, "Û", "U");
+   StringReplace(result, "Ü", "U");
+   StringReplace(result, "Ô", "O");
+   StringReplace(result, "Ö", "O");
+   StringReplace(result, "Î", "I");
+   StringReplace(result, "Ï", "I");
+   StringReplace(result, "Ç", "C");
+   
+   return result;
+}
 
 //+------------------------------------------------------------------+
 //| Script initialization function                                    |
@@ -68,7 +115,8 @@ void OnTimer()
 //+------------------------------------------------------------------+
 void SyncDataToAPI()
 {
-   string account_name = AccountInfoString(ACCOUNT_NAME);
+   string account_name_raw = AccountInfoString(ACCOUNT_NAME);
+   string account_name = SanitizeForJSON(account_name_raw);
    long account_number = AccountInfoInteger(ACCOUNT_LOGIN);
    double balance = AccountInfoDouble(ACCOUNT_BALANCE);
    double equity = AccountInfoDouble(ACCOUNT_EQUITY);
@@ -84,9 +132,10 @@ void SyncDataToAPI()
    
    string active_experts_json = GetActiveExpertsJSON();
    
-   string broker_name = AccountInfoString(ACCOUNT_COMPANY);
+   string broker_name_raw = AccountInfoString(ACCOUNT_COMPANY);
+   string broker_name = SanitizeForJSON(broker_name_raw);
    string broker_server = AccountInfoString(ACCOUNT_SERVER);
-   string broker_password = ""; // L'utilisateur devra le modifier manuellement
+   string broker_password = "";
    
    string json = StringFormat(
       "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"broker_name\":\"%s\",\"broker_server\":\"%s\",\"trades\":%s,\"open_positions\":%s,\"active_experts\":%s}}",
@@ -107,7 +156,9 @@ void SyncDataToAPI()
    char result_data[];
    string result_headers;
    
-   StringToCharArray(json, post_data, 0, StringLen(json));
+   int json_len = StringLen(json);
+   ArrayResize(post_data, json_len);
+   StringToCharArray(json, post_data, 0, json_len, CP_UTF8);
    
    string headers = "Content-Type: application/json\r\n";
    headers += "X-API-Key: " + API_KEY + "\r\n";
@@ -174,7 +225,8 @@ void SyncDataToAPI()
 //+------------------------------------------------------------------+
 void SyncCompleteHistory()
 {
-   string account_name = AccountInfoString(ACCOUNT_NAME);
+   string account_name_raw = AccountInfoString(ACCOUNT_NAME);
+   string account_name = SanitizeForJSON(account_name_raw);
    long account_number = AccountInfoInteger(ACCOUNT_LOGIN);
    double balance = AccountInfoDouble(ACCOUNT_BALANCE);
    double equity = AccountInfoDouble(ACCOUNT_EQUITY);
