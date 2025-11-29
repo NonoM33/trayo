@@ -1,410 +1,117 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title><%= @product.name %> - Boutique Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-  <style>
-    .product-page {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-    
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.9375rem;
-      margin-bottom: 2rem;
-      transition: color 0.2s;
-    }
-    
-    .back-link:hover {
-      color: var(--text-primary);
-    }
-    
-    .product-hero {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.08) 100%);
-      backdrop-filter: blur(40px);
-      border: 2px solid rgba(16, 185, 129, 0.3);
-      border-radius: 28px;
-      padding: 3rem;
-      margin-bottom: 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .product-hero::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -20%;
-      width: 60%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
-      pointer-events: none;
-    }
+<% content_for :title, @product.name %>
+
+<div class="max-w-4xl mx-auto space-y-6">
+  <!-- Back Link -->
+  <%= link_to admin_shop_index_path, class: "inline-flex items-center gap-2 text-neutral-400 hover:text-white transition-colors mb-4" do %>
+    <i class="fa-solid fa-arrow-left"></i>
+    Retour à la Boutique
+  <% end %>
+
+  <!-- Canceled Banner -->
+  <% if params[:canceled] == 'true' %>
+    <div class="rounded-xl bg-red-500/10 border border-red-500/30 p-4 flex items-center gap-3">
+      <i class="fa-solid fa-times-circle text-red-400"></i>
+      <p class="text-red-300">Le paiement a été annulé. Vous pouvez réessayer quand vous le souhaitez.</p>
+    </div>
+  <% end %>
+
+  <!-- Hero Section -->
+  <div class="relative rounded-2xl bg-gradient-to-br from-emerald-500/15 to-teal-500/5 border-2 border-emerald-500/30 p-8 overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
     
     <% if @product.badge.present? %>
-    .product-badge {
-      position: absolute;
-      top: 1.5rem;
-      right: 1.5rem;
-      padding: 0.5rem 1.25rem;
-      border-radius: 9999px;
-      font-size: 0.8125rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
-      animation: pulse-badge 2s infinite;
-    }
+      <span class="absolute top-6 right-6 px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wide bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30 animate-pulse">
+        <%= @product.badge %>
+      </span>
     <% end %>
     
-    @keyframes pulse-badge {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-    
-    .product-icon-large {
-      width: 96px;
-      height: 96px;
-      border-radius: 24px;
-      background: linear-gradient(135deg, #10b981, #059669);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-      color: white;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.35);
-    }
-    
-    .product-title {
-      font-size: 2.25rem;
-      font-weight: 800;
-      color: var(--text-primary);
-      margin: 0 0 0.75rem 0;
-      letter-spacing: -0.025em;
-    }
-    
-    .product-description {
-      font-size: 1.125rem;
-      color: var(--text-muted);
-      margin: 0;
-      line-height: 1.6;
-      max-width: 600px;
-    }
-    
-    .product-details {
-      display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 2rem;
-    }
-    
-    @media (max-width: 768px) {
-      .product-details {
-        grid-template-columns: 1fr;
-      }
-    }
-    
-    .features-section {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
-      backdrop-filter: blur(40px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 20px;
-      padding: 2rem;
-    }
-    
-    .features-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin: 0 0 1.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    
-    .features-title i {
-      color: #10b981;
-    }
-    
-    .features-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    
-    .features-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      padding: 1rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    
-    .features-list li:last-child {
-      border-bottom: none;
-    }
-    
-    .features-list .check-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #10b981;
-      font-size: 0.875rem;
-      flex-shrink: 0;
-    }
-    
-    .features-list .feature-text {
-      font-size: 1rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-    
-    .purchase-card {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.06) 100%);
-      backdrop-filter: blur(40px);
-      border: 2px solid rgba(16, 185, 129, 0.25);
-      border-radius: 24px;
-      padding: 2rem;
-      position: sticky;
-      top: 2rem;
-    }
-    
-    .price-display {
-      text-align: center;
-      margin-bottom: 2rem;
-      padding-bottom: 2rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .price-amount {
-      font-size: 3.5rem;
-      font-weight: 800;
-      color: #10b981;
-      letter-spacing: -0.025em;
-      line-height: 1;
-    }
-    
-    .price-interval {
-      font-size: 1.25rem;
-      color: var(--text-muted);
-      font-weight: 500;
-      margin-top: 0.5rem;
-    }
-    
-    .price-note {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      margin-top: 1rem;
-    }
-    
-    .purchase-btn {
-      width: 100%;
-      padding: 1.25rem 2rem;
-      font-size: 1.125rem;
-      font-weight: 700;
-      border-radius: 14px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
-      text-decoration: none;
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-      box-shadow: 0 6px 24px rgba(16, 185, 129, 0.35);
-      margin-bottom: 1rem;
-    }
-    
-    .purchase-btn:hover {
-      background: linear-gradient(135deg, #059669, #047857);
-      box-shadow: 0 8px 32px rgba(16, 185, 129, 0.45);
-      transform: translateY(-2px);
-    }
-    
-    .purchase-btn-owned {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
-      color: #10b981;
-      border: 2px solid rgba(16, 185, 129, 0.3);
-      cursor: default;
-      box-shadow: none;
-    }
-    
-    .purchase-btn-owned:hover {
-      transform: none;
-      box-shadow: none;
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
-    }
-    
-    .security-badges {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .security-badge {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.8125rem;
-      color: var(--text-muted);
-    }
-    
-    .security-badge i {
-      color: #10b981;
-    }
-    
-    .guarantee-box {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-      border-radius: 12px;
-      padding: 1rem;
-      margin-top: 1.5rem;
-      text-align: center;
-    }
-    
-    .guarantee-box p {
-      margin: 0;
-      font-size: 0.875rem;
-      color: var(--text-muted);
-    }
-    
-    .guarantee-box strong {
-      color: var(--text-primary);
-    }
-    
-    .canceled-banner {
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1));
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 12px;
-      padding: 1rem 1.5rem;
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    
-    .canceled-banner i {
-      color: #ef4444;
-    }
-    
-    .canceled-banner p {
-      margin: 0;
-      color: var(--text-primary);
-      font-size: 0.9375rem;
-    }
-  </style>
-</head>
-<body>
-  <% @page_title = @product.name %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
+    <div class="relative">
+      <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center mb-5 shadow-lg shadow-emerald-500/30">
+        <i class="fa-solid <%= @product.icon %> text-white text-3xl"></i>
+      </div>
       
-      <div class="product-page">
-        <%= link_to admin_shop_index_path, class: "back-link" do %>
-          <i class="fa-solid fa-arrow-left"></i>
-          Retour à la Boutique
+      <h1 class="text-3xl font-extrabold text-white mb-3"><%= @product.name %></h1>
+      <p class="text-lg text-neutral-300 max-w-xl leading-relaxed"><%= @product.description %></p>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+    <!-- Features (3 cols) -->
+    <div class="lg:col-span-3 rounded-xl bg-neutral-900 border border-neutral-800 p-6">
+      <h2 class="text-lg font-bold text-white mb-5 flex items-center gap-2">
+        <i class="fa-solid fa-check-double text-emerald-400"></i>
+        Ce qui est inclus
+      </h2>
+      
+      <ul class="space-y-4">
+        <% @product.features_list.each do |feature| %>
+          <li class="flex items-start gap-4 p-4 rounded-xl bg-neutral-800/50 border border-neutral-700/50">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid fa-check text-emerald-400 text-sm"></i>
+            </div>
+            <span class="text-neutral-200 leading-relaxed"><%= feature %></span>
+          </li>
         <% end %>
-        
-        <% if params[:canceled] == 'true' %>
-          <div class="canceled-banner">
-            <i class="fa-solid fa-times-circle"></i>
-            <p>Le paiement a été annulé. Vous pouvez réessayer quand vous le souhaitez.</p>
-          </div>
-        <% end %>
-        
-        <div class="product-hero">
-          <% if @product.badge.present? %>
-            <div class="product-badge"><%= @product.badge %></div>
+      </ul>
+    </div>
+
+    <!-- Purchase Card (2 cols) -->
+    <div class="lg:col-span-2">
+      <div class="rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border-2 border-emerald-500/20 p-6 sticky top-6">
+        <!-- Price -->
+        <div class="text-center pb-6 mb-6 border-b border-emerald-500/20">
+          <div class="text-5xl font-extrabold text-emerald-400"><%= @product.price.to_i %>€</div>
+          <div class="text-lg text-neutral-400 mt-1"><%= @product.interval_label %></div>
+          <% if @product.subscription? %>
+            <p class="text-sm text-neutral-500 mt-3">Renouvellement automatique, annulable à tout moment</p>
           <% end %>
-          
-          <div class="product-icon-large">
-            <i class="fa-solid <%= @product.icon %>"></i>
-          </div>
-          
-          <h1 class="product-title"><%= @product.name %></h1>
-          <p class="product-description"><%= @product.description %></p>
         </div>
         
-        <div class="product-details">
-          <div class="features-section">
-            <h2 class="features-title">
-              <i class="fa-solid fa-check-double"></i>
-              Ce qui est inclus
-            </h2>
-            
-            <ul class="features-list">
-              <% @product.features_list.each do |feature| %>
-                <li>
-                  <div class="check-icon">
-                    <i class="fa-solid fa-check"></i>
-                  </div>
-                  <span class="feature-text"><%= feature %></span>
-                </li>
-              <% end %>
-            </ul>
+        <!-- CTA Button -->
+        <% cart_products = session[:cart]&.dig(:products) || [] %>
+        <% if @already_owned %>
+          <div class="w-full py-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold text-center flex items-center justify-center gap-2 text-lg">
+            <i class="fa-solid fa-check-circle"></i>
+            Déjà souscrit
           </div>
-          
-          <div class="purchase-card">
-            <div class="price-display">
-              <div class="price-amount"><%= @product.price.to_i %>€</div>
-              <div class="price-interval"><%= @product.interval_label %></div>
-              <% if @product.subscription? %>
-                <p class="price-note">Renouvellement automatique, annulable à tout moment</p>
-              <% end %>
+        <% elsif cart_products.include?(@product.id) %>
+          <div class="space-y-3">
+            <div class="w-full py-4 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 font-semibold text-center flex items-center justify-center gap-2 text-lg">
+              <i class="fa-solid fa-check"></i>
+              Dans votre panier
             </div>
-            
-            <% if @already_owned %>
-              <div class="purchase-btn purchase-btn-owned">
-                <i class="fa-solid fa-check-circle"></i>
-                Déjà souscrit
-              </div>
-            <% else %>
-              <%= button_to purchase_admin_shop_product_path(@product), method: :post, class: "purchase-btn" do %>
-                <i class="fa-brands fa-stripe"></i>
-                Payer avec Stripe
-              <% end %>
+            <%= link_to admin_cart_path, class: "w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-center flex items-center justify-center gap-2 hover:from-emerald-600 hover:to-teal-600 transition-all" do %>
+              <i class="fa-solid fa-shopping-cart"></i>
+              Voir le panier
             <% end %>
-            
-            <div class="security-badges">
-              <div class="security-badge">
-                <i class="fa-solid fa-lock"></i>
-                <span>Paiement sécurisé</span>
-              </div>
-              <div class="security-badge">
-                <i class="fa-solid fa-shield-halved"></i>
-                <span>SSL 256-bit</span>
-              </div>
-            </div>
-            
-            <div class="guarantee-box">
-              <p><strong>Satisfait ou remboursé</strong> pendant 14 jours</p>
-            </div>
           </div>
+        <% else %>
+          <%= button_to add_product_admin_cart_path(@product), method: :post, class: "w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-lg text-center flex items-center justify-center gap-3 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/30 cursor-pointer border-none" do %>
+            <i class="fa-solid fa-cart-plus text-xl"></i>
+            Ajouter au panier
+          <% end %>
+        <% end %>
+        
+        <!-- Security Badges -->
+        <div class="flex items-center justify-center gap-6 mt-6 pt-6 border-t border-emerald-500/20">
+          <div class="flex items-center gap-2 text-sm text-neutral-400">
+            <i class="fa-solid fa-lock text-emerald-400"></i>
+            Paiement sécurisé
+          </div>
+          <div class="flex items-center gap-2 text-sm text-neutral-400">
+            <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+            SSL 256-bit
+          </div>
+        </div>
+        
+        <!-- Guarantee -->
+        <div class="mt-6 p-4 rounded-lg bg-neutral-800/50 text-center">
+          <p class="text-sm text-neutral-400">
+            <strong class="text-white">Satisfait ou remboursé</strong> pendant 14 jours
+          </p>
         </div>
       </div>
     </div>
   </div>
-</body>
-</html>
-
+</div>
