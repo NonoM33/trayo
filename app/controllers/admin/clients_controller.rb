@@ -69,9 +69,9 @@ module Admin
       end
       
       if @client.update(update_params)
-        redirect_to admin_client_path(@client), notice: "User updated successfully"
+        redirect_to admin_client_path(@client), notice: "Client mis à jour avec succès"
       else
-        render :edit, status: :unprocessable_entity
+        redirect_to admin_client_path(@client), alert: "Erreur: #{@client.errors.full_messages.join(', ')}"
       end
     end
 
@@ -414,7 +414,12 @@ module Admin
     end
 
     def user_update_params
-      params.require(:user).permit(:email, :first_name, :last_name, :phone, :commission_rate, :is_admin)
+      permitted = params.require(:user).permit(:email, :first_name, :last_name, :phone, :commission_rate, :is_admin, :password, :password_confirmation)
+      if permitted[:password].blank?
+        permitted.except(:password, :password_confirmation)
+      else
+        permitted
+      end
     end
 
     def ensure_own_profile_or_admin

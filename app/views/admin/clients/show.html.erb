@@ -12,15 +12,98 @@
         <p class="text-neutral-400"><%= @client.email %></p>
       </div>
     </div>
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-3" data-controller="slideover">
       <%= link_to admin_clients_path, class: "inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-neutral-700 text-neutral-300 hover:bg-neutral-800 transition-colors" do %>
         <i class="fa-solid fa-arrow-left"></i>
         Retour
       <% end %>
-      <%= link_to edit_admin_client_path(@client), class: "inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-neutral-900 hover:bg-neutral-100 transition-colors" do %>
+      <button type="button"
+              data-action="slideover#show:prevent"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-neutral-900 hover:bg-neutral-100 transition-colors">
         <i class="fa-solid fa-pen"></i>
         Modifier
-      <% end %>
+      </button>
+
+      <!-- Slideover pour modifier le client -->
+      <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-white/10 outline-hidden">
+        <div class="inset-y-0 flex h-dvh w-full flex-col bg-neutral-900 shadow-lg outline-hidden sm:w-96 lg:w-[480px] text-neutral-100 shadow-neutral-950">
+          <button type="button" data-action="slideover#hide:prevent" class="absolute top-4 right-4 mt-1 rounded-full p-1.5 opacity-70 transition-opacity hover:cursor-pointer hover:bg-neutral-500/15 hover:opacity-100 focus:outline-hidden active:bg-neutral-500/25 md:top-5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+              <line x1="18" x2="6" y1="6" y2="18"></line>
+              <line x1="6" x2="18" y1="6" y2="18"></line>
+            </svg>
+          </button>
+
+          <div class="flex items-center gap-3 border-b border-white/10 p-5 pr-12 md:p-6">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-lg font-bold">
+              <%= @client.first_name&.first&.upcase %><%= @client.last_name&.first&.upcase %>
+            </div>
+            <div>
+              <h4 class="font-semibold text-lg text-white">Modifier le client</h4>
+              <p class="text-sm text-neutral-400"><%= @client.email %></p>
+            </div>
+          </div>
+
+          <%= form_with url: admin_client_path(@client), method: :patch, local: true, class: "flex flex-col flex-1 overflow-hidden" do %>
+            <div class="flex-1 overflow-y-auto p-5 md:p-6 space-y-5">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Prénom</label>
+                  <input type="text" name="user[first_name]" value="<%= @client.first_name %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Prénom">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Nom</label>
+                  <input type="text" name="user[last_name]" value="<%= @client.last_name %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Nom">
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-neutral-300 mb-2">Email</label>
+                <input type="email" name="user[email]" value="<%= @client.email %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="email@exemple.com">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-neutral-300 mb-2">Téléphone</label>
+                <input type="tel" name="user[phone]" value="<%= @client.phone %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="+33 6 12 34 56 78">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-neutral-300 mb-2">Taux de commission (%)</label>
+                <input type="number" step="0.1" min="0" max="100" name="user[commission_rate]" value="<%= @client.commission_rate %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="25.0">
+              </div>
+              
+              <div class="pt-4 border-t border-neutral-800">
+                <label class="block text-sm font-medium text-neutral-300 mb-2">Nouveau mot de passe</label>
+                <p class="text-xs text-neutral-500 mb-2">Laisser vide pour ne pas changer</p>
+                <input type="password" name="user[password]" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="••••••••">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-neutral-300 mb-2">Confirmation</label>
+                <input type="password" name="user[password_confirmation]" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="••••••••">
+              </div>
+
+              <% if current_user.is_admin? %>
+                <div class="pt-4 border-t border-neutral-800">
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" name="user[is_admin]" value="1" <%= 'checked' if @client.is_admin? %> class="w-5 h-5 rounded border-neutral-600 bg-neutral-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-0">
+                    <span class="text-neutral-300">Administrateur</span>
+                  </label>
+                </div>
+              <% end %>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 border-t border-white/10 p-5 md:p-6">
+              <button type="button" data-action="slideover#hide:prevent" class="px-4 py-2.5 rounded-lg border border-neutral-700 text-neutral-300 hover:bg-neutral-800 transition-colors font-medium">
+                Annuler
+              </button>
+              <button type="submit" class="px-5 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">
+                <i class="fa-solid fa-check mr-2"></i>Enregistrer
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </dialog>
     </div>
   </div>
 
@@ -231,7 +314,7 @@
     <!-- Tab: MT5 -->
     <div data-tabs-target="panel" data-tab="mt5" class="mt-6 hidden space-y-6">
       <% @client.mt5_accounts.each do |account| %>
-        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6">
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6" data-controller="slideover">
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
               <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
@@ -242,11 +325,19 @@
                 <p class="text-sm text-neutral-400">ID: <%= account.mt5_id %> • <%= account.broker_name %></p>
               </div>
             </div>
-            <div class="text-right">
-              <div class="text-2xl font-bold <%= account.balance >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
-                <%= number_to_currency(account.balance, unit: "€", format: "%n%u") %>
+            <div class="flex items-center gap-4">
+              <div class="text-right">
+                <div class="text-2xl font-bold <%= account.balance >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+                  <%= number_to_currency(account.balance, unit: "€", format: "%n%u") %>
+                </div>
+                <div class="text-sm text-neutral-400">Solde</div>
               </div>
-              <div class="text-sm text-neutral-400">Solde</div>
+              <button type="button" 
+                      data-action="slideover#show:prevent"
+                      class="p-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white transition-colors"
+                      title="Modifier">
+                <i class="fa-solid fa-pen"></i>
+              </button>
             </div>
           </div>
           
@@ -264,10 +355,104 @@
               <div class="font-semibold text-white"><%= account.broker_server %></div>
             </div>
             <div>
-              <div class="text-sm text-neutral-400">Mot de passe</div>
-              <div class="font-mono text-sm text-neutral-400 bg-neutral-800 px-2 py-1 rounded"><%= account.broker_password&.gsub(/./, '•') || '—' %></div>
+              <div class="text-sm text-neutral-400 mb-1">Mot de passe</div>
+              <div class="flex items-center gap-2">
+                <div class="relative flex-1" id="pw-container-<%= account.id %>">
+                  <input type="password" 
+                         value="<%= account.broker_password %>" 
+                         id="pw-input-<%= account.id %>"
+                         readonly
+                         class="w-full font-mono text-sm text-white bg-neutral-800 px-3 py-1.5 rounded border border-neutral-700 pr-20">
+                  <div class="absolute right-1 top-1/2 -translate-y-1/2 flex gap-1">
+                    <button type="button" 
+                            onclick="togglePassword(<%= account.id %>)"
+                            class="p-1.5 rounded hover:bg-neutral-700 text-neutral-400 hover:text-white transition-colors"
+                            title="Afficher/Masquer">
+                      <i class="fa-solid fa-eye text-xs" id="pw-icon-<%= account.id %>"></i>
+                    </button>
+                    <button type="button" 
+                            onclick="copyPassword(<%= account.id %>)"
+                            id="pw-copy-<%= account.id %>"
+                            class="p-1.5 rounded hover:bg-neutral-700 text-neutral-400 hover:text-emerald-400 transition-colors"
+                            title="Copier">
+                      <i class="fa-solid fa-copy text-xs"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- Slideover pour modifier le compte MT5 -->
+          <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-white/10 outline-hidden">
+            <div class="inset-y-0 flex h-dvh w-full flex-col bg-neutral-900 shadow-lg outline-hidden sm:w-96 lg:w-[420px] text-neutral-100 shadow-neutral-950">
+              <button type="button" data-action="slideover#hide:prevent" class="absolute top-4 right-4 mt-1 rounded-full p-1.5 opacity-70 transition-opacity hover:cursor-pointer hover:bg-neutral-500/15 hover:opacity-100 focus:outline-hidden active:bg-neutral-500/25 md:top-5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                  <line x1="18" x2="6" y1="6" y2="18"></line>
+                  <line x1="6" x2="18" y1="6" y2="18"></line>
+                </svg>
+              </button>
+
+              <div class="flex items-center gap-3 border-b border-white/10 p-5 pr-12 md:p-6">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                  <i class="fa-solid fa-wallet text-white"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-lg text-white">Modifier le compte MT5</h4>
+                  <p class="text-sm text-neutral-400"><%= account.mt5_id %></p>
+                </div>
+              </div>
+
+              <%= form_with url: admin_mt5_account_path(account), method: :patch, local: true, class: "flex flex-col flex-1 overflow-hidden" do %>
+                <div class="flex-1 overflow-y-auto p-5 md:p-6 space-y-5">
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Nom du compte</label>
+                    <input type="text" name="mt5_account[account_name]" value="<%= account.account_name %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Ex: Compte principal">
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">ID MT5</label>
+                    <input type="text" name="mt5_account[mt5_id]" value="<%= account.mt5_id %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Ex: 123456">
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Mot de passe Broker</label>
+                    <input type="text" name="mt5_account[broker_password]" value="<%= account.broker_password %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Mot de passe">
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Nom du Broker</label>
+                    <input type="text" name="mt5_account[broker_name]" value="<%= account.broker_name %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Ex: Fusion Markets">
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Serveur</label>
+                    <input type="text" name="mt5_account[broker_server]" value="<%= account.broker_server %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Ex: FusionMarkets-Live">
+                  </div>
+                  
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium text-neutral-300 mb-2">Balance Initiale</label>
+                      <input type="number" step="0.01" name="mt5_account[initial_balance]" value="<%= account.initial_balance %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="0.00">
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-neutral-300 mb-2">High Watermark</label>
+                      <input type="number" step="0.01" name="mt5_account[high_watermark]" value="<%= account.high_watermark %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="0.00">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 border-t border-white/10 p-5 md:p-6">
+                  <button type="button" data-action="slideover#hide:prevent" class="px-4 py-2.5 rounded-lg border border-neutral-700 text-neutral-300 hover:bg-neutral-800 transition-colors font-medium">
+                    Annuler
+                  </button>
+                  <button type="submit" class="px-5 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">
+                    <i class="fa-solid fa-check mr-2"></i>Enregistrer
+                  </button>
+                </div>
+              <% end %>
+            </div>
+          </dialog>
         </div>
       <% end %>
       
@@ -733,33 +918,67 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Tabs management
   const controller = document.querySelector('[data-controller="tabs"]');
-  if (!controller) return;
-  
-  const tabs = controller.querySelectorAll('[data-tabs-target="tab"]');
-  const panels = controller.querySelectorAll('[data-tabs-target="panel"]');
-  const defaultTab = controller.dataset.tabsDefaultValue || 'overview';
-  
-  function selectTab(tabName) {
+  if (controller) {
+    const tabs = controller.querySelectorAll('[data-tabs-target="tab"]');
+    const panels = controller.querySelectorAll('[data-tabs-target="panel"]');
+    const defaultTab = controller.dataset.tabsDefaultValue || 'overview';
+    
+    function selectTab(tabName) {
+      tabs.forEach(tab => {
+        const isActive = tab.dataset.tab === tabName;
+        tab.classList.toggle('bg-white', isActive);
+        tab.classList.toggle('text-neutral-900', isActive);
+        tab.classList.toggle('text-neutral-400', !isActive);
+        tab.classList.toggle('hover:text-white', !isActive);
+        tab.classList.toggle('hover:bg-neutral-800', !isActive);
+      });
+      
+      panels.forEach(panel => {
+        const isActive = panel.dataset.tab === tabName;
+        panel.classList.toggle('hidden', !isActive);
+      });
+    }
+    
     tabs.forEach(tab => {
-      const isActive = tab.dataset.tab === tabName;
-      tab.classList.toggle('bg-white', isActive);
-      tab.classList.toggle('text-neutral-900', isActive);
-      tab.classList.toggle('text-neutral-400', !isActive);
-      tab.classList.toggle('hover:text-white', !isActive);
-      tab.classList.toggle('hover:bg-neutral-800', !isActive);
+      tab.addEventListener('click', () => selectTab(tab.dataset.tab));
     });
     
-    panels.forEach(panel => {
-      const isActive = panel.dataset.tab === tabName;
-      panel.classList.toggle('hidden', !isActive);
-    });
+    selectTab(defaultTab);
   }
-  
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => selectTab(tab.dataset.tab));
-  });
-  
-  selectTab(defaultTab);
 });
+
+// Password toggle functions
+function togglePassword(accountId) {
+  const input = document.getElementById('pw-input-' + accountId);
+  const icon = document.getElementById('pw-icon-' + accountId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.remove('fa-eye-slash');
+    icon.classList.add('fa-eye');
+  }
+}
+
+function copyPassword(accountId) {
+  const input = document.getElementById('pw-input-' + accountId);
+  const btn = document.getElementById('pw-copy-' + accountId);
+  const originalType = input.type;
+  input.type = 'text';
+  input.select();
+  navigator.clipboard.writeText(input.value).then(() => {
+    const icon = btn.querySelector('i');
+    icon.className = 'fa-solid fa-check text-xs';
+    btn.classList.add('text-emerald-400');
+    setTimeout(() => {
+      icon.className = 'fa-solid fa-copy text-xs';
+      btn.classList.remove('text-emerald-400');
+    }, 1500);
+  });
+  input.type = originalType;
+}
 </script>
