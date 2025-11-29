@@ -1,0 +1,285 @@
+<% content_for :title, "Campagnes" %>
+
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-white flex items-center gap-3">
+        <i class="fa-solid fa-bullhorn text-emerald-400"></i>
+        Campagnes Marketing
+      </h1>
+      <p class="text-neutral-400 mt-1">Gérez vos bannières et campagnes SMS/Email</p>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="border-b border-neutral-800">
+    <nav class="flex gap-1" role="tablist">
+      <button type="button" onclick="showTab('sms')" id="tab-sms" role="tab" 
+              class="tab-btn px-5 py-3 text-sm font-medium rounded-t-lg transition-all border-b-2 border-emerald-500 text-emerald-400 bg-emerald-500/10">
+        <i class="fa-solid fa-comment-sms mr-2"></i>SMS / Email
+      </button>
+      <button type="button" onclick="showTab('banners')" id="tab-banners" role="tab"
+              class="tab-btn px-5 py-3 text-sm font-medium rounded-t-lg transition-all border-b-2 border-transparent text-neutral-400 hover:text-white hover:bg-neutral-800/50">
+        <i class="fa-solid fa-rectangle-ad mr-2"></i>Bannières
+      </button>
+    </nav>
+  </div>
+
+  <!-- Tab: SMS/Email Campaigns -->
+  <div id="panel-sms" class="tab-panel space-y-6">
+    <!-- Header Actions -->
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold text-white">Campagnes SMS / Email</h2>
+      <%= link_to new_admin_sms_campaign_path, class: "inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors" do %>
+        <i class="fa-solid fa-plus"></i>
+        Nouvelle Campagne
+      <% end %>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <div class="text-sm text-neutral-400 mb-1">SMS Envoyés</div>
+        <div class="text-2xl font-bold text-white"><%= @stats[:total_sent] %></div>
+      </div>
+      <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <div class="text-sm text-neutral-400 mb-1">Aujourd'hui</div>
+        <div class="text-2xl font-bold text-emerald-400"><%= @stats[:sent_today] %></div>
+      </div>
+      <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <div class="text-sm text-neutral-400 mb-1">Échecs</div>
+        <div class="text-2xl font-bold text-red-400"><%= @stats[:failed] %></div>
+      </div>
+      <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <div class="text-sm text-neutral-400 mb-1">Campagnes</div>
+        <div class="text-2xl font-bold text-blue-400"><%= @stats[:campaigns] %></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Campagnes -->
+      <div class="lg:col-span-2 space-y-4">
+        <% if @campaigns.any? %>
+          <div class="space-y-3">
+            <% @campaigns.each do |campaign| %>
+              <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-4 hover:border-neutral-700 transition-colors">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center <%= 
+                      case campaign.status
+                      when 'completed' then 'bg-emerald-500/20'
+                      when 'sending' then 'bg-blue-500/20'
+                      when 'scheduled' then 'bg-amber-500/20'
+                      else 'bg-neutral-700'
+                      end
+                    %>">
+                      <i class="fa-solid <%= 
+                        case campaign.status
+                        when 'completed' then 'fa-check text-emerald-400'
+                        when 'sending' then 'fa-spinner fa-spin text-blue-400'
+                        when 'scheduled' then 'fa-clock text-amber-400'
+                        else 'fa-file text-neutral-400'
+                        end
+                      %>"></i>
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <h3 class="font-semibold text-white"><%= campaign.name %></h3>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-300">
+                          <%= campaign.campaign_type_label %>
+                        </span>
+                      </div>
+                      <p class="text-sm text-neutral-400">
+                        <%= campaign.type_label %> • <%= campaign.audience_label %>
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-4">
+                    <div class="text-right">
+                      <div class="text-sm text-neutral-400">Destinataires</div>
+                      <div class="font-semibold text-white"><%= campaign.recipients_count %></div>
+                    </div>
+                    <% if campaign.completed? %>
+                      <div class="text-right">
+                        <div class="text-sm text-neutral-400">Envoyés</div>
+                        <div class="font-semibold text-emerald-400"><%= campaign.sent_count %></div>
+                      </div>
+                    <% end %>
+                    <div class="flex items-center gap-2">
+                      <% if campaign.draft? %>
+                        <%= link_to send_campaign_admin_sms_campaign_path(campaign), method: :post, data: { confirm: "Envoyer cette campagne à #{campaign.recipients_count} destinataires ?" }, class: "p-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors" do %>
+                          <i class="fa-solid fa-paper-plane"></i>
+                        <% end %>
+                      <% end %>
+                      <%= link_to admin_sms_campaign_path(campaign), class: "p-2 rounded-lg hover:bg-neutral-700 text-neutral-400 hover:text-white transition-colors" do %>
+                        <i class="fa-solid fa-eye"></i>
+                      <% end %>
+                      <% if campaign.draft? %>
+                        <%= link_to edit_admin_sms_campaign_path(campaign), class: "p-2 rounded-lg hover:bg-neutral-700 text-neutral-400 hover:text-white transition-colors" do %>
+                          <i class="fa-solid fa-pen"></i>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
+            <i class="fa-solid fa-comment-sms text-4xl text-neutral-600 mb-4"></i>
+            <p class="text-neutral-400">Aucune campagne SMS/Email</p>
+            <%= link_to "Créer une campagne", new_admin_sms_campaign_path, class: "inline-block mt-4 px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors" %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Historique Récent -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-white">Derniers SMS</h3>
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 overflow-hidden">
+          <% if @recent_logs.any? %>
+            <div class="divide-y divide-neutral-800 max-h-[500px] overflow-y-auto">
+              <% @recent_logs.each do |log| %>
+                <div class="p-3 hover:bg-neutral-800/50 transition-colors">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="text-sm font-medium text-white"><%= log.user&.full_name || 'Inconnu' %></span>
+                    <span class="text-xs px-2 py-0.5 rounded-full <%= log.status == 'sent' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400' %>">
+                      <%= log.status == 'sent' ? 'Envoyé' : 'Échec' %>
+                    </span>
+                  </div>
+                  <p class="text-xs text-neutral-400 truncate"><%= log.message.to_s.truncate(60) %></p>
+                  <span class="text-xs text-neutral-500"><%= log.sent_at&.strftime("%d/%m %H:%M") %></span>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="p-8 text-center">
+              <i class="fa-solid fa-inbox text-3xl text-neutral-600 mb-2"></i>
+              <p class="text-neutral-400 text-sm">Aucun SMS récent</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Banners -->
+  <div id="panel-banners" class="tab-panel hidden space-y-6">
+    <!-- Header Actions -->
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold text-white">Bannières Dashboard</h2>
+      <%= link_to new_admin_banner_path, class: "inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition-colors" do %>
+        <i class="fa-solid fa-plus"></i>
+        Nouvelle Bannière
+      <% end %>
+    </div>
+
+    <!-- Banner Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <div class="text-sm text-neutral-400 mb-1">Total</div>
+        <div class="text-2xl font-bold text-white"><%= @banner_stats[:total] %></div>
+      </div>
+      <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <div class="text-sm text-neutral-400 mb-1">Actives</div>
+        <div class="text-2xl font-bold text-emerald-400"><%= @banner_stats[:active] %></div>
+      </div>
+      <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <div class="text-sm text-neutral-400 mb-1">Vues</div>
+        <div class="text-2xl font-bold text-blue-400"><%= @banner_stats[:views] %></div>
+      </div>
+      <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <div class="text-sm text-neutral-400 mb-1">Clics</div>
+        <div class="text-2xl font-bold text-purple-400"><%= @banner_stats[:clicks] %></div>
+      </div>
+    </div>
+
+    <!-- Banners List -->
+    <% if @banners.any? %>
+      <div class="space-y-3">
+        <% @banners.each do |banner| %>
+          <% config = banner.type_config %>
+          <div class="rounded-xl bg-gradient-to-r <%= config[:bg] %> border <%= config[:border] %> p-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
+                  <i class="fa-solid <%= config[:icon] %> text-xl <%= config[:text] %>"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="font-semibold text-white"><%= banner.title %></h3>
+                    <% unless banner.is_active %>
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-400">Inactive</span>
+                    <% end %>
+                    <% if banner.starts_at.present? || banner.ends_at.present? %>
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-400">
+                        <i class="fa-solid fa-clock mr-1"></i>Planifiée
+                      </span>
+                    <% end %>
+                  </div>
+                  <p class="text-sm text-neutral-300 mt-0.5"><%= banner.content.to_s.truncate(80) %></p>
+                  <div class="flex items-center gap-3 mt-1">
+                    <span class="text-xs text-neutral-400"><%= banner.type_label %></span>
+                    <span class="text-xs text-neutral-500">•</span>
+                    <span class="text-xs text-neutral-400"><%= banner.audience_label %></span>
+                    <span class="text-xs text-neutral-500">•</span>
+                    <span class="text-xs text-neutral-400">Priorité: <%= banner.priority %></span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="text-right hidden md:block">
+                  <div class="text-xs text-neutral-400">Vues / Clics</div>
+                  <div class="font-semibold text-white"><%= banner.views_count %> / <%= banner.clicks_count %></div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <%= link_to toggle_admin_banner_path(banner), method: :post, class: "p-2 rounded-lg hover:bg-white/10 transition-colors" do %>
+                    <i class="fa-solid <%= banner.is_active ? 'fa-toggle-on text-emerald-400' : 'fa-toggle-off text-neutral-400' %> text-lg"></i>
+                  <% end %>
+                  <%= link_to edit_admin_banner_path(banner), class: "p-2 rounded-lg hover:bg-white/10 text-neutral-300 hover:text-white transition-colors" do %>
+                    <i class="fa-solid fa-pen"></i>
+                  <% end %>
+                  <%= link_to admin_banner_path(banner), method: :delete, data: { confirm: "Supprimer cette bannière ?" }, class: "p-2 rounded-lg hover:bg-red-500/20 text-neutral-400 hover:text-red-400 transition-colors" do %>
+                    <i class="fa-solid fa-trash"></i>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
+        <i class="fa-solid fa-rectangle-ad text-4xl text-neutral-600 mb-4"></i>
+        <p class="text-neutral-400">Aucune bannière</p>
+        <%= link_to "Créer une bannière", new_admin_banner_path, class: "inline-block mt-4 px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+function showTab(tab) {
+  // Hide all panels
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+  // Deactivate all tabs
+  document.querySelectorAll('.tab-btn').forEach(t => {
+    t.classList.remove('border-emerald-500', 'text-emerald-400', 'bg-emerald-500/10');
+    t.classList.add('border-transparent', 'text-neutral-400');
+  });
+  
+  // Show selected panel
+  document.getElementById('panel-' + tab).classList.remove('hidden');
+  // Activate selected tab
+  const activeTab = document.getElementById('tab-' + tab);
+  activeTab.classList.remove('border-transparent', 'text-neutral-400');
+  activeTab.classList.add('border-emerald-500', 'text-emerald-400', 'bg-emerald-500/10');
+}
+
+// Check URL hash for tab
+if (window.location.hash === '#banners') {
+  showTab('banners');
+}
+</script>
