@@ -177,99 +177,87 @@ module Admin
 
     private
 
-    def bot_params
-      params.require(:trading_bot).permit(
-        :name, :description, :price, :status, :is_active,
-        :projection_monthly_min, :projection_monthly_max, :projection_yearly,
-        :win_rate, :max_drawdown_limit, :risk_level, :symbol, :magic_number_prefix
-      )
+    def product_params
+      params.require(:shop_product).permit(:name, :description, :price, :product_type, :interval, :icon, :badge, :badge_color, :features, :active, :position)
     end
 
-    def bot_to_hash(bot)
+    def credit_pack_params
+      params.require(:credit_pack).permit(:amount, :bonus_percentage, :label, :is_popular, :is_best, :active, :position)
+    end
+
+    def vps_offer_params
+      params.require(:vps_offer).permit(:name, :price, :specs, :description, :is_recommended, :active, :position)
+    end
+
+    def calculate_stats
+      bot_sales = BotPurchase.count
+      bot_revenue = BotPurchase.sum(:price_paid)
+      product_sales = ProductPurchase.count rescue 0
+      product_revenue = ProductPurchase.sum(:price_paid) rescue 0
+      credit_revenue = Credit.where("reason LIKE ?", "Pack%").sum(:amount) rescue 0
+      vps_revenue = Vps.sum(:monthly_price) rescue 0
+
       {
-        name: bot.name,
-        description: bot.description,
-        price: bot.price,
-        status: bot.status,
-        is_active: bot.is_active,
-        symbol: bot.symbol,
-        magic_number_prefix: bot.magic_number_prefix,
-        projection_monthly_min: bot.projection_monthly_min,
-        projection_monthly_max: bot.projection_monthly_max,
-        projection_yearly: bot.projection_yearly,
-        win_rate: bot.win_rate,
-        max_drawdown_limit: bot.max_drawdown_limit,
-        risk_level: bot.risk_level,
-        strategy_description: bot.strategy_description,
-        features: bot.features_list
+        total_products: TradingBot.count + ShopProduct.count + CreditPack.count + VpsOffer.count,
+        active_products: TradingBot.where(is_active: true).count + ShopProduct.where(active: true).count + CreditPack.where(active: true).count + VpsOffer.where(active: true).count,
+        total_sales: bot_sales + product_sales,
+        total_revenue: bot_revenue + product_revenue + credit_revenue + vps_revenue
       }
     end
 
-    def generate_csv(bots)
+    def bot_to_hash(bot)
+      { type: 'bot', name: bot.name, price: bot.price, is_active: bot.is_active }
+    end
+
+    def product_to_hash(product)
+      { type: 'product', name: product.name, price: product.price, active: product.active }
+    end
+
+    def credit_pack_to_hash(pack)
+      { type: 'credit_pack', amount: pack.amount, bonus_percentage: pack.bonus_percentage, active: pack.active }
+    end
+
+    def vps_offer_to_hash(offer)
+      { type: 'vps_offer', name: offer.name, price: offer.price, active: offer.active }
+    end
+
+    def generate_csv
       require 'csv'
       CSV.generate(headers: true) do |csv|
-        csv << ['Nom', 'Prix', 'Statut', 'Actif', 'Symbol', 'Win Rate', 'Risque', 'Ventes', 'Revenus']
-        
-        bots.each do |bot|
-          sales = bot.bot_purchases.count
-          revenue = bot.bot_purchases.sum(:price_paid)
-          csv << [
-            bot.name,
-            bot.price,
-            bot.status,
-            bot.is_active ? 'Oui' : 'Non',
-            bot.symbol,
-            bot.win_rate,
-            bot.risk_level,
-            sales,
-            revenue
-          ]
-        end
+        csv << ['Type', 'Nom', 'Prix', 'Actif']
+        TradingBot.order(:name).each { |b| csv << ['Bot', b.name, b.price, b.is_active ? 'Oui' : 'Non'] }
+        ShopProduct.order(:position).each { |p| csv << ['Produit', p.name, p.price, p.active ? 'Oui' : 'Non'] }
+        CreditPack.ordered.each { |c| csv << ['Crédits', "Pack #{c.amount}€", c.amount, c.active ? 'Oui' : 'Non'] }
+        VpsOffer.ordered.each { |v| csv << ['VPS', v.name, v.price, v.active ? 'Oui' : 'Non'] }
       end
     end
 
-    def import_from_json(file)
+    def import_data(file)
       data = JSON.parse(file.read)
       
-      data.each do |bot_data|
-        bot = TradingBot.find_or_initialize_by(name: bot_data['name'])
-        bot.assign_attributes(
-          description: bot_data['description'],
-          price: bot_data['price'],
-          status: bot_data['status'] || 'active',
-          is_active: bot_data['is_active'],
-          symbol: bot_data['symbol'],
-          magic_number_prefix: bot_data['magic_number_prefix'],
-          projection_monthly_min: bot_data['projection_monthly_min'],
-          projection_monthly_max: bot_data['projection_monthly_max'],
-          projection_yearly: bot_data['projection_yearly'],
-          win_rate: bot_data['win_rate'],
-          max_drawdown_limit: bot_data['max_drawdown_limit'],
-          risk_level: bot_data['risk_level'],
-          strategy_description: bot_data['strategy_description'],
-          features: bot_data['features']
-        )
+      data['bots']&.each do |d|
+        bot = TradingBot.find_or_initialize_by(name: d['name'])
+        bot.assign_attributes(d.except('type'))
         bot.save!
       end
-    end
-
-    def import_from_csv(file)
-      require 'csv'
-      csv = CSV.parse(file.read, headers: true)
       
-      csv.each do |row|
-        bot = TradingBot.find_or_initialize_by(name: row['Nom'])
-        bot.assign_attributes(
-          price: row['Prix'].to_f,
-          status: row['Statut'] || 'active',
-          is_active: row['Actif'] == 'Oui',
-          symbol: row['Symbol'],
-          win_rate: row['Win Rate']&.to_f,
-          risk_level: row['Risque']
-        )
-        bot.save!
+      data['products']&.each do |d|
+        product = ShopProduct.find_or_initialize_by(name: d['name'])
+        product.assign_attributes(d.except('type'))
+        product.save!
+      end
+      
+      data['credit_packs']&.each do |d|
+        pack = CreditPack.find_or_initialize_by(amount: d['amount'])
+        pack.assign_attributes(d.except('type'))
+        pack.save!
+      end
+      
+      data['vps_offers']&.each do |d|
+        offer = VpsOffer.find_or_initialize_by(name: d['name'])
+        offer.assign_attributes(d.except('type'))
+        offer.save!
       end
     end
   end
 end
-
