@@ -877,71 +877,95 @@ async function initializeChart() {
         maintainAspectRatio: false,
         interaction: { intersect: false, mode: 'index' },
         plugins: {
-          legend: {
-            display: true,
-            position: 'top',
-            labels: {
-              color: textColor,
-              font: { size: 12, weight: '500', family: 'Inter, sans-serif' },
-              padding: 15,
-              usePointStyle: true
-            }
-          },
+          legend: { display: false },
           tooltip: {
-            backgroundColor: 'rgba(23, 23, 23, 0.95)',
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
             titleColor: '#fff',
+            titleFont: { size: 13, weight: 'bold' },
             bodyColor: '#e2e8f0',
-            borderColor: 'rgba(255, 255, 255, 0.1)',
+            bodyFont: { size: 12 },
+            borderColor: 'rgba(139, 92, 246, 0.5)',
             borderWidth: 1,
-            cornerRadius: 8,
-            padding: 12,
+            cornerRadius: 12,
+            padding: 14,
             displayColors: true,
+            boxPadding: 6,
             callbacks: {
+              title: function(context) {
+                return '📅 ' + context[0].label;
+              },
               label: function(context) {
                 if (context.parsed.y === null) return '';
-                let label = context.dataset.label || '';
-                if (label) label += ': ';
                 const value = context.parsed.y;
-                const formattedValue = Math.abs(value).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
-                label += value >= 0 ? formattedValue : '-' + formattedValue;
-                return label;
+                const formattedValue = Math.abs(value).toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' €';
+                
+                if (context.dataset.label === 'Profit Mensuel') {
+                  const icon = value >= 0 ? '📈' : '📉';
+                  return icon + ' Profit: ' + (value >= 0 ? '+' : '-') + formattedValue;
+                } else if (context.dataset.label === 'Projection') {
+                  return '🎯 Projection: ' + formattedValue;
+                } else {
+                  return '💰 Balance: ' + formattedValue;
+                }
               }
             }
           }
         },
         scales: {
           x: {
-            grid: { display: false },
-            ticks: { color: textColor, font: { size: 11 }, maxRotation: 45, minRotation: 45 }
+            grid: { display: false, drawBorder: false },
+            ticks: { 
+              color: textColor, 
+              font: { size: 11, weight: '500' }, 
+              maxRotation: 45, 
+              minRotation: 45,
+              padding: 8
+            },
+            border: { display: false }
           },
           y: {
             type: 'linear',
             position: 'left',
-            beginAtZero: true,
-            grid: { color: gridColor, drawBorder: false },
+            grid: { color: gridColor, drawBorder: false, lineWidth: 1 },
             ticks: {
               color: textColor,
               font: { size: 11 },
-              callback: function(value) { return value.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €'; }
+              padding: 12,
+              callback: function(value) { 
+                if (value >= 1000 || value <= -1000) {
+                  return (value / 1000).toFixed(1) + 'k €';
+                }
+                return value.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €'; 
+              }
             },
-            title: { display: true, text: 'Profits Mensuels', color: textColor, font: { size: 11, weight: '500' } }
+            border: { display: false }
           },
           y1: {
             type: 'linear',
             position: 'right',
             grid: { display: false },
             ticks: {
-              color: textColor,
-              font: { size: 11 },
-              callback: function(value) { return value.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €'; }
+              color: '#8b5cf6',
+              font: { size: 11, weight: '600' },
+              padding: 12,
+              callback: function(value) { 
+                if (value >= 1000) {
+                  return (value / 1000).toFixed(1) + 'k €';
+                }
+                return value.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €'; 
+              }
             },
-            title: { display: true, text: 'Balance Projetée', color: textColor, font: { size: 11, weight: '500' } }
+            border: { display: false }
           }
         }
       }
     });
   } catch (error) {
     console.error('Error initializing chart:', error);
+    const loadingDiv = document.getElementById('chart-loading');
+    if (loadingDiv) {
+      loadingDiv.innerHTML = '<div class="text-center"><i class="fa-solid fa-chart-line text-4xl text-neutral-600 mb-3"></i><p class="text-neutral-400">Graphique indisponible</p></div>';
+    }
   }
 }
 
