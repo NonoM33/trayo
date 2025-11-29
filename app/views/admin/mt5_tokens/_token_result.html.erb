@@ -58,12 +58,6 @@
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      <% if @generated_token %>
-        copyToken();
-      <% end %>
-    });
-
     function copyToken() {
       const token = '<%= @generated_token %>';
       navigator.clipboard.writeText(token).then(() => showNotification('Token copié !'));
@@ -104,6 +98,10 @@ Instructions:
       a.click();
       URL.revokeObjectURL(url);
     }
+    
+    <% if @generated_token %>
+      setTimeout(copyToken, 100);
+    <% end %>
   </script>
 </turbo-frame>
 

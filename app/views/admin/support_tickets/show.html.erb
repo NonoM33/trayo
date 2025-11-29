@@ -184,12 +184,12 @@
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  function initTicketStatusForm() {
     const statusSelect = document.getElementById('ticket_status');
     const commentField = document.getElementById('status_comment_field');
     const originalStatus = '<%= @ticket.status %>';
     
-    if (statusSelect) {
+    if (statusSelect && commentField) {
       statusSelect.addEventListener('change', function() {
         if (this.value !== originalStatus) {
           commentField.style.display = 'block';

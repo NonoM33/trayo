@@ -1,0 +1,200 @@
+<% @page_title = 'Mes Factures' %>
+
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-white tracking-tight">Mes Factures</h1>
+      <p class="text-neutral-400 mt-1">Historique de vos factures et paiements</p>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Total à Régler -->
+    <div class="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-clock text-red-400 text-lg"></i>
+        </div>
+        <div>
+          <p class="text-sm text-neutral-400">À Régler</p>
+          <p class="text-2xl font-bold <%= @total_pending > 0 ? 'text-red-400' : 'text-white' %>">
+            <%= number_to_currency(@total_pending, unit: "€", format: "%n%u") %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Réglé -->
+    <div class="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-check-circle text-emerald-400 text-lg"></i>
+        </div>
+        <div>
+          <p class="text-sm text-neutral-400">Total Réglé</p>
+          <p class="text-2xl font-bold text-emerald-400">
+            <%= number_to_currency(@total_paid, unit: "€", format: "%n%u") %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nombre de Factures -->
+    <div class="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-file-invoice text-blue-400 text-lg"></i>
+        </div>
+        <div>
+          <p class="text-sm text-neutral-400">Total Factures</p>
+          <p class="text-2xl font-bold text-white">
+            <%= @invoices.count + @commission_invoices.count %>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Factures à Régler -->
+  <% if @pending_invoices.any? || @pending_commission_invoices.any? %>
+    <div class="rounded-2xl border border-red-500/30 bg-red-500/5 overflow-hidden">
+      <div class="px-6 py-4 border-b border-red-500/20">
+        <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+          <i class="fa-solid fa-exclamation-circle text-red-400"></i>
+          Factures à Régler
+          <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-400">
+            <%= @pending_invoices.count + @pending_commission_invoices.count %>
+          </span>
+        </h2>
+      </div>
+      
+      <div class="divide-y divide-neutral-800/50">
+        <% @pending_invoices.each do |invoice| %>
+          <div class="px-6 py-4 flex items-center justify-between hover:bg-neutral-900/30 transition-colors">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center">
+                <i class="fa-solid fa-file-invoice text-neutral-400"></i>
+              </div>
+              <div>
+                <p class="font-medium text-white"><%= invoice.reference %></p>
+                <p class="text-sm text-neutral-400">
+                  <%= invoice.created_at.strftime("%d/%m/%Y") %>
+                  <span class="mx-2">•</span>
+                  <%= invoice.invoice_items.count %> article(s)
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-right">
+                <p class="font-bold text-red-400"><%= number_to_currency(invoice.balance_due, unit: "€", format: "%n%u") %></p>
+                <% if invoice.partial? %>
+                  <p class="text-xs text-neutral-500">sur <%= number_to_currency(invoice.total_amount, unit: "€", format: "%n%u") %></p>
+                <% end %>
+              </div>
+              <%= link_to admin_invoice_path(invoice), class: "px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-500 transition-colors" do %>
+                <i class="fa-solid fa-credit-card mr-1"></i>
+                Régler
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+        
+        <% @pending_commission_invoices.each do |invoice| %>
+          <div class="px-6 py-4 flex items-center justify-between hover:bg-neutral-900/30 transition-colors">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                <i class="fa-solid fa-percent text-amber-400"></i>
+              </div>
+              <div>
+                <p class="font-medium text-white"><%= invoice.reference %></p>
+                <p class="text-sm text-neutral-400">
+                  Commission du <%= invoice.created_at.strftime("%d/%m/%Y") %>
+                  <% if invoice.due_date.present? %>
+                    <span class="mx-2">•</span>
+                    Échéance: <%= invoice.due_date.strftime("%d/%m/%Y") %>
+                  <% end %>
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-right">
+                <p class="font-bold text-red-400"><%= number_to_currency(invoice.total_amount, unit: "€", format: "%n%u") %></p>
+                <% if invoice.late_fee.to_f > 0 %>
+                  <p class="text-xs text-red-300">dont <%= number_to_currency(invoice.late_fee, unit: "€", format: "%n%u") %> de frais</p>
+                <% end %>
+              </div>
+              <span class="px-3 py-1.5 rounded-lg text-sm font-medium <%= invoice.overdue? ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400' %>">
+                <%= invoice.overdue? ? 'En retard' : 'En attente' %>
+              </span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Historique des Factures Réglées -->
+  <div class="rounded-2xl border border-neutral-800 bg-neutral-900/50 overflow-hidden">
+    <div class="px-6 py-4 border-b border-neutral-800">
+      <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+        <i class="fa-solid fa-history text-neutral-400"></i>
+        Historique
+      </h2>
+    </div>
+    
+    <% if @paid_invoices.any? || @paid_commission_invoices.any? %>
+      <div class="divide-y divide-neutral-800/50">
+        <% (@paid_invoices + @paid_commission_invoices).sort_by { |i| i.respond_to?(:paid_at) && i.paid_at ? i.paid_at : i.updated_at }.reverse.each do |invoice| %>
+          <div class="px-6 py-4 flex items-center justify-between hover:bg-neutral-800/30 transition-colors">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                <i class="fa-solid fa-check text-emerald-400"></i>
+              </div>
+              <div>
+                <p class="font-medium text-white"><%= invoice.reference %></p>
+                <p class="text-sm text-neutral-400">
+                  <% if invoice.is_a?(CommissionInvoice) %>
+                    Commission • Réglée le <%= (invoice.paid_at || invoice.updated_at).strftime("%d/%m/%Y") %>
+                  <% else %>
+                    Achat • <%= invoice.invoice_items.count %> article(s)
+                  <% end %>
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <p class="font-bold text-emerald-400"><%= number_to_currency(invoice.total_amount, unit: "€", format: "%n%u") %></p>
+              <span class="px-3 py-1.5 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400">
+                Réglée
+              </span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="px-6 py-12 text-center">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-neutral-800 flex items-center justify-center mb-4">
+          <i class="fa-solid fa-file-invoice text-neutral-600 text-2xl"></i>
+        </div>
+        <p class="text-neutral-400">Aucune facture réglée</p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Message si aucune facture -->
+  <% if @invoices.empty? && @commission_invoices.empty? %>
+    <div class="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-12 text-center">
+      <div class="w-20 h-20 mx-auto rounded-2xl bg-neutral-800 flex items-center justify-center mb-6">
+        <i class="fa-solid fa-file-invoice text-neutral-600 text-3xl"></i>
+      </div>
+      <h3 class="text-xl font-semibold text-white mb-2">Aucune facture</h3>
+      <p class="text-neutral-400 mb-6">Vous n'avez pas encore de facture.</p>
+      <%= link_to admin_shop_index_path, class: "inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-500 transition-colors" do %>
+        <i class="fa-solid fa-shopping-cart"></i>
+        Découvrir la boutique
+      <% end %>
+    </div>
+  <% end %>
+</div>
+

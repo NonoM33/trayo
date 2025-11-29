@@ -168,15 +168,17 @@
       }
     }
     
-    // Check if popup should be shown
-    document.addEventListener('DOMContentLoaded', function() {
+    function checkAndShowPopup() {
       const dismissedToday = localStorage.getItem('campaign_dismissed_today');
       const today = new Date().toDateString();
       
       if (dismissedToday !== today) {
-        // Show popup after a short delay
         setTimeout(showCampaignPopup, 1000);
       }
-    });
+    }
+    
+    document.addEventListener('DOMContentLoaded', checkAndShowPopup);
+    document.addEventListener('turbo:load', checkAndShowPopup);
+    document.addEventListener('turbo:render', checkAndShowPopup);
   </script>
 <% end %>

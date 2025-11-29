@@ -305,14 +305,6 @@
 </style>
 
 <script>
-// Copier automatiquement le token au chargement de la page (seulement si le token existe)
-document.addEventListener('DOMContentLoaded', function() {
-  <% if @generated_token && !@token_expired %>
-    const token = '<%= @generated_token %>';
-    copyToClipboard(token);
-  <% end %>
-});
-
 function copyToClipboard(text) {
   navigator.clipboard.writeText(text).then(function() {
     // Afficher une notification de succès
@@ -380,4 +372,10 @@ Le client sera créé automatiquement au premier lancement avec l'email fourni.
   document.body.removeChild(a);
   window.URL.revokeObjectURL(url);
 }
+
+<% if @generated_token && !@token_expired %>
+  setTimeout(function() {
+    copyToClipboard('<%= @generated_token %>');
+  }, 100);
+<% end %>
 </script>

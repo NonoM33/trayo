@@ -67,9 +67,6 @@
               <%= link_to admin_vps_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Mes VPS" do %>
                 <i class="fa-solid fa-server"></i>
               <% end %>
-              <%= link_to admin_bonus_deposits_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Programme Bonus" do %>
-                <i class="fa-solid fa-gift"></i>
-              <% end %>
             <% end %>
           </div>
 
@@ -224,11 +221,9 @@
                     <span>Mes VPS</span>
                   <% end %>
                   
-                  <div class="my-2 border-t border-neutral-800"></div>
-                  
-                  <%= link_to admin_bonus_deposits_path, class: "group w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors #{request.path.start_with?('/admin/bonus') ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'}" do %>
-                    <i class="fa-solid fa-gift w-5"></i>
-                    <span>Bonus</span>
+                  <%= link_to admin_my_invoices_path, class: "group w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors #{request.path.start_with?('/admin/my_invoices') ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'}" do %>
+                    <i class="fa-solid fa-file-invoice w-5"></i>
+                    <span>Mes Factures</span>
                   <% end %>
                 </div>
               <% end %>

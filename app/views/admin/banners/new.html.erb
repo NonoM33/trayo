@@ -131,14 +131,22 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+function initBannerPreview() {
   const titleInput = document.getElementById('banner_title');
   const contentInput = document.getElementById('banner_content');
   const previewTitle = document.getElementById('preview-title');
   const previewContent = document.getElementById('preview-content');
 
-  titleInput?.addEventListener('input', e => previewTitle.textContent = e.target.value || 'Titre de la bannière');
-  contentInput?.addEventListener('input', e => previewContent.textContent = e.target.value || 'Contenu de votre message...');
-});
+  if (titleInput && previewTitle) {
+    titleInput.addEventListener('input', e => previewTitle.textContent = e.target.value || 'Titre de la bannière');
+  }
+  if (contentInput && previewContent) {
+    contentInput.addEventListener('input', e => previewContent.textContent = e.target.value || 'Contenu de votre message...');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initBannerPreview);
+document.addEventListener('turbo:load', initBannerPreview);
+document.addEventListener('turbo:render', initBannerPreview);
 </script>
 

@@ -516,6 +516,8 @@
     } else {
       initializeCapitalChart();
     }
+    document.addEventListener('turbo:load', initializeCapitalChart);
+    document.addEventListener('turbo:render', initializeCapitalChart);
   </script>
 </body>
 </html>

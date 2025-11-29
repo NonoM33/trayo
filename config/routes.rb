@@ -205,6 +205,8 @@ Rails.application.routes.draw do
     
     resources :my_trades, only: [:index]
     
+    resources :my_invoices, only: [:index, :show]
+    
     resources :vps, path: 'vps' do
       member do
         post :update_status

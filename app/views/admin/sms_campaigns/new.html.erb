@@ -182,9 +182,12 @@ function updateCharCount() {
   document.getElementById('char-count').textContent = textarea.value.length;
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+function initSmsCampaignForm() {
   const smsSection = document.getElementById('sms-section');
   const emailSection = document.getElementById('email-section');
+  const messageInput = document.getElementById('sms_campaign_message_template');
+  
+  if (!smsSection || !emailSection) return;
   
   document.querySelectorAll('input[name="sms_campaign[campaign_type]"]').forEach(radio => {
     radio.addEventListener('change', function() {
@@ -194,8 +197,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  document.getElementById('sms_campaign_message_template').addEventListener('input', updateCharCount);
-  updateCharCount();
-});
+  if (messageInput) {
+    messageInput.addEventListener('input', updateCharCount);
+    updateCharCount();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initSmsCampaignForm);
+document.addEventListener('turbo:load', initSmsCampaignForm);
+document.addEventListener('turbo:render', initSmsCampaignForm);
 </script>
 

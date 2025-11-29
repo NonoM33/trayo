@@ -13,11 +13,7 @@
           setTimeout(showNotice, 100);
         }
       }
-      if (document.readyState === 'complete') {
-        setTimeout(showNotice, 50);
-      } else {
-        document.addEventListener('DOMContentLoaded', function() { setTimeout(showNotice, 50); }, { once: true });
-      }
+      setTimeout(showNotice, 50);
     })();
   </script>
 <% end %>
@@ -32,11 +28,7 @@
           setTimeout(showAlert, 100);
         }
       }
-      if (document.readyState === 'complete') {
-        setTimeout(showAlert, 50);
-      } else {
-        document.addEventListener('DOMContentLoaded', function() { setTimeout(showAlert, 50); }, { once: true });
-      }
+      setTimeout(showAlert, 50);
     })();
   </script>
 <% end %>

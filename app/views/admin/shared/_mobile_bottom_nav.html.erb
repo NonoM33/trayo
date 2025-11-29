@@ -136,9 +136,9 @@
               <i class="fa-solid fa-server text-xl mb-1"></i>
               <span class="text-xs">Mes VPS</span>
             <% end %>
-            <%= link_to admin_bonus_deposits_path, class: "mobile-menu-tile #{request.path.start_with?('/admin/bonus') ? 'active' : ''}" do %>
-              <i class="fa-solid fa-gift text-xl mb-1"></i>
-              <span class="text-xs">Bonus</span>
+            <%= link_to admin_my_invoices_path, class: "mobile-menu-tile #{request.path.start_with?('/admin/my_invoices') ? 'active' : ''}" do %>
+              <i class="fa-solid fa-file-invoice text-xl mb-1"></i>
+              <span class="text-xs">Factures</span>
             <% end %>
           </div>
         <% end %>
