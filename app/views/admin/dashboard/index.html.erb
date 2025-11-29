@@ -797,12 +797,25 @@ async function initializeChart() {
     const allLabels = [...historicalLabels, ...projectionLabels];
     
     const historicalProfits = historicalData.map(d => d.profit);
-    const projectionProfits = new Array(historicalData.length).fill(null);
-    projectionData.forEach((d, i) => {
-      projectionProfits.push(d.balance);
+    
+    const cumulativeBalance = [];
+    let runningBalance = currentBalance - historicalProfits.reduce((a, b) => a + b, 0);
+    historicalProfits.forEach(profit => {
+      runningBalance += profit;
+      cumulativeBalance.push(runningBalance);
     });
     
-    projectionProfits[historicalData.length] = currentBalance;
+    const projectionBalances = projectionData.map(d => d.balance);
+    const allBalances = [...cumulativeBalance, ...projectionBalances];
+    
+    const projectionLine = new Array(historicalData.length).fill(null);
+    projectionLine[historicalData.length - 1] = currentBalance;
+    projectionBalances.forEach(b => projectionLine.push(b));
+    
+    const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 350);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+    gradient.addColorStop(0.5, 'rgba(139, 92, 246, 0.15)');
+    gradient.addColorStop(1, 'rgba(139, 92, 246, 0)');
     
     window.portfolioChartInstance = new Chart(ctx, {
       type: 'bar',
@@ -811,32 +824,51 @@ async function initializeChart() {
         datasets: [
           {
             type: 'bar',
-            label: 'Profits Mensuels',
+            label: 'Profit Mensuel',
             data: [...historicalProfits, ...new Array(projectionData.length).fill(null)],
-            backgroundColor: historicalProfits.map(p => p >= 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'),
-            borderColor: historicalProfits.map(p => p >= 0 ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)'),
-            borderWidth: 1,
-            borderRadius: 6,
+            backgroundColor: historicalProfits.map(p => p >= 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+            borderColor: historicalProfits.map(p => p >= 0 ? 'rgba(16, 185, 129, 1)' : 'rgba(239, 68, 68, 1)'),
+            borderWidth: 0,
+            borderRadius: { topLeft: 6, topRight: 6 },
+            borderSkipped: false,
             yAxisID: 'y',
             order: 2
           },
           {
             type: 'line',
-            label: 'Balance Projetée',
-            data: projectionProfits,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            borderWidth: 3,
-            borderDash: [8, 4],
+            label: 'Balance Cumulée',
+            data: [...cumulativeBalance, ...new Array(projectionData.length).fill(null)],
+            borderColor: 'rgba(255, 255, 255, 0.4)',
+            backgroundColor: 'transparent',
+            borderWidth: 2,
             fill: false,
             tension: 0.4,
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            pointBackgroundColor: '#3b82f6',
+            pointRadius: 0,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#fff',
             pointBorderColor: '#fff',
             pointBorderWidth: 2,
             yAxisID: 'y1',
             order: 1
+          },
+          {
+            type: 'line',
+            label: 'Projection',
+            data: projectionLine,
+            borderColor: '#8b5cf6',
+            backgroundColor: gradient,
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointRadius: function(context) {
+              return context.dataIndex >= historicalData.length ? 6 : 0;
+            },
+            pointHoverRadius: 8,
+            pointBackgroundColor: '#8b5cf6',
+            pointBorderColor: '#1a1a1a',
+            pointBorderWidth: 3,
+            yAxisID: 'y1',
+            order: 0
           }
         ]
       },
