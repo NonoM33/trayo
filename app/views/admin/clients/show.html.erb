@@ -1594,4 +1594,40 @@ function copyPassword(accountId) {
   });
   input.type = originalType;
 }
+
+// Sub-tabs for Trading section
+function showTradingSection(section) {
+  document.querySelectorAll('.trading-section').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.trading-subtab').forEach(el => {
+    el.classList.remove('bg-neutral-800', 'text-white', 'border', 'border-neutral-700');
+    el.classList.add('text-neutral-400');
+  });
+  
+  const sectionEl = document.getElementById('trading-section-' + section);
+  const tabEl = document.getElementById('trading-tab-' + section);
+  
+  if (sectionEl) sectionEl.classList.remove('hidden');
+  if (tabEl) {
+    tabEl.classList.remove('text-neutral-400');
+    tabEl.classList.add('bg-neutral-800', 'text-white', 'border', 'border-neutral-700');
+  }
+}
+
+// Sub-tabs for Finances section
+function showFinancesSection(section) {
+  document.querySelectorAll('.finances-section').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.finances-subtab').forEach(el => {
+    el.classList.remove('bg-neutral-800', 'text-white', 'border', 'border-neutral-700');
+    el.classList.add('text-neutral-400');
+  });
+  
+  const sectionEl = document.getElementById('finances-section-' + section);
+  const tabEl = document.getElementById('finances-tab-' + section);
+  
+  if (sectionEl) sectionEl.classList.remove('hidden');
+  if (tabEl) {
+    tabEl.classList.remove('text-neutral-400');
+    tabEl.classList.add('bg-neutral-800', 'text-white', 'border', 'border-neutral-700');
+  }
+}
 </script>
