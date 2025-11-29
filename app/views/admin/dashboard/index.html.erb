@@ -402,7 +402,14 @@
           </h2>
           <p class="text-sm text-neutral-400 mt-1 ml-[52px]">Analyse en temps réel de tous vos robots de trading</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
+          <% updates_needed = bot_purchases.select(&:needs_update?) %>
+          <% if updates_needed.any? %>
+            <%= link_to admin_my_bots_path, class: "group flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-sm font-bold text-white shadow-lg shadow-orange-500/25 transition-all hover:scale-[1.02] hover:shadow-orange-500/40" do %>
+              <i class="fa-solid fa-arrow-up-from-bracket group-hover:animate-bounce"></i>
+              <span><%= updates_needed.count %> mise<%= updates_needed.count > 1 ? 's' : '' %> à jour</span>
+            <% end %>
+          <% end %>
           <span class="px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
             <i class="fa-solid fa-robot mr-1"></i>
             <%= bot_purchases.count %> bot<%= bot_purchases.count > 1 ? 's' : '' %> actif<%= bot_purchases.count > 1 ? 's' : '' %>
