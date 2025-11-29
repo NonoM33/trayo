@@ -141,6 +141,16 @@ Rails.application.routes.draw do
     
     get 'shop/product/:id', to: 'shop#show_product', as: :shop_product
     post 'shop/product/:id/purchase', to: 'shop#purchase_product', as: :purchase_shop_product
+
+    resource :cart, only: [:show], controller: 'cart' do
+      post 'add_bot/:id', to: 'cart#add_bot', as: :add_bot
+      post 'add_product/:id', to: 'cart#add_product', as: :add_product
+      delete 'remove_bot/:id', to: 'cart#remove_bot', as: :remove_bot
+      delete 'remove_product/:id', to: 'cart#remove_product', as: :remove_product
+      delete 'clear', to: 'cart#clear', as: :clear
+      post 'checkout', to: 'cart#checkout', as: :checkout
+      get 'success', to: 'cart#success', as: :success
+    end
     
     resources :my_bots, only: [:index, :show] do
       member do
