@@ -819,107 +819,128 @@
       <% end %>
       
       <% if @client.mt5_accounts.empty? %>
-        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
-          <i class="fa-solid fa-wallet text-4xl text-neutral-600 mb-4"></i>
-          <p class="text-neutral-400">Aucun compte MT5</p>
-        </div>
-      <% end %>
-    </div>
-
-    <!-- Tab: Bots -->
-    <div data-tabs-target="panel" data-tab="bots" class="mt-6 hidden space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <% @client.bot_purchases.includes(:trading_bot).each do |purchase| %>
-          <%= render partial: "admin/clients/bot_purchase_card", locals: { bot: purchase } %>
+          <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
+            <i class="fa-solid fa-wallet text-4xl text-neutral-600 mb-4"></i>
+            <p class="text-neutral-400">Aucun compte MT5</p>
+          </div>
         <% end %>
       </div>
-      
-      <% if @client.bot_purchases.empty? %>
-        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
-          <i class="fa-solid fa-robot text-4xl text-neutral-600 mb-4"></i>
-          <p class="text-neutral-400">Aucun bot assigné</p>
-        </div>
-      <% end %>
 
-      <% if current_user.is_admin? %>
-        <!-- Assigner un Bot -->
-        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6">
-          <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-plus text-blue-400"></i>
-            Assigner un Bot
-          </h3>
-          <%= form_with url: assign_to_user_admin_bot_purchases_path, method: :post, local: true, class: "flex flex-col md:flex-row gap-4" do |f| %>
-            <input type="hidden" name="user_id" value="<%= @client.id %>">
-            <div class="flex-1">
-              <select name="trading_bot_id" required class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                <option value="">Sélectionner un bot...</option>
-                <% TradingBot.active.each do |bot| %>
-                  <option value="<%= bot.id %>"><%= bot.name %> - <%= number_to_currency(bot.price, unit: "€", format: "%n%u") %></option>
-                <% end %>
-              </select>
-            </div>
-            <button type="submit" class="px-6 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">
-              <i class="fa-solid fa-plus mr-2"></i>Assigner
-            </button>
+      <!-- Section: Bots -->
+      <div id="trading-section-bots" class="trading-section hidden space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <% @client.bot_purchases.includes(:trading_bot).each do |purchase| %>
+            <%= render partial: "admin/clients/bot_purchase_card", locals: { bot: purchase } %>
           <% end %>
         </div>
-      <% end %>
-    </div>
-
-    <!-- Tab: Trades -->
-    <div data-tabs-target="panel" data-tab="trades" class="mt-6 hidden space-y-6">
-      <% trades = Trade.joins(mt5_account: :user).where(users: { id: @client.id }).order(close_time: :desc).limit(50) %>
-      
-      <div class="rounded-xl bg-neutral-900 border border-neutral-800 overflow-hidden">
-        <div class="p-4 border-b border-neutral-800">
-          <h3 class="text-lg font-semibold text-white">Derniers Trades</h3>
-        </div>
-        <% if trades.any? %>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-neutral-800/50">
-                <tr>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Symbol</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Type</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Volume</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Prix Entrée</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Prix Sortie</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Profit</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Date</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-neutral-800">
-                <% trades.each do |trade| %>
-                  <tr class="hover:bg-neutral-800/30">
-                    <td class="px-4 py-3 text-white font-medium"><%= trade.symbol %></td>
-                    <td class="px-4 py-3">
-                      <span class="px-2 py-1 rounded text-xs font-semibold <%= trade.trade_type&.downcase == 'buy' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400' %>">
-                        <%= trade.trade_type %>
-                      </span>
-                    </td>
-                    <td class="px-4 py-3 text-neutral-300"><%= trade.volume %></td>
-                    <td class="px-4 py-3 text-neutral-300"><%= trade.open_price %></td>
-                    <td class="px-4 py-3 text-neutral-300"><%= trade.close_price %></td>
-                    <td class="px-4 py-3 font-semibold <%= trade.profit >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
-                      <%= number_to_currency(trade.profit, unit: "€", format: "%n%u") %>
-                    </td>
-                    <td class="px-4 py-3 text-neutral-400 text-sm"><%= trade.close_time&.strftime("%d/%m/%Y %H:%M") %></td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
+        
+        <% if @client.bot_purchases.empty? %>
+          <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
+            <i class="fa-solid fa-robot text-4xl text-neutral-600 mb-4"></i>
+            <p class="text-neutral-400">Aucun bot assigné</p>
           </div>
-        <% else %>
-          <div class="p-12 text-center">
-            <i class="fa-solid fa-chart-line text-4xl text-neutral-600 mb-4"></i>
-            <p class="text-neutral-400">Aucun trade</p>
+        <% end %>
+
+        <% if current_user.is_admin? %>
+          <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6">
+            <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-plus text-blue-400"></i>
+              Assigner un Bot
+            </h3>
+            <%= form_with url: assign_to_user_admin_bot_purchases_path, method: :post, local: true, class: "flex flex-col md:flex-row gap-4" do |f| %>
+              <input type="hidden" name="user_id" value="<%= @client.id %>">
+              <div class="flex-1">
+                <select name="trading_bot_id" required class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                  <option value="">Sélectionner un bot...</option>
+                  <% TradingBot.active.each do |bot| %>
+                    <option value="<%= bot.id %>"><%= bot.name %> - <%= number_to_currency(bot.price, unit: "€", format: "%n%u") %></option>
+                  <% end %>
+                </select>
+              </div>
+              <button type="submit" class="px-6 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">
+                <i class="fa-solid fa-plus mr-2"></i>Assigner
+              </button>
+            <% end %>
           </div>
         <% end %>
       </div>
+
+      <!-- Section: Trades -->
+      <div id="trading-section-trades" class="trading-section hidden">
+        <% trades = Trade.joins(mt5_account: :user).where(users: { id: @client.id }).order(close_time: :desc).limit(50) %>
+        
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 overflow-hidden">
+          <% if trades.any? %>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-neutral-800/50">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Symbol</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Type</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Volume</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Entrée</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Sortie</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Profit</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase">Date</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-800">
+                  <% trades.each do |trade| %>
+                    <tr class="hover:bg-neutral-800/30">
+                      <td class="px-4 py-3 text-white font-medium"><%= trade.symbol %></td>
+                      <td class="px-4 py-3">
+                        <span class="px-2 py-1 rounded text-xs font-semibold <%= trade.trade_type&.downcase == 'buy' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400' %>">
+                          <%= trade.trade_type %>
+                        </span>
+                      </td>
+                      <td class="px-4 py-3 text-neutral-300"><%= trade.volume %></td>
+                      <td class="px-4 py-3 text-neutral-300"><%= trade.open_price %></td>
+                      <td class="px-4 py-3 text-neutral-300"><%= trade.close_price %></td>
+                      <td class="px-4 py-3 font-semibold <%= trade.profit >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+                        <%= number_to_currency(trade.profit, unit: "€", format: "%n%u") %>
+                      </td>
+                      <td class="px-4 py-3 text-neutral-400 text-sm"><%= trade.close_time&.strftime("%d/%m/%Y %H:%M") %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="p-12 text-center">
+              <i class="fa-solid fa-chart-line text-4xl text-neutral-600 mb-4"></i>
+              <p class="text-neutral-400">Aucun trade</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
     </div>
 
-    <!-- Tab: Invoices -->
-    <div data-tabs-target="panel" data-tab="invoices" class="mt-6 hidden space-y-6">
+    <!-- Tab: Finances (Factures + Commissions + Abonnements + VPS) -->
+    <div data-tabs-target="panel" data-tab="finances" class="mt-6 hidden space-y-6">
+      <!-- Sub-navigation -->
+      <div class="flex items-center gap-2 pb-4 border-b border-neutral-800">
+        <button type="button" onclick="showFinancesSection('invoices')" id="finances-tab-invoices" class="finances-subtab px-4 py-2 rounded-lg text-sm font-medium bg-neutral-800 text-white border border-neutral-700">
+          <i class="fa-solid fa-file-invoice mr-2"></i>Factures
+        </button>
+        <button type="button" onclick="showFinancesSection('commissions')" id="finances-tab-commissions" class="finances-subtab px-4 py-2 rounded-lg text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-800/50 transition-colors">
+          <i class="fa-solid fa-percent mr-2"></i>Commissions
+          <% if unpaid_commissions > 0 %>
+            <span class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-red-500/20 text-red-400"><%= unpaid_commissions %></span>
+          <% end %>
+        </button>
+        <button type="button" onclick="showFinancesSection('subscriptions')" id="finances-tab-subscriptions" class="finances-subtab px-4 py-2 rounded-lg text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-800/50 transition-colors">
+          <i class="fa-solid fa-repeat mr-2"></i>Abonnements
+          <% if active_subs > 0 %>
+            <span class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-emerald-500/20 text-emerald-400"><%= active_subs %></span>
+          <% end %>
+        </button>
+        <button type="button" onclick="showFinancesSection('vps')" id="finances-tab-vps" class="finances-subtab px-4 py-2 rounded-lg text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-800/50 transition-colors">
+          <i class="fa-solid fa-server mr-2"></i>VPS
+        </button>
+      </div>
+
+      <!-- Section: Factures -->
+      <div id="finances-section-invoices" class="finances-section space-y-4">
       <% @client.invoices.order(created_at: :desc).each do |invoice| %>
         <div class="rounded-xl bg-neutral-900 border border-neutral-800 overflow-hidden">
           <div class="p-4 flex items-center justify-between flex-wrap gap-4">
@@ -1009,15 +1030,15 @@
       <% end %>
       
       <% if @client.invoices.empty? %>
-        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
-          <i class="fa-solid fa-file-invoice text-4xl text-neutral-600 mb-4"></i>
-          <p class="text-neutral-400">Aucune facture</p>
-        </div>
-      <% end %>
-    </div>
+          <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
+            <i class="fa-solid fa-file-invoice text-4xl text-neutral-600 mb-4"></i>
+            <p class="text-neutral-400">Aucune facture</p>
+          </div>
+        <% end %>
+      </div>
 
-    <!-- Tab: Commissions -->
-    <div data-tabs-target="panel" data-tab="commissions" class="mt-6 hidden space-y-6">
+      <!-- Section: Commissions -->
+      <div id="finances-section-commissions" class="finances-section hidden space-y-4">
       <!-- Résumé Performance -->
       <div class="rounded-xl bg-gradient-to-r from-blue-900/30 to-purple-900/20 border border-blue-700/30 p-6">
         <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
