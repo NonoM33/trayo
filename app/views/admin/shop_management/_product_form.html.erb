@@ -1,0 +1,126 @@
+<%= form_with model: product, url: product.new_record? ? create_product_admin_shop_management_index_path : update_product_admin_shop_management_path(product), method: product.new_record? ? :post : :patch, class: "space-y-6" do |f| %>
+  <% if product.errors.any? %>
+    <div class="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+      <div class="flex items-start gap-3">
+        <i class="fa-solid fa-exclamation-circle text-red-400 mt-0.5"></i>
+        <div>
+          <p class="font-medium text-red-300"><%= pluralize(product.errors.count, "erreur") %></p>
+          <ul class="mt-2 text-sm text-red-300/70 list-disc list-inside">
+            <% product.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+      <div class="bg-neutral-900 rounded-xl p-6 border border-neutral-800">
+        <h3 class="font-semibold text-white mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-info-circle text-blue-400"></i>
+          Informations
+        </h3>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-neutral-300 mb-2">Nom du produit *</label>
+            <%= f.text_field :name, required: true, placeholder: "Ex: Pack Maintenance Annuelle", class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-neutral-300 mb-2">Description</label>
+            <%= f.text_area :description, rows: 3, placeholder: "Description du produit...", class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" %>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-neutral-300 mb-2">Caractéristiques</label>
+            <%= f.text_area :features, rows: 5, placeholder: "Une caractéristique par ligne...", class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono text-sm" %>
+            <p class="text-xs text-neutral-500 mt-1">Une caractéristique par ligne</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-neutral-900 rounded-xl p-6 border border-neutral-800">
+        <h3 class="font-semibold text-white mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-euro-sign text-emerald-400"></i>
+          Tarification
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-neutral-300 mb-2">Prix (€) *</label>
+            <%= f.number_field :price, step: 0.01, min: 0, required: true, placeholder: "99.00", class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-neutral-300 mb-2">Type *</label>
+            <%= f.select :product_type, [['Paiement unique', 'one_time'], ['Abonnement', 'subscription']], {}, class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-neutral-300 mb-2">Intervalle</label>
+            <%= f.select :interval, [['Mensuel', 'month'], ['Annuel', 'year'], ['Unique', 'one_time']], { include_blank: 'Sélectionner...' }, class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <div class="bg-neutral-900 rounded-xl p-6 border border-neutral-800">
+        <h3 class="font-semibold text-white mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-palette text-purple-400"></i>
+          Apparence
+        </h3>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-neutral-300 mb-2">Icône FontAwesome</label>
+            <%= f.text_field :icon, placeholder: "fa-crown", class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+            <p class="text-xs text-neutral-500 mt-1">Ex: fa-crown, fa-wrench, fa-rocket</p>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-neutral-300 mb-2">Badge</label>
+            <%= f.text_field :badge, placeholder: "POPULAIRE", class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-neutral-300 mb-2">Couleur du badge</label>
+            <%= f.select :badge_color, [['Vert', 'emerald'], ['Bleu', 'blue'], ['Violet', 'purple'], ['Orange', 'amber'], ['Rouge', 'red']], { include_blank: 'Par défaut' }, class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-neutral-300 mb-2">Position</label>
+            <%= f.number_field :position, min: 0, placeholder: "1", class: "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+            <p class="text-xs text-neutral-500 mt-1">Ordre d'affichage (plus petit = premier)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-neutral-900 rounded-xl p-6 border border-neutral-800">
+        <h3 class="font-semibold text-white mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-toggle-on text-green-400"></i>
+          Statut
+        </h3>
+        
+        <label class="flex items-center gap-3 p-4 rounded-lg bg-neutral-800 border border-neutral-700 cursor-pointer hover:border-neutral-600 transition-colors">
+          <%= f.check_box :active, class: "w-5 h-5 rounded bg-neutral-700 border-neutral-600 text-green-500 focus:ring-green-500 focus:ring-offset-neutral-900" %>
+          <div>
+            <p class="font-medium text-white">Actif</p>
+            <p class="text-xs text-neutral-500">Visible dans la boutique</p>
+          </div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-4">
+    <%= f.submit product.new_record? ? "Créer le Pack" : "Enregistrer", class: "flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white shadow-lg hover:bg-green-500 cursor-pointer" %>
+    <%= link_to admin_shop_management_index_path(tab: 'products'), class: "flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-6 py-3 text-sm font-medium text-neutral-300 hover:bg-neutral-700 hover:text-white" do %>
+      Annuler
+    <% end %>
+  </div>
+<% end %>
+

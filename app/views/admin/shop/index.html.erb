@@ -15,13 +15,13 @@
         </div>
         <div>
           <p class="font-semibold text-amber-200">Mode Administrateur</p>
-          <p class="text-xs text-amber-300/60">Vous pouvez gérer les articles depuis ici</p>
+          <p class="text-xs text-amber-300/60">Gérez prix, stocks et articles comme sur Shopify</p>
         </div>
       </div>
       <div class="flex items-center gap-3">
-        <%= link_to admin_bots_path, class: "flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 text-sm font-medium hover:bg-amber-500/30 transition-all" do %>
-          <i class="fa-solid fa-robot"></i>
-          Gérer les Bots
+        <%= link_to admin_shop_management_index_path, class: "flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 transition-all" do %>
+          <i class="fa-solid fa-boxes-stacked"></i>
+          Gestion Boutique
         <% end %>
       </div>
     </div>
@@ -116,54 +116,40 @@
       </div>
     </div>
 
-    <% 
-      credit_packs = [
-        { amount: 500, bonus: 5 },
-        { amount: 1000, bonus: 6 },
-        { amount: 1500, bonus: 7 },
-        { amount: 2000, bonus: 8 },
-        { amount: 5000, bonus: 10 }
-      ]
-    %>
+    <% credit_packs_db = CreditPack.active.ordered %>
     
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-      <% credit_packs.each_with_index do |pack, index| %>
-        <% 
-          bonus_amount = (pack[:amount] * pack[:bonus] / 100.0).round
-          total_credit = pack[:amount] + bonus_amount
-          is_popular = pack[:amount] == 1000
-          is_best = pack[:amount] == 5000
-        %>
-        <div class="relative group rounded-2xl p-5 transition-all hover:scale-[1.02] <%= is_best ? 'bg-gradient-to-br from-violet-950/60 to-purple-950/40 border-2 border-violet-500/50' : (is_popular ? 'bg-gradient-to-br from-amber-950/40 to-orange-950/20 border-2 border-amber-500/40' : 'bg-neutral-900 border border-neutral-800 hover:border-neutral-700') %>">
+      <% credit_packs_db.each do |pack| %>
+        <div class="relative group rounded-2xl p-5 transition-all hover:scale-[1.02] <%= pack.is_best? ? 'bg-gradient-to-br from-violet-950/60 to-purple-950/40 border-2 border-violet-500/50' : (pack.is_popular? ? 'bg-gradient-to-br from-amber-950/40 to-orange-950/20 border-2 border-amber-500/40' : 'bg-neutral-900 border border-neutral-800 hover:border-neutral-700') %>">
           
-          <% if is_best %>
+          <% if pack.is_best? %>
             <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-violet-500 text-white shadow-lg">
               Meilleur
             </span>
-          <% elsif is_popular %>
+          <% elsif pack.is_popular? %>
             <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-amber-500 text-white shadow-lg">
               Populaire
             </span>
           <% end %>
 
-          <div class="text-center mb-4 <%= is_best || is_popular ? 'mt-2' : '' %>">
-            <div class="text-3xl font-bold text-white mb-1"><%= pack[:amount] %>€</div>
-            <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold <%= is_best ? 'bg-violet-500/30 text-violet-300' : (is_popular ? 'bg-amber-500/30 text-amber-300' : 'bg-emerald-500/20 text-emerald-400') %>">
-              +<%= pack[:bonus] %>% bonus
+          <div class="text-center mb-4 <%= pack.is_best? || pack.is_popular? ? 'mt-2' : '' %>">
+            <div class="text-3xl font-bold text-white mb-1"><%= pack.amount %>€</div>
+            <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold <%= pack.is_best? ? 'bg-violet-500/30 text-violet-300' : (pack.is_popular? ? 'bg-amber-500/30 text-amber-300' : 'bg-emerald-500/20 text-emerald-400') %>">
+              +<%= pack.bonus_percentage %>% bonus
             </div>
           </div>
 
-          <div class="text-center mb-4 py-3 rounded-xl <%= is_best ? 'bg-violet-500/10' : (is_popular ? 'bg-amber-500/10' : 'bg-neutral-800/50') %>">
+          <div class="text-center mb-4 py-3 rounded-xl <%= pack.is_best? ? 'bg-violet-500/10' : (pack.is_popular? ? 'bg-amber-500/10' : 'bg-neutral-800/50') %>">
             <div class="text-xs text-neutral-400 mb-1">Vous recevez</div>
-            <div class="text-xl font-bold <%= is_best ? 'text-violet-400' : (is_popular ? 'text-amber-400' : 'text-emerald-400') %>"><%= total_credit %>€</div>
-            <div class="text-[10px] text-neutral-500">+<%= bonus_amount %>€ offerts</div>
+            <div class="text-xl font-bold <%= pack.is_best? ? 'text-violet-400' : (pack.is_popular? ? 'text-amber-400' : 'text-emerald-400') %>"><%= pack.total_credits %>€</div>
+            <div class="text-[10px] text-neutral-500">+<%= pack.bonus_amount %>€ offerts</div>
           </div>
 
           <form action="<%= buy_credits_admin_shop_index_path %>" method="post" data-turbo="false">
             <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
-            <input type="hidden" name="amount" value="<%= pack[:amount] %>">
-            <input type="hidden" name="bonus" value="<%= pack[:bonus] %>">
-            <button type="submit" class="w-full py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer border-0 <%= is_best ? 'bg-violet-500 text-white hover:bg-violet-600' : (is_popular ? 'bg-amber-500 text-white hover:bg-amber-600' : 'bg-white text-neutral-900 hover:bg-neutral-200') %>">
+            <input type="hidden" name="amount" value="<%= pack.amount %>">
+            <input type="hidden" name="bonus" value="<%= pack.bonus_percentage %>">
+            <button type="submit" class="w-full py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer border-0 <%= pack.is_best? ? 'bg-violet-500 text-white hover:bg-violet-600' : (pack.is_popular? ? 'bg-amber-500 text-white hover:bg-amber-600' : 'bg-white text-neutral-900 hover:bg-neutral-200') %>">
               Recharger
             </button>
           </form>

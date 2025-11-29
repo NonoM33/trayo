@@ -4,70 +4,159 @@ module Admin
 
     def index
       @bots = TradingBot.order(:name)
-      @products = ShopProduct.order(:name) if defined?(ShopProduct)
-      @products ||= []
+      @products = ShopProduct.order(:position, :name)
+      @credit_packs = CreditPack.ordered
+      @vps_offers = VpsOffer.ordered
       
-      @stats = {
-        total_bots: @bots.count,
-        active_bots: @bots.where(is_active: true).count,
-        total_sales: BotPurchase.count,
-        total_revenue: BotPurchase.sum(:price_paid)
-      }
+      @stats = calculate_stats
+      @tab = params[:tab] || 'bots'
     end
 
-    def update_bot
-      @bot = TradingBot.find(params[:id])
-      
-      if @bot.update(bot_params)
-        respond_to do |format|
-          format.html { redirect_to admin_shop_management_index_path, notice: "Bot mis à jour" }
-          format.json { render json: { success: true, bot: @bot } }
-        end
-      else
-        respond_to do |format|
-          format.html { redirect_to admin_shop_management_index_path, alert: @bot.errors.full_messages.join(", ") }
-          format.json { render json: { success: false, errors: @bot.errors.full_messages }, status: :unprocessable_entity }
-        end
-      end
-    end
-
+    # === BOTS ===
     def toggle_bot
       @bot = TradingBot.find(params[:id])
       @bot.update(is_active: !@bot.is_active)
-      
-      status = @bot.is_active ? "activé" : "désactivé"
-      redirect_to admin_shop_management_index_path, notice: "#{@bot.name} #{status}"
-    end
-
-    def bulk_update
-      params[:bots]&.each do |id, bot_params|
-        bot = TradingBot.find_by(id: id)
-        bot&.update(price: bot_params[:price]) if bot_params[:price].present?
-      end
-      
-      redirect_to admin_shop_management_index_path, notice: "Prix mis à jour"
+      redirect_to admin_shop_management_index_path(tab: 'bots'), notice: "#{@bot.name} #{@bot.is_active ? 'activé' : 'masqué'}"
     end
 
     def duplicate_bot
       original = TradingBot.find(params[:id])
-      
       new_bot = original.dup
       new_bot.name = "#{original.name} (copie)"
       new_bot.is_active = false
       new_bot.save!
-      
-      redirect_to edit_admin_bot_path(new_bot), notice: "Bot dupliqué. Modifiez-le maintenant."
+      redirect_to edit_admin_bot_path(new_bot), notice: "Bot dupliqué"
     end
 
+    # === PRODUCTS ===
+    def toggle_product
+      @product = ShopProduct.find(params[:id])
+      @product.update(active: !@product.active)
+      redirect_to admin_shop_management_index_path(tab: 'products'), notice: "#{@product.name} #{@product.active ? 'activé' : 'désactivé'}"
+    end
+
+    def new_product
+      @product = ShopProduct.new
+    end
+
+    def create_product
+      @product = ShopProduct.new(product_params)
+      if @product.save
+        redirect_to admin_shop_management_index_path(tab: 'products'), notice: "Produit créé"
+      else
+        render :new_product, status: :unprocessable_entity
+      end
+    end
+
+    def edit_product
+      @product = ShopProduct.find(params[:id])
+    end
+
+    def update_product
+      @product = ShopProduct.find(params[:id])
+      if @product.update(product_params)
+        redirect_to admin_shop_management_index_path(tab: 'products'), notice: "Produit mis à jour"
+      else
+        render :edit_product, status: :unprocessable_entity
+      end
+    end
+
+    def destroy_product
+      @product = ShopProduct.find(params[:id])
+      @product.destroy
+      redirect_to admin_shop_management_index_path(tab: 'products'), notice: "Produit supprimé"
+    end
+
+    # === CREDIT PACKS ===
+    def new_credit_pack
+      @credit_pack = CreditPack.new
+    end
+
+    def create_credit_pack
+      @credit_pack = CreditPack.new(credit_pack_params)
+      if @credit_pack.save
+        redirect_to admin_shop_management_index_path(tab: 'credits'), notice: "Pack créé"
+      else
+        render :new_credit_pack, status: :unprocessable_entity
+      end
+    end
+
+    def edit_credit_pack
+      @credit_pack = CreditPack.find(params[:id])
+    end
+
+    def update_credit_pack
+      @credit_pack = CreditPack.find(params[:id])
+      if @credit_pack.update(credit_pack_params)
+        redirect_to admin_shop_management_index_path(tab: 'credits'), notice: "Pack mis à jour"
+      else
+        render :edit_credit_pack, status: :unprocessable_entity
+      end
+    end
+
+    def destroy_credit_pack
+      CreditPack.find(params[:id]).destroy
+      redirect_to admin_shop_management_index_path(tab: 'credits'), notice: "Pack supprimé"
+    end
+
+    def toggle_credit_pack
+      pack = CreditPack.find(params[:id])
+      pack.update(active: !pack.active)
+      redirect_to admin_shop_management_index_path(tab: 'credits'), notice: "Pack #{pack.active ? 'activé' : 'désactivé'}"
+    end
+
+    # === VPS OFFERS ===
+    def new_vps_offer
+      @vps_offer = VpsOffer.new
+    end
+
+    def create_vps_offer
+      @vps_offer = VpsOffer.new(vps_offer_params)
+      if @vps_offer.save
+        redirect_to admin_shop_management_index_path(tab: 'vps'), notice: "Offre VPS créée"
+      else
+        render :new_vps_offer, status: :unprocessable_entity
+      end
+    end
+
+    def edit_vps_offer
+      @vps_offer = VpsOffer.find(params[:id])
+    end
+
+    def update_vps_offer
+      @vps_offer = VpsOffer.find(params[:id])
+      if @vps_offer.update(vps_offer_params)
+        redirect_to admin_shop_management_index_path(tab: 'vps'), notice: "Offre mise à jour"
+      else
+        render :edit_vps_offer, status: :unprocessable_entity
+      end
+    end
+
+    def destroy_vps_offer
+      VpsOffer.find(params[:id]).destroy
+      redirect_to admin_shop_management_index_path(tab: 'vps'), notice: "Offre supprimée"
+    end
+
+    def toggle_vps_offer
+      offer = VpsOffer.find(params[:id])
+      offer.update(active: !offer.active)
+      redirect_to admin_shop_management_index_path(tab: 'vps'), notice: "Offre #{offer.active ? 'activée' : 'désactivée'}"
+    end
+
+    # === EXPORT/IMPORT ===
     def export
-      @bots = TradingBot.order(:name)
-      
       respond_to do |format|
         format.json do
-          render json: @bots.map { |bot| bot_to_hash(bot) }
+          data = {
+            bots: TradingBot.order(:name).map { |b| bot_to_hash(b) },
+            products: ShopProduct.order(:position).map { |p| product_to_hash(p) },
+            credit_packs: CreditPack.ordered.map { |c| credit_pack_to_hash(c) },
+            vps_offers: VpsOffer.ordered.map { |v| vps_offer_to_hash(v) }
+          }
+          render json: data
         end
         format.csv do
-          send_data generate_csv(@bots), filename: "boutique_export_#{Date.current}.csv", type: 'text/csv'
+          send_data generate_csv, filename: "catalogue_#{Date.current}.csv", type: 'text/csv'
         end
       end
     end
@@ -78,20 +167,8 @@ module Admin
         return
       end
 
-      file = params[:file]
-      extension = File.extname(file.original_filename).downcase
-
       begin
-        case extension
-        when '.json'
-          import_from_json(file)
-        when '.csv'
-          import_from_csv(file)
-        else
-          redirect_to admin_shop_management_index_path, alert: "Format non supporté (JSON ou CSV)"
-          return
-        end
-        
+        import_data(params[:file])
         redirect_to admin_shop_management_index_path, notice: "Import réussi !"
       rescue => e
         redirect_to admin_shop_management_index_path, alert: "Erreur: #{e.message}"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_29_013518) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_29_030108) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -195,6 +195,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_013518) do
     t.string "external_id"
     t.index ["user_id", "kind", "created_at"], name: "idx_commission_reminders_user_kind_created"
     t.index ["user_id"], name: "index_commission_reminders_on_user_id"
+  end
+
+  create_table "credit_packs", force: :cascade do |t|
+    t.integer "amount"
+    t.integer "bonus_percentage"
+    t.string "label"
+    t.boolean "is_popular"
+    t.boolean "is_best"
+    t.boolean "active"
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "credits", force: :cascade do |t|
@@ -634,6 +646,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_013518) do
     t.index ["invoice_id"], name: "index_vps_on_invoice_id"
     t.index ["status"], name: "index_vps_on_status"
     t.index ["user_id"], name: "index_vps_on_user_id"
+  end
+
+  create_table "vps_offers", force: :cascade do |t|
+    t.string "name"
+    t.decimal "price"
+    t.string "specs"
+    t.text "description"
+    t.boolean "is_recommended"
+    t.boolean "active"
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "withdrawals", force: :cascade do |t|
