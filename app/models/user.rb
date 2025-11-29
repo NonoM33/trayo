@@ -12,6 +12,7 @@ class User < ApplicationRecord
   has_many :invoices, dependent: :destroy
   has_many :invoice_payments, through: :invoices
   has_many :commission_reminders, dependent: :destroy
+  has_many :commission_invoices, dependent: :destroy
   has_many :support_tickets, dependent: :destroy
   has_many :subscriptions, dependent: :destroy
 
