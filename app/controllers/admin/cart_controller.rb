@@ -82,7 +82,7 @@ module Admin
         payment_method_types: ['card'],
         line_items: line_items,
         mode: has_subscription ? 'subscription' : 'payment',
-        success_url: admin_cart_success_url + "?session_id={CHECKOUT_SESSION_ID}",
+        success_url: success_admin_cart_url + "?session_id={CHECKOUT_SESSION_ID}",
         cancel_url: admin_cart_url + "?canceled=true",
         metadata: {
           user_id: current_user.id,
