@@ -107,10 +107,13 @@
             <span class="text-3xl font-extrabold text-emerald-400"><%= number_to_currency(@cart_total, unit: "€", format: "%n%u") %></span>
           </div>
 
-          <%= button_to checkout_admin_cart_path, method: :post, class: "w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-lg flex items-center justify-center gap-3 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/30 cursor-pointer border-none" do %>
-            <i class="fa-brands fa-stripe text-2xl"></i>
-            Payer maintenant
-          <% end %>
+          <form action="<%= checkout_admin_cart_path %>" method="post" class="mt-6" data-turbo="false">
+            <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+            <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-lg flex items-center justify-center gap-3 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/30 cursor-pointer border-none">
+              <i class="fa-brands fa-stripe text-2xl"></i>
+              Payer maintenant
+            </button>
+          </form>
 
           <div class="flex items-center justify-center gap-4 mt-4 text-xs text-neutral-500">
             <span class="flex items-center gap-1"><i class="fa-solid fa-lock text-emerald-400"></i> Sécurisé</span>

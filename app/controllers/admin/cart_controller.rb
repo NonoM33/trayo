@@ -127,8 +127,7 @@ module Admin
             current_user.product_purchases.create!(
               shop_product: product,
               price_paid: product.price,
-              status: 'active',
-              stripe_checkout_session_id: stripe_session.id
+              status: 'active'
             )
           end
 
@@ -198,8 +197,7 @@ module Admin
         due_date: Date.current,
         status: 'paid',
         stripe_payment_intent_id: stripe_session.payment_intent,
-        stripe_customer_id: stripe_session.customer,
-        notes: "Achat boutique"
+        stripe_customer_id: stripe_session.customer
       )
 
       total = 0
