@@ -509,7 +509,6 @@ function initOnboarding() {
   if (onboardingInitialized) return;
   onboardingInitialized = true;
   
-  // Toggle Licence / Subscription
   const toggleLicence = document.getElementById('toggle-licence');
   const toggleSubscription = document.getElementById('toggle-subscription');
   const sectionLicence = document.getElementById('section-licence');
@@ -521,18 +520,16 @@ function initOnboarding() {
     offerTypeInput.value = type;
     
     if (type === 'subscription') {
-      toggleSubscription.className = 'flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm';
-      toggleLicence.className = 'flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200';
+      toggleSubscription.className = 'flex-1 px-4 py-3 rounded-lg text-sm font-bold transition-all bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg';
+      toggleLicence.className = 'flex-1 px-4 py-3 rounded-lg text-sm font-bold transition-all text-neutral-400 hover:text-white';
       sectionSubscription.classList.remove('hidden');
       sectionLicence.classList.add('hidden');
-      // Clear licence selection
       document.querySelectorAll('[data-bot-checkbox]').forEach(c => c.checked = false);
     } else {
-      toggleLicence.className = 'flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm';
-      toggleSubscription.className = 'flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200';
+      toggleLicence.className = 'flex-1 px-4 py-3 rounded-lg text-sm font-bold transition-all bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg';
+      toggleSubscription.className = 'flex-1 px-4 py-3 rounded-lg text-sm font-bold transition-all text-neutral-400 hover:text-white';
       sectionLicence.classList.remove('hidden');
       sectionSubscription.classList.add('hidden');
-      // Clear subscription selection
       document.querySelectorAll('.subscription-card').forEach(c => c.classList.remove('selected'));
       document.querySelectorAll('.subscription-radio').forEach(r => r.checked = false);
       selectedPlan = null;
@@ -543,15 +540,18 @@ function initOnboarding() {
   toggleLicence?.addEventListener('click', () => setOfferType('licence'));
   toggleSubscription?.addEventListener('click', () => setOfferType('subscription'));
   
-  // Subscription card selection
   document.querySelectorAll('.subscription-card').forEach(card => {
     card.addEventListener('click', function() {
-      document.querySelectorAll('.subscription-card').forEach(c => c.classList.remove('selected'));
-      this.classList.add('selected');
+      document.querySelectorAll('.subscription-card').forEach(c => {
+        c.classList.remove('selected');
+        c.classList.add('border-neutral-700', 'bg-neutral-800/50');
+        c.classList.remove('border-blue-500', 'bg-blue-500/10', 'ring-2', 'ring-blue-500/50');
+      });
+      this.classList.add('selected', 'border-blue-500', 'bg-blue-500/10', 'ring-2', 'ring-blue-500/50');
+      this.classList.remove('border-neutral-700', 'bg-neutral-800/50');
       this.querySelector('.subscription-radio').checked = true;
       selectedPlan = this.dataset.plan;
       updateTotal();
-      // Hide error
       const offerError = document.getElementById('offer-error');
       if (offerError) offerError.classList.add('hidden');
     });
@@ -559,21 +559,30 @@ function initOnboarding() {
   
   function initStripe() {
     const cardEl = document.getElementById('card-element');
-    if (cardEl && !cardElement) {
+    if (cardEl && !cardElement && window.stripePublicKey) {
       stripe = Stripe(window.stripePublicKey);
       elements = stripe.elements({
         appearance: {
           theme: 'night',
           variables: {
-            colorPrimary: '#3b82f6',
+            colorPrimary: '#10b981',
             colorBackground: '#262626',
             colorText: '#ffffff',
             colorDanger: '#ef4444',
-            borderRadius: '8px'
+            borderRadius: '8px',
+            fontFamily: 'system-ui, sans-serif'
           }
         }
       });
-      cardElement = elements.create('card');
+      cardElement = elements.create('card', {
+        style: {
+          base: {
+            fontSize: '16px',
+            color: '#ffffff',
+            '::placeholder': { color: '#737373' }
+          }
+        }
+      });
       cardElement.mount('#card-element');
       cardElement.on('change', function(event) {
         const displayError = document.getElementById('card-errors');
@@ -611,7 +620,7 @@ function initOnboarding() {
     }
     
     const totalEl = document.getElementById('total-amount');
-    if (totalEl) totalEl.textContent = total.toFixed(2) + ' €' + (currentOfferType === 'subscription' ? '/mois' : '');
+    if (totalEl) totalEl.textContent = total.toFixed(2).replace('.', ',') + ' €' + (currentOfferType === 'subscription' ? '/mois' : '');
     
     const reviewOffer = document.getElementById('review-offer');
     if (reviewOffer) reviewOffer.textContent = offerLabel || '—';
@@ -620,7 +629,6 @@ function initOnboarding() {
   document.querySelectorAll('input[data-bot-checkbox]').forEach(cb => {
     cb.addEventListener('change', function() {
       updateTotal();
-      // Hide error if at least one bot selected
       const selectedBots = document.querySelectorAll('input[data-bot-checkbox]:checked');
       const offerError = document.getElementById('offer-error');
       if (selectedBots.length > 0 && offerError) {
