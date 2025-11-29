@@ -281,256 +281,297 @@
       </div>
     </div>
     
-    <div data-scroll-area-target="viewport"
-         data-action="scroll->scroll-area#onViewportScroll"
-         class="max-h-[500px] overflow-auto scrollbar-hide bg-neutral-950">
-      <table class="w-full min-w-[800px]">
-        <thead class="sticky top-0 z-10 bg-neutral-900">
-          <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
-            <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Client</th>
-            <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Commission</th>
-            <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Gains</th>
-            <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Écart WM</th>
-            <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Solde</th>
-          </tr>
-        </thead>
-        <tbody class="*:even:bg-neutral-900/50 *:*:py-4 bg-neutral-950">
-          <% @clients.each do |client| %>
-            <tr class="cursor-pointer hover:bg-neutral-800 transition-colors" onclick="window.location.href='<%= admin_client_path(client) %>'">
-              <td class="px-6 text-sm">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0">
-                    <%= client.first_name&.first&.upcase || client.email.first.upcase %>
-                  </div>
-                  <div>
-                    <p class="font-medium text-white">
-                    <%= "#{client.first_name} #{client.last_name}".strip.presence || "N/A" %>
-                    </p>
-                    <p class="text-neutral-400"><%= client.email %></p>
-                  </div>
-                </div>
-              </td>
-              <td class="px-6 text-sm text-neutral-400">
-                  <%= number_to_percentage(client.commission_rate, precision: 1) %>
-              </td>
-              <td class="px-6">
-                <span class="text-sm font-medium <%= client.total_profits >= 0 ? 'text-green-400' : 'text-red-400' %>">
-                  <%= number_to_currency(client.total_profits, unit: "€", format: "%n %u") %>
+    <div class="md:hidden divide-y divide-neutral-800">
+      <% @clients.each do |client| %>
+        <%= link_to admin_client_path(client), class: "block p-4 hover:bg-neutral-800/50 active:bg-neutral-800 transition-colors" do %>
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0">
+              <%= client.first_name&.first&.upcase || client.email.first.upcase %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <p class="font-semibold text-white truncate">
+                  <%= "#{client.first_name} #{client.last_name}".strip.presence || "N/A" %>
+                </p>
+                <span class="text-sm font-medium <%= client.total_profits >= 0 ? 'text-green-400' : 'text-red-400' %> shrink-0">
+                  <%= number_to_currency(client.total_profits, unit: "€", format: "%n%u", precision: 0) %>
                 </span>
-              </td>
-              <td class="px-6">
-                <% diff = client.watermark_difference %>
-                <span class="text-sm font-medium <%= diff >= 0 ? 'text-green-400' : 'text-red-400' %>">
-                  <%= number_to_currency(diff, unit: "€", format: "%n %u") %>
+              </div>
+              <p class="text-sm text-neutral-400 truncate"><%= client.email %></p>
+              <div class="flex items-center gap-3 mt-2">
+                <span class="text-xs text-neutral-500">
+                  <i class="fa-solid fa-percent mr-1"></i><%= number_to_percentage(client.commission_rate, precision: 0) %>
                 </span>
-              </td>
-              <td class="px-6">
                 <% if client.balance_due > 0 %>
-                  <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-yellow-400/10 text-yellow-500 ring-1 ring-inset ring-yellow-400/25">
-                    <%= number_to_currency(client.balance_due, unit: "€", format: "%n %u") %>
+                  <span class="text-xs font-medium text-yellow-400">
+                    Dû: <%= number_to_currency(client.balance_due, unit: "€", format: "%n%u", precision: 0) %>
                   </span>
-                <% elsif client.balance_due < 0 %>
-                  <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-red-400/10 text-red-400 ring-1 ring-inset ring-red-400/25">
-                    Crédit: <%= number_to_currency(client.balance_due.abs, unit: "€", format: "%n %u") %>
-                  </span>
-                <% else %>
-                  <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-green-400/10 text-green-400 ring-1 ring-inset ring-green-400/25">
-                    <i class="fa-solid fa-check text-xs"></i>
-                    0,00 €
+                <% elsif client.balance_due == 0 %>
+                  <span class="text-xs text-green-400">
+                    <i class="fa-solid fa-check mr-1"></i>À jour
                   </span>
                 <% end %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-neutral-600 text-sm"></i>
+          </div>
+        <% end %>
+      <% end %>
     </div>
 
-    <div data-scroll-area-target="scrollbar"
-         data-scroll-area-orientation-value="vertical"
-         data-action="click->scroll-area#onScrollbarClick"
-         class="absolute right-2 top-20 bottom-4 flex w-1.5 justify-center rounded-full bg-black/5 backdrop-blur-sm opacity-0 transition-opacity duration-150 delay-300 pointer-events-none data-[hovering]:opacity-100 data-[hovering]:duration-100 data-[hovering]:delay-0 data-[hovering]:pointer-events-auto data-[scrolling]:opacity-100 data-[scrolling]:duration-100 data-[scrolling]:delay-0 data-[scrolling]:pointer-events-auto data-[visible=false]:hidden dark:bg-white/10">
-      <div data-scroll-area-target="thumb"
-           data-action="mousedown->scroll-area#onThumbMouseDown"
-           class="relative w-full rounded-full bg-neutral-500 transition-opacity duration-100 dark:bg-neutral-400"></div>
-    </div>
-  </div>
-
-  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
-       data-controller="scroll-area"
-       data-scroll-area-target="root"
-       data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
-
-    <div class="px-6 py-5 bg-neutral-900">
-      <h2 class="text-lg font-semibold text-white">Administrateurs</h2>
-    </div>
-    
-    <div data-scroll-area-target="viewport"
-         data-action="scroll->scroll-area#onViewportScroll"
-         class="max-h-[400px] overflow-auto scrollbar-hide bg-neutral-950">
-      <table class="w-full min-w-[600px]">
-        <thead class="sticky top-0 z-10 bg-neutral-900">
-          <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
-            <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Nom</th>
-            <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Email</th>
-            <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Créé le</th>
-            <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="*:even:bg-neutral-900/50 *:*:py-4 bg-neutral-950">
-          <% @admins.each do |admin| %>
-            <tr class="hover:bg-neutral-800 transition-colors">
-              <td class="px-6 text-sm">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0">
-                    <%= admin.first_name&.first&.upcase || admin.email.first.upcase %>
-                  </div>
-                  <p class="font-medium text-white">
-                    <%= "#{admin.first_name} #{admin.last_name}".strip.presence || "N/A" %>
-                  </p>
-                </div>
-              </td>
-              <td class="px-6 text-sm text-neutral-400">
-                <%= admin.email %>
-              </td>
-              <td class="px-6 text-sm text-neutral-400">
-                <%= admin.created_at.strftime("%d/%m/%Y") %>
-              </td>
-              <td class="px-6">
-                <% if admin.id != current_user.id %>
-                  <%= button_to admin_client_path(admin), method: :delete, data: { turbo_confirm: "Supprimer cet admin ?" }, class: "flex items-center justify-center gap-1.5 rounded-lg border border-red-400/30 bg-red-600 px-3 py-1.5 text-xs font-medium whitespace-nowrap text-white shadow-sm transition-all duration-100 ease-in-out select-none hover:bg-red-500" do %>
-                    <i class="fa-solid fa-trash"></i>
-                    Supprimer
-                  <% end %>
-                <% else %>
-                  <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-blue-400/10 text-blue-400 ring-1 ring-inset ring-blue-400/25">
-                    <i class="fa-solid fa-user text-xs"></i>
-                    Vous
-                  </span>
-                <% end %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-
-    <div data-scroll-area-target="scrollbar"
-         data-scroll-area-orientation-value="vertical"
-         data-action="click->scroll-area#onScrollbarClick"
-         class="absolute right-2 top-16 bottom-4 flex w-1.5 justify-center rounded-full bg-black/5 backdrop-blur-sm opacity-0 transition-opacity duration-150 delay-300 pointer-events-none data-[hovering]:opacity-100 data-[hovering]:duration-100 data-[hovering]:delay-0 data-[hovering]:pointer-events-auto data-[scrolling]:opacity-100 data-[scrolling]:duration-100 data-[scrolling]:delay-0 data-[scrolling]:pointer-events-auto data-[visible=false]:hidden dark:bg-white/10">
-      <div data-scroll-area-target="thumb"
-           data-action="mousedown->scroll-area#onThumbMouseDown"
-           class="relative w-full rounded-full bg-neutral-500 transition-opacity duration-100 dark:bg-neutral-400"></div>
-    </div>
-  </div>
-
-  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
-       data-controller="scroll-area"
-       data-scroll-area-target="root"
-       data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
-
-    <div class="px-6 py-5 flex items-center justify-between bg-neutral-900">
-      <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-        <i class="fa-solid fa-envelope text-emerald-400"></i>
-        Invitations
-      </h2>
-      <span class="text-sm text-neutral-400"><%= @invitations.count %> invitation(s)</span>
-    </div>
-
-    <% if @invitations.any? %>
-      <div data-scroll-area-target="viewport"
-           data-action="scroll->scroll-area#onViewportScroll"
-           class="max-h-[400px] overflow-auto scrollbar-hide bg-neutral-950">
-        <table class="w-full min-w-[800px]">
+    <div class="hidden md:block" data-controller="scroll-area" data-scroll-area-target="root" data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
+      <div data-scroll-area-target="viewport" data-action="scroll->scroll-area#onViewportScroll" class="max-h-[500px] overflow-auto scrollbar-hide bg-neutral-950">
+        <table class="w-full">
           <thead class="sticky top-0 z-10 bg-neutral-900">
             <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
-              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Code</th>
-              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Email</th>
-              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-center">Étape</th>
-              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-center">Statut</th>
-              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Créée</th>
-              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Expire</th>
-              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-right">Actions</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Client</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Commission</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Gains</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Écart WM</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Solde</th>
             </tr>
           </thead>
           <tbody class="*:even:bg-neutral-900/50 *:*:py-4 bg-neutral-950">
-            <% @invitations.each do |invitation| %>
-              <tr class="hover:bg-neutral-800 transition-colors">
+            <% @clients.each do |client| %>
+              <tr class="cursor-pointer hover:bg-neutral-800 transition-colors" onclick="window.location.href='<%= admin_client_path(client) %>'">
+                <td class="px-6 text-sm">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0">
+                      <%= client.first_name&.first&.upcase || client.email.first.upcase %>
+                    </div>
+                    <div>
+                      <p class="font-medium text-white"><%= "#{client.first_name} #{client.last_name}".strip.presence || "N/A" %></p>
+                      <p class="text-neutral-400"><%= client.email %></p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 text-sm text-neutral-400"><%= number_to_percentage(client.commission_rate, precision: 1) %></td>
                 <td class="px-6">
-                  <code class="px-2 py-1 bg-neutral-800 text-emerald-400 rounded text-sm font-mono"><%= invitation.code %></code>
-                </td>
-                <td class="px-6 text-sm text-neutral-300">
-                  <%= invitation.email.presence || "-" %>
-                </td>
-                <td class="px-6 text-center">
-                  <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-400/10 text-blue-400 text-sm font-bold">
-                    <%= invitation.step %>/6
+                  <span class="text-sm font-medium <%= client.total_profits >= 0 ? 'text-green-400' : 'text-red-400' %>">
+                    <%= number_to_currency(client.total_profits, unit: "€", format: "%n %u") %>
                   </span>
                 </td>
-                <td class="px-6 text-center">
-                  <% if invitation.is_used? %>
-                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-green-400/10 text-green-400 ring-1 ring-inset ring-green-400/25">
-                      <i class="fa-solid fa-check text-[10px]"></i>
-                      Utilisée
-                    </span>
-                  <% elsif invitation.is_expired? %>
-                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-red-400/10 text-red-400 ring-1 ring-inset ring-red-400/25">
-                      <i class="fa-solid fa-clock text-[10px]"></i>
-                      Expirée
-                    </span>
-                  <% else %>
-                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-emerald-400/10 text-emerald-400 ring-1 ring-inset ring-emerald-400/25">
-                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                      Active
-                    </span>
-                  <% end %>
-                </td>
-                <td class="px-6 text-sm text-neutral-400">
-                  <%= invitation.created_at.strftime("%d/%m/%Y") %>
-                </td>
-                <td class="px-6 text-sm text-neutral-400">
-                  <%= invitation.expires_at&.strftime("%d/%m/%Y") || "-" %>
+                <td class="px-6">
+                  <% diff = client.watermark_difference %>
+                  <span class="text-sm font-medium <%= diff >= 0 ? 'text-green-400' : 'text-red-400' %>">
+                    <%= number_to_currency(diff, unit: "€", format: "%n %u") %>
+                  </span>
                 </td>
                 <td class="px-6">
-                  <div class="flex items-center justify-end gap-2">
-                    <% if !invitation.is_used? && !invitation.is_expired? %>
-                      <button onclick="copyToClipboard('https://join.trayo.fr/join/<%= invitation.code %>')" class="flex items-center justify-center w-8 h-8 rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors" title="Copier le lien">
-                        <i class="fa-solid fa-copy text-xs"></i>
-                      </button>
-                      <%= link_to "https://join.trayo.fr/join/#{invitation.code}", target: "_blank", class: "flex items-center justify-center w-8 h-8 rounded-lg border border-emerald-400/30 bg-emerald-600 text-white hover:bg-emerald-500 transition-colors", title: "Ouvrir le lien" do %>
-                        <i class="fa-solid fa-external-link text-xs"></i>
-                      <% end %>
-                    <% end %>
-                    <%= button_to admin_invitation_path(invitation), method: :delete, data: { turbo_confirm: "Supprimer cette invitation ?" }, class: "flex items-center justify-center w-8 h-8 rounded-lg border border-red-400/30 bg-red-600 text-white hover:bg-red-500 transition-colors", title: "Supprimer" do %>
-                      <i class="fa-solid fa-trash text-xs"></i>
-                    <% end %>
-                  </div>
+                  <% if client.balance_due > 0 %>
+                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-yellow-400/10 text-yellow-500 ring-1 ring-inset ring-yellow-400/25">
+                      <%= number_to_currency(client.balance_due, unit: "€", format: "%n %u") %>
+                    </span>
+                  <% elsif client.balance_due < 0 %>
+                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-red-400/10 text-red-400 ring-1 ring-inset ring-red-400/25">
+                      Crédit: <%= number_to_currency(client.balance_due.abs, unit: "€", format: "%n %u") %>
+                    </span>
+                  <% else %>
+                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-green-400/10 text-green-400 ring-1 ring-inset ring-green-400/25">
+                      <i class="fa-solid fa-check text-xs"></i>
+                      0,00 €
+                    </span>
+                  <% end %>
                 </td>
               </tr>
             <% end %>
           </tbody>
         </table>
       </div>
+      <div data-scroll-area-target="scrollbar" data-scroll-area-orientation-value="vertical" data-action="click->scroll-area#onScrollbarClick" class="absolute right-2 top-20 bottom-4 flex w-1.5 justify-center rounded-full bg-black/5 backdrop-blur-sm opacity-0 transition-opacity duration-150 delay-300 pointer-events-none data-[hovering]:opacity-100 data-[hovering]:duration-100 data-[hovering]:delay-0 data-[hovering]:pointer-events-auto data-[scrolling]:opacity-100 data-[scrolling]:duration-100 data-[scrolling]:delay-0 data-[scrolling]:pointer-events-auto data-[visible=false]:hidden dark:bg-white/10">
+        <div data-scroll-area-target="thumb" data-action="mousedown->scroll-area#onThumbMouseDown" class="relative w-full rounded-full bg-neutral-500 transition-opacity duration-100 dark:bg-neutral-400"></div>
+      </div>
+    </div>
+  </div>
 
-      <div data-scroll-area-target="scrollbar"
-           data-scroll-area-orientation-value="vertical"
-           data-action="click->scroll-area#onScrollbarClick"
-           class="absolute right-2 top-16 bottom-4 flex w-1.5 justify-center rounded-full bg-black/5 backdrop-blur-sm opacity-0 transition-opacity duration-150 delay-300 pointer-events-none data-[hovering]:opacity-100 data-[hovering]:duration-100 data-[hovering]:delay-0 data-[hovering]:pointer-events-auto data-[scrolling]:opacity-100 data-[scrolling]:duration-100 data-[scrolling]:delay-0 data-[scrolling]:pointer-events-auto data-[visible=false]:hidden dark:bg-white/10">
-        <div data-scroll-area-target="thumb"
-             data-action="mousedown->scroll-area#onThumbMouseDown"
-             class="relative w-full rounded-full bg-neutral-500 transition-opacity duration-100 dark:bg-neutral-400"></div>
+  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden">
+    <div class="px-4 md:px-6 py-4 md:py-5 bg-neutral-900">
+      <h2 class="text-base md:text-lg font-semibold text-white">Administrateurs</h2>
+    </div>
+    
+    <div class="md:hidden divide-y divide-neutral-800">
+      <% @admins.each do |admin| %>
+        <div class="p-4 flex items-center gap-3">
+          <div class="w-11 h-11 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shrink-0">
+            <%= admin.first_name&.first&.upcase || admin.email.first.upcase %>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-white truncate"><%= "#{admin.first_name} #{admin.last_name}".strip.presence || "N/A" %></p>
+            <p class="text-sm text-neutral-400 truncate"><%= admin.email %></p>
+          </div>
+          <% if admin.id == current_user.id %>
+            <span class="text-xs font-medium text-blue-400 px-2 py-1 bg-blue-400/10 rounded-full">Vous</span>
+          <% else %>
+            <%= button_to admin_client_path(admin), method: :delete, data: { turbo_confirm: "Supprimer ?" }, class: "p-2 rounded-lg bg-red-600 text-white" do %>
+              <i class="fa-solid fa-trash text-xs"></i>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="hidden md:block" data-controller="scroll-area" data-scroll-area-target="root" data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
+      <div data-scroll-area-target="viewport" data-action="scroll->scroll-area#onViewportScroll" class="max-h-[400px] overflow-auto scrollbar-hide bg-neutral-950">
+        <table class="w-full">
+          <thead class="sticky top-0 z-10 bg-neutral-900">
+            <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Nom</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Email</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Créé le</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="*:even:bg-neutral-900/50 *:*:py-4 bg-neutral-950">
+            <% @admins.each do |admin| %>
+              <tr class="hover:bg-neutral-800 transition-colors">
+                <td class="px-6 text-sm">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0">
+                      <%= admin.first_name&.first&.upcase || admin.email.first.upcase %>
+                    </div>
+                    <p class="font-medium text-white"><%= "#{admin.first_name} #{admin.last_name}".strip.presence || "N/A" %></p>
+                  </div>
+                </td>
+                <td class="px-6 text-sm text-neutral-400"><%= admin.email %></td>
+                <td class="px-6 text-sm text-neutral-400"><%= admin.created_at.strftime("%d/%m/%Y") %></td>
+                <td class="px-6">
+                  <% if admin.id != current_user.id %>
+                    <%= button_to admin_client_path(admin), method: :delete, data: { turbo_confirm: "Supprimer cet admin ?" }, class: "flex items-center justify-center gap-1.5 rounded-lg border border-red-400/30 bg-red-600 px-3 py-1.5 text-xs font-medium whitespace-nowrap text-white shadow-sm transition-all select-none hover:bg-red-500" do %>
+                      <i class="fa-solid fa-trash"></i>
+                      Supprimer
+                    <% end %>
+                  <% else %>
+                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-blue-400/10 text-blue-400 ring-1 ring-inset ring-blue-400/25">
+                      <i class="fa-solid fa-user text-xs"></i>
+                      Vous
+                    </span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden">
+    <div class="px-4 md:px-6 py-4 md:py-5 flex items-center justify-between bg-neutral-900">
+      <h2 class="text-base md:text-lg font-semibold text-white flex items-center gap-2">
+        <i class="fa-solid fa-envelope text-emerald-400"></i>
+        Invitations
+      </h2>
+      <span class="text-xs md:text-sm text-neutral-400"><%= @invitations.count %></span>
+    </div>
+
+    <% if @invitations.any? %>
+      <div class="md:hidden divide-y divide-neutral-800">
+        <% @invitations.each do |invitation| %>
+          <div class="p-4">
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <div class="flex-1 min-w-0">
+                <code class="px-2 py-1 bg-neutral-800 text-emerald-400 rounded text-xs font-mono"><%= invitation.code %></code>
+                <% if invitation.email.present? %>
+                  <p class="text-sm text-neutral-300 mt-2 truncate"><%= invitation.email %></p>
+                <% end %>
+              </div>
+              <% if invitation.is_used? %>
+                <span class="text-xs font-medium text-green-400 px-2 py-1 bg-green-400/10 rounded-full shrink-0">Utilisée</span>
+              <% elsif invitation.is_expired? %>
+                <span class="text-xs font-medium text-red-400 px-2 py-1 bg-red-400/10 rounded-full shrink-0">Expirée</span>
+              <% else %>
+                <span class="text-xs font-medium text-emerald-400 px-2 py-1 bg-emerald-400/10 rounded-full shrink-0 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Active
+                </span>
+              <% end %>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3 text-xs text-neutral-500">
+                <span>Étape <%= invitation.step %>/6</span>
+                <span><%= invitation.created_at.strftime("%d/%m") %></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <% if !invitation.is_used? && !invitation.is_expired? %>
+                  <button onclick="copyToClipboard('https://join.trayo.fr/join/<%= invitation.code %>')" class="p-2 rounded-lg bg-neutral-800 text-neutral-300">
+                    <i class="fa-solid fa-copy text-xs"></i>
+                  </button>
+                <% end %>
+                <%= button_to admin_invitation_path(invitation), method: :delete, data: { turbo_confirm: "Supprimer ?" }, class: "p-2 rounded-lg bg-red-600 text-white" do %>
+                  <i class="fa-solid fa-trash text-xs"></i>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="hidden md:block" data-controller="scroll-area" data-scroll-area-target="root" data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
+        <div data-scroll-area-target="viewport" data-action="scroll->scroll-area#onViewportScroll" class="max-h-[400px] overflow-auto scrollbar-hide bg-neutral-950">
+          <table class="w-full">
+            <thead class="sticky top-0 z-10 bg-neutral-900">
+              <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+                <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Code</th>
+                <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Email</th>
+                <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-center">Étape</th>
+                <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-center">Statut</th>
+                <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Créée</th>
+                <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Expire</th>
+                <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="*:even:bg-neutral-900/50 *:*:py-4 bg-neutral-950">
+              <% @invitations.each do |invitation| %>
+                <tr class="hover:bg-neutral-800 transition-colors">
+                  <td class="px-6"><code class="px-2 py-1 bg-neutral-800 text-emerald-400 rounded text-sm font-mono"><%= invitation.code %></code></td>
+                  <td class="px-6 text-sm text-neutral-300"><%= invitation.email.presence || "-" %></td>
+                  <td class="px-6 text-center">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-400/10 text-blue-400 text-sm font-bold"><%= invitation.step %>/6</span>
+                  </td>
+                  <td class="px-6 text-center">
+                    <% if invitation.is_used? %>
+                      <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-green-400/10 text-green-400 ring-1 ring-inset ring-green-400/25">
+                        <i class="fa-solid fa-check text-[10px]"></i>Utilisée
+                      </span>
+                    <% elsif invitation.is_expired? %>
+                      <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-red-400/10 text-red-400 ring-1 ring-inset ring-red-400/25">
+                        <i class="fa-solid fa-clock text-[10px]"></i>Expirée
+                      </span>
+                    <% else %>
+                      <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-emerald-400/10 text-emerald-400 ring-1 ring-inset ring-emerald-400/25">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>Active
+                      </span>
+                    <% end %>
+                  </td>
+                  <td class="px-6 text-sm text-neutral-400"><%= invitation.created_at.strftime("%d/%m/%Y") %></td>
+                  <td class="px-6 text-sm text-neutral-400"><%= invitation.expires_at&.strftime("%d/%m/%Y") || "-" %></td>
+                  <td class="px-6">
+                    <div class="flex items-center justify-end gap-2">
+                      <% if !invitation.is_used? && !invitation.is_expired? %>
+                        <button onclick="copyToClipboard('https://join.trayo.fr/join/<%= invitation.code %>')" class="flex items-center justify-center w-8 h-8 rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors" title="Copier">
+                          <i class="fa-solid fa-copy text-xs"></i>
+                        </button>
+                        <%= link_to "https://join.trayo.fr/join/#{invitation.code}", target: "_blank", class: "flex items-center justify-center w-8 h-8 rounded-lg border border-emerald-400/30 bg-emerald-600 text-white hover:bg-emerald-500 transition-colors", title: "Ouvrir" do %>
+                          <i class="fa-solid fa-external-link text-xs"></i>
+                        <% end %>
+                      <% end %>
+                      <%= button_to admin_invitation_path(invitation), method: :delete, data: { turbo_confirm: "Supprimer cette invitation ?" }, class: "flex items-center justify-center w-8 h-8 rounded-lg border border-red-400/30 bg-red-600 text-white hover:bg-red-500 transition-colors", title: "Supprimer" do %>
+                        <i class="fa-solid fa-trash text-xs"></i>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </div>
     <% else %>
-      <div class="text-center py-12 px-6 bg-neutral-950">
-        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-neutral-900 flex items-center justify-center">
-          <i class="fa-solid fa-envelope text-2xl text-neutral-600"></i>
+      <div class="text-center py-8 md:py-12 px-4 md:px-6 bg-neutral-950">
+        <div class="w-14 h-14 md:w-16 md:h-16 mx-auto mb-4 rounded-2xl bg-neutral-900 flex items-center justify-center">
+          <i class="fa-solid fa-envelope text-xl md:text-2xl text-neutral-600"></i>
         </div>
-        <p class="text-neutral-400 mb-4">Aucune invitation créée</p>
-        <button type="button" onclick="document.querySelector('[data-action*=slideover][class*=emerald]').click()" class="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 transition-colors">
-          <i class="fa-solid fa-plus"></i>
-          Créer une invitation
-        </button>
+        <p class="text-neutral-400 text-sm mb-4">Aucune invitation</p>
       </div>
     <% end %>
   </div>

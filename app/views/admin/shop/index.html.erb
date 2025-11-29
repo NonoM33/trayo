@@ -6,51 +6,44 @@
   cart_count = cart_bots.count + cart_products.count
 %>
 
-<div class="space-y-8">
+<div class="space-y-6 md:space-y-8">
   <% if current_user.is_admin? %>
-    <div class="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-amber-950/50 to-orange-950/30 border border-amber-500/30">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 md:p-4 rounded-xl bg-gradient-to-r from-amber-950/50 to-orange-950/30 border border-amber-500/30">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-          <i class="fa-solid fa-shield-halved text-amber-400"></i>
+        <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-shield-halved text-amber-400 text-sm md:text-base"></i>
         </div>
         <div>
-          <p class="font-semibold text-amber-200">Mode Administrateur</p>
-          <p class="text-xs text-amber-300/60">Gérez prix, stocks et articles comme sur Shopify</p>
+          <p class="font-semibold text-amber-200 text-sm md:text-base">Mode Admin</p>
+          <p class="text-xs text-amber-300/60 hidden md:block">Gérez prix, stocks et articles</p>
         </div>
       </div>
-      <div class="flex items-center gap-3">
-        <%= link_to admin_shop_management_index_path, class: "flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 transition-all" do %>
-          <i class="fa-solid fa-boxes-stacked"></i>
-          Gestion Boutique
-        <% end %>
-      </div>
+      <%= link_to admin_shop_management_index_path, class: "flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold" do %>
+        <i class="fa-solid fa-boxes-stacked"></i>
+        <span class="hidden sm:inline">Gestion</span>
+      <% end %>
     </div>
   <% end %>
 
-  <!-- Header -->
-  <div class="flex items-center justify-between">
+  <div class="flex items-start sm:items-center justify-between gap-3">
     <div>
-      <h1 class="text-3xl font-bold text-white mb-2">Boutique Trayo</h1>
-      <p class="text-neutral-400">Bots de trading, packs et services premium</p>
+      <h1 class="text-xl md:text-3xl font-bold text-white mb-1">Boutique Trayo</h1>
+      <p class="text-neutral-400 text-xs md:text-base hidden sm:block">Bots de trading, packs et services premium</p>
     </div>
     
-    <!-- Cart Button -->
-    <%= link_to admin_cart_path, class: "group relative inline-flex items-center gap-3 px-5 py-3 rounded-2xl transition-all duration-300 #{cart_count > 0 ? 'bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-400 text-white shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 hover:scale-105' : 'bg-neutral-900 border border-neutral-700/50 text-neutral-300 hover:border-emerald-500/50 hover:bg-neutral-800'}" do %>
+    <%= link_to admin_cart_path, class: "group relative inline-flex items-center gap-2 md:gap-3 px-3 md:px-5 py-2 md:py-3 rounded-xl md:rounded-2xl transition-all shrink-0 #{cart_count > 0 ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-white shadow-lg shadow-emerald-500/30' : 'bg-neutral-900 border border-neutral-700/50 text-neutral-300'}" do %>
       <div class="relative">
-        <div class="w-10 h-10 rounded-xl <%= cart_count > 0 ? 'bg-white/20' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30' %> flex items-center justify-center transition-transform group-hover:scale-110">
-          <i class="fa-solid fa-shopping-cart <%= cart_count > 0 ? 'text-white' : 'text-emerald-400' %>"></i>
+        <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl <%= cart_count > 0 ? 'bg-white/20' : 'bg-emerald-500/20 border border-emerald-500/30' %> flex items-center justify-center">
+          <i class="fa-solid fa-shopping-cart <%= cart_count > 0 ? 'text-white' : 'text-emerald-400' %> text-sm md:text-base"></i>
         </div>
         <% if cart_count > 0 %>
-          <span class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white text-emerald-600 text-[10px] font-black flex items-center justify-center shadow-lg ring-2 ring-emerald-500 animate-pulse"><%= cart_count %></span>
+          <span class="absolute -top-1 -right-1 w-4 h-4 md:w-5 md:h-5 rounded-full bg-white text-emerald-600 text-[9px] md:text-[10px] font-black flex items-center justify-center"><%= cart_count %></span>
         <% end %>
       </div>
-      <div class="flex flex-col items-start">
-        <span class="font-bold text-sm"><%= cart_count > 0 ? 'Mon Panier' : 'Panier vide' %></span>
+      <div class="hidden sm:flex flex-col items-start">
+        <span class="font-bold text-sm"><%= cart_count > 0 ? 'Panier' : 'Vide' %></span>
         <span class="text-xs <%= cart_count > 0 ? 'text-emerald-100' : 'text-neutral-500' %>"><%= cart_count %> article<%= cart_count > 1 ? 's' : '' %></span>
       </div>
-      <% if cart_count > 0 %>
-        <i class="fa-solid fa-arrow-right text-white/70 group-hover:translate-x-1 transition-transform"></i>
-      <% end %>
     <% end %>
   </div>
 
@@ -67,26 +60,24 @@
     </div>
   <% end %>
 
-  <!-- Packs Crédits Commission -->
   <section>
-    <div class="flex items-center justify-between mb-6 pb-4 border-b border-neutral-800">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 md:mb-6 pb-3 md:pb-4 border-b border-neutral-800">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-          <i class="fa-solid fa-wallet text-white"></i>
+        <div class="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-wallet text-white text-sm md:text-base"></i>
         </div>
         <div>
-          <h2 class="text-xl font-bold text-white">Crédits Commission</h2>
-          <p class="text-sm text-neutral-500">Avancez vos commissions et profitez de bonus exclusifs</p>
+          <h2 class="text-lg md:text-xl font-bold text-white">Crédits</h2>
+          <p class="text-xs text-neutral-500 hidden sm:block">Avancez vos commissions</p>
         </div>
       </div>
-      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/20 border border-violet-500/30">
-        <i class="fa-solid fa-coins text-violet-400"></i>
-        <span class="text-sm font-semibold text-violet-300"><%= number_to_currency(current_user.total_credits, unit: "€", format: "%n%u") %> disponibles</span>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/20 border border-violet-500/30 self-start sm:self-auto">
+        <i class="fa-solid fa-coins text-violet-400 text-sm"></i>
+        <span class="text-sm font-semibold text-violet-300"><%= number_to_currency(current_user.total_credits, unit: "€", format: "%n%u") %></span>
       </div>
     </div>
 
-    <!-- Avantages -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="hidden md:grid grid-cols-3 gap-4 mb-6">
       <div class="flex items-center gap-3 p-4 rounded-xl bg-neutral-900 border border-neutral-800">
         <div class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
           <i class="fa-solid fa-percent text-emerald-400"></i>
@@ -102,7 +93,7 @@
         </div>
         <div>
           <div class="font-medium text-white">Fini les relances</div>
-          <div class="text-xs text-neutral-500">Prélevé automatiquement sur votre solde</div>
+          <div class="text-xs text-neutral-500">Prélevé automatiquement</div>
         </div>
       </div>
       <div class="flex items-center gap-3 p-4 rounded-xl bg-neutral-900 border border-neutral-800">
@@ -111,45 +102,40 @@
         </div>
         <div>
           <div class="font-medium text-white">Tranquillité d'esprit</div>
-          <div class="text-xs text-neutral-500">Vos bots restent actifs sans interruption</div>
+          <div class="text-xs text-neutral-500">Bots toujours actifs</div>
         </div>
       </div>
     </div>
 
     <% credit_packs_db = CreditPack.active.ordered %>
     
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4">
       <% credit_packs_db.each do |pack| %>
-        <div class="relative group rounded-2xl p-5 transition-all hover:scale-[1.02] <%= pack.is_best? ? 'bg-gradient-to-br from-violet-950/60 to-purple-950/40 border-2 border-violet-500/50' : (pack.is_popular? ? 'bg-gradient-to-br from-amber-950/40 to-orange-950/20 border-2 border-amber-500/40' : 'bg-neutral-900 border border-neutral-800 hover:border-neutral-700') %>">
+        <div class="relative group rounded-xl md:rounded-2xl p-3 md:p-5 transition-all active:scale-[0.98] <%= pack.is_best? ? 'bg-gradient-to-br from-violet-950/60 to-purple-950/40 border-2 border-violet-500/50' : (pack.is_popular? ? 'bg-gradient-to-br from-amber-950/40 to-orange-950/20 border-2 border-amber-500/40' : 'bg-neutral-900 border border-neutral-800') %>">
           
           <% if pack.is_best? %>
-            <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-violet-500 text-white shadow-lg">
-              Meilleur
-            </span>
+            <span class="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase bg-violet-500 text-white">Best</span>
           <% elsif pack.is_popular? %>
-            <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-amber-500 text-white shadow-lg">
-              Populaire
-            </span>
+            <span class="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase bg-amber-500 text-white">Pop</span>
           <% end %>
 
-          <div class="text-center mb-4 <%= pack.is_best? || pack.is_popular? ? 'mt-2' : '' %>">
-            <div class="text-3xl font-bold text-white mb-1"><%= pack.amount %>€</div>
-            <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold <%= pack.is_best? ? 'bg-violet-500/30 text-violet-300' : (pack.is_popular? ? 'bg-amber-500/30 text-amber-300' : 'bg-emerald-500/20 text-emerald-400') %>">
-              +<%= pack.bonus_percentage %>% bonus
+          <div class="text-center mb-2 md:mb-4 <%= pack.is_best? || pack.is_popular? ? 'mt-1 md:mt-2' : '' %>">
+            <div class="text-2xl md:text-3xl font-bold text-white"><%= pack.amount %>€</div>
+            <div class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] md:text-xs font-bold <%= pack.is_best? ? 'bg-violet-500/30 text-violet-300' : (pack.is_popular? ? 'bg-amber-500/30 text-amber-300' : 'bg-emerald-500/20 text-emerald-400') %>">
+              +<%= pack.bonus_percentage %>%
             </div>
           </div>
 
-          <div class="text-center mb-4 py-3 rounded-xl <%= pack.is_best? ? 'bg-violet-500/10' : (pack.is_popular? ? 'bg-amber-500/10' : 'bg-neutral-800/50') %>">
-            <div class="text-xs text-neutral-400 mb-1">Vous recevez</div>
-            <div class="text-xl font-bold <%= pack.is_best? ? 'text-violet-400' : (pack.is_popular? ? 'text-amber-400' : 'text-emerald-400') %>"><%= pack.total_credits %>€</div>
-            <div class="text-[10px] text-neutral-500">+<%= pack.bonus_amount %>€ offerts</div>
+          <div class="text-center mb-2 md:mb-4 py-2 md:py-3 rounded-lg md:rounded-xl <%= pack.is_best? ? 'bg-violet-500/10' : (pack.is_popular? ? 'bg-amber-500/10' : 'bg-neutral-800/50') %>">
+            <div class="text-lg md:text-xl font-bold <%= pack.is_best? ? 'text-violet-400' : (pack.is_popular? ? 'text-amber-400' : 'text-emerald-400') %>"><%= pack.total_credits %>€</div>
+            <div class="text-[9px] md:text-[10px] text-neutral-500">+<%= pack.bonus_amount %>€</div>
           </div>
 
           <form action="<%= buy_credits_admin_shop_index_path %>" method="post" data-turbo="false">
             <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
             <input type="hidden" name="amount" value="<%= pack.amount %>">
             <input type="hidden" name="bonus" value="<%= pack.bonus_percentage %>">
-            <button type="submit" class="w-full py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer border-0 <%= pack.is_best? ? 'bg-violet-500 text-white hover:bg-violet-600' : (pack.is_popular? ? 'bg-amber-500 text-white hover:bg-amber-600' : 'bg-white text-neutral-900 hover:bg-neutral-200') %>">
+            <button type="submit" class="w-full py-2 md:py-2.5 rounded-lg md:rounded-xl text-xs md:text-sm font-semibold transition-all cursor-pointer border-0 <%= pack.is_best? ? 'bg-violet-500 text-white' : (pack.is_popular? ? 'bg-amber-500 text-white' : 'bg-white text-neutral-900') %>">
               Recharger
             </button>
           </form>
@@ -158,21 +144,20 @@
     </div>
   </section>
 
-  <!-- Packs & Services Premium -->
   <% if @products.any? %>
     <section>
-      <div class="flex items-center gap-3 mb-6 pb-4 border-b border-neutral-800">
-        <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-          <i class="fa-solid fa-crown text-amber-400"></i>
+      <div class="flex items-center gap-3 mb-4 md:mb-6 pb-3 md:pb-4 border-b border-neutral-800">
+        <div class="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-crown text-amber-400 text-sm md:text-base"></i>
         </div>
-        <h2 class="text-xl font-bold text-white">Packs & Services Premium</h2>
+        <h2 class="text-lg md:text-xl font-bold text-white">Services Premium</h2>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-6">
         <% @products.each do |product| %>
-          <div class="relative rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border-2 border-emerald-500/30 p-6 hover:border-emerald-400/50 transition-all group">
+          <div class="relative rounded-xl md:rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border-2 border-emerald-500/30 p-4 md:p-6">
             <% if product.badge.present? %>
-              <span class="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide 
+              <span class="absolute top-3 right-3 md:top-4 md:right-4 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-bold uppercase 
                 <%= case product.badge_color
                     when 'emerald' then 'bg-emerald-500 text-white'
                     when 'amber' then 'bg-amber-500 text-white'
@@ -183,45 +168,45 @@
               </span>
             <% end %>
 
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20">
-              <i class="fa-solid <%= product.icon %> text-white text-xl"></i>
+            <div class="w-11 h-11 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center mb-3 md:mb-4">
+              <i class="fa-solid <%= product.icon %> text-white text-base md:text-xl"></i>
             </div>
 
-            <h3 class="text-xl font-bold text-white mb-2"><%= product.name %></h3>
-            <p class="text-neutral-400 text-sm mb-4 leading-relaxed"><%= product.description %></p>
+            <h3 class="text-base md:text-xl font-bold text-white mb-1 md:mb-2"><%= product.name %></h3>
+            <p class="text-neutral-400 text-xs md:text-sm mb-3 md:mb-4 line-clamp-2"><%= product.description %></p>
 
-            <ul class="space-y-2 mb-6">
-              <% product.features_list.each do |feature| %>
-                <li class="flex items-center gap-2 text-sm text-neutral-300">
-                  <i class="fa-solid fa-check text-emerald-400 text-xs"></i>
+            <ul class="space-y-1.5 md:space-y-2 mb-4 md:mb-6 hidden sm:block">
+              <% product.features_list.first(3).each do |feature| %>
+                <li class="flex items-center gap-2 text-xs md:text-sm text-neutral-300">
+                  <i class="fa-solid fa-check text-emerald-400 text-[10px] md:text-xs"></i>
                   <%= feature %>
                 </li>
               <% end %>
             </ul>
 
-            <div class="flex items-baseline gap-2 mb-6">
-              <span class="text-3xl font-extrabold text-emerald-400"><%= product.price.to_i %>€</span>
-              <span class="text-neutral-500"><%= product.interval_label %></span>
+            <div class="flex items-baseline gap-2 mb-4 md:mb-6">
+              <span class="text-2xl md:text-3xl font-extrabold text-emerald-400"><%= product.price.to_i %>€</span>
+              <span class="text-neutral-500 text-xs md:text-sm"><%= product.interval_label %></span>
             </div>
 
             <% if @my_product_ids.include?(product.id) %>
-              <div class="w-full py-3.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold text-center flex items-center justify-center gap-2">
+              <div class="w-full py-2.5 md:py-3.5 rounded-lg md:rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold text-center text-sm flex items-center justify-center gap-2">
                 <i class="fa-solid fa-check-circle"></i>
                 Actif
               </div>
             <% elsif cart_products.include?(product.id) %>
-              <div class="w-full py-3.5 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 font-semibold text-center flex items-center justify-center gap-2">
+              <div class="w-full py-2.5 md:py-3.5 rounded-lg md:rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 font-semibold text-center text-sm flex items-center justify-center gap-2">
                 <i class="fa-solid fa-shopping-cart"></i>
-                Dans le panier
+                Panier
               </div>
             <% else %>
-              <div class="flex gap-3">
-                <%= link_to admin_shop_product_path(product), class: "flex-1 py-3 rounded-xl bg-neutral-800/80 border border-neutral-700 text-neutral-300 font-medium text-center hover:bg-neutral-700 hover:text-white transition-all text-sm" do %>
+              <div class="flex gap-2 md:gap-3">
+                <%= link_to admin_shop_product_path(product), class: "flex-1 py-2.5 md:py-3 rounded-lg md:rounded-xl bg-neutral-800/80 border border-neutral-700 text-neutral-300 font-medium text-center text-xs md:text-sm" do %>
                   Détails
                 <% end %>
-                <%= button_to add_product_admin_cart_path(product), method: :post, class: "flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold text-center flex items-center justify-center gap-2 hover:from-emerald-600 hover:to-teal-600 hover:shadow-lg hover:shadow-emerald-500/25 transition-all cursor-pointer border-0 text-sm" do %>
+                <%= button_to add_product_admin_cart_path(product), method: :post, class: "flex-1 py-2.5 md:py-3 rounded-lg md:rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold text-center flex items-center justify-center gap-1.5 cursor-pointer border-0 text-xs md:text-sm" do %>
                   <i class="fa-solid fa-cart-plus"></i>
-                  Ajouter
+                  <span class="hidden sm:inline">Ajouter</span>
                 <% end %>
               </div>
             <% end %>
@@ -231,17 +216,16 @@
     </section>
   <% end %>
 
-  <!-- Bots de Trading -->
   <section>
-    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-neutral-800">
-      <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
-        <i class="fa-solid fa-robot text-blue-400"></i>
+    <div class="flex items-center gap-3 mb-4 md:mb-6 pb-3 md:pb-4 border-b border-neutral-800">
+      <div class="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+        <i class="fa-solid fa-robot text-blue-400 text-sm md:text-base"></i>
       </div>
-      <h2 class="text-xl font-bold text-white">Bots de Trading</h2>
+      <h2 class="text-lg md:text-xl font-bold text-white">Bots de Trading</h2>
     </div>
 
     <% if @bots.any? %>
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-5">
         <% @bots.each do |bot| %>
           <% 
             real_projections = bot.calculate_real_projections
@@ -249,58 +233,51 @@
             win_rate = bot.calculate_global_win_rate
             win_rate = win_rate > 0 ? win_rate : bot.win_rate
           %>
-          <div class="group rounded-2xl bg-gradient-to-br from-blue-950/40 to-indigo-950/20 border border-blue-500/20 p-6 transition-all hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/5 relative">
+          <div class="group rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-950/40 to-indigo-950/20 border border-blue-500/20 p-4 md:p-6 transition-all relative">
             
             <% if current_user.is_admin? %>
-              <%= link_to edit_admin_bot_path(bot), class: "absolute top-3 right-3 w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 hover:bg-amber-500/30 transition-all opacity-0 group-hover:opacity-100", title: "Modifier ce bot" do %>
-                <i class="fa-solid fa-pen text-xs"></i>
+              <%= link_to edit_admin_bot_path(bot), class: "absolute top-2 right-2 md:top-3 md:right-3 w-7 h-7 md:w-8 md:h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400", title: "Modifier" do %>
+                <i class="fa-solid fa-pen text-[10px] md:text-xs"></i>
               <% end %>
             <% end %>
             
-            <!-- Header -->
-            <div class="flex items-start justify-between mb-6">
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <i class="fa-solid fa-robot text-white text-lg"></i>
+            <div class="flex items-start justify-between mb-3 md:mb-6">
+              <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-robot text-white text-sm md:text-lg"></i>
               </div>
               <% if @my_bot_ids.include?(bot.id) %>
-                <span class="text-xs font-medium text-emerald-400">Installé ✓</span>
+                <span class="text-[10px] md:text-xs font-medium text-emerald-400 px-2 py-0.5 bg-emerald-500/10 rounded-full">Installé ✓</span>
               <% end %>
             </div>
 
-            <!-- Content -->
-            <h3 class="text-lg font-semibold text-white mb-1"><%= bot.name %></h3>
-            <p class="text-sm text-blue-200/50 mb-6">Jusqu'à <%= number_to_currency((yearly_value / 12.0).round, unit: "€", format: "%n%u") %>/mois</p>
+            <h3 class="text-base md:text-lg font-semibold text-white mb-0.5"><%= bot.name %></h3>
+            <p class="text-xs md:text-sm text-blue-200/50 mb-3 md:mb-6"><%= number_to_currency((yearly_value / 12.0).round, unit: "€", format: "%n%u") %>/mois</p>
 
-            <!-- Stats -->
-            <div class="flex items-center gap-6 mb-6">
+            <div class="flex items-center gap-4 md:gap-6 mb-3 md:mb-6">
               <div>
-                <div class="text-2xl font-bold text-white"><%= number_to_percentage(win_rate, precision: 0) %></div>
-                <div class="text-xs text-blue-300/40">Win rate</div>
+                <div class="text-xl md:text-2xl font-bold text-white"><%= number_to_percentage(win_rate, precision: 0) %></div>
+                <div class="text-[10px] md:text-xs text-blue-300/40">Win rate</div>
               </div>
-              <div class="w-px h-8 bg-blue-500/20"></div>
+              <div class="w-px h-6 md:h-8 bg-blue-500/20"></div>
               <div>
-                <div class="text-2xl font-bold text-emerald-400">+<%= number_to_currency(yearly_value, unit: "€", format: "%n%u", precision: 0) %></div>
-                <div class="text-xs text-blue-300/40">Par an</div>
+                <div class="text-xl md:text-2xl font-bold text-emerald-400">+<%= number_to_currency(yearly_value, unit: "€", format: "%n%u", precision: 0) %></div>
+                <div class="text-[10px] md:text-xs text-blue-300/40">Par an</div>
               </div>
             </div>
 
-            <!-- Price & CTA -->
-            <div class="flex items-center justify-between pt-6 border-t border-blue-500/10">
+            <div class="flex items-center justify-between pt-3 md:pt-6 border-t border-blue-500/10">
               <div>
-                <span class="text-2xl font-bold text-white"><%= bot.price.to_i %>€</span>
-                <span class="text-xs text-blue-300/40 ml-1">une fois</span>
+                <span class="text-xl md:text-2xl font-bold text-white"><%= bot.price.to_i %>€</span>
               </div>
               
               <% if @my_bot_ids.include?(bot.id) %>
-                <%= link_to admin_my_bots_path, class: "px-5 py-2.5 rounded-full text-sm font-medium text-blue-400 hover:bg-blue-500/10 transition-colors" do %>
+                <%= link_to admin_my_bots_path, class: "px-3 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium text-blue-400" do %>
                   Gérer →
                 <% end %>
               <% elsif cart_bots.include?(bot.id) %>
-                <span class="px-5 py-2.5 rounded-full text-sm font-medium bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                  ✓ Ajouté
-                </span>
+                <span class="px-3 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium bg-blue-500/20 text-blue-300 border border-blue-500/30">✓</span>
               <% else %>
-                <%= button_to add_bot_admin_cart_path(bot), method: :post, class: "px-5 py-2.5 rounded-full text-sm font-medium bg-white text-neutral-900 hover:bg-blue-50 transition-colors cursor-pointer border-0" do %>
+                <%= button_to add_bot_admin_cart_path(bot), method: :post, class: "px-3 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium bg-white text-neutral-900 cursor-pointer border-0" do %>
                   Ajouter
                 <% end %>
               <% end %>
