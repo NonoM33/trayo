@@ -130,123 +130,63 @@
     </div>
 
     <% if @bots.any? %>
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         <% @bots.each do |bot| %>
           <% 
-            risk_gradient = case bot.risk_level.downcase
-              when 'low' then 'from-emerald-500/20 to-teal-500/10'
-              when 'medium' then 'from-amber-500/20 to-orange-500/10'
-              when 'high' then 'from-red-500/20 to-pink-500/10'
-              else 'from-blue-500/20 to-purple-500/10'
-            end
-            risk_border = case bot.risk_level.downcase
-              when 'low' then 'border-emerald-500/30 hover:border-emerald-400/50'
-              when 'medium' then 'border-amber-500/30 hover:border-amber-400/50'
-              when 'high' then 'border-red-500/30 hover:border-red-400/50'
-              else 'border-blue-500/30 hover:border-blue-400/50'
-            end
-            icon_gradient = case bot.risk_level.downcase
-              when 'low' then 'from-emerald-400 to-teal-500'
-              when 'medium' then 'from-amber-400 to-orange-500'
-              when 'high' then 'from-red-400 to-pink-500'
-              else 'from-blue-400 to-purple-500'
-            end
+            real_projections = bot.calculate_real_projections
+            yearly_value = real_projections[:yearly] > 0 ? real_projections[:yearly] : bot.projection_yearly
+            win_rate = bot.calculate_global_win_rate
+            win_rate = win_rate > 0 ? win_rate : bot.win_rate
           %>
-          <div class="relative rounded-2xl bg-gradient-to-br <%= risk_gradient %> border-2 <%= risk_border %> p-6 transition-all group hover:shadow-xl hover:shadow-blue-500/10">
+          <div class="group rounded-2xl bg-neutral-900 border border-neutral-800 p-6 transition-all hover:border-neutral-700 hover:bg-neutral-900/80">
             
-            <% if @my_bot_ids.include?(bot.id) %>
-              <span class="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-emerald-500 text-white shadow-lg shadow-emerald-500/30">
-                <i class="fa-solid fa-check mr-1"></i>Installé
-              </span>
-            <% elsif bot.risk_level.downcase == 'low' %>
-              <span class="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-emerald-500 text-white">
-                Sécurisé
-              </span>
-            <% end %>
-
-            <!-- Icon & Name -->
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br <%= icon_gradient %> flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
-              <i class="fa-solid fa-robot text-white text-2xl"></i>
-            </div>
-
-            <h3 class="text-xl font-bold text-white mb-2"><%= bot.name %></h3>
-            
-            <div class="flex items-center gap-2 mb-3">
-              <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold uppercase
-                <%= case bot.risk_level.downcase
-                    when 'low' then 'bg-emerald-500/30 text-emerald-300'
-                    when 'medium' then 'bg-amber-500/30 text-amber-300'
-                    when 'high' then 'bg-red-500/30 text-red-300'
-                    else 'bg-blue-500/30 text-blue-300'
-                    end %>">
-                <i class="fa-solid fa-shield-halved mr-1"></i>
-                <%= bot.risk_label %>
-              </span>
-              <span class="text-xs text-neutral-400">•</span>
-              <span class="text-xs text-neutral-400">Licence à vie</span>
-            </div>
-
-            <p class="text-neutral-400 text-sm mb-5 leading-relaxed line-clamp-2"><%= bot.real_marketing_tagline %></p>
-
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-2 gap-4 mb-6 p-4 rounded-xl bg-neutral-900/50 border border-white/5">
-              <div class="text-center">
-                <div class="text-xs text-neutral-500 uppercase tracking-wide mb-1 font-medium">Gain Annuel</div>
-                <% 
-                  real_projections = bot.calculate_real_projections
-                  yearly_value = real_projections[:yearly] > 0 ? real_projections[:yearly] : bot.projection_yearly
-                %>
-                <div class="text-xl font-extrabold text-white"><%= number_to_currency(yearly_value, unit: "€", format: "%n%u", precision: 0) %></div>
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-6">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                <i class="fa-solid fa-robot text-white text-lg"></i>
               </div>
-              <div class="text-center">
-                <div class="text-xs text-neutral-500 uppercase tracking-wide mb-1 font-medium">Taux Réussite</div>
-                <% win_rate = bot.calculate_global_win_rate %>
-                <div class="text-xl font-extrabold text-emerald-400"><%= number_to_percentage(win_rate > 0 ? win_rate : bot.win_rate, precision: 0) %></div>
-              </div>
-            </div>
-
-            <!-- Monthly projection -->
-            <div class="flex items-center gap-2 mb-6 text-sm">
-              <i class="fa-solid fa-chart-line text-emerald-400"></i>
-              <span class="text-neutral-400">Potentiel:</span>
-              <span class="text-emerald-400 font-bold"><%= number_to_currency((yearly_value / 12.0).round, unit: "€", format: "%n%u") %>/mois</span>
-            </div>
-
-            <!-- Price -->
-            <div class="flex items-baseline gap-2 mb-6">
-              <span class="text-3xl font-extrabold text-white"><%= bot.price.to_i %>€</span>
-              <span class="text-neutral-500 text-sm line-through"><%= (bot.price * 1.5).to_i %>€</span>
-              <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 text-xs font-bold">-33%</span>
-            </div>
-
-            <!-- CTA Buttons -->
-            <% if @my_bot_ids.include?(bot.id) %>
-              <%= link_to admin_my_bots_path, class: "w-full py-3.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold text-center flex items-center justify-center gap-2 hover:bg-emerald-500/30 transition-all" do %>
-                <i class="fa-solid fa-arrow-right"></i>
-                Gérer mon bot
+              <% if @my_bot_ids.include?(bot.id) %>
+                <span class="text-xs font-medium text-emerald-400">Installé ✓</span>
               <% end %>
-            <% elsif cart_bots.include?(bot.id) %>
-              <div class="w-full py-3.5 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 font-semibold text-center flex items-center justify-center gap-2">
-                <i class="fa-solid fa-check"></i>
-                Dans le panier
+            </div>
+
+            <!-- Content -->
+            <h3 class="text-lg font-semibold text-white mb-1"><%= bot.name %></h3>
+            <p class="text-sm text-neutral-500 mb-6">Jusqu'à <%= number_to_currency((yearly_value / 12.0).round, unit: "€", format: "%n%u") %>/mois</p>
+
+            <!-- Stats -->
+            <div class="flex items-center gap-6 mb-6">
+              <div>
+                <div class="text-2xl font-bold text-white"><%= number_to_percentage(win_rate, precision: 0) %></div>
+                <div class="text-xs text-neutral-500">Win rate</div>
               </div>
-            <% else %>
-              <div class="flex gap-3">
-                <%= link_to admin_shop_path(bot), class: "flex-1 py-3 rounded-xl bg-neutral-800/80 border border-neutral-700 text-neutral-300 font-medium text-center hover:bg-neutral-700 hover:text-white transition-all" do %>
-                  Détails
+              <div class="w-px h-8 bg-neutral-800"></div>
+              <div>
+                <div class="text-2xl font-bold text-emerald-400">+<%= number_to_currency(yearly_value, unit: "€", format: "%n%u", precision: 0) %></div>
+                <div class="text-xs text-neutral-500">Par an</div>
+              </div>
+            </div>
+
+            <!-- Price & CTA -->
+            <div class="flex items-center justify-between pt-6 border-t border-neutral-800">
+              <div>
+                <span class="text-2xl font-bold text-white"><%= bot.price.to_i %>€</span>
+                <span class="text-xs text-neutral-500 ml-1">une fois</span>
+              </div>
+              
+              <% if @my_bot_ids.include?(bot.id) %>
+                <%= link_to admin_my_bots_path, class: "px-5 py-2.5 rounded-full text-sm font-medium text-emerald-400 hover:bg-emerald-500/10 transition-colors" do %>
+                  Gérer →
                 <% end %>
-                <%= button_to add_bot_admin_cart_path(bot), method: :post, class: "flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-center flex items-center justify-center gap-2 hover:from-blue-600 hover:to-indigo-700 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 transition-all cursor-pointer border-0" do %>
-                  <i class="fa-solid fa-cart-plus"></i>
+              <% elsif cart_bots.include?(bot.id) %>
+                <span class="px-5 py-2.5 rounded-full text-sm font-medium bg-neutral-800 text-neutral-400">
+                  ✓ Ajouté
+                </span>
+              <% else %>
+                <%= button_to add_bot_admin_cart_path(bot), method: :post, class: "px-5 py-2.5 rounded-full text-sm font-medium bg-white text-neutral-900 hover:bg-neutral-200 transition-colors cursor-pointer border-0" do %>
                   Ajouter
                 <% end %>
-              </div>
-            <% end %>
-
-            <!-- Trust indicators -->
-            <div class="flex items-center justify-center gap-4 mt-4 text-xs text-neutral-500">
-              <span class="flex items-center gap-1"><i class="fa-solid fa-infinity text-blue-400"></i> À vie</span>
-              <span class="flex items-center gap-1"><i class="fa-solid fa-headset text-blue-400"></i> Support</span>
-              <span class="flex items-center gap-1"><i class="fa-solid fa-sync text-blue-400"></i> Mises à jour</span>
+              <% end %>
             </div>
           </div>
         <% end %>
