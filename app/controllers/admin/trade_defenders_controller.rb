@@ -56,99 +56,138 @@ module Admin
       @trade = Trade.find(params[:id])
       old_profit = @trade.profit.abs
       
-      @trade.update!(
-        trade_originality: 'manual_admin',
-        is_unauthorized_manual: false
-      )
-      
-      if @trade.trade_originality_before_last_save == 'manual_client'
-        mt5_account = @trade.mt5_account
-        mt5_account.update(high_watermark: mt5_account.high_watermark + old_profit)
+      ActiveRecord::Base.transaction do
+        @trade.update!(
+          trade_originality: 'manual_admin',
+          is_unauthorized_manual: false
+        )
+        
+        if @trade.trade_originality_before_last_save == 'manual_client' && @trade.mt5_account.present?
+          mt5_account = @trade.mt5_account
+          mt5_account.update!(high_watermark: mt5_account.high_watermark + old_profit)
+        end
       end
       
-      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "Trade marked as admin trade"
+      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "Trade marqué comme vôtre"
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::StatementInvalid => e
+      Rails.logger.error "Trade Defender Approve Error: #{e.message}"
+      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), alert: "Erreur: #{e.message}"
     end
     
     def mark_as_client_trade
       @trade = Trade.find(params[:id])
       
-      @trade.update!(
-        trade_originality: 'manual_client',
-        is_unauthorized_manual: true
-      )
+      ActiveRecord::Base.transaction do
+        @trade.update!(
+          trade_originality: 'manual_client',
+          is_unauthorized_manual: true
+        )
+        
+        @trade.mt5_account.apply_trade_defender_penalty(@trade.profit) if @trade.mt5_account.present?
+      end
       
-      @trade.mt5_account.apply_trade_defender_penalty(@trade.profit)
-      
-      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "Trade marked as unauthorized client trade - penalty applied"
+      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "Trade marqué comme client - pénalité appliquée"
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::StatementInvalid => e
+      Rails.logger.error "Trade Defender Client Mark Error: #{e.message}"
+      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), alert: "Erreur: #{e.message}"
     end
     
     def recalculate_penalties_for_account
       @mt5_account = Mt5Account.find(params[:mt5_account_id])
       @mt5_account.recalculate_watermark_with_penalties
       
-      redirect_to admin_client_path(@mt5_account.user), notice: "Watermark recalculated with penalties applied"
+      redirect_to admin_client_path(@mt5_account.user), notice: "Watermark recalculé avec pénalités appliquées"
+    rescue ActiveRecord::RecordNotFound => e
+      redirect_to admin_trade_defenders_path, alert: "Compte non trouvé"
     end
     
     def bulk_mark_as_admin
       trade_ids = params[:trade_ids] || []
       
       if trade_ids.any?
-        trades = Trade.where(id: trade_ids).where(trade_originality: 'manual_client')
-        trades.each do |trade|
-          trade.mt5_account.update(high_watermark: trade.mt5_account.high_watermark + trade.profit.abs)
+        ActiveRecord::Base.transaction do
+          trades = Trade.where(id: trade_ids).where(trade_originality: 'manual_client').includes(:mt5_account)
+          trades.each do |trade|
+            next unless trade.mt5_account.present?
+            trade.mt5_account.update!(high_watermark: trade.mt5_account.high_watermark + trade.profit.abs)
+          end
+          
+          Trade.where(id: trade_ids).update_all(
+            trade_originality: 'manual_admin',
+            is_unauthorized_manual: false
+          )
         end
         
-        Trade.where(id: trade_ids).update_all(
-          trade_originality: 'manual_admin',
-          is_unauthorized_manual: false
-        )
-        
-        redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "#{trade_ids.count} trades marked as admin"
+        redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "#{trade_ids.count} trades marqués comme vôtres"
       else
-        redirect_to admin_trade_defenders_path, alert: "No trades selected"
+        redirect_to admin_trade_defenders_path, alert: "Aucun trade sélectionné"
       end
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::StatementInvalid => e
+      Rails.logger.error "Trade Defender Bulk Admin Error: #{e.message}"
+      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), alert: "Erreur: #{e.message}"
     end
     
     def bulk_mark_as_client
       trade_ids = params[:trade_ids] || []
       
       if trade_ids.any?
-        trades = Trade.where(id: trade_ids)
-        trades.each do |trade|
-          trade.update(
+        ActiveRecord::Base.transaction do
+          trades = Trade.where(id: trade_ids).includes(:mt5_account)
+          trades.each do |trade|
+            next unless trade.mt5_account.present?
+            
+            trade.update!(
+              trade_originality: 'manual_client',
+              is_unauthorized_manual: true
+            )
+            trade.mt5_account.apply_trade_defender_penalty(trade.profit)
+          end
+        end
+        
+        redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "#{trade_ids.count} trades marqués comme client - pénalités appliquées"
+      else
+        redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), alert: "Aucun trade sélectionné"
+      end
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::StatementInvalid => e
+      Rails.logger.error "Trade Defender Bulk Client Error: #{e.message}"
+      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), alert: "Erreur: #{e.message}"
+    end
+    
+    def mark_all_pending_as_admin
+      ActiveRecord::Base.transaction do
+        count = Trade.where(trade_originality: 'manual_pending_review').update_all(
+          trade_originality: 'manual_admin',
+          is_unauthorized_manual: false
+        )
+        
+        redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "#{count} trades marqués comme vôtres"
+      end
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::StatementInvalid => e
+      Rails.logger.error "Trade Defender Error: #{e.message}"
+      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), alert: "Erreur lors de la mise à jour: #{e.message}"
+    end
+    
+    def mark_all_pending_as_client
+      trades = Trade.where(trade_originality: 'manual_pending_review').includes(mt5_account: :user)
+      count = 0
+      
+      ActiveRecord::Base.transaction do
+        trades.find_each do |trade|
+          next unless trade.mt5_account.present?
+          
+          trade.update!(
             trade_originality: 'manual_client',
             is_unauthorized_manual: true
           )
           trade.mt5_account.apply_trade_defender_penalty(trade.profit)
+          count += 1
         end
-        
-        redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "#{trade_ids.count} trades marked as client - penalties applied"
-      else
-        redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), alert: "No trades selected"
-      end
-    end
-    
-    def mark_all_pending_as_admin
-      count = Trade.where(trade_originality: 'manual_pending_review').update_all(
-        trade_originality: 'manual_admin',
-        is_unauthorized_manual: false
-      )
-      
-      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "#{count} trades marked as admin"
-    end
-    
-    def mark_all_pending_as_client
-      trades = Trade.where(trade_originality: 'manual_pending_review')
-      
-      trades.each do |trade|
-        trade.update!(
-          trade_originality: 'manual_client',
-          is_unauthorized_manual: true
-        )
-        trade.mt5_account.apply_trade_defender_penalty(trade.profit)
       end
       
-      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "#{trades.count} trades marked as client - penalties applied"
+      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), notice: "#{count} trades marqués comme client - pénalités appliquées"
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::StatementInvalid => e
+      Rails.logger.error "Trade Defender Error: #{e.message}"
+      redirect_to admin_trade_defenders_path(status: 'manual_pending_review'), alert: "Erreur lors de la mise à jour: #{e.message}"
     end
   end
 end
