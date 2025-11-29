@@ -499,8 +499,142 @@ end
 
 ---
 
+## 🛒 Boutique & Système de Panier
+
+### Design Boutique
+
+La boutique utilise une esthétique premium avec gradients et cartes interactives :
+
+```html
+<!-- Product Card (Pack Premium) -->
+<div
+  class="relative rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 
+            border-2 border-emerald-500/30 p-6 hover:border-emerald-400/50 transition-all"
+>
+  <!-- Badge -->
+  <span
+    class="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold 
+               bg-emerald-500 text-white"
+    >POPULAIRE</span
+  >
+
+  <!-- Icon -->
+  <div
+    class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 
+              flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20"
+  >
+    <i class="fa-solid fa-wrench text-white text-xl"></i>
+  </div>
+
+  <!-- Content -->
+  <h3 class="text-xl font-bold text-white">Pack Maintenance</h3>
+  <p class="text-neutral-400 text-sm">Description du pack...</p>
+
+  <!-- Price -->
+  <div class="flex items-baseline gap-2">
+    <span class="text-3xl font-extrabold text-emerald-400">99€</span>
+    <span class="text-neutral-500">/an</span>
+  </div>
+
+  <!-- CTA -->
+  <button
+    class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 
+                 text-white font-semibold hover:from-emerald-600 hover:to-teal-600"
+  >
+    <i class="fa-solid fa-cart-plus"></i> Ajouter au panier
+  </button>
+</div>
+```
+
+### Système de Panier
+
+Le panier utilise la session Rails pour stocker les items :
+
+```ruby
+# Session structure
+session[:cart] = {
+  bots: [1, 2, 3],      # IDs des bots
+  products: [1, 2]       # IDs des packs
+}
+
+# CartController actions
+- add_bot/:id      → Ajoute un bot au panier
+- add_product/:id  → Ajoute un pack au panier
+- remove_bot/:id   → Retire un bot
+- remove_product/:id → Retire un pack
+- clear            → Vide le panier
+- checkout         → Crée session Stripe et redirige
+- success          → Traite le paiement réussi
+```
+
+### Checkout Stripe Multi-Items
+
+```ruby
+# Création de la session Stripe avec plusieurs items
+line_items = []
+
+cart_bots.each do |bot|
+  line_items << { price: get_stripe_price(bot), quantity: 1 }
+end
+
+cart_products.each do |product|
+  line_items << { price: product.stripe_price_id, quantity: 1 }
+end
+
+Stripe::Checkout::Session.create(
+  customer_email: current_user.email,
+  line_items: line_items,
+  mode: has_subscription ? 'subscription' : 'payment',
+  success_url: admin_cart_success_url + "?session_id={CHECKOUT_SESSION_ID}",
+  cancel_url: admin_cart_url + "?canceled=true",
+  metadata: { user_id: current_user.id, bot_ids: '1,2,3', product_ids: '1,2' }
+)
+```
+
+### États des Boutons
+
+| État         | Style                                                      | Texte            |
+| ------------ | ---------------------------------------------------------- | ---------------- |
+| Disponible   | `bg-gradient-to-r from-emerald-500 to-teal-500`            | "Ajouter"        |
+| Dans panier  | `bg-amber-500/20 border-amber-500/30 text-amber-400`       | "Dans le panier" |
+| Déjà possédé | `bg-emerald-500/20 border-emerald-500/30 text-emerald-400` | "Actif"          |
+
+### Page Panier
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  🛒 Mon Panier (3 articles)          [Continuer mes achats] │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────────────────────────┐  ┌──────────────────┐ │
+│  │ 🤖 Bot GBPUSD       399€   [🗑] │  │ Récapitulatif    │ │
+│  │ 🤖 Bot Gold         399€   [🗑] │  │                  │ │
+│  │ 🔧 Pack Maintenance  99€   [🗑] │  │ Bot GBPUSD  399€ │ │
+│  └─────────────────────────────────┘  │ Bot Gold    399€ │ │
+│                                       │ Pack Maint   99€ │ │
+│  [Vider le panier]                    │ ───────────────  │ │
+│                                       │ Total       897€ │ │
+│                                       │                  │ │
+│                                       │ [💳 Payer]       │ │
+│                                       │ 🔒 SSL 🛡️        │ │
+│                                       └──────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Page Succès
+
+Animation de confirmation avec :
+
+- Cercle vert animé (bounce) avec check ✓
+- Récapitulatif de la commande
+- Boutons d'action (Voir mes bots / Dashboard)
+- Lien vers le support
+
+---
+
 **Design System** : Shadcn-inspired + RailsBlocks
-**Palette** : Monochrome avec accents (emerald, amber, red, purple)
-**Style** : Minimal, Sobre, Élégant
+**Palette** : Monochrome avec accents (emerald, amber, red, purple, blue)
+**Style** : Minimal, Sobre, Élégant, Premium
 **Frameworks** : Tailwind CSS, Turbo, Stimulus
+**Payment** : Stripe Checkout (multi-items)
 **Date** : Novembre 2025
