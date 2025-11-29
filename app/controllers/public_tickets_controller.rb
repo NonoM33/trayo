@@ -1,6 +1,5 @@
 class PublicTicketsController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:add_comment]
-  skip_before_action :authenticate_user!
 
   def show
     @ticket = SupportTicket.find_by(public_token: params[:token])
