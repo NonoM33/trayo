@@ -3,23 +3,21 @@ module Admin
     before_action :require_admin
     
     def index
-      # Par défaut, on n'affiche QUE les trades en attente
       if params[:status].present? && params[:status] == 'all'
-        # Si "Tous" est sélectionné, afficher tous les trades manuels
         @manual_trades = Trade.where(trade_originality: ['manual_pending_review', 'manual_client', 'manual_admin'])
-                              .includes(:mt5_account)
+                              .includes(mt5_account: :user)
                               .order(close_time: :desc)
       elsif params[:status].present?
-        # Filtrer par statut spécifique
         @manual_trades = Trade.where(trade_originality: params[:status])
-                              .includes(:mt5_account)
+                              .includes(mt5_account: :user)
                               .order(close_time: :desc)
       else
-        # Par défaut: afficher UNIQUEMENT les trades en attente
         @manual_trades = Trade.where(trade_originality: 'manual_pending_review')
-                              .includes(:mt5_account)
+                              .includes(mt5_account: :user)
                               .order(close_time: :desc)
       end
+      
+      @manual_trades = @manual_trades.joins(:mt5_account).where.not(mt5_accounts: { user_id: nil })
       
       if params[:account_id].present?
         @manual_trades = @manual_trades.where(mt5_account_id: params[:account_id])
@@ -45,12 +43,12 @@ module Admin
       
       @total_penalty = Trade.where(trade_originality: 'manual_client').sum(:profit)
       
-      @accounts_with_manual_trades = Mt5Account.joins(:trades)
+      @accounts_with_manual_trades = Mt5Account.joins(:trades, :user)
                                                .where(trades: { trade_originality: ['manual_pending_review', 'manual_client', 'manual_admin'] })
                                                .distinct
                                                .includes(:user)
       
-      @all_accounts = @manual_trades.includes(:mt5_account).map { |t| t.mt5_account }.uniq
+      @all_accounts = @manual_trades.includes(:mt5_account).map { |t| t.mt5_account }.uniq.compact
       @all_symbols = Trade.where(trade_originality: ['manual_pending_review', 'manual_client', 'manual_admin']).distinct.pluck(:symbol).compact.sort
     end
     
