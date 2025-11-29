@@ -1,0 +1,471 @@
+<% content_for :title, "Campagnes" %>
+
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-white flex items-center gap-3">
+        <i class="fa-solid fa-bullhorn text-emerald-400"></i>
+        Campagnes Marketing
+      </h1>
+      <p class="text-neutral-400 mt-1">Gérez vos bannières et campagnes SMS/Email</p>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="border-b border-neutral-800">
+    <nav class="flex gap-1" role="tablist">
+      <button type="button" onclick="showTab('sms')" id="tab-sms" role="tab" 
+              class="tab-btn px-5 py-3 text-sm font-medium rounded-t-lg transition-all border-b-2 border-emerald-500 text-emerald-400 bg-emerald-500/10">
+        <i class="fa-solid fa-comment-sms mr-2"></i>SMS / Email
+      </button>
+      <button type="button" onclick="showTab('banners')" id="tab-banners" role="tab"
+              class="tab-btn px-5 py-3 text-sm font-medium rounded-t-lg transition-all border-b-2 border-transparent text-neutral-400 hover:text-white hover:bg-neutral-800/50">
+        <i class="fa-solid fa-rectangle-ad mr-2"></i>Bannières
+      </button>
+    </nav>
+  </div>
+
+  <!-- Tab: SMS/Email Campaigns -->
+  <div id="panel-sms" class="tab-panel space-y-6">
+    <!-- Header Actions -->
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold text-white">Campagnes SMS / Email</h2>
+      <div data-controller="slideover">
+        <button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors" data-action="slideover#show:prevent">
+          <i class="fa-solid fa-plus"></i>
+          Nouvelle Campagne
+        </button>
+
+        <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-black/10 outline-hidden dark:border-white/10">
+          <div class="inset-y-0 flex h-dvh w-80 flex-col bg-white shadow-lg outline-hidden sm:w-96 lg:w-[480px] dark:bg-neutral-900 dark:text-neutral-100 dark:shadow-neutral-950">
+            <button type="button" data-action="slideover#hide:prevent" class="ring-offset-background absolute top-4 right-4 mt-1 rounded-full p-1.5 opacity-70 transition-opacity hover:cursor-pointer hover:bg-neutral-500/15 hover:opacity-100 focus:outline-hidden active:bg-neutral-500/25 disabled:pointer-events-none md:top-5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                <line x1="18" x2="6" y1="6" y2="18"></line>
+                <line x1="6" x2="18" y1="6" y2="18"></line>
+              </svg>
+              <span class="sr-only">Fermer</span>
+            </button>
+
+            <h4 class="mt-0 border-b font-semibold border-neutral-800 p-5 pr-8 text-lg text-white md:p-6 md:text-xl flex items-center gap-3">
+              <i class="fa-solid fa-comment-sms text-emerald-400"></i>
+              Nouvelle Campagne
+            </h4>
+            
+            <%= form_with url: admin_sms_campaigns_path, method: :post, local: true, class: "flex flex-col flex-1 overflow-hidden" do %>
+              <div class="flex-1 overflow-y-auto p-5 md:p-6 space-y-5">
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Nom de la campagne</label>
+                  <input type="text" name="sms_campaign[name]" required placeholder="Ex: Promo Noël 2025" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Type de campagne</label>
+                  <select name="sms_campaign[campaign_type]" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-emerald-500">
+                    <option value="sms">SMS</option>
+                    <option value="email">Email</option>
+                    <option value="both">SMS + Email</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Audience</label>
+                  <select name="sms_campaign[audience]" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-emerald-500">
+                    <option value="all">Tous les clients</option>
+                    <option value="active">Clients actifs (bots en cours)</option>
+                    <option value="inactive">Clients inactifs</option>
+                    <option value="with_balance">Avec solde > 0</option>
+                    <option value="commission_due">Commission due</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Message</label>
+                  <textarea name="sms_campaign[message]" rows="4" required placeholder="Votre message..." class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 resize-none"></textarea>
+                  <p class="text-xs text-neutral-500 mt-1">Variables: {prenom}, {nom}, {solde}, {profit}</p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Planification (optionnel)</label>
+                  <input type="datetime-local" name="sms_campaign[scheduled_at]" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-emerald-500">
+                </div>
+              </div>
+
+              <div class="flex flex-none items-center justify-start gap-2 border-t border-neutral-800 p-5 md:p-6">
+                <button type="submit" class="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 transition-colors">
+                  <i class="fa-solid fa-save"></i>
+                  Créer la campagne
+                </button>
+                <button data-action="slideover#hide:prevent" type="button" class="flex items-center justify-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-800/50 px-4 py-2.5 text-sm font-medium text-neutral-300 hover:bg-neutral-700/50 transition-colors">
+                  Annuler
+                </button>
+              </div>
+            <% end %>
+          </div>
+        </dialog>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-paper-plane text-emerald-400 text-lg"></i>
+        </div>
+        <div>
+          <div class="text-sm text-neutral-400">SMS Envoyés</div>
+          <div class="text-2xl font-bold text-white"><%= @stats[:total_sent] %></div>
+        </div>
+      </div>
+      <div class="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-clock text-blue-400 text-lg"></i>
+        </div>
+        <div>
+          <div class="text-sm text-neutral-400">Aujourd'hui</div>
+          <div class="text-2xl font-bold text-emerald-400"><%= @stats[:sent_today] %></div>
+        </div>
+      </div>
+      <div class="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-triangle-exclamation text-red-400 text-lg"></i>
+        </div>
+        <div>
+          <div class="text-sm text-neutral-400">Échecs</div>
+          <div class="text-2xl font-bold text-red-400"><%= @stats[:failed] %></div>
+        </div>
+      </div>
+      <div class="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-bullhorn text-purple-400 text-lg"></i>
+        </div>
+        <div>
+          <div class="text-sm text-neutral-400">Campagnes</div>
+          <div class="text-2xl font-bold text-purple-400"><%= @stats[:campaigns] %></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Campagnes -->
+      <div class="lg:col-span-2">
+        <div class="rounded-2xl bg-neutral-900/80 border border-neutral-800 overflow-hidden">
+          <div class="p-5 border-b border-neutral-800">
+            <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+              <i class="fa-solid fa-list text-emerald-400"></i>
+              Liste des Campagnes
+            </h3>
+          </div>
+          <% if @campaigns.any? %>
+            <div class="divide-y divide-neutral-800">
+              <% @campaigns.each do |campaign| %>
+                <div class="p-4 hover:bg-neutral-800/30 transition-colors">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                      <div class="w-10 h-10 rounded-lg flex items-center justify-center <%= 
+                        case campaign.status
+                        when 'completed' then 'bg-emerald-500/20'
+                        when 'sending' then 'bg-blue-500/20'
+                        when 'scheduled' then 'bg-amber-500/20'
+                        else 'bg-neutral-700'
+                        end
+                      %>">
+                        <i class="fa-solid <%= 
+                          case campaign.status
+                          when 'completed' then 'fa-check text-emerald-400'
+                          when 'sending' then 'fa-spinner fa-spin text-blue-400'
+                          when 'scheduled' then 'fa-clock text-amber-400'
+                          else 'fa-file text-neutral-400'
+                          end
+                        %>"></i>
+                      </div>
+                      <div>
+                        <div class="flex items-center gap-2">
+                          <h4 class="font-medium text-white"><%= campaign.name %></h4>
+                          <span class="text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-300">
+                            <%= campaign.campaign_type_label %>
+                          </span>
+                        </div>
+                        <p class="text-sm text-neutral-400">
+                          <%= campaign.audience_label %> • <%= campaign.recipients_count %> dest.
+                        </p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <% if campaign.completed? %>
+                        <span class="text-sm text-emerald-400 font-medium"><%= campaign.sent_count %> envoyés</span>
+                      <% end %>
+                      <% if campaign.draft? %>
+                        <%= link_to send_campaign_admin_sms_campaign_path(campaign), method: :post, data: { confirm: "Envoyer cette campagne à #{campaign.recipients_count} destinataires ?" }, class: "w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 flex items-center justify-center transition-colors" do %>
+                          <i class="fa-solid fa-paper-plane text-sm"></i>
+                        <% end %>
+                      <% end %>
+                      <%= link_to admin_sms_campaign_path(campaign), class: "w-8 h-8 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 flex items-center justify-center transition-colors" do %>
+                        <i class="fa-solid fa-eye text-sm"></i>
+                      <% end %>
+                      <% if campaign.draft? %>
+                        <%= link_to edit_admin_sms_campaign_path(campaign), class: "w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 flex items-center justify-center transition-colors" do %>
+                          <i class="fa-solid fa-pen text-sm"></i>
+                        <% end %>
+                      <% end %>
+                      <%= link_to admin_sms_campaign_path(campaign), method: :delete, data: { confirm: "Supprimer ?" }, class: "w-8 h-8 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 flex items-center justify-center transition-colors" do %>
+                        <i class="fa-solid fa-trash text-sm"></i>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="p-12 text-center">
+              <i class="fa-solid fa-comment-sms text-4xl text-neutral-600 mb-4"></i>
+              <p class="text-neutral-400 mb-2">Aucune campagne SMS/Email</p>
+              <p class="text-sm text-neutral-500">Créez votre première campagne pour commencer</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Historique Récent -->
+      <div>
+        <div class="rounded-2xl bg-neutral-900/80 border border-neutral-800 overflow-hidden">
+          <div class="p-5 border-b border-neutral-800">
+            <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+              <i class="fa-solid fa-clock-rotate-left text-blue-400"></i>
+              Derniers SMS
+            </h3>
+          </div>
+          <% if @recent_logs.any? %>
+            <div class="divide-y divide-neutral-800 max-h-[400px] overflow-y-auto">
+              <% @recent_logs.each do |log| %>
+                <div class="p-4 hover:bg-neutral-800/30 transition-colors">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="text-sm font-medium text-white"><%= log.user&.full_name || 'Inconnu' %></span>
+                    <span class="text-xs px-2 py-0.5 rounded-full <%= log.status == 'sent' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400' %>">
+                      <%= log.status == 'sent' ? 'Envoyé' : 'Échec' %>
+                    </span>
+                  </div>
+                  <p class="text-xs text-neutral-400 truncate"><%= log.message.to_s.truncate(50) %></p>
+                  <span class="text-xs text-neutral-500"><%= log.sent_at&.strftime("%d/%m %H:%M") %></span>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="p-8 text-center">
+              <i class="fa-solid fa-inbox text-3xl text-neutral-600 mb-2"></i>
+              <p class="text-neutral-400 text-sm">Aucun SMS récent</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Banners -->
+  <div id="panel-banners" class="tab-panel hidden space-y-6">
+    <!-- Header Actions -->
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold text-white">Bannières Dashboard</h2>
+      <div data-controller="slideover">
+        <button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition-colors" data-action="slideover#show:prevent">
+          <i class="fa-solid fa-plus"></i>
+          Nouvelle Bannière
+        </button>
+
+        <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-black/10 outline-hidden dark:border-white/10">
+          <div class="inset-y-0 flex h-dvh w-80 flex-col bg-white shadow-lg outline-hidden sm:w-96 lg:w-[480px] dark:bg-neutral-900 dark:text-neutral-100 dark:shadow-neutral-950">
+            <button type="button" data-action="slideover#hide:prevent" class="ring-offset-background absolute top-4 right-4 mt-1 rounded-full p-1.5 opacity-70 transition-opacity hover:cursor-pointer hover:bg-neutral-500/15 hover:opacity-100 focus:outline-hidden active:bg-neutral-500/25 disabled:pointer-events-none md:top-5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                <line x1="18" x2="6" y1="6" y2="18"></line>
+                <line x1="6" x2="18" y1="6" y2="18"></line>
+              </svg>
+              <span class="sr-only">Fermer</span>
+            </button>
+
+            <h4 class="mt-0 border-b font-semibold border-neutral-800 p-5 pr-8 text-lg text-white md:p-6 md:text-xl flex items-center gap-3">
+              <i class="fa-solid fa-rectangle-ad text-purple-400"></i>
+              Nouvelle Bannière
+            </h4>
+            
+            <%= form_with url: admin_banners_path, method: :post, local: true, class: "flex flex-col flex-1 overflow-hidden" do %>
+              <div class="flex-1 overflow-y-auto p-5 md:p-6 space-y-5">
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Titre</label>
+                  <input type="text" name="banner[title]" required placeholder="Ex: Nouveau bot disponible !" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Type</label>
+                  <select name="banner[banner_type]" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-purple-500">
+                    <option value="info">Information</option>
+                    <option value="warning">Avertissement</option>
+                    <option value="success">Succès</option>
+                    <option value="promo">Promotion</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Contenu</label>
+                  <textarea name="banner[content]" rows="3" required placeholder="Description de la bannière..." class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 resize-none"></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Lien (optionnel)</label>
+                  <input type="url" name="banner[link_url]" placeholder="https://..." class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-purple-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Début</label>
+                    <input type="datetime-local" name="banner[starts_at]" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-purple-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Fin</label>
+                    <input type="datetime-local" name="banner[ends_at]" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-purple-500">
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <input type="checkbox" name="banner[is_active]" value="1" checked class="w-5 h-5 rounded border-neutral-600 bg-neutral-800 text-purple-500 focus:ring-purple-500">
+                  <label class="text-sm text-neutral-300">Activer immédiatement</label>
+                </div>
+              </div>
+
+              <div class="flex flex-none items-center justify-start gap-2 border-t border-neutral-800 p-5 md:p-6">
+                <button type="submit" class="flex items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-purple-700 transition-colors">
+                  <i class="fa-solid fa-save"></i>
+                  Créer la bannière
+                </button>
+                <button data-action="slideover#hide:prevent" type="button" class="flex items-center justify-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-800/50 px-4 py-2.5 text-sm font-medium text-neutral-300 hover:bg-neutral-700/50 transition-colors">
+                  Annuler
+                </button>
+              </div>
+            <% end %>
+          </div>
+        </dialog>
+      </div>
+    </div>
+
+    <!-- Banner Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-rectangle-ad text-purple-400 text-lg"></i>
+        </div>
+        <div>
+          <div class="text-sm text-neutral-400">Total</div>
+          <div class="text-2xl font-bold text-white"><%= @banner_stats[:total] %></div>
+        </div>
+      </div>
+      <div class="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-toggle-on text-emerald-400 text-lg"></i>
+        </div>
+        <div>
+          <div class="text-sm text-neutral-400">Actives</div>
+          <div class="text-2xl font-bold text-emerald-400"><%= @banner_stats[:active] %></div>
+        </div>
+      </div>
+      <div class="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-eye text-blue-400 text-lg"></i>
+        </div>
+        <div>
+          <div class="text-sm text-neutral-400">Vues</div>
+          <div class="text-2xl font-bold text-blue-400"><%= @banner_stats[:views] %></div>
+        </div>
+      </div>
+      <div class="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-mouse-pointer text-amber-400 text-lg"></i>
+        </div>
+        <div>
+          <div class="text-sm text-neutral-400">Clics</div>
+          <div class="text-2xl font-bold text-amber-400"><%= @banner_stats[:clicks] %></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Banners List -->
+    <div class="rounded-2xl bg-neutral-900/80 border border-neutral-800 overflow-hidden">
+      <div class="p-5 border-b border-neutral-800">
+        <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+          <i class="fa-solid fa-list text-purple-400"></i>
+          Liste des Bannières
+        </h3>
+      </div>
+      <% if @banners.any? %>
+        <div class="divide-y divide-neutral-800">
+          <% @banners.each do |banner| %>
+            <% config = banner.type_config %>
+            <div class="p-4 hover:bg-neutral-800/30 transition-colors">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-lg bg-gradient-to-br <%= config[:bg] %> flex items-center justify-center">
+                    <i class="fa-solid <%= config[:icon] %> <%= config[:text] %>"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <h4 class="font-medium text-white"><%= banner.title %></h4>
+                      <% unless banner.is_active %>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-400">Inactive</span>
+                      <% end %>
+                      <% if banner.starts_at.present? || banner.ends_at.present? %>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">
+                          <i class="fa-solid fa-clock mr-1"></i>Planifiée
+                        </span>
+                      <% end %>
+                    </div>
+                    <p class="text-sm text-neutral-400 truncate"><%= banner.content.to_s.truncate(60) %></p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="text-right hidden md:block">
+                    <div class="text-xs text-neutral-500">Vues / Clics</div>
+                    <div class="text-sm font-medium text-white"><%= banner.views_count %> / <%= banner.clicks_count %></div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <%= link_to toggle_admin_banner_path(banner), method: :post, class: "w-8 h-8 rounded-lg bg-neutral-700 hover:bg-neutral-600 flex items-center justify-center transition-colors" do %>
+                      <i class="fa-solid <%= banner.is_active ? 'fa-toggle-on text-emerald-400' : 'fa-toggle-off text-neutral-400' %>"></i>
+                    <% end %>
+                    <%= link_to edit_admin_banner_path(banner), class: "w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 flex items-center justify-center transition-colors" do %>
+                      <i class="fa-solid fa-pen text-sm"></i>
+                    <% end %>
+                    <%= link_to admin_banner_path(banner), method: :delete, data: { confirm: "Supprimer cette bannière ?" }, class: "w-8 h-8 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 flex items-center justify-center transition-colors" do %>
+                      <i class="fa-solid fa-trash text-sm"></i>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="p-12 text-center">
+          <i class="fa-solid fa-rectangle-ad text-4xl text-neutral-600 mb-4"></i>
+          <p class="text-neutral-400 mb-2">Aucune bannière</p>
+          <p class="text-sm text-neutral-500">Créez votre première bannière pour l'afficher sur le dashboard</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(t => {
+    t.classList.remove('border-emerald-500', 'text-emerald-400', 'bg-emerald-500/10');
+    t.classList.add('border-transparent', 'text-neutral-400');
+  });
+  
+  document.getElementById('panel-' + tab).classList.remove('hidden');
+  const activeTab = document.getElementById('tab-' + tab);
+  activeTab.classList.remove('border-transparent', 'text-neutral-400');
+  activeTab.classList.add('border-emerald-500', 'text-emerald-400', 'bg-emerald-500/10');
+}
+
+if (window.location.hash === '#banners') {
+  showTab('banners');
+}
+</script>

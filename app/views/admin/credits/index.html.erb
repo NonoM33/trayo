@@ -1,99 +1,102 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Credits - Admin Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-</head>
-<body>
-  <% @page_title = "Credits Management" %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
+<% @page_title = "Crédits" %>
+
+<div class="space-y-6">
+  <%= render 'admin/shared/flash_messages' %>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-coins',
+        icon_color: 'purple',
+        label: 'Total Crédits',
+        value: @credits&.count || 0 %>
     
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
-      
-      <div class="container">
-        <% if flash[:notice] %>
-          <div class="notice"><%= flash[:notice] %></div>
-        <% end %>
-        <% if flash[:alert] %>
-          <div class="alert"><%= flash[:alert] %></div>
-        <% end %>
-
-        <div class="info-grid" style="margin-bottom: 1.5rem;">
-          <div class="info-item">
-            <div class="info-label">Total Credits</div>
-            <div class="info-value"><%= @credits ? @credits.count : 0 %></div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Total Amount</div>
-            <div class="info-value positive">
-              <%= @credits ? number_to_currency(@credits.sum(&:amount), unit: "€", format: "%n %u") : "€0.00" %>
-            </div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Average Credit</div>
-            <div class="info-value">
-              <%= @credits && @credits.any? ? number_to_currency(@credits.sum(&:amount) / @credits.count, unit: "€", format: "%n %u") : "€0.00" %>
-            </div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Clients Actifs</div>
-            <div class="info-value">
-              <%= @credits ? @credits.map(&:user_id).uniq.count : 0 %>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h2>All Credits</h2>
-            <%= link_to "View Clients", admin_clients_path, class: "btn btn-primary" %>
-          </div>
-          
-          <% if @credits && @credits.any? %>
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Client</th>
-                    <th>Amount</th>
-                    <th>Reason</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% @credits.each do |credit| %>
-                    <tr>
-                      <td><%= credit.created_at.strftime("%Y-%m-%d %H:%M") %></td>
-                      <td>
-                        <%= link_to credit.user.email, admin_client_path(credit.user), style: "color: var(--color-accent); text-decoration: none;" %>
-                      </td>
-                      <td class="positive"><%= number_to_currency(credit.amount, unit: "€", format: "%n %u") %></td>
-                      <td><%= credit.reason || "—" %></td>
-                      <td>
-                        <div class="action-buttons">
-                          <%= link_to "View Client", admin_client_path(credit.user), class: "btn btn-outline btn-sm" %>
-                        </div>
-                      </td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
-          <% else %>
-            <div style="text-align: center; padding: 60px 20px;">
-              <div style="font-size: 48px; margin-bottom: 20px; color: var(--text-muted);">💳</div>
-              <h3 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700; color: var(--text-primary);">No Credits Yet</h3>
-              <p style="margin: 0; color: var(--text-muted); font-size: 14px;">Start by adding credits to your clients</p>
-            </div>
-          <% end %>
-        </div>
-      </div>
-    </div>
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-euro-sign',
+        icon_color: 'green',
+        label: 'Montant Total',
+        value: number_to_currency(@credits&.sum(&:amount) || 0, unit: "€", format: "%n%u"),
+        value_color: 'green' %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-chart-line',
+        icon_color: 'cyan',
+        label: 'Crédit Moyen',
+        value: @credits && @credits.any? ? number_to_currency(@credits.sum(&:amount) / @credits.count, unit: "€", format: "%n%u") : "0€",
+        value_color: 'cyan' %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-users',
+        icon_color: 'blue',
+        label: 'Clients Actifs',
+        value: @credits&.map(&:user_id)&.uniq&.count || 0 %>
   </div>
-</body>
-</html>
 
+  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
+       data-controller="scroll-area"
+       data-scroll-area-target="root"
+       data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
+
+    <div class="px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-neutral-900">
+      <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+        <i class="fa-solid fa-coins text-purple-400"></i>
+        Tous les Crédits
+      </h2>
+      <%= link_to admin_clients_path, class: "flex items-center justify-center gap-1.5 rounded-lg border border-blue-400/30 bg-blue-600 px-3.5 py-2 text-sm font-medium whitespace-nowrap text-white shadow-sm transition-all hover:bg-blue-500" do %>
+        <i class="fa-solid fa-users"></i>
+        <span>Voir les Clients</span>
+      <% end %>
+    </div>
+
+    <% if @credits && @credits.any? %>
+      <div data-scroll-area-target="viewport"
+           data-action="scroll->scroll-area#onViewportScroll"
+           class="max-h-[600px] overflow-auto scrollbar-hide bg-neutral-950">
+        <table class="w-full min-w-[800px]">
+          <thead class="sticky top-0 z-10 bg-neutral-900">
+            <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Date</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Client</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-right">Montant</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Raison</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="*:even:bg-neutral-900/50 *:*:py-4 bg-neutral-950">
+            <% @credits.each do |credit| %>
+              <tr class="hover:bg-neutral-800 transition-colors">
+                <td class="px-6 text-sm text-neutral-300"><%= credit.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+                <td class="px-6">
+                  <% if credit.user.present? %>
+                    <%= render 'admin/shared/avatar', user: credit.user, size: 'sm', link: admin_client_path(credit.user) %>
+                  <% else %>
+                    <span class="text-sm text-neutral-500 italic">—</span>
+                  <% end %>
+                </td>
+                <td class="px-6 text-right">
+                  <span class="text-lg font-bold text-green-400"><%= number_to_currency(credit.amount, unit: "€", format: "%n%u") %></span>
+                </td>
+                <td class="px-6 text-sm text-neutral-400"><%= credit.reason || "—" %></td>
+                <td class="px-6">
+                  <div class="flex items-center justify-end gap-2">
+                    <% if credit.user.present? %>
+                      <%= link_to admin_client_path(credit.user), class: "flex items-center justify-center w-8 h-8 rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors", title: "Voir client" do %>
+                        <i class="fa-solid fa-eye text-xs"></i>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <%= render 'admin/shared/empty_state',
+          icon: 'fa-coins',
+          icon_gradient: 'from-purple-500/20 to-pink-500/20',
+          icon_color: 'text-purple-400',
+          title: 'Aucun crédit',
+          description: 'Les crédits apparaîtront ici une fois ajoutés aux clients.' %>
+    <% end %>
+  </div>
+</div>

@@ -218,6 +218,30 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+.sidebar:not(#mainSidebar) {
+  display: none !important;
+}
+
+#mainSidebar {
+  position: fixed !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 256px !important;
+  background-color: #111827 !important;
+  transform: translateX(0) !important;
+}
+
+@media (max-width: 768px) {
+  #mainSidebar {
+    transform: translateX(-100%) !important;
+  }
+}
+
 html.sidebar-collapsed-init .sidebar {
   width: var(--sidebar-collapsed-width);
   transition: none;
@@ -3098,4 +3122,129 @@ table {
 
 .icon-btn.lg .material-icons {
   font-size: 28px;
+}
+
+/* ===== SLIDEOVER / DIALOG STYLES ===== */
+
+dialog:not([open]) {
+  display: none !important;
+}
+
+dialog.slideover {
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+}
+
+dialog::backdrop {
+  background: none;
+}
+
+dialog.slideover[open] {
+  animation: fadeIn 200ms forwards ease-in-out, slide-in-from-right 200ms forwards ease-in-out;
+}
+
+dialog.slideover[closing] {
+  pointer-events: none;
+  animation: fadeOut 200ms forwards ease-in-out, slide-out-to-right 200ms forwards ease-in-out;
+}
+
+dialog.slideover-right[open] {
+  animation: fadeIn 200ms forwards ease-in-out, slide-in-from-right 200ms forwards ease-in-out;
+}
+
+dialog.slideover-right[closing] {
+  animation: fadeOut 200ms forwards ease-in-out, slide-out-to-right 200ms forwards ease-in-out;
+}
+
+body:has(dialog.slideover[open]) {
+  overflow: hidden;
+}
+
+:root {
+  --scrollbar-compensation: 0px;
+}
+
+body.slideover-open {
+  padding-right: var(--scrollbar-compensation);
+}
+
+body.slideover-open .fixed {
+  padding-right: var(--scrollbar-compensation);
+}
+
+body.slideover-open [data-slideover-target="dialog"] {
+  padding-right: 0 !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slide-in-from-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-out-to-right {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
+/* ===== SCROLL AREA STYLES ===== */
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-fade-y {
+  --fade-size: 40px;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black var(--fade-size),
+    black calc(100% - var(--fade-size)),
+    transparent 100%
+  );
+}
+
+.scroll-fade-x {
+  --fade-size: 25px;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black var(--fade-size),
+    black calc(100% - var(--fade-size)),
+    transparent 100%
+  );
+}
+
+.scroll-fade-both {
+  --fade-size: 25px;
+  --fade-top-offset: 0px;
+  --fade-left-offset: 0px;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent var(--fade-top-offset),
+    black calc(var(--fade-top-offset) + var(--fade-size)),
+    black calc(100% - var(--fade-size)),
+    transparent 100%
+  ),
+  linear-gradient(
+    to right,
+    transparent var(--fade-left-offset),
+    black calc(var(--fade-left-offset) + var(--fade-size)),
+    black calc(100% - var(--fade-size)),
+    transparent 100%
+  );
+  mask-composite: intersect;
 }

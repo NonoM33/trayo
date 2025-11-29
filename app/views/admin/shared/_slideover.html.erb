@@ -1,0 +1,35 @@
+<div data-controller="slideover" id="<%= local_assigns[:id] || 'slideover' %>">
+  <button type="button" data-action="slideover#show:prevent" class="<%= local_assigns[:trigger_class] %>">
+    <% if local_assigns[:trigger_icon] %>
+      <i class="fa-solid <%= local_assigns[:trigger_icon] %>"></i>
+    <% end %>
+    <% if local_assigns[:trigger_label] %>
+      <span><%= local_assigns[:trigger_label] %></span>
+    <% end %>
+  </button>
+
+  <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
+    <div class="flex h-full w-80 flex-col bg-neutral-950 shadow-2xl sm:w-96 lg:w-[480px]">
+      <div class="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-6 py-5">
+        <div class="flex items-center gap-3">
+          <% if local_assigns[:header_icon] %>
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br <%= local_assigns[:header_gradient] || 'from-blue-500 to-purple-600' %> flex items-center justify-center text-white shadow-lg">
+              <i class="fa-solid <%= local_assigns[:header_icon] %>"></i>
+            </div>
+          <% end %>
+          <h4 class="text-lg font-semibold text-white"><%= local_assigns[:title] || 'Détails' %></h4>
+        </div>
+        <button type="button" data-action="slideover#hide:prevent" class="rounded-full p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" x2="6" y1="6" y2="18"></line>
+            <line x1="6" x2="18" y1="6" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="flex-1 overflow-y-auto p-6 bg-neutral-950">
+        <%= yield %>
+      </div>
+    </div>
+  </dialog>
+</div>

@@ -16,6 +16,7 @@ Rails.application.routes.draw do
 
   # Webhooks
   post "webhooks/sms", to: "webhooks/sms#receive"
+  post "webhooks/stripe", to: "webhooks/stripe#receive"
 
   # Public ticket access
   get "ticket/:token", to: "public_tickets#show", as: :ticket
@@ -27,6 +28,9 @@ Rails.application.routes.draw do
   get "join/:code", to: "onboarding#show", as: :onboarding
   get "join/:code/step/:step", to: "onboarding#step", as: :onboarding_step
   post "join/:code/next", to: "onboarding#next_step", as: :onboarding_next_step
+  post "join/:code/payment_intent", to: "onboarding#create_payment_intent", as: :onboarding_payment_intent
+  post "join/:code/confirm_payment", to: "onboarding#confirm_payment", as: :onboarding_confirm_payment
+  patch "join/:code/update_step", to: "onboarding#update_step", as: :onboarding_update_step
   get "join/:code/complete", to: "onboarding#complete", as: :onboarding_complete
 
   namespace :admin do
@@ -50,6 +54,8 @@ Rails.application.routes.draw do
         post :regenerate_token
         post :reset_mt5
         post :send_commission_sms
+        post :send_sms
+        post :cancel_scheduled_sms
         get :sms_preview
         get :trades
         get :bots
@@ -67,6 +73,28 @@ Rails.application.routes.draw do
     resources :invoices, only: [:index, :show] do
       resources :payments, only: [:create], controller: "invoice_payments"
     end
+    resources :commission_invoices, only: [:create] do
+      member do
+        post :charge
+      end
+    end
+    
+    resources :sms_campaigns do
+      member do
+        post :send_campaign
+      end
+      collection do
+        post :preview
+      end
+    end
+    
+    resources :banners do
+      member do
+        post :toggle
+      end
+    end
+    
+    
     resources :mt5_accounts, only: [:update]
     resources :withdrawals, only: [:destroy]
     
@@ -94,15 +122,79 @@ Rails.application.routes.draw do
       member do
         delete :remove_from_user
       end
+      
+      collection do
+        get :export
+        post :import
+      end
+    end
+    
+    resources :bot_purchases, only: [:update] do
+      member do
+        post :toggle_running
+      end
       collection do
         post :assign_to_user
       end
     end
     
     resources :shop, only: [:index, :show] do
+      collection do
+        post :buy_credits
+        get :credits_success
+      end
       member do
         post :purchase
       end
+    end
+    
+    resources :shop_management, only: [:index] do
+      collection do
+        get :export
+        post :import
+        # Products
+        get :new_product
+        post :create_product
+        # Credit Packs
+        get :new_credit_pack
+        post :create_credit_pack
+        # VPS Offers
+        get :new_vps_offer
+        post :create_vps_offer
+      end
+      member do
+        # Bots
+        post :toggle_bot
+        post :duplicate_bot
+        # Products
+        post :toggle_product
+        get :edit_product
+        patch :update_product
+        delete :destroy_product
+        # Credit Packs
+        post :toggle_credit_pack
+        get :edit_credit_pack
+        patch :update_credit_pack
+        delete :destroy_credit_pack
+        # VPS Offers
+        post :toggle_vps_offer
+        get :edit_vps_offer
+        patch :update_vps_offer
+        delete :destroy_vps_offer
+      end
+    end
+    
+    get 'shop/product/:id', to: 'shop#show_product', as: :shop_product
+    post 'shop/product/:id/purchase', to: 'shop#purchase_product', as: :purchase_shop_product
+
+    resource :cart, only: [:show], controller: 'cart' do
+      post 'add_bot/:id', to: 'cart#add_bot', as: :add_bot
+      post 'add_product/:id', to: 'cart#add_product', as: :add_product
+      delete 'remove_bot/:id', to: 'cart#remove_bot', as: :remove_bot
+      delete 'remove_product/:id', to: 'cart#remove_product', as: :remove_product
+      delete 'clear', to: 'cart#clear', as: :clear
+      post 'checkout', to: 'cart#checkout', as: :checkout
+      get 'success', to: 'cart#success', as: :success
     end
     
     resources :my_bots, only: [:index, :show] do
@@ -118,12 +210,6 @@ Rails.application.routes.draw do
         post :update_status
       end
     end
-    
-    resources :campaigns do
-      member do
-        post :toggle_active
-      end
-    end
 
     resources :sms_logs, only: [:index]
     
@@ -135,6 +221,11 @@ Rails.application.routes.draw do
     end
     
     resources :invitations, only: [:index, :new, :create, :show, :destroy]
+    
+    get "finance", to: "finance#index", as: :finance
+    get "trading", to: "trading#index", as: :trading
+    get "support", to: "support#index", as: :support
+    get "settings", to: "settings#index", as: :settings
     
     resources :trades, only: [:index, :show] do
       collection do

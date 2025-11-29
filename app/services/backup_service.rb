@@ -1,3 +1,5 @@
+require 'open3'
+
 class BackupService
   BACKUP_DIR = Rails.root.join('storage', 'backups')
   RETENTION_DAYS = 30
@@ -94,17 +96,24 @@ class BackupService
           '--if-exists',
           '--no-owner',
           '--no-acl',
+          '--single-transaction',
           backup.file_path.to_s
         ]
 
-        result = system(env_vars, *pg_restore_cmd)
+        stdout, stderr, status = Open3.capture3(env_vars, *pg_restore_cmd)
+        
+        Rails.logger.info "pg_restore stdout: #{stdout}" if stdout.present?
+        Rails.logger.info "pg_restore stderr: #{stderr}" if stderr.present?
+        Rails.logger.info "pg_restore exit status: #{status.exitstatus}"
 
-        unless result
-          raise "pg_restore failed with exit code #{$?.exitstatus}"
+        if status.exitstatus == 0 || (status.exitstatus == 1 && !stderr.include?('FATAL') && !stderr.include?('ERROR'))
+          backup.update!(status: 'completed', error_message: nil)
+          backup
+        else
+          error_lines = stderr.split("\n").select { |l| l.include?('ERROR') || l.include?('FATAL') }.first(5)
+          error_msg = error_lines.any? ? error_lines.join("; ") : "pg_restore failed with exit code #{status.exitstatus}"
+          raise error_msg
         end
-
-        backup.update!(status: 'completed')
-        backup
       rescue => e
         backup.update!(
           status: 'failed',
@@ -126,15 +135,22 @@ class BackupService
       filename = "uploaded_#{timestamp}_#{original_filename}"
       file_path = BACKUP_DIR.join(filename)
 
-      FileUtils.mv(file.path, file_path) if file.respond_to?(:path) && File.exist?(file.path)
-      
-      if file.respond_to?(:read)
+      if file.respond_to?(:tempfile) && File.exist?(file.tempfile.path)
+        FileUtils.cp(file.tempfile.path, file_path)
+      elsif file.respond_to?(:path) && File.exist?(file.path)
+        FileUtils.cp(file.path, file_path)
+      else
         File.open(file_path, 'wb') do |f|
           f.write(file.read)
         end
       end
 
       file_size = File.size(file_path)
+      
+      if file_size == 0
+        File.delete(file_path) if File.exist?(file_path)
+        raise "Le fichier téléversé est vide (0 bytes)"
+      end
 
       backup = DatabaseBackup.create!(
         filename: filename,

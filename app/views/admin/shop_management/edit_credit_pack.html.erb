@@ -1,0 +1,16 @@
+<% @page_title = "Modifier Pack #{@credit_pack.amount}€" %>
+
+<div class="space-y-6">
+  <div class="flex items-center gap-4">
+    <%= link_to admin_shop_management_index_path(tab: 'credits'), class: "w-10 h-10 rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center text-neutral-400 hover:text-white hover:border-neutral-600 transition-all" do %>
+      <i class="fa-solid fa-arrow-left"></i>
+    <% end %>
+    <div>
+      <h1 class="text-2xl font-bold text-white">Modifier Pack <%= @credit_pack.amount %>€</h1>
+      <p class="text-neutral-400">Modifiez les paramètres du pack</p>
+    </div>
+  </div>
+
+  <%= render 'credit_pack_form', credit_pack: @credit_pack %>
+</div>
+

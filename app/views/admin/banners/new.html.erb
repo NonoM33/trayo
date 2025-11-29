@@ -1,0 +1,144 @@
+<% content_for :title, "Nouvelle Bannière" %>
+
+<div class="space-y-6 max-w-3xl mx-auto">
+  <!-- Header -->
+  <div class="flex items-center gap-4">
+    <%= link_to admin_sms_campaigns_path(anchor: 'banners'), class: "p-2 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors" do %>
+      <i class="fa-solid fa-arrow-left"></i>
+    <% end %>
+    <div>
+      <h1 class="text-2xl font-bold text-white">Nouvelle Bannière</h1>
+      <p class="text-neutral-400">Créez une bannière pour le dashboard client</p>
+    </div>
+  </div>
+
+  <%= form_with model: [:admin, @banner], local: true, class: "space-y-6" do |f| %>
+    <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6 space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-neutral-300 mb-2">Titre *</label>
+        <%= f.text_field :title, class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500", placeholder: "Ex: Promotion de fin d'année !" %>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-neutral-300 mb-2">Contenu</label>
+        <%= f.text_area :content, rows: 3, class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500", placeholder: "Détails de votre message..." %>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">Type de bannière</label>
+          <%= f.select :banner_type,
+              options_for_select([
+                ["ℹ️ Information", "info"],
+                ["✅ Succès", "success"],
+                ["⚠️ Avertissement", "warning"],
+                ["❌ Erreur", "error"],
+                ["🎁 Promotion", "promotion"],
+                ["📢 Annonce", "announcement"],
+                ["🔧 Maintenance", "maintenance"]
+              ], @banner.banner_type),
+              {},
+              class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500" %>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">Audience cible</label>
+          <%= f.select :target_audience,
+              options_for_select([
+                ["Tous les clients", "all"],
+                ["Clients actifs", "active_clients"],
+                ["Clients inactifs", "inactive_clients"],
+                ["Clients avec solde", "with_balance"],
+                ["Commissions impayées", "unpaid_commissions"],
+                ["Nouveaux clients", "new_clients"]
+              ], @banner.target_audience),
+              {},
+              class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500" %>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">Texte du bouton (optionnel)</label>
+          <%= f.text_field :button_text, class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500", placeholder: "Ex: En savoir plus" %>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">URL du bouton</label>
+          <%= f.text_field :button_url, class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500", placeholder: "https://..." %>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">Date de début (optionnel)</label>
+          <%= f.datetime_local_field :starts_at, class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500" %>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">Date de fin (optionnel)</label>
+          <%= f.datetime_local_field :ends_at, class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500" %>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">Priorité (0-100)</label>
+          <%= f.number_field :priority, min: 0, max: 100, class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500" %>
+          <p class="text-xs text-neutral-500 mt-1">Plus le nombre est élevé, plus la bannière est prioritaire</p>
+        </div>
+
+        <div class="flex flex-col justify-center">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <%= f.check_box :is_dismissible, class: "w-5 h-5 rounded bg-neutral-800 border-neutral-700 text-purple-500 focus:ring-purple-500" %>
+            <span class="text-sm text-neutral-300">Peut être fermée par l'utilisateur</span>
+          </label>
+          
+          <label class="flex items-center gap-3 cursor-pointer mt-3">
+            <%= f.check_box :is_active, class: "w-5 h-5 rounded bg-neutral-800 border-neutral-700 text-purple-500 focus:ring-purple-500" %>
+            <span class="text-sm text-neutral-300">Activer immédiatement</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6">
+      <h3 class="text-lg font-semibold text-white mb-4">Aperçu</h3>
+      <div id="banner-preview" class="rounded-xl bg-gradient-to-r from-blue-900/50 to-blue-800/30 border border-blue-500/50 p-4">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-info-circle text-blue-400"></i>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-semibold text-white" id="preview-title">Titre de la bannière</h4>
+            <p class="text-sm text-neutral-300 mt-1" id="preview-content">Contenu de votre message...</p>
+          </div>
+          <button type="button" class="p-1 text-neutral-400 hover:text-white">
+            <i class="fa-solid fa-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-end gap-3">
+      <%= link_to admin_sms_campaigns_path(anchor: 'banners'), class: "px-4 py-2.5 rounded-lg border border-neutral-700 text-neutral-300 hover:bg-neutral-800 transition-colors font-medium" do %>
+        Annuler
+      <% end %>
+      <%= f.submit "Créer la bannière", class: "px-5 py-2.5 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition-colors cursor-pointer" %>
+    </div>
+  <% end %>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const titleInput = document.getElementById('banner_title');
+  const contentInput = document.getElementById('banner_content');
+  const previewTitle = document.getElementById('preview-title');
+  const previewContent = document.getElementById('preview-content');
+
+  titleInput?.addEventListener('input', e => previewTitle.textContent = e.target.value || 'Titre de la bannière');
+  contentInput?.addEventListener('input', e => previewContent.textContent = e.target.value || 'Contenu de votre message...');
+});
+</script>
+

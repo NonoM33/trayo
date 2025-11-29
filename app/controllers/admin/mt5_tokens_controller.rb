@@ -18,15 +18,16 @@ module Admin
     end
 
     def create
-      # Générer le token sans le sauvegarder
       @generated_token = User.generate_mt5_registration_token
       
-      # Sauvegarder le token en session pour 1 heure
       session[:generated_mt5_token] = @generated_token
       session[:token_generated_at] = Time.current.to_i
       
-      # Afficher la page avec le token généré
-      render :show_token
+      if turbo_frame_request?
+        render partial: "token_result", locals: { generated_token: @generated_token }
+      else
+        render :show_token
+      end
     end
 
     def show_token

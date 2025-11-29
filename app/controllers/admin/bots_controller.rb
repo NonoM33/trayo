@@ -46,6 +46,45 @@ module Admin
       redirect_to admin_bots_path, notice: "Bot supprimé avec succès"
     end
 
+    def export
+      @bots = TradingBot.order(:name)
+      
+      respond_to do |format|
+        format.json do
+          render json: @bots.map { |bot| bot_to_export_hash(bot) }
+        end
+        format.csv do
+          send_data generate_csv(@bots), filename: "bots_export_#{Date.current}.csv", type: 'text/csv'
+        end
+      end
+    end
+
+    def import
+      if params[:file].blank?
+        redirect_to admin_bots_path, alert: "Veuillez sélectionner un fichier"
+        return
+      end
+
+      file = params[:file]
+      extension = File.extname(file.original_filename).downcase
+
+      begin
+        case extension
+        when '.json'
+          import_from_json(file)
+        when '.csv'
+          import_from_csv(file)
+        else
+          redirect_to admin_bots_path, alert: "Format de fichier non supporté. Utilisez JSON ou CSV."
+          return
+        end
+        
+        redirect_to admin_bots_path, notice: "Import réussi !"
+      rescue => e
+        redirect_to admin_bots_path, alert: "Erreur lors de l'import: #{e.message}"
+      end
+    end
+
     def assign_to_user
       user = User.find(params[:user_id])
       bot = TradingBot.find(params[:bot_id])
@@ -83,6 +122,106 @@ module Admin
         :win_rate, :max_drawdown_limit, :strategy_description,
         :risk_level, :is_active, :symbol, :magic_number_prefix, features: []
       )
+    end
+
+    def bot_to_export_hash(bot)
+      {
+        name: bot.name,
+        description: bot.description,
+        price: bot.price,
+        status: bot.status,
+        is_active: bot.is_active,
+        symbol: bot.symbol,
+        magic_number_prefix: bot.magic_number_prefix,
+        projection_monthly_min: bot.projection_monthly_min,
+        projection_monthly_max: bot.projection_monthly_max,
+        projection_yearly: bot.projection_yearly,
+        win_rate: bot.win_rate,
+        max_drawdown_limit: bot.max_drawdown_limit,
+        risk_level: bot.risk_level,
+        strategy_description: bot.strategy_description,
+        features: bot.features_list
+      }
+    end
+
+    def generate_csv(bots)
+      require 'csv'
+      CSV.generate(headers: true) do |csv|
+        csv << ['Nom', 'Description', 'Prix', 'Statut', 'Actif', 'Symbol', 'Magic Number', 
+                'Proj. Mensuel Min', 'Proj. Mensuel Max', 'Proj. Annuel', 
+                'Win Rate', 'Max Drawdown', 'Niveau Risque', 'Stratégie', 'Features']
+        
+        bots.each do |bot|
+          csv << [
+            bot.name,
+            bot.description,
+            bot.price,
+            bot.status,
+            bot.is_active ? 'Oui' : 'Non',
+            bot.symbol,
+            bot.magic_number_prefix,
+            bot.projection_monthly_min,
+            bot.projection_monthly_max,
+            bot.projection_yearly,
+            bot.win_rate,
+            bot.max_drawdown_limit,
+            bot.risk_level,
+            bot.strategy_description,
+            bot.features_list.join('; ')
+          ]
+        end
+      end
+    end
+
+    def import_from_json(file)
+      data = JSON.parse(file.read)
+      
+      data.each do |bot_data|
+        bot = TradingBot.find_or_initialize_by(name: bot_data['name'])
+        bot.assign_attributes(
+          description: bot_data['description'],
+          price: bot_data['price'],
+          status: bot_data['status'] || 'active',
+          is_active: bot_data['is_active'],
+          symbol: bot_data['symbol'],
+          magic_number_prefix: bot_data['magic_number_prefix'],
+          projection_monthly_min: bot_data['projection_monthly_min'],
+          projection_monthly_max: bot_data['projection_monthly_max'],
+          projection_yearly: bot_data['projection_yearly'],
+          win_rate: bot_data['win_rate'],
+          max_drawdown_limit: bot_data['max_drawdown_limit'],
+          risk_level: bot_data['risk_level'],
+          strategy_description: bot_data['strategy_description'],
+          features: bot_data['features']
+        )
+        bot.save!
+      end
+    end
+
+    def import_from_csv(file)
+      require 'csv'
+      csv = CSV.parse(file.read, headers: true)
+      
+      csv.each do |row|
+        bot = TradingBot.find_or_initialize_by(name: row['Nom'])
+        bot.assign_attributes(
+          description: row['Description'],
+          price: row['Prix'].to_f,
+          status: row['Statut'] || 'active',
+          is_active: row['Actif'] == 'Oui',
+          symbol: row['Symbol'],
+          magic_number_prefix: row['Magic Number']&.to_i,
+          projection_monthly_min: row['Proj. Mensuel Min']&.to_f,
+          projection_monthly_max: row['Proj. Mensuel Max']&.to_f,
+          projection_yearly: row['Proj. Annuel']&.to_f,
+          win_rate: row['Win Rate']&.to_f,
+          max_drawdown_limit: row['Max Drawdown']&.to_f,
+          risk_level: row['Niveau Risque'],
+          strategy_description: row['Stratégie'],
+          features: row['Features']&.split('; ')
+        )
+        bot.save!
+      end
     end
     
     def handle_backtest_upload(uploaded_file)

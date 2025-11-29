@@ -1,162 +1,430 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>VPS - Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-</head>
-<body>
-  <% @page_title = current_user.is_admin? ? 'Gestion VPS' : 'Mes VPS' %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
+<% @page_title = current_user.is_admin? ? 'Gestion VPS' : 'Mes VPS' %>
+
+<div class="space-y-6">
+  <% if flash[:notice] %>
+    <div class="flex items-center gap-3 p-4 rounded-xl border border-green-500/20 bg-green-500/10">
+      <i class="fa-solid fa-check-circle text-green-400"></i>
+      <p class="text-green-300"><%= flash[:notice] %></p>
+    </div>
+  <% end %>
+  <% if flash[:alert] %>
+    <div class="flex items-center gap-3 p-4 rounded-xl border border-red-500/20 bg-red-500/10">
+      <i class="fa-solid fa-exclamation-circle text-red-400"></i>
+      <p class="text-red-300"><%= flash[:alert] %></p>
+    </div>
+  <% end %>
+
+  <% if @vps_list.any? %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-neutral-900 rounded-xl p-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+            <i class="fa-solid fa-server text-blue-400"></i>
+          </div>
+          <div>
+            <p class="text-sm text-neutral-400">Total VPS</p>
+            <p class="text-2xl font-bold text-white"><%= @vps_list.count %></p>
+          </div>
+        </div>
+      </div>
       
-      <div class="container">
-        <% if flash[:notice] %>
-          <div class="notice"><%= flash[:notice] %></div>
-        <% end %>
-        <% if flash[:alert] %>
-          <div class="alert"><%= flash[:alert] %></div>
-        <% end %>
-
-        <% if @vps_list.any? %>
-          <div class="info-grid" style="margin-bottom: 32px;">
-            <div class="info-item">
-              <div class="info-label">Total VPS</div>
-              <div class="info-value" style="color: var(--color-accent);"><%= @vps_list.count %></div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">VPS Actifs</div>
-              <div class="info-value positive"><%= @vps_list.select { |v| v.status == 'active' }.count %></div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">En Configuration</div>
-              <div class="info-value" style="color: var(--color-warning);"><%= @vps_list.select { |v| v.status == 'pending' }.count %></div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Coût Mensuel Total</div>
-              <div class="info-value" style="color: var(--color-info);"><%= number_to_currency(@vps_list.sum(&:monthly_price), unit: "€", format: "%n %u") %></div>
-            </div>
+      <div class="bg-neutral-900 rounded-xl p-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+            <i class="fa-solid fa-check-circle text-green-400"></i>
           </div>
-        <% end %>
-
-        <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-            <h2 style="margin: 0; border: none; padding: 0;">📋 <%= current_user.is_admin? ? 'Tous les VPS' : 'Mes VPS' %></h2>
-            <% if current_user.is_admin? %>
-              <%= link_to "Nouveau VPS", new_admin_vp_path, class: "btn btn-success" %>
-            <% end %>
+          <div>
+            <p class="text-sm text-neutral-400">VPS Actifs</p>
+            <p class="text-2xl font-bold text-green-400"><%= @vps_list.select { |v| v.status == 'active' }.count %></p>
           </div>
-          
-          <% if @vps_list.any? %>
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <% if current_user.is_admin? %>
-                      <th>Client</th>
-                    <% end %>
-                    <th>VPS</th>
-                    <th>Emplacement</th>
-                    <%# <th>IP Address</th> %>
-                    <th>Statut</th>
-                    <th>Prix</th>
-                    <th>Commandé</th>
-                    <th>Renouvellement</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% @vps_list.each do |vps| %>
-                    <tr>
-                      <% if current_user.is_admin? %>
-                        <td>
-                          <%= link_to admin_client_path(vps.user), style: "text-decoration: none;" do %>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                              <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--gradient-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">
-                                <%= vps.user.email.first.upcase %>
-                              </div>
-                              <span style="color: var(--text-primary); font-weight: 600;"><%= vps.user.first_name %> <%= vps.user.last_name %></span>
-                            </div>
-                          <% end %>
-                        </td>
-                      <% end %>
-                      <td>
-                        <div style="font-weight: 700; color: var(--text-primary); font-size: 15px;">
-                          <%= vps.name %>
-                        </div>
-                      </td>
-                      <td>
-                        <span class="status-badge" style="background: var(--bg-hover); color: var(--text-primary);">
-                          🌍 <%= vps.server_location || 'Non spécifié' %>
-                        </span>
-                      </td>
-                      <%# Retired IP Address column %>
-                      <td>
-                        <span class="status-badge status-<%= vps.status %>">
-                          <%= vps.status_label %>
-                        </span>
-                      </td>
-                      <td>
-                        <div style="font-weight: 700; font-size: 16px; color: var(--color-success);">
-                          <%= number_to_currency(vps.monthly_price, unit: "€", format: "%n %u") %><span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">/an</span>
-                        </div>
-                      </td>
-                      <td style="white-space: nowrap;">
-                        <%= vps.ordered_at&.strftime("%d/%m/%Y") || '-' %>
-                      </td>
-                      <td style="white-space: nowrap;">
-                        <% if vps.renewal_date %>
-                          <% days_until = (vps.renewal_date - Date.today).to_i %>
-                          <div class="<%= days_until <= 30 ? 'value-negative' : '' %>">
-                            <%= vps.renewal_date.strftime("%d/%m/%Y") %>
-                            <% if days_until <= 30 && days_until > 0 %>
-                              <br><small style="font-size: 11px; opacity: 0.7;">⚠️ Dans <%= days_until %> jour<%= days_until > 1 ? 's' : '' %></small>
-                            <% elsif days_until <= 0 %>
-                              <br><small style="font-size: 11px; color: #ef4444;">⚠️ Expiré</small>
-                            <% end %>
-                          </div>
-                        <% else %>
-                          <span style="color: var(--text-muted);">Non défini</span>
-                        <% end %>
-                      </td>
-                      <td>
-                        <div class="action-buttons">
-                          <%= link_to "Voir", admin_vp_path(vps), class: "btn btn-outline btn-sm" %>
-                          <% if current_user.is_admin? %>
-                            <%= link_to "Modifier", edit_admin_vp_path(vps), class: "btn btn-warning btn-sm" %>
-                            <%= button_to "Supprimer", admin_vp_path(vps), method: :delete,
-                                data: { turbo_confirm: "Supprimer ce VPS ?" },
-                                class: "btn btn-danger btn-sm" %>
-                          <% end %>
-                        </div>
-                      </td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
-          <% else %>
-            <div style="text-align: center; padding: 80px 24px; color: var(--text-muted);">
-              <div style="font-size: 72px; margin-bottom: 24px; animation: float 3s ease-in-out infinite;"><i class="fa-icon fa-md fa-desktop"></i></div>
-              <h3 style="margin: 0 0 12px 0; font-size: 24px; color: var(--text-primary);">Aucun VPS pour le moment</h3>
-              <% if current_user.is_admin? %>
-                <p style="margin: 0 0 32px 0; font-size: 16px;">Créez un serveur VPS pour vos clients</p>
-                <%= link_to new_admin_vp_path, class: "btn btn-success btn-lg" do %>
-                  <span><i class="fa-icon fa-md fa-plus"></i></span> Créer un VPS
-                <% end %>
-              <% else %>
-                <p style="margin: 0 0 32px 0; font-size: 16px;">Contactez l'administrateur pour commander un VPS dédié</p>
-                <%= link_to "💬 Contacter l'Admin", "#", class: "btn btn-primary btn-lg" %>
-              <% end %>
-            </div>
-          <% end %>
+        </div>
+      </div>
+      
+      <div class="bg-neutral-900 rounded-xl p-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+            <i class="fa-solid fa-cog text-amber-400"></i>
+          </div>
+          <div>
+            <p class="text-sm text-neutral-400">En Configuration</p>
+            <p class="text-2xl font-bold text-amber-400"><%= @vps_list.select { |v| %w[pending configuring ordered].include?(v.status) }.count %></p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-neutral-900 rounded-xl p-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+            <i class="fa-solid fa-euro-sign text-cyan-400"></i>
+          </div>
+          <div>
+            <p class="text-sm text-neutral-400">Revenu Annuel</p>
+            <p class="text-2xl font-bold text-cyan-400"><%= number_to_currency(@vps_list.sum(&:monthly_price), unit: "€", format: "%n%u", precision: 0) %></p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</body>
-</html>
+  <% end %>
 
+  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
+       data-controller="scroll-area"
+       data-scroll-area-target="root"
+       data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
+
+    <div class="px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-neutral-900">
+      <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+        <i class="fa-solid fa-server text-cyan-400"></i>
+        <%= current_user.is_admin? ? 'Liste des VPS' : 'Mes VPS' %>
+      </h2>
+      <% if current_user.is_admin? %>
+        <div data-controller="slideover" id="new-vps-slideover">
+          <button type="button" data-action="slideover#show:prevent" class="flex items-center justify-center gap-1.5 rounded-lg border border-blue-400/30 bg-blue-600 px-3.5 py-2 text-sm font-medium whitespace-nowrap text-white shadow-sm transition-all duration-100 ease-in-out select-none hover:bg-blue-500">
+            <i class="fa-solid fa-plus"></i>
+            <span>Nouveau VPS</span>
+          </button>
+
+          <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
+            <div class="flex h-full w-80 flex-col bg-neutral-950 shadow-2xl sm:w-[480px] lg:w-[520px]">
+              <div class="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-6 py-5">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-server"></i>
+                  </div>
+                  <h4 class="text-lg font-semibold text-white">Nouveau VPS</h4>
+                </div>
+                <button type="button" data-action="slideover#hide:prevent" class="rounded-full p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" x2="6" y1="6" y2="18"></line>
+                    <line x1="6" x2="18" y1="6" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              
+              <%= form_with model: Vps.new, url: admin_vps_path, method: :post, class: "flex flex-1 flex-col min-h-0" do |f| %>
+                <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-neutral-950">
+                  <%= render 'vps_form_fields', f: f, clients: User.where(is_admin: false).order(:email) %>
+                </div>
+                
+                <div class="flex items-center gap-3 border-t border-neutral-800 bg-neutral-900 px-6 py-5">
+                  <%= f.submit "Créer le VPS", class: "flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-500 hover:shadow-blue-500/30 cursor-pointer" %>
+                  <button data-action="slideover#hide:prevent" type="button" class="flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-5 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white">Annuler</button>
+                </div>
+              <% end %>
+            </div>
+          </dialog>
+        </div>
+      <% end %>
+    </div>
+
+    <% if @vps_list.any? %>
+      <div data-scroll-area-target="viewport"
+           data-action="scroll->scroll-area#onViewportScroll"
+           class="max-h-[600px] overflow-auto scrollbar-hide bg-neutral-950">
+        <table class="w-full min-w-[900px]">
+          <thead class="sticky top-0 z-10 bg-neutral-900">
+            <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+              <% if current_user.is_admin? %>
+                <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Client</th>
+              <% end %>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">VPS</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Emplacement</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-center">Statut</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-right">Prix/an</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Renouvellement</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="*:even:bg-neutral-900/50 *:*:py-4 bg-neutral-950">
+            <% @vps_list.each do |vps| %>
+              <% days_until_renewal = vps.renewal_date ? (vps.renewal_date - Date.today).to_i : nil %>
+              <tr class="hover:bg-neutral-800 transition-colors">
+                <% if current_user.is_admin? %>
+                  <td class="px-6">
+                    <%= link_to admin_client_path(vps.user), class: "flex items-center gap-3 group" do %>
+                      <div class="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0">
+                        <%= vps.user.first_name&.first&.upcase || vps.user.email.first.upcase %>
+                      </div>
+                      <div>
+                        <p class="font-medium text-white group-hover:text-blue-400 transition-colors">
+                          <%= "#{vps.user.first_name} #{vps.user.last_name}".strip.presence || "N/A" %>
+                        </p>
+                        <p class="text-xs text-neutral-500"><%= vps.user.email %></p>
+                      </div>
+                    <% end %>
+                  </td>
+                <% end %>
+                <td class="px-6">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white shrink-0">
+                      <i class="fa-solid fa-server text-sm"></i>
+                    </div>
+                    <span class="font-medium text-white"><%= vps.name %></span>
+                  </div>
+                </td>
+                <td class="px-6 text-sm text-neutral-300">
+                  <span class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-globe text-blue-400 text-xs"></i>
+                    <%= vps.server_location || 'Non spécifié' %>
+                  </span>
+                </td>
+                <td class="px-6 text-center">
+                  <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium <%= 
+                    case vps.status
+                    when 'active' then 'bg-green-400/10 text-green-400 ring-1 ring-inset ring-green-400/25'
+                    when 'ready' then 'bg-emerald-400/10 text-emerald-400 ring-1 ring-inset ring-emerald-400/25'
+                    when 'configuring' then 'bg-blue-400/10 text-blue-400 ring-1 ring-inset ring-blue-400/25'
+                    when 'ordered' then 'bg-amber-400/10 text-amber-400 ring-1 ring-inset ring-amber-400/25'
+                    when 'suspended' then 'bg-red-400/10 text-red-400 ring-1 ring-inset ring-red-400/25'
+                    when 'cancelled' then 'bg-neutral-400/10 text-neutral-400 ring-1 ring-inset ring-neutral-400/25'
+                    else 'bg-neutral-400/10 text-neutral-400 ring-1 ring-inset ring-neutral-400/25'
+                    end %>">
+                    <% if vps.status == 'active' %>
+                      <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                    <% end %>
+                    <%= vps.status_label %>
+                  </span>
+                </td>
+                <td class="px-6 text-right">
+                  <span class="text-lg font-bold text-cyan-400"><%= number_to_currency(vps.monthly_price, unit: "€", format: "%n%u") %></span>
+                </td>
+                <td class="px-6">
+                  <% if vps.renewal_date %>
+                    <span class="text-sm font-medium <%= 
+                      if days_until_renewal && days_until_renewal <= 0
+                        'text-red-400'
+                      elsif days_until_renewal && days_until_renewal <= 30
+                        'text-amber-400'
+                      else
+                        'text-neutral-300'
+                      end %>">
+                      <%= vps.renewal_date.strftime("%d/%m/%Y") %>
+                      <% if days_until_renewal && days_until_renewal <= 30 && days_until_renewal > 0 %>
+                        <span class="text-xs ml-1 px-1.5 py-0.5 rounded bg-amber-400/10">(J-<%= days_until_renewal %>)</span>
+                      <% elsif days_until_renewal && days_until_renewal <= 0 %>
+                        <span class="text-xs ml-1 px-1.5 py-0.5 rounded bg-red-400/10">Expiré</span>
+                      <% end %>
+                    </span>
+                  <% else %>
+                    <span class="text-sm text-neutral-500">Non défini</span>
+                  <% end %>
+                </td>
+                <td class="px-6">
+                  <div class="flex items-center justify-end gap-2">
+                    <div data-controller="slideover">
+                      <button type="button" data-action="slideover#show:prevent" class="flex items-center justify-center w-8 h-8 rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors" title="Voir les détails">
+                        <i class="fa-solid fa-eye text-xs"></i>
+                      </button>
+
+                      <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
+                        <div class="flex h-full w-80 flex-col bg-neutral-950 shadow-2xl sm:w-[480px] lg:w-[520px]">
+                          <div class="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-6 py-5">
+                            <div class="flex items-center gap-3">
+                              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
+                                <i class="fa-solid fa-server"></i>
+                              </div>
+                              <div>
+                                <h4 class="text-lg font-semibold text-white"><%= vps.name %></h4>
+                                <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium <%= 
+                                  case vps.status
+                                  when 'active' then 'bg-green-400/10 text-green-400'
+                                  when 'ready' then 'bg-emerald-400/10 text-emerald-400'
+                                  when 'configuring' then 'bg-blue-400/10 text-blue-400'
+                                  when 'ordered' then 'bg-amber-400/10 text-amber-400'
+                                  when 'suspended' then 'bg-red-400/10 text-red-400'
+                                  else 'bg-neutral-400/10 text-neutral-400'
+                                  end %>">
+                                  <%= vps.status_label %>
+                                </span>
+                              </div>
+                            </div>
+                            <button type="button" data-action="slideover#hide:prevent" class="rounded-full p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" x2="6" y1="6" y2="18"></line>
+                                <line x1="6" x2="18" y1="6" y2="18"></line>
+                              </svg>
+                            </button>
+                          </div>
+                          
+                          <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-neutral-950">
+                            <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-3">
+                              <h5 class="text-sm font-semibold text-neutral-300 flex items-center gap-2">
+                                <i class="fa-solid fa-info-circle text-blue-400"></i>
+                                Informations
+                              </h5>
+                              <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <p class="text-neutral-500">Client</p>
+                                  <p class="text-white font-medium"><%= vps.user.email %></p>
+                                </div>
+                                <div>
+                                  <p class="text-neutral-500">Emplacement</p>
+                                  <p class="text-white"><%= vps.server_location || 'Non défini' %></p>
+                                </div>
+                                <div>
+                                  <p class="text-neutral-500">Adresse IP</p>
+                                  <code class="text-cyan-400 text-xs bg-neutral-800 px-2 py-1 rounded"><%= vps.ip_address || 'En attente' %></code>
+                                </div>
+                                <div>
+                                  <p class="text-neutral-500">Prix annuel</p>
+                                  <p class="text-cyan-400 font-bold"><%= number_to_currency(vps.monthly_price, unit: "€", format: "%n%u") %></p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-3">
+                              <h5 class="text-sm font-semibold text-neutral-300 flex items-center gap-2">
+                                <i class="fa-solid fa-calendar text-purple-400"></i>
+                                Dates clés
+                              </h5>
+                              <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <p class="text-neutral-500">Commandé</p>
+                                  <p class="text-white"><%= vps.ordered_at&.strftime("%d/%m/%Y") || '-' %></p>
+                                </div>
+                                <div>
+                                  <p class="text-neutral-500">Configuré</p>
+                                  <p class="text-white"><%= vps.configured_at&.strftime("%d/%m/%Y") || '-' %></p>
+                                </div>
+                                <div>
+                                  <p class="text-neutral-500">Prêt</p>
+                                  <p class="text-white"><%= vps.ready_at&.strftime("%d/%m/%Y") || '-' %></p>
+                                </div>
+                                <div>
+                                  <p class="text-neutral-500">Activé</p>
+                                  <p class="text-white"><%= vps.activated_at&.strftime("%d/%m/%Y") || '-' %></p>
+                                </div>
+                                <div class="col-span-2">
+                                  <p class="text-neutral-500">Renouvellement</p>
+                                  <p class="font-medium <%= days_until_renewal && days_until_renewal <= 30 ? 'text-amber-400' : 'text-white' %>">
+                                    <%= vps.renewal_date&.strftime("%d/%m/%Y") || 'Non défini' %>
+                                    <% if days_until_renewal && days_until_renewal <= 30 && days_until_renewal > 0 %>
+                                      <span class="text-xs">(dans <%= days_until_renewal %> jours)</span>
+                                    <% elsif days_until_renewal && days_until_renewal <= 0 %>
+                                      <span class="text-xs text-red-400">(expiré)</span>
+                                    <% end %>
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <% if current_user.is_admin? && vps.access_credentials.present? %>
+                              <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-3">
+                                <h5 class="text-sm font-semibold text-neutral-300 flex items-center gap-2">
+                                  <i class="fa-solid fa-key text-amber-400"></i>
+                                  Identifiants d'accès
+                                </h5>
+                                <pre class="text-xs text-neutral-300 bg-neutral-800 p-3 rounded-lg overflow-x-auto font-mono"><%= vps.access_credentials %></pre>
+                              </div>
+                            <% end %>
+
+                            <% if vps.notes.present? %>
+                              <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-3">
+                                <h5 class="text-sm font-semibold text-neutral-300 flex items-center gap-2">
+                                  <i class="fa-solid fa-sticky-note text-green-400"></i>
+                                  Notes
+                                </h5>
+                                <p class="text-sm text-neutral-300 whitespace-pre-wrap"><%= vps.notes %></p>
+                              </div>
+                            <% end %>
+
+                            <% if current_user.is_admin? %>
+                              <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-3">
+                                <h5 class="text-sm font-semibold text-neutral-300 flex items-center gap-2">
+                                  <i class="fa-solid fa-bolt text-yellow-400"></i>
+                                  Actions rapides
+                                </h5>
+                                <div class="grid grid-cols-3 gap-2">
+                                  <%= button_to "Commandé", update_status_admin_vp_path(vps, new_status: 'ordered'), method: :post, class: "px-2 py-1.5 text-xs font-medium rounded-lg #{vps.status == 'ordered' ? 'bg-amber-500 text-white' : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'}" %>
+                                  <%= button_to "Config.", update_status_admin_vp_path(vps, new_status: 'configuring'), method: :post, class: "px-2 py-1.5 text-xs font-medium rounded-lg #{vps.status == 'configuring' ? 'bg-blue-500 text-white' : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'}" %>
+                                  <%= button_to "Prêt", update_status_admin_vp_path(vps, new_status: 'ready'), method: :post, class: "px-2 py-1.5 text-xs font-medium rounded-lg #{vps.status == 'ready' ? 'bg-emerald-500 text-white' : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'}" %>
+                                  <%= button_to "Actif", update_status_admin_vp_path(vps, new_status: 'active'), method: :post, class: "px-2 py-1.5 text-xs font-medium rounded-lg #{vps.status == 'active' ? 'bg-green-500 text-white' : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'}" %>
+                                  <%= button_to "Suspendu", update_status_admin_vp_path(vps, new_status: 'suspended'), method: :post, data: { turbo_confirm: "Suspendre ce VPS ?" }, class: "px-2 py-1.5 text-xs font-medium rounded-lg #{vps.status == 'suspended' ? 'bg-red-500 text-white' : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'}" %>
+                                  <%= button_to "Annulé", update_status_admin_vp_path(vps, new_status: 'cancelled'), method: :post, data: { turbo_confirm: "Annuler ce VPS ?" }, class: "px-2 py-1.5 text-xs font-medium rounded-lg #{vps.status == 'cancelled' ? 'bg-neutral-600 text-white' : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'}" %>
+                                </div>
+                              </div>
+                            <% end %>
+                          </div>
+                          
+                          <div class="flex items-center gap-3 border-t border-neutral-800 bg-neutral-900 px-6 py-5">
+                            <button data-action="slideover#hide:prevent" type="button" class="flex-1 flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-5 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white">Fermer</button>
+                          </div>
+                        </div>
+                      </dialog>
+                    </div>
+                    
+                    <% if current_user.is_admin? %>
+                      <div data-controller="slideover">
+                        <button type="button" data-action="slideover#show:prevent" class="flex items-center justify-center w-8 h-8 rounded-lg border border-amber-400/30 bg-amber-500 text-white hover:bg-amber-400 transition-colors" title="Modifier">
+                          <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
+
+                        <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
+                          <div class="flex h-full w-80 flex-col bg-neutral-950 shadow-2xl sm:w-[480px] lg:w-[520px]">
+                            <div class="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-6 py-5">
+                              <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                                  <i class="fa-solid fa-pen"></i>
+                                </div>
+                                <h4 class="text-lg font-semibold text-white">Modifier <%= vps.name %></h4>
+                              </div>
+                              <button type="button" data-action="slideover#hide:prevent" class="rounded-full p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <line x1="18" x2="6" y1="6" y2="18"></line>
+                                  <line x1="6" x2="18" y1="6" y2="18"></line>
+                                </svg>
+                              </button>
+                            </div>
+                            
+                            <%= form_with model: vps, url: admin_vp_path(vps), method: :patch, class: "flex flex-1 flex-col min-h-0" do |f| %>
+                              <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-neutral-950">
+                                <%= render 'vps_form_fields', f: f, clients: User.where(is_admin: false).order(:email), vps: vps %>
+                              </div>
+                              
+                              <div class="flex items-center gap-3 border-t border-neutral-800 bg-neutral-900 px-6 py-5">
+                                <%= f.submit "Enregistrer", class: "flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-amber-500/25 transition-all hover:bg-amber-400 cursor-pointer" %>
+                                <button data-action="slideover#hide:prevent" type="button" class="flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-5 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white">Annuler</button>
+                              </div>
+                            <% end %>
+                          </div>
+                        </dialog>
+                      </div>
+                      
+                      <%= button_to admin_vp_path(vps), method: :delete, data: { turbo_confirm: "Supprimer ce VPS ?" }, class: "flex items-center justify-center w-8 h-8 rounded-lg border border-red-400/30 bg-red-600 text-white hover:bg-red-500 transition-colors", title: "Supprimer" do %>
+                        <i class="fa-solid fa-trash text-xs"></i>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <div data-scroll-area-target="scrollbar"
+           data-scroll-area-orientation-value="vertical"
+           data-action="click->scroll-area#onScrollbarClick"
+           class="absolute right-2 top-20 bottom-4 flex w-1.5 justify-center rounded-full bg-black/5 backdrop-blur-sm opacity-0 transition-opacity duration-150 delay-300 pointer-events-none data-[hovering]:opacity-100 data-[hovering]:duration-100 data-[hovering]:delay-0 data-[hovering]:pointer-events-auto data-[scrolling]:opacity-100 data-[scrolling]:duration-100 data-[scrolling]:delay-0 data-[scrolling]:pointer-events-auto data-[visible=false]:hidden dark:bg-white/10">
+        <div data-scroll-area-target="thumb"
+             data-action="mousedown->scroll-area#onThumbMouseDown"
+             class="relative w-full rounded-full bg-neutral-500 transition-opacity duration-100 dark:bg-neutral-400"></div>
+      </div>
+    <% else %>
+      <div class="text-center py-16 px-6 bg-neutral-950">
+        <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-server text-4xl text-cyan-400"></i>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-2">Aucun VPS pour le moment</h3>
+        <% if current_user.is_admin? %>
+          <p class="text-neutral-400 mb-8 max-w-md mx-auto">Créez un serveur VPS dédié pour vos clients de trading.</p>
+          <button type="button" onclick="document.querySelector('#new-vps-slideover button[data-action]').click()" class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-cyan-600/25 transition-all hover:shadow-cyan-500/40 hover:scale-[1.02]">
+            <i class="fa-solid fa-plus"></i>
+            Créer un VPS
+          </button>
+        <% else %>
+          <p class="text-neutral-400 mb-8 max-w-md mx-auto">Contactez l'administrateur pour commander un VPS dédié au trading.</p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

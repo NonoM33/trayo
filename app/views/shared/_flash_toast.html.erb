@@ -1,0 +1,30 @@
+<div id="flash_messages">
+  <% if local_assigns[:message] && message.present? %>
+    <div class="fixed bottom-4 right-4 z-50 animate-fade-in-up" data-controller="auto-dismiss" data-auto-dismiss-delay-value="3000">
+      <div class="flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border <%= type == :success ? 'bg-emerald-900/90 border-emerald-700/50 text-emerald-100' : 'bg-red-900/90 border-red-700/50 text-red-100' %>">
+        <i class="fa-solid <%= type == :success ? 'fa-check-circle text-emerald-400' : 'fa-exclamation-circle text-red-400' %>"></i>
+        <span class="text-sm font-medium"><%= message %></span>
+        <button type="button" data-action="auto-dismiss#dismiss" class="ml-2 opacity-70 hover:opacity-100 transition-opacity">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<style>
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.3s ease-out;
+  }
+</style>
+

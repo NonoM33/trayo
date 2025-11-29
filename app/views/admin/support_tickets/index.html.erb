@@ -1,157 +1,151 @@
-<%= render 'admin/shared/sidebar' %>
+<% @page_title = "SAV" %>
 
-<div class="main-content">
-  <%= render 'admin/shared/navbar' %>
-  
-  <div class="container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-      <h1>Support Client (SAV)</h1>
-    </div>
+<div class="space-y-6">
+  <%= render 'admin/shared/flash_messages' %>
 
-    <!-- Statistiques -->
-    <% if @stats %>
-      <div class="info-grid" style="margin-bottom: 24px;">
-        <div class="info-item">
-          <div class="info-label">Total</div>
-          <div class="info-value"><%= @stats[:total] %></div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Ouverts</div>
-          <div class="info-value" style="color: var(--color-warning);"><%= @stats[:open] %></div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Fermés</div>
-          <div class="info-value" style="color: var(--color-success);"><%= @stats[:closed] %></div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Non lus</div>
-          <div class="info-value" style="color: var(--color-danger);">
-            <%= @stats[:unread] %>
-            <% if @stats[:unread] > 0 %>
-              <i class="fa-icon fa-sm fa-exclamation-circle" style="margin-left: 5px;"></i>
-            <% end %>
+  <% if @stats %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <%= render 'admin/shared/stat_card',
+          icon: 'fa-headset',
+          icon_color: 'purple',
+          label: 'Total Tickets',
+          value: @stats[:total] %>
+      
+      <%= render 'admin/shared/stat_card',
+          icon: 'fa-envelope-open',
+          icon_color: 'amber',
+          label: 'Ouverts',
+          value: @stats[:open],
+          value_color: 'amber' %>
+      
+      <%= render 'admin/shared/stat_card',
+          icon: 'fa-check-circle',
+          icon_color: 'green',
+          label: 'Fermés',
+          value: @stats[:closed],
+          value_color: 'green' %>
+      
+      <div class="bg-neutral-900 rounded-xl p-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
+            <i class="fa-solid fa-bell text-red-400"></i>
+          </div>
+          <div>
+            <p class="text-sm text-neutral-400">Non Lus</p>
+            <div class="flex items-center gap-2">
+              <p class="text-2xl font-bold text-red-400"><%= @stats[:unread] %></p>
+              <% if @stats[:unread] > 0 %>
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+              <% end %>
+            </div>
           </div>
         </div>
       </div>
+    </div>
+  <% end %>
+
+  <div class="bg-neutral-900 rounded-xl p-4">
+    <%= form_with url: admin_support_tickets_path, method: :get, local: true, class: "flex flex-wrap items-center gap-3" do |f| %>
+      <%= f.select :status, options_for_select([['Tous', ''], ['Ouvert', 'open'], ['En cours', 'in_progress'], ['Attente client', 'waiting_for_user'], ['Fermé', 'closed']], params[:status]), {}, class: "px-3 py-2.5 bg-neutral-800 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      <%= f.text_field :ticket_number, value: params[:ticket_number], placeholder: "N° ticket (TKT-...)", class: "px-3 py-2.5 bg-neutral-800 border border-neutral-700 rounded-lg text-white text-sm placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      <%= f.text_field :phone, value: params[:phone], placeholder: "Téléphone (+33...)", class: "px-3 py-2.5 bg-neutral-800 border border-neutral-700 rounded-lg text-white text-sm placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      <%= f.submit "Filtrer", class: "px-4 py-2.5 bg-blue-600 rounded-lg text-white text-sm font-medium cursor-pointer hover:bg-blue-500 transition-colors" %>
+      <%= link_to "Réinitialiser", admin_support_tickets_path, class: "px-4 py-2.5 border border-neutral-700 bg-neutral-800 rounded-lg text-neutral-300 text-sm font-medium hover:bg-neutral-700" %>
     <% end %>
+  </div>
 
-    <!-- Filtres -->
-    <div class="card" style="margin-bottom: 24px;">
-      <%= form_with url: admin_support_tickets_path, method: :get, local: true, class: "filters-form" do |f| %>
-        <div class="filters-grid">
-          <div class="filter-group">
-            <label class="filter-label">Statut</label>
-            <%= f.select :status, 
-                options_for_select([
-                  ['Tous', ''],
-                  ['Ouvert', 'open'],
-                  ['En cours', 'in_progress'],
-                  ['En attente client', 'waiting_for_user'],
-                  ['Fermé', 'closed']
-                ], params[:status]),
-                {},
-                { class: "filter-select" } %>
-          </div>
-          <div class="filter-group">
-            <label class="filter-label">Numéro de ticket</label>
-            <%= f.text_field :ticket_number, value: params[:ticket_number], placeholder: "TKT-...", class: "filter-input" %>
-          </div>
-          <div class="filter-group">
-            <label class="filter-label">Téléphone</label>
-            <%= f.text_field :phone, value: params[:phone], placeholder: "+33...", class: "filter-input" %>
-          </div>
-          <div class="filter-group">
-            <%= f.submit "Filtrer", class: "btn btn-primary" %>
-            <%= link_to "Réinitialiser", admin_support_tickets_path, class: "btn btn-outline" %>
-          </div>
-        </div>
-      <% end %>
+  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
+       data-controller="scroll-area"
+       data-scroll-area-target="root"
+       data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
+
+    <div class="px-6 py-5 bg-neutral-900">
+      <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+        <i class="fa-solid fa-headset text-purple-400"></i>
+        Tickets Support
+      </h2>
     </div>
 
-    <!-- Liste des tickets -->
-    <div class="card">
-      <% if @tickets.any? %>
-        <div class="table-wrapper">
-          <table class="table-flat">
-            <thead>
-              <tr>
-                <th>Numéro</th>
-                <th>Date</th>
-                <th>Client</th>
-                <th>Téléphone</th>
-                <th>Sujet</th>
-                <th>Description</th>
-                <th>Statut</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% @tickets.each do |ticket| %>
-                <tr class="<%= 'unread-row' if ticket.read_at.nil? %>">
-                  <td>
-                    <strong><%= ticket.ticket_number %></strong>
+    <% if @tickets&.any? %>
+      <div data-scroll-area-target="viewport"
+           data-action="scroll->scroll-area#onViewportScroll"
+           class="max-h-[600px] overflow-auto scrollbar-hide bg-neutral-950">
+        <table class="w-full min-w-[1000px]">
+          <thead class="sticky top-0 z-10 bg-neutral-900">
+            <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Numéro</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Date</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Client</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Téléphone</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Sujet</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-center">Statut</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-neutral-950">
+            <% @tickets.each do |ticket| %>
+              <tr class="<%= ticket.read_at.nil? ? 'bg-amber-500/5' : 'even:bg-neutral-900/50' %> hover:bg-neutral-800 transition-colors">
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono font-semibold text-white"><%= ticket.ticket_number %></span>
                     <% if ticket.read_at.nil? %>
-                      <span class="badge badge-danger" style="margin-left: 5px;">Nouveau</span>
+                      <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-500 text-white">NOUVEAU</span>
                     <% end %>
-                  </td>
-                  <td><%= ticket.created_at.strftime("%d/%m/%Y %H:%M") %></td>
-                  <td>
-                    <% if ticket.user %>
-                      <%= link_to ticket.user.email, admin_client_path(ticket.user) %>
-                    <% else %>
-                      <span class="text-muted">Non identifié</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-neutral-300"><%= ticket.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+                <td class="px-6 py-4">
+                  <% if ticket.user.present? %>
+                    <%= render 'admin/shared/avatar', user: ticket.user, size: 'sm', link: admin_client_path(ticket.user) %>
+                  <% else %>
+                    <span class="text-sm text-neutral-500 italic">Non identifié</span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 text-sm text-neutral-300 font-mono"><%= ticket.phone_number %></td>
+                <td class="px-6 py-4">
+                  <p class="text-sm text-white font-medium"><%= truncate(ticket.subject || "Sans sujet", length: 40) %></p>
+                  <p class="text-xs text-neutral-500 line-clamp-1"><%= truncate(ticket.description, length: 60) %></p>
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <% variant = case ticket.status
+                     when 'open' then 'warning'
+                     when 'in_progress' then 'info'
+                     when 'waiting_for_user' then 'purple'
+                     when 'closed' then 'success'
+                     else 'neutral'
+                     end %>
+                  <%= render 'admin/shared/status_badge', label: ticket.status_label, variant: variant %>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center justify-end gap-2">
+                    <%= link_to admin_support_ticket_path(ticket), class: "flex items-center justify-center w-8 h-8 rounded-lg border border-blue-400/30 bg-blue-600 text-white hover:bg-blue-500 transition-colors", title: "Voir" do %>
+                      <i class="fa-solid fa-eye text-xs"></i>
                     <% end %>
-                  </td>
-                  <td><%= ticket.phone_number %></td>
-                  <td><%= truncate(ticket.subject || "Sans sujet", length: 40) %></td>
-                  <td>
-                    <div class="sms-message" title="<%= ticket.description %>">
-                      <%= truncate(ticket.description, length: 50) %>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="status-pill status-<%= ticket.status %> <%= ticket.status_badge_class %>">
-                      <%= ticket.status_label %>
-                    </span>
-                  </td>
-                  <td>
-                    <div class="action-buttons">
-                      <%= link_to "Voir", admin_support_ticket_path(ticket), class: "btn btn-sm btn-primary" %>
-                      <% if ticket.read_at.nil? %>
-                        <%= link_to "Marquer lu", mark_as_read_admin_support_ticket_path(ticket), 
-                                    method: :post, 
-                                    class: "btn btn-sm btn-outline" %>
+                    <% if ticket.read_at.nil? %>
+                      <%= button_to mark_as_read_admin_support_ticket_path(ticket), method: :post, class: "flex items-center justify-center w-8 h-8 rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors", title: "Marquer lu" do %>
+                        <i class="fa-solid fa-check text-xs"></i>
                       <% end %>
-                    </div>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
-
-        <div style="margin-top: 12px; text-align: right;">
-          <%= paginate @tickets if @tickets.respond_to?(:total_pages) %>
-        </div>
-      <% else %>
-        <div class="empty-state">
-          <i class="fa-icon fa-lg fa-inbox"></i>
-          <h3>Aucun ticket</h3>
-          <p>Aucun ticket ne correspond aux critères de recherche.</p>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      
+      <% if @tickets.respond_to?(:total_pages) %>
+        <div class="px-6 py-4 border-t border-neutral-800">
+          <%= paginate @tickets %>
         </div>
       <% end %>
-    </div>
+    <% else %>
+      <%= render 'admin/shared/empty_state',
+          icon: 'fa-inbox',
+          icon_gradient: 'from-purple-500/20 to-pink-500/20',
+          icon_color: 'text-purple-400',
+          title: 'Aucun ticket',
+          description: 'Les tickets de support apparaîtront ici.' %>
+    <% end %>
   </div>
 </div>
-
-<style>
-.unread-row {
-  background-color: rgba(255, 193, 7, 0.1) !important;
-  font-weight: 500;
-}
-
-.unread-row:hover {
-  background-color: rgba(255, 193, 7, 0.15) !important;
-}
-</style>
-

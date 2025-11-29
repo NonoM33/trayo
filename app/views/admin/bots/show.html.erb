@@ -1,435 +1,306 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title><%= @bot.name %> - Admin Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-</head>
-<body>
-  <% @page_title = @bot.name %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
+<% @page_title = @bot.name %>
+<% projections = @bot.calculate_real_projections %>
+<% win_rate = @bot.calculate_global_win_rate %>
+
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <% if params[:from] == 'client' && params[:client_id].present? %>
+        <%= link_to admin_client_path(params[:client_id]), class: "flex items-center justify-center w-10 h-10 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors" do %>
+          <i class="fa-solid fa-arrow-left"></i>
+        <% end %>
+      <% elsif params[:from] == 'my_bots' %>
+        <%= link_to admin_my_bots_path, class: "flex items-center justify-center w-10 h-10 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors" do %>
+          <i class="fa-solid fa-arrow-left"></i>
+        <% end %>
+      <% else %>
+        <%= link_to admin_bots_path, class: "flex items-center justify-center w-10 h-10 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors" do %>
+          <i class="fa-solid fa-arrow-left"></i>
+        <% end %>
+      <% end %>
       
-      <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-          <% if params[:from] == 'client' && params[:client_id].present? %>
-            <%= link_to admin_client_path(params[:client_id]), class: "back-link", style: "margin: 0;" do %>
-              <i class="fa-icon fa-md fa-arrow-left"></i> Retour au Client
-            <% end %>
-          <% elsif params[:from] == 'my_bots' %>
-            <%= link_to admin_my_bots_path, class: "back-link", style: "margin: 0;" do %>
-              <i class="fa-icon fa-md fa-arrow-left"></i> Retour à Mes Bots
-            <% end %>
-          <% else %>
-          <%= link_to admin_bots_path, class: "back-link", style: "margin: 0;" do %>
-            <i class="fa-icon fa-md fa-arrow-left"></i> Retour aux Bots
-            <% end %>
-          <% end %>
-          <% if current_user.is_admin? %>
-          <div style="display: flex; gap: 12px;">
-              <%= link_to admin_bot_backtests_path(@bot), class: "btn btn-secondary" do %>
-                <i class="fa-icon fa-md fa-chart-line"></i>
-                Backtests
-              <% end %>
-            <%= link_to edit_admin_bot_path(@bot), class: "btn btn-primary" do %>
-              <i class="fa-icon fa-md fa-edit"></i>
-              Modifier
-            <% end %>
-            <%= button_to admin_bot_path(@bot), method: :delete,
-                data: { turbo_confirm: "Supprimer ce bot ?" }, class: "btn btn-danger" do %>
-              <i class="fa-icon fa-md fa-trash"></i>
-              Supprimer
-            <% end %>
-          </div>
-          <% end %>
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+          <i class="fa-solid fa-robot text-2xl"></i>
         </div>
-
-        <% if flash[:notice] %>
-          <div class="notice"><%= flash[:notice] %></div>
-        <% end %>
-
-        <div class="card">
-          <div style="display: flex; align-items: start; gap: 24px;">
-         
-            
-            <div style="flex: 1;">
-              <h2 style="margin: 0 0 12px 0;"><%= @bot.name %></h2>
-              <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-                <span class="risk-badge risk-<%= @bot.risk_level.downcase %>">
-                  <%= @bot.risk_label %>
-                </span>
-                <% if @bot.is_active? %>
-                  <span class="status-badge status-validated">Disponible</span>
-                <% else %>
-                  <span class="status-badge status-inactive">Non Disponible</span>
-                <% end %>
-              </div>
-              <p style="margin: 0; color: var(--text-secondary);"><%= @bot.description %></p>
-            </div>
-          </div>
-        </div>
-
-        <div class="two-col">
-          <div class="card">
-            <h3>
-              <i class="fa-icon fa-md fa-credit-card"></i>
-              Informations Financières
-            </h3>
-            <div class="info-grid">
-              <% projections = @bot.calculate_real_projections %>
-              <div class="info-item">
-                <div class="info-label">Prix</div>
-                <div class="info-value positive"><%= @bot.formatted_price %></div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">Projection Mensuelle</div>
-                <div class="info-value <%= projections[:monthly_max] > 0 ? 'positive' : '' %>">
-                  <%= number_to_currency(projections[:monthly_min], unit: "€", format: "%n %u") %> - 
-                  <%= number_to_currency(projections[:monthly_max], unit: "€", format: "%n %u") %>
-                </div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">Projection Annuelle</div>
-                <div class="info-value <%= projections[:yearly] > 0 ? 'positive' : 'negative' %>">
-                  <%= number_to_currency(projections[:yearly], unit: "€", format: "%n %u") %>
-                </div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">Drawdown Max</div>
-                <div class="info-value <%= projections[:drawdown] > 80 ? 'negative' : '' %>">
-                  <%= number_to_percentage(projections[:drawdown], precision: 1) %>%
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <h3>
-              <i class="fa-icon fa-md fa-chart-line"></i>
-              Performances
-            </h3>
-            <div class="info-grid">
-              <div class="info-item">
-                <div class="info-label">Taux de Réussite</div>
-                <div class="info-value positive"><%= number_to_percentage(@bot.win_rate, precision: 1) %></div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">Rendement Journalier</div>
-                <div class="info-value <%= projections[:daily_return] > 0 ? 'positive' : 'negative' %>">
-                  <%= number_to_percentage(projections[:daily_return], precision: 3) %>%
-                </div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">Utilisateurs Actifs</div>
-                <div class="info-value"><%= @bot.active_users_count %></div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">Performance Moyenne</div>
-                <div class="info-value <%= @bot.average_performance > 0 ? 'positive' : 'negative' %>">
-                  <%= number_to_currency(@bot.average_performance, unit: "€", format: "%n %u") %>
-                </div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">Statut</div>
-                <div class="info-value">
-                  <% if @bot.status == 'active' %>
-                    <span style="color: #4CAF50;"><i class="fa-icon fa-md fa-check-circle"></i> Actif</span>
-                  <% else %>
-                    <span style="color: #999;"><i class="fa-icon fa-md fa-times-circle"></i> Inactif</span>
-                  <% end %>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-          <div class="card">
-            <h3>
-            <i class="fa-icon fa-md fa-chart-bar"></i>
-            Analyse des Performances
-            </h3>
-          <% if @purchases.any? %>
-            <% 
-              # Analyser les statistiques des meilleurs purchases
-              best_purchase = @purchases.max_by { |p| p.total_profit || 0 }
-              most_active_purchase = @purchases.max_by { |p| p.trades_count || 0 }
-            %>
-            
-            <% if best_purchase && best_purchase.associated_trades.any? %>
-              <div class="info-grid" style="margin-bottom: 24px;">
-                <div class="info-item">
-                  <div class="info-label">Meilleur Jour (profit)</div>
-                  <% best_day = best_purchase.get_best_performing_day %>
-                  <% if best_day %>
-                    <div class="info-value positive"><%= best_day[:day_name] %></div>
-                    <div class="help-text">
-                      <%= number_to_currency(best_day[:total_profit], unit: "€", format: "%n %u") %> 
-                      (<%= best_day[:total_trades] %> trades)
-                    </div>
-                  <% else %>
-                    <div class="info-value">N/A</div>
-                  <% end %>
-                </div>
-                
-                <div class="info-item">
-                  <div class="info-label">Jour le Plus Actif</div>
-                  <% active_day = best_purchase.get_most_active_day %>
-                  <% if active_day %>
-                    <div class="info-value"><%= active_day[:day_name] %></div>
-                    <div class="help-text">
-                      <%= active_day[:total_trades] %> trades
-                      (<%= number_to_currency(active_day[:total_profit], unit: "€", format: "%n %u") %>)
-                    </div>
-                  <% else %>
-                    <div class="info-value">N/A</div>
-                  <% end %>
-                </div>
-                
-                <div class="info-item">
-                  <div class="info-label">Jour le Plus Risqué</div>
-                  <% risk_day = best_purchase.get_riskiest_day %>
-                  <% if risk_day %>
-                    <div class="info-value <%= risk_day[:total_profit] > 0 ? 'positive' : 'negative' %>">
-                      <%= risk_day[:day_name] %>
-                    </div>
-                    <div class="help-text">
-                      <%= risk_day[:losing_trades] %> trades perdants
-                    </div>
-                  <% else %>
-                    <div class="info-value">N/A</div>
-                  <% end %>
-                </div>
-                
-                <div class="info-item">
-                  <div class="info-label">Meilleure Heure</div>
-                  <% best_hour = best_purchase.get_best_performing_hour %>
-                  <% if best_hour %>
-                    <div class="info-value positive"><%= best_hour[:hour] %>h</div>
-                    <div class="help-text">
-                      <%= number_to_currency(best_hour[:total_profit], unit: "€", format: "%n %u") %>
-                      (<%= best_hour[:total_trades] %> trades)
-                    </div>
-                  <% else %>
-                    <div class="info-value">N/A</div>
-                  <% end %>
-                </div>
-              </div>
-              
-              <div class="info-grid" style="margin-bottom: 24px;">
-                <div class="info-item">
-                  <div class="info-label">Heure la Plus Active</div>
-                  <% active_hour = best_purchase.get_most_active_hour %>
-                  <% if active_hour %>
-                    <div class="info-value"><%= active_hour[:hour] %>h</div>
-                    <div class="help-text">
-                      <%= active_hour[:total_trades] %> trades
-                      (<%= number_to_currency(active_hour[:total_profit], unit: "€", format: "%n %u") %>)
-                    </div>
-                  <% else %>
-                    <div class="info-value">N/A</div>
-                  <% end %>
-                </div>
-                
-                <div class="info-item">
-                  <div class="info-label">Durée Moyenne des Trades</div>
-                  <% duration = best_purchase.analyze_trade_duration %>
-                  <% if duration[:avg_duration_minutes] == 0 && duration[:avg_duration_hours] == 0 %>
-                    <div class="info-value" style="color: #999;">Non disponible</div>
-                    <div class="help-text" style="font-size: 11px;">
-                      Les timestamps MT5 sont identiques pour open/close
-                    </div>
-                  <% else %>
-                    <div class="info-value">
-                      <%= format_duration(duration[:avg_duration_minutes]) %>
-                    </div>
-                    <div class="help-text">
-                      Min: <%= format_duration(duration[:min_duration_minutes]) %>
-                      | Max: <%= format_duration(duration[:max_duration_minutes]) %>
-                    </div>
-                  <% end %>
-                </div>
-                
-                <div class="info-item">
-                  <div class="info-label">Taux de Réussite Global</div>
-                  <% 
-                    all_trades = best_purchase.associated_trades
-                    winning = all_trades.count { |t| (t.profit || 0) > 0 }
-                    win_rate = all_trades.any? ? (winning.to_f / all_trades.count * 100).round(2) : 0
-                  %>
-                  <div class="info-value positive"><%= win_rate %>%</div>
-                  <div class="help-text">
-                    <%= winning %> gagnants / <%= all_trades.count %> total
-                  </div>
-                </div>
-                
-                <div class="info-item">
-                  <div class="info-label">
-                    Drawdown Max
-                    <span class="help-icon" title="Perte maximale depuis le pic de capital par rapport au capital investi. Au-dessus de 80%, le risque devient important.">
-                      <i class="fa-icon fa-sm fa-info-circle" style="color: #9ca3af; cursor: help; margin-left: 6px;"></i>
-                    </span>
-                  </div>
-                  <% 
-                    drawdown_pct = best_purchase.drawdown_percentage
-                    drawdown_amount = best_purchase.get_current_drawdown
-                  %>
-                  <div class="info-value <%= drawdown_pct <= 80 ? 'positive' : drawdown_pct <= 95 ? '' : 'negative' %>">
-                    <%= number_to_percentage(drawdown_pct, precision: 1) %>%
-                  </div>
-                  <div class="help-text">
-                    Drawdown: <%= number_to_currency(drawdown_amount, unit: "€", format: "%n %u") %><br>
-                    Limite: <%= number_to_currency(best_purchase.trading_bot.max_drawdown_limit, unit: "€", format: "%n %u") %>
-                  </div>
-                </div>
-              </div>
-              
-              <% 
-                day_stats = best_purchase.analyze_by_day_of_week 
-                hour_stats = best_purchase.analyze_by_hour 
-              %>
-              
-              <% if day_stats.any? %>
-                <h4 style="margin-bottom: 16px;">📊 Analyse par Jour de la Semaine</h4>
-                <div class="table-wrapper">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Jour</th>
-                        <th>Trades</th>
-                        <th>Profit Total</th>
-                        <th>Profit Moyen</th>
-                        <th>Gagnants</th>
-                        <th>Perdants</th>
-                        <th>Commission</th>
-                        <th>Swap</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <% day_stats.sort_by { |d| d[:wday] }.each do |day| %>
-                        <tr>
-                          <td><strong><%= day[:day_name] %></strong></td>
-                          <td><%= day[:total_trades] %></td>
-                          <td class="<%= day[:total_profit] >= 0 ? 'positive' : 'negative' %>">
-                            <%= number_to_currency(day[:total_profit], unit: "€", format: "%n %u") %>
-                          </td>
-                          <td class="<%= day[:avg_profit] >= 0 ? 'positive' : 'negative' %>">
-                            <%= number_to_currency(day[:avg_profit], unit: "€", format: "%n %u") %>
-                          </td>
-                          <td style="color: #10b981;"><%= day[:winning_trades] %></td>
-                          <td style="color: #ef4444;"><%= day[:losing_trades] %></td>
-                          <td style="color: <%= day[:total_commission] >= 0 ? '#10b981' : '#ef4444' %>;"><%= format_cost_with_sign(day[:total_commission]) %></td>
-                          <td style="color: <%= day[:total_swap] >= 0 ? '#10b981' : '#ef4444' %>;"><%= format_cost_with_sign(day[:total_swap]) %></td>
-                        </tr>
-                      <% end %>
-                    </tbody>
-                  </table>
-          </div>
-        <% end %>
-
-              <% if hour_stats.any? %>
-                <h4 style="margin-top: 24px; margin-bottom: 16px;">⏰ Analyse par Heure</h4>
-                <div class="table-wrapper">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Heure</th>
-                        <th>Trades</th>
-                        <th>Profit Total</th>
-                        <th>Profit Moyen</th>
-                        <th>Gagnants</th>
-                        <th>Perdants</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <% hour_stats.each do |hour| %>
-                        <tr>
-                          <td><strong><%= hour[:hour] %>h</strong></td>
-                          <td><%= hour[:total_trades] %></td>
-                          <td class="<%= hour[:total_profit] >= 0 ? 'positive' : 'negative' %>">
-                            <%= number_to_currency(hour[:total_profit], unit: "€", format: "%n %u") %>
-                          </td>
-                          <td class="<%= hour[:avg_profit] >= 0 ? 'positive' : 'negative' %>">
-                            <%= number_to_currency(hour[:avg_profit], unit: "€", format: "%n %u") %>
-                          </td>
-                          <td style="color: #10b981;"><%= hour[:winning_trades] %></td>
-                          <td style="color: #ef4444;"><%= hour[:losing_trades] %></td>
-                        </tr>
-                      <% end %>
-                    </tbody>
-                  </table>
-                </div>
-              <% end %>
+        <div>
+          <h1 class="text-2xl font-bold text-white"><%= @bot.name %></h1>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold <%= 
+              case @bot.risk_level&.downcase
+              when 'low' then 'bg-green-400/10 text-green-400 ring-1 ring-inset ring-green-400/25'
+              when 'medium' then 'bg-yellow-400/10 text-yellow-400 ring-1 ring-inset ring-yellow-400/25'
+              when 'high' then 'bg-red-400/10 text-red-400 ring-1 ring-inset ring-red-400/25'
+              else 'bg-neutral-400/10 text-neutral-400 ring-1 ring-inset ring-neutral-400/25'
+              end %>">
+              <%= @bot.risk_label %>
+            </span>
+            <% if @bot.is_active? %>
+              <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium bg-green-400/10 text-green-400 ring-1 ring-inset ring-green-400/25">
+                <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                Disponible
+              </span>
             <% else %>
-              <p style="text-align: center; color: var(--text-muted); padding: 20px;">
-                Aucune donnée de trading disponible pour l'analyse
-              </p>
+              <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-neutral-400/10 text-neutral-400 ring-1 ring-inset ring-neutral-400/25">
+                Non disponible
+              </span>
             <% end %>
-          <% else %>
-            <p style="text-align: center; color: var(--text-muted); padding: 20px;">
-              Aucun client n'utilise ce bot pour le moment
-            </p>
-          <% end %>
+          </div>
         </div>
-
-        <% if current_user.is_admin? %>
-        <div class="card">
-          <h3>
-            <i class="fa-icon fa-md fa-users"></i>
-            Clients Utilisant ce Bot
-          </h3>
-          <% if @purchases.any? %>
-            <table>
-              <thead>
-                <tr>
-                  <th>Client</th>
-                  <th>Date d'Achat</th>
-                  <th>Prix Payé</th>
-                  <th>Statut</th>
-                  <th>Profit Total</th>
-                  <th>Trades</th>
-                  <th>Actif</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% @purchases.each do |purchase| %>
-                  <tr>
-                    <td>
-                      <%= link_to admin_client_path(purchase.user) do %>
-                        <span style="color: white;"><%= purchase.user.email %></span>
-                      <% end %>
-                    </td>
-                    <td><%= purchase.created_at.strftime("%d/%m/%Y") %></td>
-                    <td><%= number_to_currency(purchase.price_paid, unit: "€", format: "%n %u") %></td>
-                    <td>
-                      <% if purchase.status == 'active' %>
-                        <span style="color: #4CAF50;">Actif</span>
-                      <% else %>
-                        <span style="color: #999;">Inactif</span>
-                      <% end %>
-                    </td>
-                    <td class="<%= purchase.total_profit > 0 ? 'positive' : 'negative' %>">
-                      <%= number_to_currency(purchase.total_profit, unit: "€", format: "%n %u") %>
-                    </td>
-                    <td><%= purchase.trades_count %></td>
-                    <td>
-                      <%= purchase.status_badge %>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          <% else %>
-            <p style="text-align: center; color: var(--text-muted); padding: 40px;">
-              Aucun client n'utilise ce bot pour le moment
-            </p>
-          <% end %>
-        </div>
-        <% end %>
       </div>
     </div>
+    
+    <% if current_user.is_admin? %>
+      <div class="flex items-center gap-2">
+        <%= link_to admin_bot_backtests_path(@bot), class: "flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-100 transition-all hover:bg-neutral-700" do %>
+          <i class="fa-solid fa-chart-line text-xs"></i>
+          Backtests
+        <% end %>
+        <%= link_to edit_admin_bot_path(@bot), class: "flex items-center justify-center gap-2 rounded-lg border border-amber-400/30 bg-amber-500 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-amber-400" do %>
+          <i class="fa-solid fa-pen text-xs"></i>
+          Modifier
+        <% end %>
+        <%= button_to admin_bot_path(@bot), method: :delete, data: { turbo_confirm: "Supprimer ce bot ?" }, class: "flex items-center justify-center gap-2 rounded-lg border border-red-400/30 bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-red-500" do %>
+          <i class="fa-solid fa-trash text-xs"></i>
+        <% end %>
+      </div>
+    <% end %>
   </div>
-</body>
-</html>
+
+  <% if flash[:notice] %>
+    <div class="flex items-center gap-3 p-4 rounded-xl border border-green-500/20 bg-green-500/10">
+      <i class="fa-solid fa-check-circle text-green-400"></i>
+      <p class="text-green-300"><%= flash[:notice] %></p>
+    </div>
+  <% end %>
+
+  <% if @bot.description.present? %>
+    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
+      <p class="text-neutral-300"><%= @bot.description %></p>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+      <p class="text-xs text-neutral-500 uppercase tracking-wide mb-1">Prix</p>
+      <p class="text-2xl font-bold text-white"><%= @bot.formatted_price %></p>
+    </div>
+    
+    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+      <p class="text-xs text-neutral-500 uppercase tracking-wide mb-1">Mensuel</p>
+      <p class="text-xl font-bold text-emerald-400">
+        <%= number_to_currency(projections[:monthly_max], unit: "€", format: "%n%u", precision: 0) %>
+      </p>
+      <p class="text-xs text-neutral-500">max estimé</p>
+    </div>
+    
+    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+      <p class="text-xs text-neutral-500 uppercase tracking-wide mb-1">Annuel</p>
+      <p class="text-xl font-bold <%= projections[:yearly] >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+        <%= number_to_currency(projections[:yearly], unit: "€", format: "%n%u", precision: 0) %>
+      </p>
+    </div>
+    
+    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+      <p class="text-xs text-neutral-500 uppercase tracking-wide mb-1">Win Rate</p>
+      <p class="text-2xl font-bold text-emerald-400"><%= number_to_percentage(win_rate, precision: 1) %></p>
+    </div>
+    
+    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+      <p class="text-xs text-neutral-500 uppercase tracking-wide mb-1">Drawdown</p>
+      <p class="text-2xl font-bold <%= projections[:drawdown] <= 30 ? 'text-green-400' : projections[:drawdown] <= 60 ? 'text-yellow-400' : 'text-red-400' %>">
+        <%= number_to_percentage(projections[:drawdown], precision: 1) %>
+      </p>
+    </div>
+    
+    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+      <p class="text-xs text-neutral-500 uppercase tracking-wide mb-1">Utilisateurs</p>
+      <p class="text-2xl font-bold text-blue-400"><%= @bot.active_users_count %></p>
+    </div>
+  </div>
+
+  <% if @purchases.any? %>
+    <% 
+      best_purchase = @purchases.max_by { |p| p.total_profit || 0 }
+      all_trades = best_purchase&.associated_trades || []
+    %>
+    
+    <% if all_trades.any? %>
+      <div class="bg-neutral-950 border border-neutral-800 rounded-xl overflow-hidden">
+        <div class="bg-neutral-900 px-6 py-4 border-b border-neutral-800">
+          <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+            <i class="fa-solid fa-chart-bar text-blue-400"></i>
+            Analyse des Performances
+          </h2>
+        </div>
+        
+        <div class="p-6">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <% best_day = best_purchase.get_best_performing_day %>
+            <% if best_day %>
+              <div class="bg-neutral-900 border border-neutral-800 rounded-lg p-4">
+                <p class="text-xs text-neutral-500 mb-1">Meilleur Jour</p>
+                <p class="text-lg font-bold text-white"><%= best_day[:day_name] %></p>
+                <p class="text-sm text-emerald-400"><%= number_to_currency(best_day[:total_profit], unit: "€", format: "%n%u") %></p>
+              </div>
+            <% end %>
+            
+            <% best_hour = best_purchase.get_best_performing_hour %>
+            <% if best_hour %>
+              <div class="bg-neutral-900 border border-neutral-800 rounded-lg p-4">
+                <p class="text-xs text-neutral-500 mb-1">Meilleure Heure</p>
+                <p class="text-lg font-bold text-white"><%= best_hour[:hour] %>h</p>
+                <p class="text-sm text-emerald-400"><%= number_to_currency(best_hour[:total_profit], unit: "€", format: "%n%u") %></p>
+              </div>
+            <% end %>
+            
+            <% 
+              winning = all_trades.count { |t| (t.profit || 0) > 0 }
+              total = all_trades.count
+              wr = total > 0 ? (winning.to_f / total * 100).round(1) : 0
+            %>
+            <div class="bg-neutral-900 border border-neutral-800 rounded-lg p-4">
+              <p class="text-xs text-neutral-500 mb-1">Trades Gagnants</p>
+              <p class="text-lg font-bold text-emerald-400"><%= winning %>/<%= total %></p>
+              <p class="text-sm text-neutral-400"><%= wr %>%</p>
+            </div>
+            
+            <% drawdown_pct = best_purchase.drawdown_percentage %>
+            <div class="bg-neutral-900 border border-neutral-800 rounded-lg p-4">
+              <p class="text-xs text-neutral-500 mb-1">Drawdown Actuel</p>
+              <p class="text-lg font-bold <%= drawdown_pct <= 50 ? 'text-green-400' : drawdown_pct <= 80 ? 'text-yellow-400' : 'text-red-400' %>">
+                <%= number_to_percentage(drawdown_pct, precision: 1) %>
+              </p>
+            </div>
+          </div>
+
+          <% day_stats = best_purchase.analyze_by_day_of_week %>
+          <% if day_stats.any? %>
+            <div class="mb-6">
+              <h3 class="text-sm font-semibold text-neutral-300 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-calendar-week text-purple-400"></i>
+                Par Jour
+              </h3>
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr class="border-b border-neutral-800">
+                      <th class="text-left py-3 px-4 text-xs font-semibold text-neutral-400 uppercase">Jour</th>
+                      <th class="text-right py-3 px-4 text-xs font-semibold text-neutral-400 uppercase">Trades</th>
+                      <th class="text-right py-3 px-4 text-xs font-semibold text-neutral-400 uppercase">Profit</th>
+                      <th class="text-right py-3 px-4 text-xs font-semibold text-neutral-400 uppercase">Gagnants</th>
+                      <th class="text-right py-3 px-4 text-xs font-semibold text-neutral-400 uppercase">Perdants</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-neutral-800">
+                    <% day_stats.sort_by { |d| d[:wday] }.each do |day| %>
+                      <tr class="hover:bg-neutral-900/50">
+                        <td class="py-3 px-4 text-sm font-medium text-white"><%= day[:day_name] %></td>
+                        <td class="py-3 px-4 text-sm text-neutral-400 text-right"><%= day[:total_trades] %></td>
+                        <td class="py-3 px-4 text-sm font-medium text-right <%= day[:total_profit] >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+                          <%= number_to_currency(day[:total_profit], unit: "€", format: "%n%u") %>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-emerald-400 text-right"><%= day[:winning_trades] %></td>
+                        <td class="py-3 px-4 text-sm text-red-400 text-right"><%= day[:losing_trades] %></td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          <% end %>
+
+          <% hour_stats = best_purchase.analyze_by_hour %>
+          <% if hour_stats.any? %>
+            <div>
+              <h3 class="text-sm font-semibold text-neutral-300 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-clock text-blue-400"></i>
+                Par Heure (Top 8)
+              </h3>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <% hour_stats.sort_by { |h| -h[:total_profit] }.first(8).each do |hour| %>
+                  <div class="bg-neutral-900 border border-neutral-800 rounded-lg p-3">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-sm font-bold text-white"><%= hour[:hour] %>h</span>
+                      <span class="text-xs text-neutral-500"><%= hour[:total_trades] %> trades</span>
+                    </div>
+                    <p class="text-sm font-medium <%= hour[:total_profit] >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+                      <%= number_to_currency(hour[:total_profit], unit: "€", format: "%n%u") %>
+                    </p>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+
+  <% if current_user.is_admin? %>
+    <div class="bg-neutral-950 border border-neutral-800 rounded-xl overflow-hidden">
+      <div class="bg-neutral-900 px-6 py-4 border-b border-neutral-800">
+        <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+          <i class="fa-solid fa-users text-purple-400"></i>
+          Clients (<%= @purchases.count %>)
+        </h2>
+      </div>
+      
+      <% if @purchases.any? %>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-neutral-800 bg-neutral-900/50">
+                <th class="text-left py-3 px-6 text-xs font-semibold text-neutral-400 uppercase">Client</th>
+                <th class="text-left py-3 px-6 text-xs font-semibold text-neutral-400 uppercase">Date</th>
+                <th class="text-right py-3 px-6 text-xs font-semibold text-neutral-400 uppercase">Prix</th>
+                <th class="text-right py-3 px-6 text-xs font-semibold text-neutral-400 uppercase">Profit</th>
+                <th class="text-right py-3 px-6 text-xs font-semibold text-neutral-400 uppercase">Trades</th>
+                <th class="text-center py-3 px-6 text-xs font-semibold text-neutral-400 uppercase">Statut</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-neutral-800">
+              <% @purchases.each do |purchase| %>
+                <tr class="hover:bg-neutral-900/50 transition-colors">
+                  <td class="py-4 px-6">
+                    <%= link_to admin_client_path(purchase.user), class: "flex items-center gap-3 group" do %>
+                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xs">
+                        <%= purchase.user.email[0].upcase %>
+                      </div>
+                      <span class="text-sm text-neutral-300 group-hover:text-white transition-colors"><%= purchase.user.email %></span>
+                    <% end %>
+                  </td>
+                  <td class="py-4 px-6 text-sm text-neutral-400"><%= purchase.created_at.strftime("%d/%m/%Y") %></td>
+                  <td class="py-4 px-6 text-sm text-neutral-300 text-right"><%= number_to_currency(purchase.price_paid, unit: "€", format: "%n%u") %></td>
+                  <td class="py-4 px-6 text-sm font-medium text-right <%= (purchase.total_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+                    <%= number_to_currency(purchase.total_profit || 0, unit: "€", format: "%n%u") %>
+                  </td>
+                  <td class="py-4 px-6 text-sm text-neutral-400 text-right"><%= purchase.trades_count || 0 %></td>
+                  <td class="py-4 px-6 text-center">
+                    <% if purchase.status == 'active' %>
+                      <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-green-400/10 text-green-400 ring-1 ring-inset ring-green-400/25">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                        Actif
+                      </span>
+                    <% else %>
+                      <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-neutral-400/10 text-neutral-400 ring-1 ring-inset ring-neutral-400/25">
+                        Inactif
+                      </span>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="text-center py-12 px-6">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-neutral-800 flex items-center justify-center">
+            <i class="fa-solid fa-users text-2xl text-neutral-600"></i>
+          </div>
+          <p class="text-neutral-400">Aucun client n'utilise ce bot pour le moment</p>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

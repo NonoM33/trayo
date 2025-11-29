@@ -1,0 +1,117 @@
+<% content_for :title, @product.name %>
+
+<div class="max-w-4xl mx-auto space-y-6">
+  <!-- Back Link -->
+  <%= link_to admin_shop_index_path, class: "inline-flex items-center gap-2 text-neutral-400 hover:text-white transition-colors mb-4" do %>
+    <i class="fa-solid fa-arrow-left"></i>
+    Retour à la Boutique
+  <% end %>
+
+  <!-- Canceled Banner -->
+  <% if params[:canceled] == 'true' %>
+    <div class="rounded-xl bg-red-500/10 border border-red-500/30 p-4 flex items-center gap-3">
+      <i class="fa-solid fa-times-circle text-red-400"></i>
+      <p class="text-red-300">Le paiement a été annulé. Vous pouvez réessayer quand vous le souhaitez.</p>
+    </div>
+  <% end %>
+
+  <!-- Hero Section -->
+  <div class="relative rounded-2xl bg-gradient-to-br from-emerald-500/15 to-teal-500/5 border-2 border-emerald-500/30 p-8 overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
+    
+    <% if @product.badge.present? %>
+      <span class="absolute top-6 right-6 px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wide bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30 animate-pulse">
+        <%= @product.badge %>
+      </span>
+    <% end %>
+    
+    <div class="relative">
+      <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center mb-5 shadow-lg shadow-emerald-500/30">
+        <i class="fa-solid <%= @product.icon %> text-white text-3xl"></i>
+      </div>
+      
+      <h1 class="text-3xl font-extrabold text-white mb-3"><%= @product.name %></h1>
+      <p class="text-lg text-neutral-300 max-w-xl leading-relaxed"><%= @product.description %></p>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+    <!-- Features (3 cols) -->
+    <div class="lg:col-span-3 rounded-xl bg-neutral-900 border border-neutral-800 p-6">
+      <h2 class="text-lg font-bold text-white mb-5 flex items-center gap-2">
+        <i class="fa-solid fa-check-double text-emerald-400"></i>
+        Ce qui est inclus
+      </h2>
+      
+      <ul class="space-y-4">
+        <% @product.features_list.each do |feature| %>
+          <li class="flex items-start gap-4 p-4 rounded-xl bg-neutral-800/50 border border-neutral-700/50">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid fa-check text-emerald-400 text-sm"></i>
+            </div>
+            <span class="text-neutral-200 leading-relaxed"><%= feature %></span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+
+    <!-- Purchase Card (2 cols) -->
+    <div class="lg:col-span-2">
+      <div class="rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border-2 border-emerald-500/20 p-6 sticky top-6">
+        <!-- Price -->
+        <div class="text-center pb-6 mb-6 border-b border-emerald-500/20">
+          <div class="text-5xl font-extrabold text-emerald-400"><%= @product.price.to_i %>€</div>
+          <div class="text-lg text-neutral-400 mt-1"><%= @product.interval_label %></div>
+          <% if @product.subscription? %>
+            <p class="text-sm text-neutral-500 mt-3">Renouvellement automatique, annulable à tout moment</p>
+          <% end %>
+        </div>
+        
+        <!-- CTA Button -->
+        <% cart_products = session[:cart]&.dig(:products) || [] %>
+        <% if @already_owned %>
+          <div class="w-full py-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold text-center flex items-center justify-center gap-2 text-lg">
+            <i class="fa-solid fa-check-circle"></i>
+            Déjà souscrit
+          </div>
+        <% elsif cart_products.include?(@product.id) %>
+          <div class="space-y-3">
+            <div class="w-full py-4 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 font-semibold text-center flex items-center justify-center gap-2 text-lg">
+              <i class="fa-solid fa-check"></i>
+              Dans votre panier
+            </div>
+            <%= link_to admin_cart_path, class: "w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-center flex items-center justify-center gap-2 hover:from-emerald-600 hover:to-teal-600 transition-all" do %>
+              <i class="fa-solid fa-shopping-cart"></i>
+              Voir le panier
+            <% end %>
+          </div>
+        <% else %>
+          <%= button_to add_product_admin_cart_path(@product), method: :post, class: "w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-lg text-center flex items-center justify-center gap-3 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/30 cursor-pointer border-none" do %>
+            <i class="fa-solid fa-cart-plus text-xl"></i>
+            Ajouter au panier
+          <% end %>
+        <% end %>
+        
+        <!-- Security Badges -->
+        <div class="flex items-center justify-center gap-6 mt-6 pt-6 border-t border-emerald-500/20">
+          <div class="flex items-center gap-2 text-sm text-neutral-400">
+            <i class="fa-solid fa-lock text-emerald-400"></i>
+            Paiement sécurisé
+          </div>
+          <div class="flex items-center gap-2 text-sm text-neutral-400">
+            <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+            SSL 256-bit
+          </div>
+        </div>
+        
+        <!-- Guarantee -->
+        <div class="mt-6 p-4 rounded-lg bg-neutral-800/50 text-center">
+          <p class="text-sm text-neutral-400">
+            <strong class="text-white">Satisfait ou remboursé</strong> pendant 14 jours
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

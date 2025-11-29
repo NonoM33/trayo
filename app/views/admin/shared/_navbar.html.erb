@@ -1,69 +1,35 @@
-<div class="navbar">
-  <div style="display: flex; align-items: center; gap: 16px;">
-    <button class="theme-toggle" onclick="toggleMobileSidebar()" aria-label="Toggle menu" style="display: none;" id="mobileMenuBtn">
-      <span class="theme-icon"><i class="fa-icon fa-md fa-bars"></i></span>
+<div style="position: fixed !important; top: 0 !important; left: 256px !important; right: 0 !important; height: 64px !important; background-color: #111827 !important; border-bottom: 1px solid #374151 !important; padding: 0 24px !important; z-index: 9998 !important; color: #ffffff !important; display: flex !important; align-items: center !important; justify-content: space-between !important; transition: left 0.3s !important;" id="navbar">
+  <div class="flex items-center gap-4">
+    <button data-action="click->sidebar#openMobile" class="md:hidden p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400" aria-label="Toggle menu" id="mobileMenuBtn">
+      <i class="fa-solid fa-bars"></i>
     </button>
-    <h2 class="navbar-title">
+    <h2 class="text-xl font-bold text-neutral-900 dark:text-white flex items-center gap-2">
       <% if @page_title&.include?('VPS') %>
-        <i class="fa-icon fa-md fa-desktop"></i>
+        <i class="fa-solid fa-server"></i>
       <% elsif @page_title&.include?('Bot') %>
-        <i class="fa-icon fa-md fa-robot"></i>
+        <i class="fa-solid fa-robot"></i>
       <% elsif @page_title&.include?('Client') %>
-        <i class="fa-icon fa-md fa-users"></i>
+        <i class="fa-solid fa-users"></i>
       <% elsif @page_title&.include?('Bonus') %>
-        <i class="fa-icon fa-md fa-gift"></i>
+        <i class="fa-solid fa-gift"></i>
       <% else %>
-        <i class="fa-icon fa-md fa-chart-line"></i>
+        <i class="fa-solid fa-chart-line"></i>
       <% end %>
       <%= @page_title || 'Dashboard' %>
     </h2>
   </div>
-  <div class="navbar-right">
+  <div class="flex items-center gap-3">
     <% total_credits = current_user.total_credits %>
-    <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: linear-gradient(135deg, var(--color-success), var(--color-success-hover)); border-radius: 12px; box-shadow: var(--shadow-sm);">
-      <i class="fa-icon fa-md fa-gift" style="color: white;"></i>
-      <span style="color: white; font-weight: 700; font-size: 15px;">
-        <%= number_to_currency(total_credits, unit: "€", format: "%n %u", precision: 2) %> crédits
+    <%= link_to admin_shop_index_path(anchor: 'credits'), class: "group flex items-center gap-2.5 px-4 py-2 rounded-xl transition-all #{total_credits > 0 ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40' : 'bg-gradient-to-r from-violet-500 to-purple-600 shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40'} hover:scale-105" do %>
+      <i class="fa-solid fa-wallet text-white"></i>
+      <span class="text-white font-bold text-sm">
+        <%= number_to_currency(total_credits, unit: "€", format: "%n%u", precision: 2) %> crédits
       </span>
-    </div>
+      <% if total_credits < 100 %>
+        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-white/20 text-white group-hover:bg-white/30">
+          +10%
+        </span>
+      <% end %>
+    <% end %>
   </div>
 </div>
-
-<script>
-  function toggleTheme() {
-    const body = document.body;
-    const icon = document.getElementById('themeIcon');
-    
-    if (body.classList.contains('dark-mode')) {
-      body.classList.remove('dark-mode');
-      icon.innerHTML = '<i class="fa-solid fa-moon"></i>';
-      localStorage.setItem('theme', 'light');
-    } else {
-      body.classList.add('dark-mode');
-      icon.innerHTML = '<i class="fa-solid fa-sun"></i>';
-      localStorage.setItem('theme', 'dark');
-    }
-  }
-  
-  (function() {
-    const savedTheme = localStorage.getItem('theme');
-    const icon = document.getElementById('themeIcon');
-    
-    if (savedTheme === 'dark') {
-      document.body.classList.add('dark-mode');
-      if (icon) icon.innerHTML = '<i class="fa-solid fa-sun"></i>';
-    }
-    
-    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    if (window.innerWidth <= 768 && mobileMenuBtn) {
-      mobileMenuBtn.style.display = 'flex';
-    }
-    
-    window.addEventListener('resize', function() {
-      if (mobileMenuBtn) {
-        mobileMenuBtn.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
-      }
-    });
-  })();
-</script>
-

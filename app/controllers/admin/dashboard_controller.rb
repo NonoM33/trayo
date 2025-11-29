@@ -208,25 +208,29 @@ module Admin
       @average_daily_gain = @client.average_daily_gain
     end
 
-  def monitoring_status
-    return head :forbidden unless current_user.is_admin?
-    
-    all_accounts = Mt5Account.where.not(last_heartbeat_at: nil)
-    online_accounts = all_accounts.where("last_heartbeat_at > ?", 30.seconds.ago)
-    offline_accounts = all_accounts.where("last_heartbeat_at <= ?", 30.seconds.ago)
-    
-    render json: {
-      online_count: online_accounts.count,
-      offline_count: offline_accounts.count,
-      offline_accounts: offline_accounts.map do |account|
-        {
-          account_name: account.account_name,
-          last_heartbeat_at: account.last_heartbeat_at,
-          time_ago: account.last_heartbeat_at ? time_ago_in_words(account.last_heartbeat_at) : nil
-        }
-      end
-    }
-  end
+    def monitoring_status
+      return head :forbidden unless current_user.is_admin?
+      
+      all_accounts = Mt5Account.where.not(last_heartbeat_at: nil)
+      online_accounts = all_accounts.where("last_heartbeat_at > ?", 30.seconds.ago)
+      offline_accounts = all_accounts.where("last_heartbeat_at <= ?", 30.seconds.ago)
+      
+      render json: {
+        online_count: online_accounts.count,
+        offline_count: offline_accounts.count,
+        offline_accounts: offline_accounts.map do |account|
+          {
+            account_name: account.account_name,
+            last_heartbeat_at: account.last_heartbeat_at&.iso8601,
+            time_ago: account.last_heartbeat_at ? ActionController::Base.helpers.time_ago_in_words(account.last_heartbeat_at) : nil
+          }
+        end
+      }
+    rescue => e
+      Rails.logger.error "Error in monitoring_status: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      render json: { error: "Internal server error" }, status: :internal_server_error
+    end
 
   def test_icons
     # Page de test pour les icônes

@@ -1,48 +1,124 @@
-<div class="container">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-    <h1>Logs SMS</h1>
-    <%= link_to "Retour aux Clients", admin_clients_path, class: "btn btn-outline" %>
+<% @page_title = "SMS" %>
+
+<div class="space-y-6">
+  <%= render 'admin/shared/flash_messages' %>
+
+  <% logs = @logs || [] %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-comment-sms',
+        icon_color: 'blue',
+        label: 'Total SMS',
+        value: logs.respond_to?(:total_count) ? logs.total_count : logs.count %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-paper-plane',
+        icon_color: 'green',
+        label: 'Envoyés',
+        value: logs.select { |l| l.status == 'sent' }.count,
+        value_color: 'green' %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-clock',
+        icon_color: 'amber',
+        label: 'En Attente',
+        value: logs.select { |l| l.status == 'pending' }.count,
+        value_color: 'amber' %>
+    
+    <%= render 'admin/shared/stat_card',
+        icon: 'fa-times-circle',
+        icon_color: 'red',
+        label: 'Échoués',
+        value: logs.select { |l| l.status == 'failed' }.count,
+        value_color: 'red' %>
   </div>
 
-  <div class="card">
-    <table class="table-flat">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Client</th>
-          <th>Téléphone</th>
-          <th>Type</th>
-          <th>Montant</th>
-          <th>REF</th>
-          <th>Message</th>
-          <th>Statut</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @logs.each do |log| %>
-          <tr>
-            <td><%= log.created_at.strftime("%d/%m/%Y %H:%M") %></td>
-            <td><%= link_to log.user.email, admin_client_path(log.user) %></td>
-            <td><%= log.phone_number %></td>
-            <td><%= log.kind.humanize %></td>
-            <td><%= number_to_currency(log.amount, unit: "€", format: "%n %u") %></td>
-            <td><%= log.watermark_reference.present? ? "REF #{log.watermark_reference.round(2)}" : "-" %></td>
-            <td>
-              <div class="sms-message" title="<%= log.message_content %>">
-                <%= log.short_message %>
-              </div>
-            </td>
-            <td>
-              <span class="status-pill status-<%= log.status %>"><%= log.status_label %></span>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+  <div class="relative w-full bg-neutral-950 rounded-xl overflow-hidden"
+       data-controller="scroll-area"
+       data-scroll-area-target="root"
+       data-action="mouseenter->scroll-area#onRootMouseEnter mouseleave->scroll-area#onRootMouseLeave">
 
-    <div style="margin-top: 12px; text-align: right;">
-      <%= paginate @logs if @logs.respond_to?(:total_pages) %>
+    <div class="px-6 py-5 flex items-center justify-between bg-neutral-900">
+      <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+        <i class="fa-solid fa-comment-sms text-blue-400"></i>
+        Logs SMS
+      </h2>
+      <%= link_to admin_clients_path, class: "flex items-center justify-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-800 px-3.5 py-2 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white" do %>
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Retour aux Clients</span>
+      <% end %>
     </div>
+
+    <% if @logs&.any? %>
+      <div data-scroll-area-target="viewport"
+           data-action="scroll->scroll-area#onViewportScroll"
+           class="max-h-[600px] overflow-auto scrollbar-hide bg-neutral-950">
+        <table class="w-full min-w-[1000px]">
+          <thead class="sticky top-0 z-10 bg-neutral-900">
+            <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Date</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Client</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Téléphone</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Type</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-right">Montant</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">REF</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100">Message</th>
+              <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 text-center">Statut</th>
+            </tr>
+          </thead>
+          <tbody class="*:even:bg-neutral-900/50 *:*:py-4 bg-neutral-950">
+            <% @logs.each do |log| %>
+              <tr class="hover:bg-neutral-800 transition-colors">
+                <td class="px-6 text-sm text-neutral-300"><%= log.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+                <td class="px-6">
+                  <% if log.user.present? %>
+                    <%= render 'admin/shared/avatar', user: log.user, size: 'sm', link: admin_client_path(log.user) %>
+                  <% else %>
+                    <span class="text-sm text-neutral-500 italic">Inconnu</span>
+                  <% end %>
+                </td>
+                <td class="px-6 text-sm text-neutral-300 font-mono"><%= log.phone_number %></td>
+                <td class="px-6">
+                  <span class="px-2 py-1 rounded text-xs font-medium bg-purple-500/20 text-purple-400"><%= log.kind.humanize %></span>
+                </td>
+                <td class="px-6 text-right">
+                  <span class="font-semibold text-cyan-400"><%= number_to_currency(log.amount, unit: "€", format: "%n%u") %></span>
+                </td>
+                <td class="px-6 text-sm text-neutral-400 font-mono">
+                  <%= log.watermark_reference.present? ? "REF #{log.watermark_reference.round(2)}" : "—" %>
+                </td>
+                <td class="px-6">
+                  <p class="text-sm text-neutral-300 line-clamp-1 max-w-xs" title="<%= log.message_content %>">
+                    <%= log.short_message %>
+                  </p>
+                </td>
+                <td class="px-6 text-center">
+                  <% variant = case log.status
+                     when 'sent' then 'success'
+                     when 'pending' then 'warning'
+                     when 'failed' then 'danger'
+                     else 'neutral'
+                     end %>
+                  <%= render 'admin/shared/status_badge', label: log.status_label, variant: variant %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      
+      <% if @logs.respond_to?(:total_pages) %>
+        <div class="px-6 py-4 border-t border-neutral-800">
+          <%= paginate @logs %>
+        </div>
+      <% end %>
+    <% else %>
+      <%= render 'admin/shared/empty_state',
+          icon: 'fa-comment-sms',
+          icon_gradient: 'from-blue-500/20 to-cyan-500/20',
+          icon_color: 'text-blue-400',
+          title: 'Aucun SMS',
+          description: 'Les logs SMS apparaîtront ici.' %>
+    <% end %>
   </div>
 </div>
-

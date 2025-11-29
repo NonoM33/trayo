@@ -1,0 +1,201 @@
+<% content_for :title, "Nouvelle Campagne SMS/Email" %>
+
+<div class="space-y-6 max-w-3xl mx-auto">
+  <!-- Header -->
+  <div class="flex items-center gap-4">
+    <%= link_to admin_sms_campaigns_path, class: "p-2 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors" do %>
+      <i class="fa-solid fa-arrow-left"></i>
+    <% end %>
+    <div>
+      <h1 class="text-2xl font-bold text-white">Nouvelle Campagne</h1>
+      <p class="text-neutral-400">Créez une campagne SMS et/ou Email</p>
+    </div>
+  </div>
+
+  <%= form_with model: [:admin, @campaign], local: true, class: "space-y-6", data: { controller: "campaign-form" } do |f| %>
+    <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6 space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-neutral-300 mb-2">Nom de la campagne *</label>
+        <%= f.text_field :name, class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500", placeholder: "Ex: Relance commissions Novembre" %>
+      </div>
+
+      <!-- Channel Selection -->
+      <div>
+        <label class="block text-sm font-medium text-neutral-300 mb-3">Canal d'envoi *</label>
+        <div class="grid grid-cols-3 gap-3">
+          <label class="relative cursor-pointer">
+            <%= f.radio_button :campaign_type, 'sms', class: "peer sr-only", checked: true, data: { action: "change->campaign-form#toggleChannel" } %>
+            <div class="p-4 rounded-xl border-2 border-neutral-700 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 transition-all text-center">
+              <i class="fa-solid fa-comment-sms text-2xl text-emerald-400 mb-2"></i>
+              <div class="font-medium text-white">SMS</div>
+              <div class="text-xs text-neutral-400">uniquement</div>
+            </div>
+          </label>
+          
+          <label class="relative cursor-pointer">
+            <%= f.radio_button :campaign_type, 'email', class: "peer sr-only", data: { action: "change->campaign-form#toggleChannel" } %>
+            <div class="p-4 rounded-xl border-2 border-neutral-700 peer-checked:border-blue-500 peer-checked:bg-blue-500/10 transition-all text-center">
+              <i class="fa-solid fa-envelope text-2xl text-blue-400 mb-2"></i>
+              <div class="font-medium text-white">Email</div>
+              <div class="text-xs text-neutral-400">uniquement</div>
+            </div>
+          </label>
+          
+          <label class="relative cursor-pointer">
+            <%= f.radio_button :campaign_type, 'sms_email', class: "peer sr-only", data: { action: "change->campaign-form#toggleChannel" } %>
+            <div class="p-4 rounded-xl border-2 border-neutral-700 peer-checked:border-purple-500 peer-checked:bg-purple-500/10 transition-all text-center">
+              <i class="fa-solid fa-paper-plane text-2xl text-purple-400 mb-2"></i>
+              <div class="font-medium text-white">SMS + Email</div>
+              <div class="text-xs text-neutral-400">les deux</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">Type de message</label>
+          <%= f.select :sms_type, 
+              options_for_select([
+                ["📢 Relance Commission", "relance_commission"],
+                ["💰 Rappel Paiement", "rappel_paiement"],
+                ["🎉 Promotion", "promotion"],
+                ["🤖 Activation Bot", "activation_bot"],
+                ["⚠️ Alerte Compte", "alerte_compte"],
+                ["📊 Performance", "performance"],
+                ["🔧 Maintenance", "maintenance"],
+                ["✨ Bienvenue", "bienvenue"],
+                ["📝 Personnalisé", "personnalise"]
+              ], @campaign.sms_type),
+              { include_blank: "Choisir un type..." },
+              class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" %>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">Audience cible *</label>
+          <%= f.select :target_audience,
+              options_for_select([
+                ["Tous les clients", "all_clients"],
+                ["Clients actifs (bots running)", "active_clients"],
+                ["Clients inactifs", "inactive_clients"],
+                ["Clients avec solde > 0", "with_balance"],
+                ["Commissions impayées", "unpaid_commissions"],
+                ["Nouveaux clients (30 jours)", "new_clients"]
+              ], @campaign.target_audience),
+              { include_blank: "Choisir une audience..." },
+              class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" %>
+        </div>
+      </div>
+
+      <!-- SMS Section -->
+      <div id="sms-section" data-campaign-form-target="smsSection">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="fa-solid fa-comment-sms text-emerald-400"></i>
+          <label class="text-sm font-medium text-neutral-300">Message SMS</label>
+        </div>
+        <%= f.text_area :message_template, rows: 4, class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500", placeholder: "TRAYO: Votre message SMS ici..." %>
+        <p class="text-xs text-neutral-500 mt-2">
+          <strong>Variables:</strong> {prenom}, {nom}, {solde}, {commission} • <span id="char-count">0</span>/160 caractères
+        </p>
+      </div>
+
+      <!-- Email Section -->
+      <div id="email-section" class="hidden space-y-4" data-campaign-form-target="emailSection">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="fa-solid fa-envelope text-blue-400"></i>
+          <label class="text-sm font-medium text-neutral-300">Email</label>
+        </div>
+        
+        <div>
+          <label class="block text-xs text-neutral-400 mb-1">Sujet</label>
+          <%= f.text_field :email_subject, class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500", placeholder: "Sujet de l'email..." %>
+        </div>
+        
+        <div>
+          <label class="block text-xs text-neutral-400 mb-1">Corps de l'email</label>
+          <%= f.text_area :email_body, rows: 8, class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono text-sm", placeholder: "Bonjour {prenom},\n\nVotre message ici...\n\nCordialement,\nL'équipe TRAYO" %>
+        </div>
+      </div>
+
+      <div class="rounded-lg bg-neutral-800/50 p-4">
+        <h4 class="text-sm font-medium text-neutral-300 mb-2">Templates rapides</h4>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="setTemplate('relance')" class="px-3 py-1.5 text-xs rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 transition-colors">
+            Relance commission
+          </button>
+          <button type="button" onclick="setTemplate('promo')" class="px-3 py-1.5 text-xs rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 transition-colors">
+            Promotion
+          </button>
+          <button type="button" onclick="setTemplate('maintenance')" class="px-3 py-1.5 text-xs rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 transition-colors">
+            Maintenance
+          </button>
+          <button type="button" onclick="setTemplate('bienvenue')" class="px-3 py-1.5 text-xs rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 transition-colors">
+            Bienvenue
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-end gap-3">
+      <%= link_to admin_sms_campaigns_path, class: "px-4 py-2.5 rounded-lg border border-neutral-700 text-neutral-300 hover:bg-neutral-800 transition-colors font-medium" do %>
+        Annuler
+      <% end %>
+      <%= f.submit "Créer la campagne", class: "px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors cursor-pointer" %>
+    </div>
+  <% end %>
+</div>
+
+<script>
+const templates = {
+  relance: {
+    sms: "TRAYO: Bonjour {prenom}, votre commission de {commission}€ est en attente de règlement. Merci de régulariser votre situation.",
+    subject: "Rappel: Commission en attente",
+    email: "Bonjour {prenom},\n\nNous vous rappelons que votre commission de {commission}€ est en attente de règlement.\n\nMerci de régulariser votre situation dans les plus brefs délais.\n\nCordialement,\nL'équipe TRAYO"
+  },
+  promo: {
+    sms: "TRAYO: Offre exclusive! Profitez de -20% sur votre prochain bot. Code: PROMO20. Valable 48h.",
+    subject: "🎉 Offre exclusive: -20% sur votre prochain bot!",
+    email: "Bonjour {prenom},\n\nNous avons une offre exclusive pour vous!\n\nProfitez de -20% sur votre prochain bot avec le code PROMO20.\n\nCette offre est valable 48h seulement.\n\nCordialement,\nL'équipe TRAYO"
+  },
+  maintenance: {
+    sms: "TRAYO: Maintenance prévue ce soir de 23h à 2h. Vos bots seront temporairement suspendus. Merci de votre compréhension.",
+    subject: "🔧 Maintenance programmée ce soir",
+    email: "Bonjour {prenom},\n\nNous vous informons qu'une maintenance est prévue ce soir de 23h à 2h.\n\nVos bots seront temporairement suspendus pendant cette période.\n\nMerci de votre compréhension.\n\nCordialement,\nL'équipe TRAYO"
+  },
+  bienvenue: {
+    sms: "TRAYO: Bienvenue {prenom}! Votre compte est prêt. Vos bots vont commencer à trader. L'équipe TRAYO.",
+    subject: "✨ Bienvenue chez TRAYO!",
+    email: "Bonjour {prenom},\n\nBienvenue chez TRAYO!\n\nVotre compte est maintenant prêt et vos bots vont commencer à trader.\n\nSi vous avez des questions, n'hésitez pas à nous contacter.\n\nCordialement,\nL'équipe TRAYO"
+  }
+};
+
+function setTemplate(type) {
+  const t = templates[type];
+  document.getElementById('sms_campaign_message_template').value = t.sms;
+  document.getElementById('sms_campaign_email_subject').value = t.subject;
+  document.getElementById('sms_campaign_email_body').value = t.email;
+  updateCharCount();
+}
+
+function updateCharCount() {
+  const textarea = document.getElementById('sms_campaign_message_template');
+  document.getElementById('char-count').textContent = textarea.value.length;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const smsSection = document.getElementById('sms-section');
+  const emailSection = document.getElementById('email-section');
+  
+  document.querySelectorAll('input[name="sms_campaign[campaign_type]"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      const type = this.value;
+      smsSection.classList.toggle('hidden', type === 'email');
+      emailSection.classList.toggle('hidden', type === 'sms');
+    });
+  });
+
+  document.getElementById('sms_campaign_message_template').addEventListener('input', updateCharCount);
+  updateCharCount();
+});
+</script>
+

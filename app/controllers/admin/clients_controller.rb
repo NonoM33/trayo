@@ -6,6 +6,7 @@ module Admin
     def index
       @clients = User.clients.order(:email)
       @admins = User.admins.order(:email)
+      @invitations = Invitation.order(created_at: :desc).limit(20)
       trades_scope = Trade.joins(mt5_account: :user).where(users: { is_admin: false })
       @average_daily_gain_all = Trade.average_daily_gain(scope: trades_scope)
     end
@@ -33,7 +34,9 @@ module Admin
       @invoices_total_due = @invoices.sum(&:balance_due)
       @available_bot_purchases = @client.bot_purchases.includes(:trading_bot).where(invoice_id: nil)
       @available_vps = @client.vps.where(invoice_id: nil)
-    @recent_commission_reminders = @client.commission_reminders.recent.limit(5)
+      @recent_commission_reminders = @client.commission_reminders.recent.limit(5)
+      @performance = CommissionBillingService.calculate_user_performance(@client)
+      @pending_commission_invoices = @client.commission_invoices.unpaid
       @average_daily_gain = @client.average_daily_gain
       
       bot_purchases_count = @client.bot_purchases.count
@@ -68,9 +71,9 @@ module Admin
       end
       
       if @client.update(update_params)
-        redirect_to admin_client_path(@client), notice: "User updated successfully"
+        redirect_to admin_client_path(@client), notice: "Client mis à jour avec succès"
       else
-        render :edit, status: :unprocessable_entity
+        redirect_to admin_client_path(@client), alert: "Erreur: #{@client.errors.full_messages.join(', ')}"
       end
     end
 
@@ -256,10 +259,72 @@ module Admin
       end
     end
 
+    def send_sms
+      @client = User.find(params[:id])
+      
+      if @client.phone.blank?
+        redirect_to admin_client_path(@client), alert: "Pas de numéro de téléphone enregistré."
+        return
+      end
+
+      message = params[:message]
+      sms_type = params[:sms_type]
+      scheduled_at = params[:scheduled_at]
+      is_scheduled = params[:schedule] == "1" && scheduled_at.present?
+
+      message = message.gsub('{prenom}', @client.first_name.to_s)
+                       .gsub('{nom}', @client.last_name.to_s)
+                       .gsub('{solde}', @client.mt5_accounts.sum(:balance).round(2).to_s)
+                       .gsub('{commission}', (CommissionBillingService.calculate_user_performance(@client)[:pending_commission] || 0).round(2).to_s)
+
+      if is_scheduled
+        ScheduledSms.create!(
+          user: @client,
+          created_by: current_user,
+          message: message,
+          sms_type: sms_type,
+          phone_number: @client.phone,
+          scheduled_at: DateTime.parse(scheduled_at),
+          status: 'pending'
+        )
+        redirect_to admin_client_path(@client), notice: "SMS programmé pour le #{DateTime.parse(scheduled_at).strftime('%d/%m/%Y à %H:%M')}"
+      else
+        begin
+          SmsService.send_sms(@client.phone, message)
+          
+          SmsCampaignLog.create(
+            user: @client,
+            sms_type: sms_type,
+            message: message,
+            phone_number: @client.phone,
+            status: 'sent',
+            sent_at: Time.current,
+            sent_by: current_user
+          ) rescue nil
+
+          redirect_to admin_client_path(@client), notice: "SMS envoyé avec succès à #{@client.phone}"
+        rescue => e
+          redirect_to admin_client_path(@client), alert: "Erreur lors de l'envoi: #{e.message}"
+        end
+      end
+    end
+
     def sms_preview
       @client = User.find(params[:id])
       result = CommissionReminderSender.new(@client).preview(kind: "manual")
       render partial: "admin/clients/sms_preview_modal", locals: { client: @client, result: result }
+    end
+
+    def cancel_scheduled_sms
+      @client = User.find(params[:id])
+      sms = ScheduledSms.find(params[:sms_id])
+      
+      if sms.user_id == @client.id && sms.pending?
+        sms.cancel!
+        redirect_to admin_client_path(@client, tab: 'sms'), notice: "SMS programmé annulé"
+      else
+        redirect_to admin_client_path(@client, tab: 'sms'), alert: "Impossible d'annuler ce SMS"
+      end
     end
 
     private
@@ -413,7 +478,12 @@ module Admin
     end
 
     def user_update_params
-      params.require(:user).permit(:email, :first_name, :last_name, :phone, :commission_rate, :is_admin)
+      permitted = params.require(:user).permit(:email, :first_name, :last_name, :phone, :commission_rate, :is_admin, :password, :password_confirmation)
+      if permitted[:password].blank?
+        permitted.except(:password, :password_confirmation)
+      else
+        permitted
+      end
     end
 
     def ensure_own_profile_or_admin

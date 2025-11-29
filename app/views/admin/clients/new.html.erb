@@ -1,37 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Nouvel Utilisateur - Admin Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-  <style>
-    .container { max-width: 800px; }
-    .btn { padding: 12px 30px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-    .btn:hover { background: #45a049; }
-    .error-messages { background: #f44336; color: white; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
-    .error-messages ul { margin: 0; padding-left: 20px; }
-    .checkbox-group { display: flex; align-items: center; }
-    .checkbox-group input[type="checkbox"] { width: auto; margin-right: 10px; }
-    .checkbox-group label { margin: 0; }
-    .help-text { font-size: 13px; color: #666; margin-top: 5px; }
-    .role-selector { background: #f9f9f9; padding: 20px; border-radius: 4px; border: 2px solid #ddd; }
-    .role-option { margin-bottom: 15px; }
-    .role-option:last-child { margin-bottom: 0; }
-    .role-option label { display: flex; align-items: flex-start; cursor: pointer; }
-    .role-option input[type="radio"] { margin-right: 10px; margin-top: 3px; }
-    .role-description { font-size: 13px; color: #666; margin-top: 3px; }
-  </style>
-</head>
-<body>
-  <% @page_title = "Créer un Nouvel Utilisateur" %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
-      
-      <div class="container">
-    <%= link_to "<i class='fa-icon fa-md fa-arrow-left'></i> Retour aux Utilisateurs".html_safe, admin_clients_path, class: "back-link" %>
+<% @page_title = "Créer un Nouvel Utilisateur" %>
+
+<%= link_to "<i class='fa-icon fa-md fa-arrow-left'></i> Retour aux Utilisateurs".html_safe, admin_clients_path, class: "back-link" %>
 
     <div class="card">
       <h2>Créer un Nouvel Utilisateur</h2>
@@ -111,9 +80,3 @@
 
         <%= f.submit "Create User", class: "btn" %>
       <% end %>
-      </div>
-    </div>
-  </div>
-</body>
-</html>
-

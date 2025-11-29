@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_29_030108) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -35,6 +35,46 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
     t.string "original_filename"
     t.index ["is_active"], name: "index_backtests_on_is_active"
     t.index ["trading_bot_id"], name: "index_backtests_on_trading_bot_id"
+  end
+
+  create_table "banner_dismissals", force: :cascade do |t|
+    t.bigint "banner_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "dismissed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["banner_id", "user_id"], name: "index_banner_dismissals_on_banner_id_and_user_id", unique: true
+    t.index ["banner_id"], name: "index_banner_dismissals_on_banner_id"
+    t.index ["user_id"], name: "index_banner_dismissals_on_user_id"
+  end
+
+  create_table "banners", force: :cascade do |t|
+    t.string "title", null: false
+    t.text "content"
+    t.string "banner_type", default: "info"
+    t.string "icon"
+    t.string "background_color"
+    t.string "text_color"
+    t.string "button_text"
+    t.string "button_url"
+    t.string "target_audience", default: "all"
+    t.text "target_filters"
+    t.boolean "is_dismissible", default: true
+    t.boolean "is_active", default: true
+    t.datetime "starts_at"
+    t.datetime "ends_at"
+    t.integer "priority", default: 0
+    t.integer "views_count", default: 0
+    t.integer "clicks_count", default: 0
+    t.integer "dismissals_count", default: 0
+    t.bigint "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["banner_type"], name: "index_banners_on_banner_type"
+    t.index ["created_by_id"], name: "index_banners_on_created_by_id"
+    t.index ["is_active"], name: "index_banners_on_is_active"
+    t.index ["starts_at", "ends_at"], name: "index_banners_on_starts_at_and_ends_at"
+    t.index ["target_audience"], name: "index_banners_on_target_audience"
   end
 
   create_table "bonus_deposits", force: :cascade do |t|
@@ -111,6 +151,33 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
     t.index ["is_active", "start_date", "end_date"], name: "index_campaigns_on_is_active_and_start_date_and_end_date"
   end
 
+  create_table "commission_invoices", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "invoice_id"
+    t.string "reference", null: false
+    t.string "period_type"
+    t.date "period_start"
+    t.date "period_end"
+    t.decimal "total_profit", precision: 15, scale: 2, default: "0.0"
+    t.decimal "commission_rate", precision: 5, scale: 2
+    t.decimal "commission_amount", precision: 15, scale: 2, default: "0.0"
+    t.decimal "late_fee", precision: 15, scale: 2, default: "0.0"
+    t.decimal "total_amount", precision: 15, scale: 2, default: "0.0"
+    t.string "status", default: "pending"
+    t.string "stripe_payment_intent_id"
+    t.datetime "due_date"
+    t.datetime "paid_at"
+    t.datetime "reminder_sent_at"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["due_date"], name: "index_commission_invoices_on_due_date"
+    t.index ["invoice_id"], name: "index_commission_invoices_on_invoice_id"
+    t.index ["reference"], name: "index_commission_invoices_on_reference", unique: true
+    t.index ["status"], name: "index_commission_invoices_on_status"
+    t.index ["user_id"], name: "index_commission_invoices_on_user_id"
+  end
+
   create_table "commission_reminders", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "kind", default: "initial", null: false
@@ -128,6 +195,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
     t.string "external_id"
     t.index ["user_id", "kind", "created_at"], name: "idx_commission_reminders_user_kind_created"
     t.index ["user_id"], name: "index_commission_reminders_on_user_id"
+  end
+
+  create_table "credit_packs", force: :cascade do |t|
+    t.integer "amount"
+    t.integer "bonus_percentage"
+    t.string "label"
+    t.boolean "is_popular"
+    t.boolean "is_best"
+    t.boolean "active"
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "credits", force: :cascade do |t|
@@ -183,8 +262,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.decimal "budget"
+    t.string "stripe_payment_intent_id"
     t.index ["code"], name: "index_invitations_on_code", unique: true
     t.index ["status"], name: "index_invitations_on_status"
+    t.index ["stripe_payment_intent_id"], name: "index_invitations_on_stripe_payment_intent_id"
   end
 
   create_table "invoice_items", force: :cascade do |t|
@@ -227,7 +308,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
     t.jsonb "metadata"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "stripe_payment_intent_id"
+    t.string "stripe_customer_id"
+    t.string "stripe_charge_id"
     t.index ["reference"], name: "index_invoices_on_reference", unique: true
+    t.index ["stripe_payment_intent_id"], name: "index_invoices_on_stripe_payment_intent_id"
     t.index ["user_id"], name: "index_invoices_on_user_id"
   end
 
@@ -261,6 +346,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
     t.string "broker_name"
     t.string "broker_server"
     t.string "broker_password"
+    t.decimal "watermark_at_last_billing", precision: 15, scale: 2
+    t.decimal "initial_balance_snapshot", precision: 15, scale: 2
     t.index ["is_admin_account"], name: "index_mt5_accounts_on_is_admin_account"
     t.index ["mt5_id"], name: "index_mt5_accounts_on_mt5_id", unique: true
     t.index ["user_id", "mt5_id"], name: "index_mt5_accounts_on_user_id_and_mt5_id", unique: true
@@ -294,6 +381,133 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
     t.index ["payment_date"], name: "index_payments_on_payment_date"
     t.index ["status"], name: "index_payments_on_status"
     t.index ["user_id"], name: "index_payments_on_user_id"
+  end
+
+  create_table "product_purchases", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "shop_product_id", null: false
+    t.decimal "price_paid", precision: 10, scale: 2, null: false
+    t.string "status", default: "pending"
+    t.string "stripe_payment_intent_id"
+    t.string "stripe_subscription_id"
+    t.datetime "expires_at"
+    t.datetime "starts_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_product_id"], name: "index_product_purchases_on_shop_product_id"
+    t.index ["status"], name: "index_product_purchases_on_status"
+    t.index ["stripe_payment_intent_id"], name: "index_product_purchases_on_stripe_payment_intent_id"
+    t.index ["stripe_subscription_id"], name: "index_product_purchases_on_stripe_subscription_id"
+    t.index ["user_id"], name: "index_product_purchases_on_user_id"
+  end
+
+  create_table "scheduled_sms", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "created_by_id"
+    t.text "message", null: false
+    t.string "sms_type"
+    t.string "phone_number"
+    t.datetime "scheduled_at", null: false
+    t.string "status", default: "pending"
+    t.datetime "sent_at"
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_scheduled_sms_on_created_by_id"
+    t.index ["scheduled_at"], name: "index_scheduled_sms_on_scheduled_at"
+    t.index ["status"], name: "index_scheduled_sms_on_status"
+    t.index ["user_id"], name: "index_scheduled_sms_on_user_id"
+  end
+
+  create_table "shop_products", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.string "product_type", default: "subscription", null: false
+    t.decimal "price", precision: 10, scale: 2, null: false
+    t.string "stripe_price_id"
+    t.string "stripe_product_id"
+    t.text "features"
+    t.string "interval", default: "year"
+    t.boolean "active", default: true
+    t.integer "position", default: 0
+    t.string "icon", default: "fa-box"
+    t.string "badge"
+    t.string "badge_color"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_shop_products_on_active"
+    t.index ["position"], name: "index_shop_products_on_position"
+    t.index ["product_type"], name: "index_shop_products_on_product_type"
+  end
+
+  create_table "sms_campaign_logs", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "sent_by_id"
+    t.bigint "sms_campaign_id"
+    t.string "sms_type"
+    t.text "message"
+    t.string "phone_number"
+    t.string "status", default: "sent"
+    t.datetime "sent_at"
+    t.string "provider_message_id"
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sent_at"], name: "index_sms_campaign_logs_on_sent_at"
+    t.index ["sent_by_id"], name: "index_sms_campaign_logs_on_sent_by_id"
+    t.index ["sms_campaign_id"], name: "index_sms_campaign_logs_on_sms_campaign_id"
+    t.index ["sms_type"], name: "index_sms_campaign_logs_on_sms_type"
+    t.index ["status"], name: "index_sms_campaign_logs_on_status"
+    t.index ["user_id"], name: "index_sms_campaign_logs_on_user_id"
+  end
+
+  create_table "sms_campaigns", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "sms_type"
+    t.text "message_template"
+    t.string "status", default: "draft"
+    t.string "target_audience"
+    t.text "target_filters"
+    t.integer "recipients_count", default: 0
+    t.integer "sent_count", default: 0
+    t.integer "failed_count", default: 0
+    t.datetime "scheduled_at"
+    t.datetime "sent_at"
+    t.datetime "completed_at"
+    t.bigint "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "campaign_type", default: "sms"
+    t.string "email_subject"
+    t.text "email_body"
+    t.string "channels", default: "sms"
+    t.index ["campaign_type"], name: "index_sms_campaigns_on_campaign_type"
+    t.index ["created_by_id"], name: "index_sms_campaigns_on_created_by_id"
+    t.index ["scheduled_at"], name: "index_sms_campaigns_on_scheduled_at"
+    t.index ["status"], name: "index_sms_campaigns_on_status"
+  end
+
+  create_table "subscriptions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "stripe_subscription_id", null: false
+    t.string "stripe_customer_id", null: false
+    t.string "plan", null: false
+    t.string "status", default: "active"
+    t.datetime "current_period_start"
+    t.datetime "current_period_end"
+    t.datetime "canceled_at"
+    t.decimal "monthly_price", precision: 10, scale: 2
+    t.integer "failed_payment_count", default: 0
+    t.datetime "last_payment_failed_at"
+    t.datetime "last_reminder_sent_at"
+    t.text "cancellation_reason"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["plan"], name: "index_subscriptions_on_plan"
+    t.index ["status"], name: "index_subscriptions_on_status"
+    t.index ["stripe_customer_id"], name: "index_subscriptions_on_stripe_customer_id"
+    t.index ["stripe_subscription_id"], name: "index_subscriptions_on_stripe_subscription_id", unique: true
+    t.index ["user_id"], name: "index_subscriptions_on_user_id"
   end
 
   create_table "support_tickets", force: :cascade do |t|
@@ -397,9 +611,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
     t.boolean "is_admin", default: false
     t.string "phone"
     t.boolean "init_mt5", default: false, null: false
+    t.string "stripe_customer_id"
+    t.boolean "commission_billing_enabled", default: true
+    t.datetime "last_commission_billing_date"
+    t.decimal "last_watermark_snapshot", precision: 15, scale: 2
+    t.decimal "commission_balance_due", precision: 15, scale: 2, default: "0.0"
+    t.boolean "commission_payment_failed", default: false
+    t.datetime "commission_payment_failed_at"
+    t.boolean "bots_suspended_for_payment", default: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["init_mt5"], name: "index_users_on_init_mt5"
     t.index ["mt5_api_token"], name: "index_users_on_mt5_api_token", unique: true
+    t.index ["stripe_customer_id"], name: "index_users_on_stripe_customer_id"
   end
 
   create_table "vps", force: :cascade do |t|
@@ -425,6 +648,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
     t.index ["user_id"], name: "index_vps_on_user_id"
   end
 
+  create_table "vps_offers", force: :cascade do |t|
+    t.string "name"
+    t.decimal "price"
+    t.string "specs"
+    t.text "description"
+    t.boolean "is_recommended"
+    t.boolean "active"
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "withdrawals", force: :cascade do |t|
     t.bigint "mt5_account_id", null: false
     t.decimal "amount", precision: 15, scale: 2, null: false
@@ -440,11 +675,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
   end
 
   add_foreign_key "backtests", "trading_bots"
+  add_foreign_key "banner_dismissals", "banners"
+  add_foreign_key "banner_dismissals", "users"
+  add_foreign_key "banners", "users", column: "created_by_id"
   add_foreign_key "bonus_deposits", "users"
   add_foreign_key "bonus_periods", "campaigns"
   add_foreign_key "bot_purchases", "invoices"
   add_foreign_key "bot_purchases", "trading_bots"
   add_foreign_key "bot_purchases", "users"
+  add_foreign_key "commission_invoices", "invoices"
+  add_foreign_key "commission_invoices", "users"
   add_foreign_key "commission_reminders", "users"
   add_foreign_key "credits", "users"
   add_foreign_key "deposits", "mt5_accounts"
@@ -454,6 +694,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_26_154237) do
   add_foreign_key "invoices", "users"
   add_foreign_key "mt5_accounts", "users"
   add_foreign_key "payments", "users"
+  add_foreign_key "product_purchases", "shop_products"
+  add_foreign_key "product_purchases", "users"
+  add_foreign_key "scheduled_sms", "users"
+  add_foreign_key "scheduled_sms", "users", column: "created_by_id"
+  add_foreign_key "sms_campaign_logs", "sms_campaigns"
+  add_foreign_key "sms_campaign_logs", "users"
+  add_foreign_key "sms_campaign_logs", "users", column: "sent_by_id"
+  add_foreign_key "sms_campaigns", "users", column: "created_by_id"
+  add_foreign_key "subscriptions", "users"
   add_foreign_key "support_tickets", "users"
   add_foreign_key "ticket_comments", "support_tickets"
   add_foreign_key "ticket_comments", "users"

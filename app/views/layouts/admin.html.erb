@@ -5,6 +5,37 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
+  
+  <!-- Tailwind CSS v4+ -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3b82f6',
+            accent: '#667eea',
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- RailsBlocks dependencies -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/components/color-picker/color-picker.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/dark.css" />
+  
+  <!-- Tom Select -->
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css" rel="stylesheet">
+  
+  <!-- Air Datepicker -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.6.0/air-datepicker.min.css">
+  
+  <!-- Photoswipe -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe/dist/photoswipe.css">
+  
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   <%= stylesheet_link_tag "admin", "data-turbo-track": "reload" %>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,99 +44,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <%= javascript_importmap_tags %>
 </head>
-<body class="dark-mode">
+<body class="dark h-screen overflow-hidden" style="background-color: #1a1a1a; color: #ffffff;">
   <script>
     (function() {
-      // Activer le mode sombre par défaut
-      document.body.classList.add('dark-mode');
+      document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
-      
-      // Debug: Check FontAwesome loading
-      console.log('=== FONTAWESOME DEBUG ===');
-      console.log('FontAwesome CSS loaded:', document.querySelector('link[href*="font-awesome"]') !== null);
-      
-      // Test FontAwesome classes
-      const testIcon = document.createElement('i');
-      testIcon.className = 'fa-solid fa-home';
-      document.body.appendChild(testIcon);
-      
-      const computedStyle = window.getComputedStyle(testIcon);
-      console.log('FontAwesome font-family:', computedStyle.fontFamily);
-      console.log('FontAwesome font-weight:', computedStyle.fontWeight);
-      
-      document.body.removeChild(testIcon);
-      console.log('=== END FONTAWESOME DEBUG ===');
     })();
   </script>
   
-  <%= render 'admin/shared/navbar' %>
-  <%= render 'admin/shared/sidebar' %>
+  <%= render 'admin/shared/toast_container' %>
   
-  <div class="main-content">
-    <%= yield %>
+  <div class="flex h-screen w-full">
+    <%= render 'admin/shared/sidebar' %>
+    
+    <main class="flex-1 flex flex-col min-w-0 h-full bg-white dark:bg-neutral-950 relative">
+      <%= render 'admin/shared/navbar' %>
+      <div class="flex-1 overflow-y-auto" style="padding: 24px; margin-top: 64px;">
+        <%= yield %>
+      </div>
+    </main>
   </div>
 
-  <!-- Dropdown JavaScript -->
-  <script>
-    // Gestionnaire de dropdowns personnalisé
-    document.addEventListener('DOMContentLoaded', function() {
-      initializeDropdowns();
-    });
-    
-    document.addEventListener('turbo:load', function() {
-      initializeDropdowns();
-    });
-    
-    document.addEventListener('turbo:render', function() {
-      initializeDropdowns();
-    });
-    
-    function initializeDropdowns() {
-      // Fermer tous les dropdowns ouverts
-      document.querySelectorAll('.dropdown.active').forEach(dropdown => {
-        dropdown.classList.remove('active');
-      });
-      
-      // Ajouter les event listeners aux dropdowns
-      document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
-        toggle.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          const dropdown = this.closest('.dropdown');
-          const isActive = dropdown.classList.contains('active');
-          
-          // Fermer tous les autres dropdowns
-          document.querySelectorAll('.dropdown.active').forEach(activeDropdown => {
-            if (activeDropdown !== dropdown) {
-              activeDropdown.classList.remove('active');
-            }
-          });
-          
-          // Toggle le dropdown actuel
-          dropdown.classList.toggle('active', !isActive);
-        });
-      });
-      
-      // Fermer les dropdowns quand on clique ailleurs
-      document.addEventListener('click', function(e) {
-        if (!e.target.closest('.dropdown')) {
-          document.querySelectorAll('.dropdown.active').forEach(dropdown => {
-            dropdown.classList.remove('active');
-          });
-        }
-      });
-      
-      // Gérer les touches clavier
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-          document.querySelectorAll('.dropdown.active').forEach(dropdown => {
-            dropdown.classList.remove('active');
-          });
-        }
-      });
-    }
-  </script>
 </body>
 </html>
 

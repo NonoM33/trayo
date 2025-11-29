@@ -1,0 +1,52 @@
+<% sizes = {
+  'sm' => 'w-7 h-7 text-xs',
+  'md' => 'w-9 h-9 text-sm',
+  'lg' => 'w-12 h-12 text-base'
+} %>
+
+<% 
+  user = local_assigns[:user]
+  has_user = user.present?
+  
+  if has_user
+    initial = user.first_name&.first&.upcase || user.email&.first&.upcase || '?'
+    name = "#{user.first_name} #{user.last_name}".strip.presence || user.email || "N/A"
+    email = user.email
+  else
+    initial = local_assigns[:initial] || '?'
+    name = local_assigns[:name] || 'Inconnu'
+    email = local_assigns[:email]
+  end
+  
+  show_link = has_user && local_assigns[:link].present?
+%>
+
+<% if show_link %>
+  <%= link_to local_assigns[:link], class: "flex items-center gap-3 group" do %>
+    <div class="<%= sizes[local_assigns[:size] || 'md'] %> bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold shrink-0">
+      <%= initial %>
+    </div>
+    <% if name || email %>
+      <div>
+        <p class="font-medium text-white group-hover:text-blue-400 transition-colors"><%= name %></p>
+        <% if email %>
+          <p class="text-xs text-neutral-500"><%= email %></p>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+<% else %>
+  <div class="flex items-center gap-3">
+    <div class="<%= sizes[local_assigns[:size] || 'md'] %> bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold shrink-0">
+      <%= initial %>
+    </div>
+    <% if name || email %>
+      <div>
+        <p class="font-medium text-white"><%= name %></p>
+        <% if email %>
+          <p class="text-xs text-neutral-500"><%= email %></p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

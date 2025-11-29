@@ -45,10 +45,10 @@ module Admin
 
     def update
       if @vps.update(vps_params)
-        redirect_to admin_vps_path(@vps), notice: "VPS mis à jour avec succès"
+        redirect_to admin_vps_path, notice: "VPS mis à jour avec succès"
       else
         @clients = User.where(is_admin: false).order(:email)
-        render :edit, status: :unprocessable_entity
+        redirect_to admin_vps_path, alert: "Erreur lors de la mise à jour"
       end
     end
 
@@ -75,7 +75,16 @@ module Admin
         @vps.update(status: new_status)
       end
       
-      redirect_to admin_vps_path(@vps), notice: "Statut mis à jour : #{@vps.status_label}"
+      message = "Statut VPS: #{@vps.status_label}"
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.replace("vps_#{@vps.id}", partial: "admin/clients/vps_card", locals: { vps: @vps }),
+            turbo_stream.replace("flash_messages", partial: "shared/flash_toast", locals: { message: message, type: :success })
+          ]
+        end
+        format.html { redirect_back fallback_location: admin_vps_path, notice: message }
+      end
     end
 
     private

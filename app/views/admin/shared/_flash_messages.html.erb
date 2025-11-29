@@ -1,0 +1,27 @@
+<% if flash[:notice] %>
+  <div class="flex items-center gap-3 p-4 rounded-xl bg-green-500/10">
+    <i class="fa-solid fa-check-circle text-green-400"></i>
+    <p class="text-green-300"><%= flash[:notice] %></p>
+  </div>
+<% end %>
+
+<% if flash[:alert] %>
+  <div class="flex items-center gap-3 p-4 rounded-xl bg-red-500/10">
+    <i class="fa-solid fa-exclamation-circle text-red-400"></i>
+    <p class="text-red-300"><%= flash[:alert] %></p>
+  </div>
+<% end %>
+
+<% if flash[:warning] %>
+  <div class="flex items-center gap-3 p-4 rounded-xl bg-amber-500/10">
+    <i class="fa-solid fa-exclamation-triangle text-amber-400"></i>
+    <p class="text-amber-300"><%= flash[:warning] %></p>
+  </div>
+<% end %>
+
+<% if flash[:info] %>
+  <div class="flex items-center gap-3 p-4 rounded-xl bg-blue-500/10">
+    <i class="fa-solid fa-info-circle text-blue-400"></i>
+    <p class="text-blue-300"><%= flash[:info] %></p>
+  </div>
+<% end %>

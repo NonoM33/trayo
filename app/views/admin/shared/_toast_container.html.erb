@@ -1,0 +1,43 @@
+<div data-controller="toast" data-toast-position-value="top-center" data-toast-duration-value="4000" class="fixed top-0 left-0 right-0 z-[9999] pointer-events-none">
+  <div data-toast-target="container" class="flex flex-col items-center gap-3 pt-6 pointer-events-auto">
+  </div>
+</div>
+
+<% if notice.present? %>
+  <script>
+    (function() {
+      function showNotice() {
+        if (window.toast) {
+          window.toast('<%= j notice %>', { type: 'success' });
+        } else {
+          setTimeout(showNotice, 100);
+        }
+      }
+      if (document.readyState === 'complete') {
+        setTimeout(showNotice, 50);
+      } else {
+        document.addEventListener('DOMContentLoaded', function() { setTimeout(showNotice, 50); }, { once: true });
+      }
+    })();
+  </script>
+<% end %>
+
+<% if alert.present? %>
+  <script>
+    (function() {
+      function showAlert() {
+        if (window.toast) {
+          window.toast('<%= j alert %>', { type: 'error' });
+        } else {
+          setTimeout(showAlert, 100);
+        }
+      }
+      if (document.readyState === 'complete') {
+        setTimeout(showAlert, 50);
+      } else {
+        document.addEventListener('DOMContentLoaded', function() { setTimeout(showAlert, 50); }, { once: true });
+      }
+    })();
+  </script>
+<% end %>
+

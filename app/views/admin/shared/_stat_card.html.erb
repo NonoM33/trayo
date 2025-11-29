@@ -1,0 +1,41 @@
+<% icon_colors = {
+  'blue' => 'bg-blue-500/10 text-blue-400',
+  'green' => 'bg-green-500/10 text-green-400',
+  'amber' => 'bg-amber-500/10 text-amber-400',
+  'cyan' => 'bg-cyan-500/10 text-cyan-400',
+  'purple' => 'bg-purple-500/10 text-purple-400',
+  'red' => 'bg-red-500/10 text-red-400',
+  'emerald' => 'bg-emerald-500/10 text-emerald-400'
+} %>
+
+<% value_colors = {
+  'green' => 'text-green-400',
+  'cyan' => 'text-cyan-400',
+  'amber' => 'text-amber-400',
+  'red' => 'text-red-400',
+  'purple' => 'text-purple-400',
+  'blue' => 'text-blue-400',
+  nil => 'text-white'
+} %>
+
+<div class="bg-neutral-900 rounded-xl p-4">
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 rounded-lg <%= icon_colors[local_assigns[:icon_color] || 'blue'] %> flex items-center justify-center">
+      <i class="fa-solid <%= local_assigns[:icon] || 'fa-chart-bar' %>"></i>
+    </div>
+    <div>
+      <p class="text-sm text-neutral-400"><%= local_assigns[:label] || 'Label' %></p>
+      <p class="text-2xl font-bold <%= value_colors[local_assigns[:value_color]] %>"><%= local_assigns[:value] || 0 %></p>
+    </div>
+  </div>
+  <% if local_assigns[:subtitle] %>
+    <div class="mt-3 pt-3 border-t border-neutral-800">
+      <span class="text-sm text-<%= local_assigns[:subtitle_color] || 'neutral-400' %> flex items-center gap-1.5">
+        <% if local_assigns[:subtitle_icon] %>
+          <i class="fa-solid <%= local_assigns[:subtitle_icon] %> text-xs"></i>
+        <% end %>
+        <%= local_assigns[:subtitle] %>
+      </span>
+    </div>
+  <% end %>
+</div>

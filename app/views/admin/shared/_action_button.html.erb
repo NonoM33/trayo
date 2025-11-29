@@ -1,0 +1,28 @@
+<% 
+  variants = {
+    'primary' => 'border-blue-400/30 bg-blue-600 text-white hover:bg-blue-500',
+    'secondary' => 'border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white',
+    'success' => 'border-green-400/30 bg-green-600 text-white hover:bg-green-500',
+    'warning' => 'border-amber-400/30 bg-amber-500 text-white hover:bg-amber-400',
+    'danger' => 'border-red-400/30 bg-red-600 text-white hover:bg-red-500'
+  }
+  
+  variant_class = variants[local_assigns[:variant] || 'secondary']
+%>
+
+<% if local_assigns[:href] %>
+  <%= link_to local_assigns[:href], 
+      class: "flex items-center justify-center w-8 h-8 rounded-lg border #{variant_class} transition-colors",
+      title: local_assigns[:title],
+      method: local_assigns[:method],
+      data: local_assigns[:data] do %>
+    <i class="fa-solid <%= local_assigns[:icon] %> text-xs"></i>
+  <% end %>
+<% else %>
+  <button type="<%= local_assigns[:type] || 'button' %>"
+          class="flex items-center justify-center w-8 h-8 rounded-lg border <%= variant_class %> transition-colors"
+          title="<%= local_assigns[:title] %>"
+          <%= "onclick=\"#{local_assigns[:onclick]}\"" if local_assigns[:onclick] %>>
+    <i class="fa-solid <%= local_assigns[:icon] %> text-xs"></i>
+  </button>
+<% end %>

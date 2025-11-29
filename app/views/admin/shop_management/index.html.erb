@@ -1,0 +1,209 @@
+<% @page_title = "Gestion Boutique" %>
+
+<div class="space-y-6">
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-white flex items-center gap-3">
+        <i class="fa-solid fa-store text-emerald-400"></i>
+        Gestion de la Boutique
+      </h1>
+      <p class="text-neutral-400 mt-1">Gérez tous vos articles, prix et stocks</p>
+    </div>
+    
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="relative" data-controller="dropdown">
+        <button type="button" data-action="dropdown#toggle" class="flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-300 hover:bg-neutral-700 hover:text-white transition-all">
+          <i class="fa-solid fa-download"></i>
+          Exporter
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+        </button>
+        <div data-dropdown-target="menu" class="hidden absolute right-0 mt-2 w-48 rounded-xl bg-neutral-900 border border-neutral-800 shadow-xl z-50">
+          <%= link_to export_admin_shop_management_index_path(format: :json), class: "flex items-center gap-2 px-4 py-3 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white transition-colors rounded-t-xl" do %>
+            <i class="fa-solid fa-file-code text-blue-400"></i>
+            Export JSON
+          <% end %>
+          <%= link_to export_admin_shop_management_index_path(format: :csv), class: "flex items-center gap-2 px-4 py-3 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white transition-colors rounded-b-xl" do %>
+            <i class="fa-solid fa-file-csv text-green-400"></i>
+            Export CSV
+          <% end %>
+        </div>
+      </div>
+
+      <div data-controller="slideover">
+        <button type="button" data-action="slideover#show:prevent" class="flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-300 hover:bg-neutral-700 hover:text-white transition-all">
+          <i class="fa-solid fa-upload"></i>
+          Importer
+        </button>
+        
+        <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
+          <div class="flex h-full w-80 flex-col bg-neutral-950 shadow-2xl sm:w-[400px]">
+            <div class="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-6 py-5">
+              <h4 class="text-lg font-semibold text-white flex items-center gap-2">
+                <i class="fa-solid fa-upload text-green-400"></i>
+                Importer
+              </h4>
+              <button type="button" data-action="slideover#hide:prevent" class="rounded-full p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white">
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
+            
+            <%= form_with url: import_admin_shop_management_index_path, method: :post, multipart: true, class: "flex flex-1 flex-col" do |f| %>
+              <div class="flex-1 overflow-y-auto p-6 space-y-4">
+                <div class="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                  <p class="text-sm text-blue-300"><i class="fa-solid fa-info-circle mr-2"></i>Format JSON uniquement</p>
+                </div>
+                <input type="file" name="file" accept=".json" required class="w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white cursor-pointer">
+              </div>
+              <div class="border-t border-neutral-800 bg-neutral-900 px-6 py-4">
+                <%= f.submit "Importer", class: "w-full rounded-lg bg-green-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-green-500 cursor-pointer" %>
+              </div>
+            <% end %>
+          </div>
+        </dialog>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <%= render 'admin/shared/stat_card', 
+        icon: 'fa-box', 
+        icon_color: 'blue', 
+        label: 'Total Articles', 
+        value: @stats[:total_products] %>
+    
+    <%= render 'admin/shared/stat_card', 
+        icon: 'fa-eye', 
+        icon_color: 'green', 
+        label: 'En Vente', 
+        value: @stats[:active_products],
+        value_color: 'green' %>
+    
+    <%= render 'admin/shared/stat_card', 
+        icon: 'fa-shopping-cart', 
+        icon_color: 'purple', 
+        label: 'Ventes Totales', 
+        value: @stats[:total_sales],
+        value_color: 'purple' %>
+    
+    <%= render 'admin/shared/stat_card', 
+        icon: 'fa-euro-sign', 
+        icon_color: 'emerald', 
+        label: "Chiffre d'Affaires", 
+        value: number_to_currency(@stats[:total_revenue], unit: "€", format: "%n%u"),
+        value_color: 'emerald' %>
+  </div>
+
+  <div class="bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800">
+    <div class="flex border-b border-neutral-800">
+      <%= link_to admin_shop_management_index_path(tab: 'bots'), class: "flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors border-b-2 #{@tab == 'bots' ? 'border-blue-500 text-blue-400 bg-blue-500/5' : 'border-transparent text-neutral-400 hover:text-white hover:bg-neutral-800/50'}" do %>
+        <i class="fa-solid fa-robot"></i>
+        Bots de Trading
+        <span class="px-2 py-0.5 rounded-full text-xs bg-neutral-800 text-neutral-400"><%= @bots.count %></span>
+      <% end %>
+      
+      <%= link_to admin_shop_management_index_path(tab: 'products'), class: "flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors border-b-2 #{@tab == 'products' ? 'border-purple-500 text-purple-400 bg-purple-500/5' : 'border-transparent text-neutral-400 hover:text-white hover:bg-neutral-800/50'}" do %>
+        <i class="fa-solid fa-crown"></i>
+        Packs & Services
+        <span class="px-2 py-0.5 rounded-full text-xs bg-neutral-800 text-neutral-400"><%= @products.count %></span>
+      <% end %>
+      
+      <%= link_to admin_shop_management_index_path(tab: 'credits'), class: "flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors border-b-2 #{@tab == 'credits' ? 'border-emerald-500 text-emerald-400 bg-emerald-500/5' : 'border-transparent text-neutral-400 hover:text-white hover:bg-neutral-800/50'}" do %>
+        <i class="fa-solid fa-wallet"></i>
+        Crédits Commission
+        <span class="px-2 py-0.5 rounded-full text-xs bg-neutral-800 text-neutral-400"><%= @credit_packs.count %></span>
+      <% end %>
+      
+      <%= link_to admin_shop_management_index_path(tab: 'vps'), class: "flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors border-b-2 #{@tab == 'vps' ? 'border-amber-500 text-amber-400 bg-amber-500/5' : 'border-transparent text-neutral-400 hover:text-white hover:bg-neutral-800/50'}" do %>
+        <i class="fa-solid fa-server"></i>
+        VPS
+        <span class="px-2 py-0.5 rounded-full text-xs bg-neutral-800 text-neutral-400"><%= @vps_offers.count %></span>
+      <% end %>
+    </div>
+
+    <% if @tab == 'bots' %>
+      <%= render 'bots_table' %>
+    <% elsif @tab == 'products' %>
+      <%= render 'products_table' %>
+    <% elsif @tab == 'credits' %>
+      <%= render 'credits_table' %>
+    <% elsif @tab == 'vps' %>
+      <%= render 'vps_table' %>
+    <% end %>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-neutral-900 rounded-xl p-6 border border-neutral-800">
+      <h3 class="font-semibold text-white mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-trophy text-amber-400"></i>
+        Top Ventes
+      </h3>
+      <div class="space-y-3">
+        <% @bots.sort_by { |b| -b.bot_purchases.count }.first(5).each_with_index do |bot, index| %>
+          <div class="flex items-center justify-between p-3 rounded-lg bg-neutral-800/50 hover:bg-neutral-800 transition-colors">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white <%= index == 0 ? 'bg-gradient-to-br from-amber-400 to-orange-500' : (index == 1 ? 'bg-gradient-to-br from-neutral-300 to-neutral-400' : (index == 2 ? 'bg-gradient-to-br from-amber-600 to-amber-700' : 'bg-neutral-700')) %>">
+                <%= index + 1 %>
+              </span>
+              <span class="font-medium text-white"><%= bot.name %></span>
+            </div>
+            <div class="text-right">
+              <p class="font-semibold text-white"><%= bot.bot_purchases.count %> ventes</p>
+              <p class="text-xs text-neutral-400"><%= number_to_currency(bot.bot_purchases.sum(:price_paid), unit: "€", format: "%n%u") %></p>
+            </div>
+          </div>
+        <% end %>
+        <% if @bots.empty? %>
+          <p class="text-neutral-500 text-center py-4">Aucune vente</p>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="bg-neutral-900 rounded-xl p-6 border border-neutral-800">
+      <h3 class="font-semibold text-white mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-bolt text-blue-400"></i>
+        Actions Rapides
+      </h3>
+      <div class="grid grid-cols-2 gap-3">
+        <%= link_to new_admin_bot_path, class: "flex items-center gap-3 p-4 rounded-xl bg-neutral-800 border border-neutral-700 hover:border-blue-500/50 transition-all group" do %>
+          <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+            <i class="fa-solid fa-robot text-blue-400"></i>
+          </div>
+          <div>
+            <p class="font-medium text-white">Nouveau Bot</p>
+            <p class="text-xs text-neutral-500">Créer un bot</p>
+          </div>
+        <% end %>
+        
+        <%= link_to new_product_admin_shop_management_index_path, class: "flex items-center gap-3 p-4 rounded-xl bg-neutral-800 border border-neutral-700 hover:border-purple-500/50 transition-all group" do %>
+          <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+            <i class="fa-solid fa-crown text-purple-400"></i>
+          </div>
+          <div>
+            <p class="font-medium text-white">Nouveau Pack</p>
+            <p class="text-xs text-neutral-500">Créer un service</p>
+          </div>
+        <% end %>
+        
+        <%= link_to admin_shop_index_path, class: "flex items-center gap-3 p-4 rounded-xl bg-neutral-800 border border-neutral-700 hover:border-emerald-500/50 transition-all group" do %>
+          <div class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+            <i class="fa-solid fa-store text-emerald-400"></i>
+          </div>
+          <div>
+            <p class="font-medium text-white">Voir Boutique</p>
+            <p class="text-xs text-neutral-500">Vue client</p>
+          </div>
+        <% end %>
+        
+        <%= link_to admin_clients_path, class: "flex items-center gap-3 p-4 rounded-xl bg-neutral-800 border border-neutral-700 hover:border-amber-500/50 transition-all group" do %>
+          <div class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+            <i class="fa-solid fa-users text-amber-400"></i>
+          </div>
+          <div>
+            <p class="font-medium text-white">Clients</p>
+            <p class="text-xs text-neutral-500">Gérer les achats</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,151 +1,403 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Gestion des Bots - Admin Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-</head>
-<body>
-  <% @page_title = "Gestion des Bots de Trading" %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
+<% @page_title = "Gestion des Bots de Trading" %>
+
+<div class="space-y-6">
+<% if flash[:notice] %>
+    <div class="flex items-center gap-3 p-4 rounded-xl border border-green-500/20 bg-green-500/10">
+      <i class="fa-solid fa-check-circle text-green-400"></i>
+      <p class="text-green-300"><%= flash[:notice] %></p>
+  </div>
+<% end %>
+<% if flash[:alert] %>
+    <div class="flex items-center gap-3 p-4 rounded-xl border border-red-500/20 bg-red-500/10">
+      <i class="fa-solid fa-exclamation-circle text-red-400"></i>
+      <p class="text-red-300"><%= flash[:alert] %></p>
+  </div>
+<% end %>
+
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-white">Bots de Trading</h1>
+      <p class="text-neutral-400 mt-1">Gérez vos bots de trading automatisés</p>
+    </div>
     
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
-      
-      <div class="container">
-        <% if flash[:notice] %>
-          <div class="notice"><%= flash[:notice] %></div>
-        <% end %>
-        <% if flash[:alert] %>
-          <div class="alert"><%= flash[:alert] %></div>
-        <% end %>
-
-        <% if @bots.any? %>
-          <div class="info-grid" style="margin-bottom: 32px;">
-            <div class="info-item">
-              <div class="info-label">Total Bots</div>
-              <div class="info-value" style="color: var(--color-accent);"><%= @bots.count %></div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Bots Actifs</div>
-              <div class="info-value positive"><%= @bots.select(&:is_active?).count %></div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Utilisateurs Totaux</div>
-              <div class="info-value" style="color: var(--color-info);"><%= @bots.sum(&:active_users_count) %></div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Taux Moyen Réussite</div>
-              <div class="info-value" style="color: var(--color-success);"><%= number_to_percentage(@bots.average(:win_rate) || 0, precision: 1) %></div>
-            </div>
-          </div>
-        <% end %>
-
-        <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-            <h2 style="margin: 0; border: none; padding: 0;">📋 Bots de Trading</h2>
-            <%= link_to "Nouveau Bot", new_admin_bot_path, class: "btn btn-success" %>
-          </div>
-          
-          <% if @bots.any? %>
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Bot</th>
-                    <th>Prix</th>
-                    <th>Risque</th>
-                    <th>Projection Mensuelle</th>
-                    <th>Win Rate</th>
-                    <th>Statut</th>
-                    <th>Utilisateurs</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% @bots.each do |bot| %>
-                    <tr>
-                      <td>
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                        
-                          <div>
-                            <div style="font-weight: 700; color: var(--text-primary); font-size: 15px;">
-                              <%= bot.name %>
-                            </div>
-                            <% tagline = bot.real_marketing_tagline %>
-                            <% if tagline.present? %>
-                              <div style="font-size: 12px; color: var(--text-muted);">
-                                <%= tagline.truncate(40) %>
-                              </div>
-                            <% end %>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div style="font-weight: 700; font-size: 16px; color: var(--text-primary);">
-                          <%= bot.formatted_price %>
-                        </div>
-                      </td>
-                      <td>
-                        <span class="risk-badge risk-<%= bot.risk_level.downcase %>">
-                          <%= bot.risk_label %>
-                        </span>
-                      </td>
-                      <td style="white-space: nowrap; font-weight: 600;">
-                        <% projections = bot.calculate_real_projections %>
-                        <%= number_to_currency(projections[:monthly_min], unit: "€", format: "%n %u", precision: 0) %> - 
-                        <%= number_to_currency(projections[:monthly_max], unit: "€", format: "%n %u", precision: 0) %>
-                      </td>
-                      <td>
-                        <% win_rate = bot.calculate_global_win_rate %>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                          <div style="flex: 1; height: 8px; background: var(--bg-hover); border-radius: var(--radius-full); overflow: hidden;">
-                            <div style="width: <%= win_rate %>%; height: 100%; background: var(--gradient-success); border-radius: var(--radius-full);"></div>
-                          </div>
-                          <span class="positive" style="font-weight: 700; font-size: 14px; min-width: 50px;">
-                            <%= number_to_percentage(win_rate, precision: 1) %>
-                          </span>
-                        </div>
-                      </td>
-                      <td>
-                        <% if bot.is_active? %>
-                          <span class="status-badge status-active">Actif</span>
-                        <% else %>
-                          <span class="status-badge status-inactive">Inactif</span>
-                        <% end %>
-                      </td>
-                      <td style="text-align: center;">
-                        <span class="status-badge" style="background: var(--bg-info-box); color: var(--color-info);">
-                          <%= bot.active_users_count %>
-                        </span>
-                      </td>
-                      <td>
-                        <div class="action-buttons">
-                          <%= link_to "Voir", admin_bot_path(bot), class: "btn btn-outline btn-sm" %>
-                          <%= link_to "Modifier", edit_admin_bot_path(bot), class: "btn btn-warning btn-sm" %>
-                          <%= button_to "Supprimer", admin_bot_path(bot), method: :delete, 
-                              data: { turbo_confirm: "Supprimer ce bot ?" }, 
-                              class: "btn btn-danger btn-sm" %>
-                        </div>
-                      </td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
-          <% else %>
-            <div style="text-align: center; padding: 80px 24px; color: var(--text-muted);">
-              <div style="font-size: 72px; margin-bottom: 24px; animation: bounce 2s infinite;"><i class="fa-icon fa-md fa-robot"></i></div>
-              <h3 style="margin: 0 0 12px 0; font-size: 24px; color: var(--text-primary);">Aucun bot pour le moment</h3>
-              <p style="margin: 0 0 32px 0; font-size: 16px;">Créez votre premier bot de trading intelligent</p>
-              <%= link_to "Créer mon Premier Bot", new_admin_bot_path, class: "btn btn-success btn-lg" %>
-            </div>
+    <div class="flex items-center gap-3">
+      <div class="relative" data-controller="dropdown">
+        <button type="button" data-action="dropdown#toggle" class="flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white">
+          <i class="fa-solid fa-file-export"></i>
+          Exporter
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+        </button>
+        <div data-dropdown-target="menu" class="hidden absolute right-0 mt-2 w-48 rounded-xl bg-neutral-900 border border-neutral-800 shadow-xl z-50">
+          <%= link_to export_admin_bots_path(format: :json), class: "flex items-center gap-2 px-4 py-3 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white transition-colors rounded-t-xl" do %>
+            <i class="fa-solid fa-file-code text-blue-400"></i>
+            Exporter en JSON
+          <% end %>
+          <%= link_to export_admin_bots_path(format: :csv), class: "flex items-center gap-2 px-4 py-3 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white transition-colors rounded-b-xl" do %>
+            <i class="fa-solid fa-file-csv text-green-400"></i>
+            Exporter en CSV
           <% end %>
         </div>
       </div>
+      
+      <div data-controller="slideover">
+        <button type="button" data-action="slideover#show:prevent" class="flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white">
+          <i class="fa-solid fa-file-import"></i>
+          Importer
+        </button>
+        
+        <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
+          <div class="flex h-full w-80 flex-col bg-neutral-950 shadow-2xl sm:w-[400px]">
+            <div class="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-6 py-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-green-500/20">
+                  <i class="fa-solid fa-file-import"></i>
+                </div>
+                <h4 class="text-lg font-semibold text-white">Importer des Bots</h4>
+              </div>
+              <button type="button" data-action="slideover#hide:prevent" class="rounded-full p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" x2="6" y1="6" y2="18"></line>
+                  <line x1="6" x2="18" y1="6" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            
+            <%= form_with url: import_admin_bots_path, method: :post, multipart: true, class: "flex flex-1 flex-col min-h-0" do |f| %>
+              <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-neutral-950">
+                <div class="p-4 rounded-xl border border-blue-500/20 bg-blue-500/10">
+                  <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-info-circle text-blue-400 mt-0.5"></i>
+                    <div>
+                      <p class="text-sm font-medium text-blue-300">Formats supportés</p>
+                      <p class="text-xs text-blue-300/70 mt-1">JSON ou CSV exporté depuis cette page</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Fichier à importer</label>
+                  <div class="relative">
+                    <input type="file" name="file" accept=".json,.csv" required 
+                           class="w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
+                  </div>
+                  <p class="text-xs text-neutral-500 mt-2">Les bots existants avec le même nom seront mis à jour</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3 border-t border-neutral-800 bg-neutral-900 px-6 py-5">
+                <%= f.submit "Importer", class: "flex-1 flex items-center justify-center gap-2 rounded-lg bg-green-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-green-600/25 transition-all hover:bg-green-500 cursor-pointer" %>
+                <button data-action="slideover#hide:prevent" type="button" class="flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-5 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white">Annuler</button>
+              </div>
+            <% end %>
+          </div>
+        </dialog>
+      </div>
+
+      <div data-controller="slideover">
+      <button type="button" data-action="slideover#show:prevent" class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-500 hover:shadow-blue-500/30">
+        <i class="fa-solid fa-plus"></i>
+        Nouveau Bot
+      </button>
+
+      <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-neutral-800 outline-hidden bg-transparent p-0">
+        <div class="flex h-full w-80 flex-col bg-neutral-950 shadow-2xl sm:w-[480px] lg:w-[560px]">
+          <div class="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-6 py-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-robot"></i>
+              </div>
+              <h4 class="text-lg font-semibold text-white">Nouveau Bot</h4>
+            </div>
+            <button type="button" data-action="slideover#hide:prevent" class="rounded-full p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" x2="6" y1="6" y2="18"></line>
+                <line x1="6" x2="18" y1="6" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          
+          <%= form_with model: TradingBot.new, url: admin_bots_path, method: :post, class: "flex flex-1 flex-col min-h-0" do |f| %>
+            <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-neutral-950">
+              
+              <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-4">
+                <h5 class="text-sm font-semibold text-neutral-300 flex items-center gap-2">
+                  <i class="fa-solid fa-info-circle text-blue-400"></i>
+                  Informations générales
+                </h5>
+                
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Nom du Bot *</label>
+                  <%= f.text_field :name, required: true, placeholder: "Ex: Alpha Trader Pro", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Prix (€) *</label>
+                    <%= f.number_field :price, step: 0.01, min: 0, required: true, placeholder: "499", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Statut *</label>
+                    <%= f.select :status, [['Actif', 'active'], ['Inactif', 'inactive']], {}, class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Symbol MT5</label>
+                    <%= f.text_field :symbol, placeholder: "EURUSD", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Magic Number</label>
+                    <%= f.number_field :magic_number_prefix, placeholder: "10000", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Description</label>
+                  <%= f.text_area :description, rows: 2, placeholder: "Description attrayante du bot...", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none" %>
+                </div>
+                
+                <label class="flex items-center gap-3 p-3 rounded-lg border border-neutral-800 bg-neutral-900 cursor-pointer hover:border-neutral-700 transition-colors">
+                  <%= f.check_box :is_active, class: "w-4 h-4 text-blue-600 bg-neutral-800 border-neutral-700 rounded focus:ring-blue-500" %>
+                  <div>
+                    <p class="text-sm font-medium text-white">Disponible à la vente</p>
+                    <p class="text-xs text-neutral-500">Afficher dans la boutique</p>
+                  </div>
+                </label>
+              </div>
+
+              <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-4">
+                <h5 class="text-sm font-semibold text-neutral-300 flex items-center gap-2">
+                  <i class="fa-solid fa-chart-line text-emerald-400"></i>
+                  Projections & Performance
+                </h5>
+                
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Gain mensuel min (€)</label>
+                    <%= f.number_field :projection_monthly_min, step: 0.01, min: 0, placeholder: "500", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Gain mensuel max (€)</label>
+                    <%= f.number_field :projection_monthly_max, step: 0.01, min: 0, placeholder: "1500", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Win Rate (%)</label>
+                    <%= f.number_field :win_rate, step: 0.01, min: 0, max: 100, placeholder: "75", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Niveau de risque</label>
+                    <%= f.select :risk_level, [['Faible', 'low'], ['Modéré', 'medium'], ['Élevé', 'high']], { include_blank: 'Sélectionner...' }, class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Gain annuel (€)</label>
+                    <%= f.number_field :projection_yearly, step: 0.01, min: 0, placeholder: "12000", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Drawdown max (%)</label>
+                    <%= f.number_field :max_drawdown_limit, step: 0.1, min: 0, placeholder: "35", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" %>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-4">
+                <h5 class="text-sm font-semibold text-neutral-300 flex items-center gap-2">
+                  <i class="fa-solid fa-bullhorn text-purple-400"></i>
+                  Stratégie
+                </h5>
+                
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Description de la stratégie</label>
+                  <%= f.text_area :strategy_description, rows: 3, placeholder: "Expliquez comment fonctionne ce bot...", class: "w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none" %>
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-3 border-t border-neutral-800 bg-neutral-900 px-6 py-5">
+              <%= f.submit "Créer le Bot", class: "flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-500 hover:shadow-blue-500/30 cursor-pointer" %>
+              <button data-action="slideover#hide:prevent" type="button" class="flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-5 py-2.5 text-sm font-medium text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white">Annuler</button>
+    </div>
+          <% end %>
+    </div>
+      </dialog>
+    </div>
     </div>
   </div>
-</body>
-</html>
+  
+  <% if @bots.any? %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-neutral-900 overflow-hidden rounded-xl">
+        <div class="px-5 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <i class="fa-solid fa-robot text-blue-400"></i>
+            </div>
+            <div>
+              <p class="text-sm text-neutral-400">Total Bots</p>
+              <p class="text-2xl font-bold text-white"><%= @bots.count %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-neutral-900 overflow-hidden rounded-xl">
+        <div class="px-5 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+              <i class="fa-solid fa-play text-green-400"></i>
+            </div>
+            <div>
+              <p class="text-sm text-neutral-400">Bots Actifs</p>
+              <p class="text-2xl font-bold text-green-400"><%= @bots.select(&:is_active?).count %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-neutral-900 overflow-hidden rounded-xl">
+        <div class="px-5 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+              <i class="fa-solid fa-users text-purple-400"></i>
+            </div>
+            <div>
+              <p class="text-sm text-neutral-400">Utilisateurs</p>
+              <p class="text-2xl font-bold text-purple-400"><%= @bots.sum(&:active_users_count) %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-neutral-900 overflow-hidden rounded-xl">
+        <div class="px-5 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+              <i class="fa-solid fa-chart-line text-emerald-400"></i>
+            </div>
+            <div>
+              <p class="text-sm text-neutral-400">Win Rate Moyen</p>
+              <p class="text-2xl font-bold text-emerald-400"><%= number_to_percentage(@bots.average(:win_rate) || 0, precision: 1) %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <% @bots.each do |bot| %>
+        <% projections = bot.calculate_real_projections %>
+        <% win_rate = bot.calculate_global_win_rate %>
+        
+        <div class="bg-neutral-950 rounded-xl overflow-hidden transition-colors group hover:bg-neutral-900">
+          <div class="bg-neutral-900 px-5 py-4 border-b border-neutral-800">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-lg shadow-blue-500/20">
+                  <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-lg font-semibold text-white truncate"><%= bot.name %></h3>
+                <% tagline = bot.real_marketing_tagline %>
+                <% if tagline.present? %>
+                    <p class="text-sm text-neutral-400 truncate"><%= tagline %></p>
+                <% end %>
+                </div>
+              </div>
+              <% if bot.is_active? %>
+                <span class="shrink-0 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium bg-green-400/10 text-green-400 ring-1 ring-inset ring-green-400/25">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                  Actif
+                </span>
+              <% else %>
+                <span class="shrink-0 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium bg-neutral-400/10 text-neutral-400 ring-1 ring-inset ring-neutral-400/25">
+                  Inactif
+                </span>
+              <% end %>
+            </div>
+          </div>
+          
+          <div class="p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-neutral-400 text-sm">Prix</span>
+              <span class="text-xl font-bold text-white"><%= bot.formatted_price %></span>
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <span class="text-neutral-400 text-sm">Niveau de risque</span>
+              <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold <%= 
+                case bot.risk_level&.downcase
+                when 'low' then 'bg-green-400/10 text-green-400 ring-1 ring-inset ring-green-400/25'
+                when 'medium' then 'bg-yellow-400/10 text-yellow-400 ring-1 ring-inset ring-yellow-400/25'
+                when 'high' then 'bg-red-400/10 text-red-400 ring-1 ring-inset ring-red-400/25'
+                else 'bg-neutral-400/10 text-neutral-400 ring-1 ring-inset ring-neutral-400/25'
+                end %>">
+                <%= bot.risk_label %>
+              </span>
+                  </div>
+            
+            <div class="flex items-center justify-between">
+              <span class="text-neutral-400 text-sm">Projection /mois</span>
+              <span class="text-sm font-medium text-emerald-400">
+                <%= number_to_currency(projections[:monthly_min], unit: "€", format: "%n%u", precision: 0) %> - <%= number_to_currency(projections[:monthly_max], unit: "€", format: "%n%u", precision: 0) %>
+                  </span>
+                </div>
+            
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-neutral-400 text-sm">Win Rate</span>
+                <span class="text-sm font-bold text-emerald-400"><%= number_to_percentage(win_rate, precision: 1) %></span>
+              </div>
+              <div class="h-2 bg-neutral-800 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-emerald-500 to-green-400 rounded-full transition-all duration-500" style="width: <%= win_rate %>%;"></div>
+              </div>
+            </div>
+            
+            <div class="flex items-center justify-between pt-2 border-t border-neutral-800">
+              <span class="text-neutral-400 text-sm">Utilisateurs actifs</span>
+              <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium bg-blue-400/10 text-blue-400 ring-1 ring-inset ring-blue-400/25">
+                <i class="fa-solid fa-users text-[10px]"></i>
+                  <%= bot.active_users_count %>
+                </span>
+            </div>
+          </div>
+          
+          <div class="bg-neutral-900 px-5 py-4 border-t border-neutral-800">
+            <div class="flex items-center gap-2">
+              <%= link_to admin_bot_path(bot), class: "flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm font-medium text-neutral-100 transition-all hover:bg-neutral-700" do %>
+                <i class="fa-solid fa-eye text-xs"></i>
+                Voir
+              <% end %>
+              <%= link_to edit_admin_bot_path(bot), class: "flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-amber-400/30 bg-amber-500 px-3 py-2 text-sm font-medium text-white transition-all hover:bg-amber-400" do %>
+                <i class="fa-solid fa-pen text-xs"></i>
+                Modifier
+              <% end %>
+              <%= button_to admin_bot_path(bot), method: :delete, data: { turbo_confirm: "Supprimer ce bot ?" }, class: "flex items-center justify-center gap-1.5 rounded-lg border border-red-400/30 bg-red-600 px-3 py-2 text-sm font-medium text-white transition-all hover:bg-red-500" do %>
+                <i class="fa-solid fa-trash text-xs"></i>
+              <% end %>
+            </div>
+          </div>
+                </div>
+          <% end %>
+    </div>
+  <% else %>
+    <div class="bg-neutral-950 rounded-xl overflow-hidden">
+      <div class="text-center py-16 px-6">
+        <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-robot text-4xl text-blue-400"></i>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-2">Aucun bot pour le moment</h3>
+        <p class="text-neutral-400 mb-8 max-w-md mx-auto">Créez votre premier bot de trading intelligent pour commencer à automatiser vos stratégies.</p>
+        <button type="button" onclick="document.querySelector('[data-controller=slideover] button[data-action]').click()" class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-green-600/25 transition-all hover:shadow-green-500/40 hover:scale-[1.02]">
+          <i class="fa-solid fa-plus"></i>
+          Créer mon Premier Bot
+        </button>
+      </div>
+    </div>
+  <% end %>
+</div>

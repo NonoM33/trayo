@@ -1,434 +1,321 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Boutique - Trayo</title>
-  <%= stylesheet_link_tag "admin" %>
-  <style>
-    .shop-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-    }
-    
-    @media (min-width: 1920px) {
-      .shop-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 2rem;
-      }
-    }
-    
-    @media (min-width: 1440px) and (max-width: 1919px) {
-      .shop-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.75rem;
-      }
-    }
-    
-    @media (min-width: 1024px) and (max-width: 1439px) {
-      .shop-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-      }
-    }
-    
-    @media (min-width: 769px) and (max-width: 1023px) {
-      .shop-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.25rem;
-      }
-    }
-    
-    @media (min-width: 600px) and (max-width: 768px) {
-      .shop-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-      }
-    }
-    
-    @media (max-width: 599px) {
-      .shop-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-      }
-    }
-    
-    .bot-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
-      backdrop-filter: blur(40px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 20px;
-      overflow: hidden;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-    }
-    
-    .bot-card:hover {
-      border-color: rgba(255, 255, 255, 0.25);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      transform: translateY(-4px);
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%);
-    }
-    
-    .bot-card-image {
-      position: relative;
-      width: 100%;
-      height: 180px;
-      background: var(--bg-hover);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 4rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .bot-card-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .bot-card-badge {
-      position: absolute;
-      top: 0.75rem;
-      right: 0.75rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: white;
-      text-transform: uppercase;
-      letter-spacing: 0.025em;
-    }
-    
-    .bot-card-content {
-      padding: 1.5rem;
-    }
-    
-    .bot-card-header {
-      margin-bottom: 1rem;
-    }
-    
-    .bot-card-title {
-      font-size: 1.125rem;
-      font-weight: 700;
-      margin: 0 0 0.5rem 0;
-      color: var(--text-primary);
-      line-height: 1.3;
-      letter-spacing: -0.025em;
-    }
-    
-    .bot-card-tagline {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      margin: 0;
-      line-height: 1.5;
-    }
-    
-    .bot-card-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin: 1rem 0;
-      padding: 1rem;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-      backdrop-filter: blur(20px);
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .bot-stat {
-      text-align: center;
-    }
-    
-    .bot-stat-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      margin-bottom: 0.375rem;
-      font-weight: 600;
-    }
-    
-    .bot-stat-value {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      letter-spacing: -0.025em;
-    }
-    
-    .bot-card-price {
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--text-primary);
-      text-align: center;
-      margin: 1rem 0;
-      letter-spacing: -0.025em;
-    }
-    
-    .bot-card-cta {
-      width: 100%;
-      padding: 0.625rem 1rem;
-      font-size: 0.875rem;
-      font-weight: 600;
-      border-radius: var(--radius-md);
-      border: none;
-      cursor: pointer;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      text-decoration: none;
-    }
-    
-    .bot-card-cta-primary {
-      background: var(--color-accent);
-      color: white;
-    }
-    
-    .bot-card-cta-primary:hover {
-      background: var(--color-accent-hover);
-    }
-    
-    .bot-card-cta-secondary {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
-      backdrop-filter: blur(30px);
-      color: var(--text-primary);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-    
-    .bot-card-cta-secondary:hover {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%);
-      border-color: rgba(255, 255, 255, 0.25);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    }
-    
-    .bot-card-cta-owned {
-      background: hsl(142 76% 36%);
-      color: white;
-      cursor: default;
-    }
-    
-    .shop-header {
-      text-align: center;
-      margin-bottom: 2.5rem;
-    }
-    
-    .shop-header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      margin: 0 0 0.75rem 0;
-      color: var(--text-primary);
-      line-height: 1.2;
-      letter-spacing: -0.025em;
-    }
-    
-    .shop-header p {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      margin: 0;
-    }
-    
-    .bot-users-count {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      margin-top: 0.75rem;
-      padding: 0.5rem 0.75rem;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-      backdrop-filter: blur(20px);
-      border-radius: 10px;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    @media (max-width: 768px) {
-      .shop-header h1 {
-        font-size: 1.5rem;
-      }
-      
-      .bot-card-content {
-        padding: 1.25rem;
-      }
-      
-      .bot-card-image {
-        height: 160px;
-      }
-    }
-    
-    @media (max-width: 390px) {
-      .shop-header {
-        margin-bottom: 1.5rem;
-      }
-      
-      .shop-header h1 {
-        font-size: 1.375rem;
-      }
-      
-      .shop-header p {
-        font-size: 0.8125rem;
-      }
-      
-      .bot-card-content {
-        padding: 1rem;
-      }
-      
-      .bot-card-image {
-        height: 140px;
-        font-size: 3rem;
-      }
-      
-      .bot-card-title {
-        font-size: 1rem;
-      }
-      
-      .bot-card-tagline {
-        font-size: 0.8125rem;
-      }
-      
-      .bot-card-stats {
-        gap: 0.75rem;
-        padding: 0.875rem;
-      }
-      
-      .bot-stat-label {
-        font-size: 0.6875rem;
-      }
-      
-      .bot-stat-value {
-        font-size: 1.125rem;
-      }
-      
-      .bot-card-price {
-        font-size: 1.75rem;
-      }
-      
-      .bot-card-cta {
-        padding: 0.75rem 1rem;
-        font-size: 0.9375rem;
-        min-height: 48px;
-      }
-      
-      .bot-users-count {
-        font-size: 0.6875rem;
-        padding: 0.5rem;
-      }
-    }
-    
-    @media (hover: none) and (pointer: coarse) {
-      .bot-card-cta {
-        min-height: 48px;
-        font-size: 0.9375rem;
-      }
-      
-      .bot-card {
-        transition: none;
-      }
-      
-      .bot-card:active {
-        transform: scale(0.98);
-      }
-    }
-  </style>
-</head>
-<body>
-  <% @page_title = "Boutique" %>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
-      
-      <div class="container" style="max-width: 1600px;">
-        <% if flash[:notice] %>
-          <div class="notice"><%= flash[:notice] %></div>
-        <% end %>
-        <% if flash[:alert] %>
-          <div class="alert"><%= flash[:alert] %></div>
-        <% end %>
+<% content_for :title, "Boutique" %>
 
-        <div class="shop-header">
-          <h1>Bots de Trading</h1>
-          <p>Automatisez vos trades et maximisez vos profits</p>
+<% 
+  cart_bots = session[:cart]&.dig('bots') || []
+  cart_products = session[:cart]&.dig('products') || []
+  cart_count = cart_bots.count + cart_products.count
+%>
+
+<div class="space-y-8">
+  <% if current_user.is_admin? %>
+    <div class="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-amber-950/50 to-orange-950/30 border border-amber-500/30">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-shield-halved text-amber-400"></i>
         </div>
-
-        <% if @bots.any? %>
-          <div class="shop-grid">
-            <% @bots.each do |bot| %>
-              <div class="bot-card">
-                <div class="bot-card-content">
-                  <div class="bot-card-header" style="position: relative;">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                     
-                      <div style="flex: 1;">
-                        <h3 class="bot-card-title" style="margin: 0 0 4px 0;"><%= bot.name %></h3>
-                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                          <span class="risk-badge risk-<%= bot.risk_level.downcase %>" style="font-size: 10px; padding: 4px 8px;">
-                            <%= bot.risk_label %>
-                          </span>
-                          <% if @my_bot_ids.include?(bot.id) %>
-                            <span style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; display: flex; align-items: center; gap: 4px;">
-                              <i class="fa-icon fa-xs fa-check-circle"></i> Installé
-                            </span>
-                          <% end %>
-                        </div>
-                      </div>
-                    </div>
-                    <p class="bot-card-tagline"><%= bot.real_marketing_tagline %></p>
-                  </div>
-                  
-                  <div class="bot-card-stats">
-                    <div class="bot-stat">
-                      <div class="bot-stat-label">Gain Annuel</div>
-                      <div class="bot-stat-value">
-                        <% 
-                          real_projections = bot.calculate_real_projections
-                          yearly_value = real_projections[:yearly] > 0 ? real_projections[:yearly] : bot.projection_yearly
-                        %>
-                        <%= number_to_currency(yearly_value, unit: "€", format: "%n %u", precision: 0) %>
-                      </div>
-                    </div>
-                    <div class="bot-stat">
-                      <div class="bot-stat-label">Taux Réussite</div>
-                      <div class="bot-stat-value">
-                        <% win_rate = bot.calculate_global_win_rate %>
-                        <%= number_to_percentage(win_rate > 0 ? win_rate : bot.win_rate, precision: 0) %>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="bot-card-price">
-                    <%= bot.formatted_price %>
-                  </div>
-                  
-                  <% if @my_bot_ids.include?(bot.id) %>
-                    <%= link_to admin_my_bots_path, class: "bot-card-cta bot-card-cta-secondary" do %>
-                      <i class="fa-icon fa-md fa-arrow-right"></i> Voir mes bots
-                    <% end %>
-                  <% else %>
-                    <%= link_to "Voir les Détails", admin_shop_path(bot), class: "bot-card-cta bot-card-cta-primary" %>
-                  <% end %>
-                </div>
-              </div>
-            <% end %>
-          </div>
-        <% else %>
-          <div class="card" style="text-align: center; padding: 4rem 2rem; background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 18px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);">
-            <div style="margin-bottom: 1.5rem; color: var(--text-muted);">
-              <i class="fa-icon fa-md fa-robot"></i>
-            </div>
-            <h2 style="margin: 0 0 0.75rem 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; color: var(--text-primary);">Aucun Bot Disponible</h2>
-            <p style="margin: 0; color: var(--text-muted); font-size: 0.875rem;">Revenez bientôt pour découvrir nos bots de trading</p>
-          </div>
+        <div>
+          <p class="font-semibold text-amber-200">Mode Administrateur</p>
+          <p class="text-xs text-amber-300/60">Gérez prix, stocks et articles comme sur Shopify</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <%= link_to admin_shop_management_index_path, class: "flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 transition-all" do %>
+          <i class="fa-solid fa-boxes-stacked"></i>
+          Gestion Boutique
         <% end %>
       </div>
     </div>
+  <% end %>
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-white mb-2">Boutique Trayo</h1>
+      <p class="text-neutral-400">Bots de trading, packs et services premium</p>
+    </div>
+    
+    <!-- Cart Button -->
+    <%= link_to admin_cart_path, class: "group relative inline-flex items-center gap-3 px-5 py-3 rounded-2xl transition-all duration-300 #{cart_count > 0 ? 'bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-400 text-white shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 hover:scale-105' : 'bg-neutral-900 border border-neutral-700/50 text-neutral-300 hover:border-emerald-500/50 hover:bg-neutral-800'}" do %>
+      <div class="relative">
+        <div class="w-10 h-10 rounded-xl <%= cart_count > 0 ? 'bg-white/20' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30' %> flex items-center justify-center transition-transform group-hover:scale-110">
+          <i class="fa-solid fa-shopping-cart <%= cart_count > 0 ? 'text-white' : 'text-emerald-400' %>"></i>
+        </div>
+        <% if cart_count > 0 %>
+          <span class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white text-emerald-600 text-[10px] font-black flex items-center justify-center shadow-lg ring-2 ring-emerald-500 animate-pulse"><%= cart_count %></span>
+        <% end %>
+      </div>
+      <div class="flex flex-col items-start">
+        <span class="font-bold text-sm"><%= cart_count > 0 ? 'Mon Panier' : 'Panier vide' %></span>
+        <span class="text-xs <%= cart_count > 0 ? 'text-emerald-100' : 'text-neutral-500' %>"><%= cart_count %> article<%= cart_count > 1 ? 's' : '' %></span>
+      </div>
+      <% if cart_count > 0 %>
+        <i class="fa-solid fa-arrow-right text-white/70 group-hover:translate-x-1 transition-transform"></i>
+      <% end %>
+    <% end %>
   </div>
-</body>
-</html>
+
+
+  <% if params[:success] == 'true' %>
+    <div class="rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 p-5 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+        <i class="fa-solid fa-party-horn text-emerald-400 text-xl"></i>
+      </div>
+      <div>
+        <h3 class="font-semibold text-white">Paiement réussi !</h3>
+        <p class="text-emerald-300 text-sm">Votre achat a été confirmé et est maintenant actif.</p>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Packs Crédits Commission -->
+  <section>
+    <div class="flex items-center justify-between mb-6 pb-4 border-b border-neutral-800">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+          <i class="fa-solid fa-wallet text-white"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-white">Crédits Commission</h2>
+          <p class="text-sm text-neutral-500">Avancez vos commissions et profitez de bonus exclusifs</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/20 border border-violet-500/30">
+        <i class="fa-solid fa-coins text-violet-400"></i>
+        <span class="text-sm font-semibold text-violet-300"><%= number_to_currency(current_user.total_credits, unit: "€", format: "%n%u") %> disponibles</span>
+      </div>
+    </div>
+
+    <!-- Avantages -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="flex items-center gap-3 p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <div class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-percent text-emerald-400"></i>
+        </div>
+        <div>
+          <div class="font-medium text-white">Jusqu'à 10% bonus</div>
+          <div class="text-xs text-neutral-500">Plus vous rechargez, plus vous gagnez</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-clock text-blue-400"></i>
+        </div>
+        <div>
+          <div class="font-medium text-white">Fini les relances</div>
+          <div class="text-xs text-neutral-500">Prélevé automatiquement sur votre solde</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <div class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-bolt text-amber-400"></i>
+        </div>
+        <div>
+          <div class="font-medium text-white">Tranquillité d'esprit</div>
+          <div class="text-xs text-neutral-500">Vos bots restent actifs sans interruption</div>
+        </div>
+      </div>
+    </div>
+
+    <% credit_packs_db = CreditPack.active.ordered %>
+    
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <% credit_packs_db.each do |pack| %>
+        <div class="relative group rounded-2xl p-5 transition-all hover:scale-[1.02] <%= pack.is_best? ? 'bg-gradient-to-br from-violet-950/60 to-purple-950/40 border-2 border-violet-500/50' : (pack.is_popular? ? 'bg-gradient-to-br from-amber-950/40 to-orange-950/20 border-2 border-amber-500/40' : 'bg-neutral-900 border border-neutral-800 hover:border-neutral-700') %>">
+          
+          <% if pack.is_best? %>
+            <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-violet-500 text-white shadow-lg">
+              Meilleur
+            </span>
+          <% elsif pack.is_popular? %>
+            <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-amber-500 text-white shadow-lg">
+              Populaire
+            </span>
+          <% end %>
+
+          <div class="text-center mb-4 <%= pack.is_best? || pack.is_popular? ? 'mt-2' : '' %>">
+            <div class="text-3xl font-bold text-white mb-1"><%= pack.amount %>€</div>
+            <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold <%= pack.is_best? ? 'bg-violet-500/30 text-violet-300' : (pack.is_popular? ? 'bg-amber-500/30 text-amber-300' : 'bg-emerald-500/20 text-emerald-400') %>">
+              +<%= pack.bonus_percentage %>% bonus
+            </div>
+          </div>
+
+          <div class="text-center mb-4 py-3 rounded-xl <%= pack.is_best? ? 'bg-violet-500/10' : (pack.is_popular? ? 'bg-amber-500/10' : 'bg-neutral-800/50') %>">
+            <div class="text-xs text-neutral-400 mb-1">Vous recevez</div>
+            <div class="text-xl font-bold <%= pack.is_best? ? 'text-violet-400' : (pack.is_popular? ? 'text-amber-400' : 'text-emerald-400') %>"><%= pack.total_credits %>€</div>
+            <div class="text-[10px] text-neutral-500">+<%= pack.bonus_amount %>€ offerts</div>
+          </div>
+
+          <form action="<%= buy_credits_admin_shop_index_path %>" method="post" data-turbo="false">
+            <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+            <input type="hidden" name="amount" value="<%= pack.amount %>">
+            <input type="hidden" name="bonus" value="<%= pack.bonus_percentage %>">
+            <button type="submit" class="w-full py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer border-0 <%= pack.is_best? ? 'bg-violet-500 text-white hover:bg-violet-600' : (pack.is_popular? ? 'bg-amber-500 text-white hover:bg-amber-600' : 'bg-white text-neutral-900 hover:bg-neutral-200') %>">
+              Recharger
+            </button>
+          </form>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <!-- Packs & Services Premium -->
+  <% if @products.any? %>
+    <section>
+      <div class="flex items-center gap-3 mb-6 pb-4 border-b border-neutral-800">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-crown text-amber-400"></i>
+        </div>
+        <h2 class="text-xl font-bold text-white">Packs & Services Premium</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <% @products.each do |product| %>
+          <div class="relative rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border-2 border-emerald-500/30 p-6 hover:border-emerald-400/50 transition-all group">
+            <% if product.badge.present? %>
+              <span class="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide 
+                <%= case product.badge_color
+                    when 'emerald' then 'bg-emerald-500 text-white'
+                    when 'amber' then 'bg-amber-500 text-white'
+                    when 'blue' then 'bg-blue-500 text-white'
+                    else 'bg-neutral-500 text-white'
+                    end %>">
+                <%= product.badge %>
+              </span>
+            <% end %>
+
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20">
+              <i class="fa-solid <%= product.icon %> text-white text-xl"></i>
+            </div>
+
+            <h3 class="text-xl font-bold text-white mb-2"><%= product.name %></h3>
+            <p class="text-neutral-400 text-sm mb-4 leading-relaxed"><%= product.description %></p>
+
+            <ul class="space-y-2 mb-6">
+              <% product.features_list.each do |feature| %>
+                <li class="flex items-center gap-2 text-sm text-neutral-300">
+                  <i class="fa-solid fa-check text-emerald-400 text-xs"></i>
+                  <%= feature %>
+                </li>
+              <% end %>
+            </ul>
+
+            <div class="flex items-baseline gap-2 mb-6">
+              <span class="text-3xl font-extrabold text-emerald-400"><%= product.price.to_i %>€</span>
+              <span class="text-neutral-500"><%= product.interval_label %></span>
+            </div>
+
+            <% if @my_product_ids.include?(product.id) %>
+              <div class="w-full py-3.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold text-center flex items-center justify-center gap-2">
+                <i class="fa-solid fa-check-circle"></i>
+                Actif
+              </div>
+            <% elsif cart_products.include?(product.id) %>
+              <div class="w-full py-3.5 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 font-semibold text-center flex items-center justify-center gap-2">
+                <i class="fa-solid fa-shopping-cart"></i>
+                Dans le panier
+              </div>
+            <% else %>
+              <div class="flex gap-3">
+                <%= link_to admin_shop_product_path(product), class: "flex-1 py-3 rounded-xl bg-neutral-800/80 border border-neutral-700 text-neutral-300 font-medium text-center hover:bg-neutral-700 hover:text-white transition-all text-sm" do %>
+                  Détails
+                <% end %>
+                <%= button_to add_product_admin_cart_path(product), method: :post, class: "flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold text-center flex items-center justify-center gap-2 hover:from-emerald-600 hover:to-teal-600 hover:shadow-lg hover:shadow-emerald-500/25 transition-all cursor-pointer border-0 text-sm" do %>
+                  <i class="fa-solid fa-cart-plus"></i>
+                  Ajouter
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <!-- Bots de Trading -->
+  <section>
+    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-neutral-800">
+      <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+        <i class="fa-solid fa-robot text-blue-400"></i>
+      </div>
+      <h2 class="text-xl font-bold text-white">Bots de Trading</h2>
+    </div>
+
+    <% if @bots.any? %>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <% @bots.each do |bot| %>
+          <% 
+            real_projections = bot.calculate_real_projections
+            yearly_value = real_projections[:yearly] > 0 ? real_projections[:yearly] : bot.projection_yearly
+            win_rate = bot.calculate_global_win_rate
+            win_rate = win_rate > 0 ? win_rate : bot.win_rate
+          %>
+          <div class="group rounded-2xl bg-gradient-to-br from-blue-950/40 to-indigo-950/20 border border-blue-500/20 p-6 transition-all hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/5 relative">
+            
+            <% if current_user.is_admin? %>
+              <%= link_to edit_admin_bot_path(bot), class: "absolute top-3 right-3 w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 hover:bg-amber-500/30 transition-all opacity-0 group-hover:opacity-100", title: "Modifier ce bot" do %>
+                <i class="fa-solid fa-pen text-xs"></i>
+              <% end %>
+            <% end %>
+            
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-6">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-robot text-white text-lg"></i>
+              </div>
+              <% if @my_bot_ids.include?(bot.id) %>
+                <span class="text-xs font-medium text-emerald-400">Installé ✓</span>
+              <% end %>
+            </div>
+
+            <!-- Content -->
+            <h3 class="text-lg font-semibold text-white mb-1"><%= bot.name %></h3>
+            <p class="text-sm text-blue-200/50 mb-6">Jusqu'à <%= number_to_currency((yearly_value / 12.0).round, unit: "€", format: "%n%u") %>/mois</p>
+
+            <!-- Stats -->
+            <div class="flex items-center gap-6 mb-6">
+              <div>
+                <div class="text-2xl font-bold text-white"><%= number_to_percentage(win_rate, precision: 0) %></div>
+                <div class="text-xs text-blue-300/40">Win rate</div>
+              </div>
+              <div class="w-px h-8 bg-blue-500/20"></div>
+              <div>
+                <div class="text-2xl font-bold text-emerald-400">+<%= number_to_currency(yearly_value, unit: "€", format: "%n%u", precision: 0) %></div>
+                <div class="text-xs text-blue-300/40">Par an</div>
+              </div>
+            </div>
+
+            <!-- Price & CTA -->
+            <div class="flex items-center justify-between pt-6 border-t border-blue-500/10">
+              <div>
+                <span class="text-2xl font-bold text-white"><%= bot.price.to_i %>€</span>
+                <span class="text-xs text-blue-300/40 ml-1">une fois</span>
+              </div>
+              
+              <% if @my_bot_ids.include?(bot.id) %>
+                <%= link_to admin_my_bots_path, class: "px-5 py-2.5 rounded-full text-sm font-medium text-blue-400 hover:bg-blue-500/10 transition-colors" do %>
+                  Gérer →
+                <% end %>
+              <% elsif cart_bots.include?(bot.id) %>
+                <span class="px-5 py-2.5 rounded-full text-sm font-medium bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  ✓ Ajouté
+                </span>
+              <% else %>
+                <%= button_to add_bot_admin_cart_path(bot), method: :post, class: "px-5 py-2.5 rounded-full text-sm font-medium bg-white text-neutral-900 hover:bg-blue-50 transition-colors cursor-pointer border-0" do %>
+                  Ajouter
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
+        <div class="w-16 h-16 rounded-2xl bg-neutral-800 flex items-center justify-center mx-auto mb-4">
+          <i class="fa-solid fa-robot text-neutral-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">Aucun Bot Disponible</h3>
+        <p class="text-neutral-400 text-sm">Revenez bientôt pour découvrir nos bots de trading</p>
+      </div>
+    <% end %>
+  </section>
+</div>

@@ -1,0 +1,28 @@
+<% @page_title = "Configuration" %>
+
+<div class="space-y-6">
+  <%= render 'admin/shared/flash_messages' %>
+
+  <div class="bg-neutral-900 rounded-xl overflow-hidden">
+    <div class="flex border-b border-neutral-800">
+      <%= link_to admin_settings_path(tab: 'maintenance'), class: "flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors #{@tab == 'maintenance' ? 'text-amber-400 border-b-2 border-amber-400 bg-amber-500/5' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'}" do %>
+        <i class="fa-solid fa-wrench"></i>
+        Maintenance
+      <% end %>
+      <%= link_to admin_settings_path(tab: 'backups'), class: "flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors #{@tab == 'backups' ? 'text-blue-400 border-b-2 border-blue-400 bg-blue-500/5' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'}" do %>
+        <i class="fa-solid fa-database"></i>
+        Backups
+      <% end %>
+    </div>
+
+    <div class="p-0">
+      <% case @tab %>
+      <% when 'maintenance' %>
+        <%= render 'maintenance_tab' %>
+      <% when 'backups' %>
+        <%= render 'backups_tab' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+

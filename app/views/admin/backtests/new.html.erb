@@ -1,61 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Nouveau Backtest - <%= @bot.name %></title>
-  <%= stylesheet_link_tag "admin" %>
-</head>
-<body>
-  <% @page_title = "Nouveau Backtest" %>
-  
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const form = document.querySelector('form');
-      const fileInput = document.querySelector('input[type="file"]');
-      const submitButtons = document.querySelectorAll('input[type="submit"]');
-      
-      console.log('🔍 DEBUG: Formulaire chargé');
-      console.log('📝 Nombre de champs de fichier:', fileInput);
-      console.log('📤 Nombre de boutons submit:', submitButtons.length);
-      
-      // Logger quand un fichier est sélectionné
-      if (fileInput) {
-        fileInput.addEventListener('change', function() {
-          console.log('📁 Fichier sélectionné:', this.files[0].name);
-          console.log('📊 Taille du fichier:', this.files[0].size, 'bytes');
-        });
-      }
-      
-      // Logger avant soumission
-      if (form) {
-        form.addEventListener('submit', function(e) {
-          console.log('🚀 SOUMISSION DU FORMULAIRE');
-          console.log('📋 Données du formulaire:', new FormData(form));
-          
-          if (fileInput && fileInput.files.length > 0) {
-            console.log('✅ Fichier uploadé:', fileInput.files[0].name);
-          } else {
-            console.log('⚠️ Aucun fichier sélectionné');
-          }
-        });
-      }
-      
-      // Logger au clic sur les boutons submit
-      submitButtons.forEach(function(button, index) {
-        button.addEventListener('click', function() {
-          console.log(`🖱️ Clic sur bouton submit #${index}`);
-        });
-      });
-    });
-  </script>
-  
-  <div class="app-layout">
-    <%= render 'admin/shared/sidebar' %>
-    
-    <div class="main-content">
-      <%= render 'admin/shared/navbar' %>
-      
-      <div class="container">
-        <%= link_to admin_bot_backtests_path(@bot), class: "back-link" do %>
+<% @page_title = "Nouveau Backtest" %>
+
+<%= link_to admin_bot_backtests_path(@bot), class: "back-link" do %>
           <i class="fa-icon fa-md fa-arrow-left"></i> Retour aux backtests
         <% end %>
         
@@ -151,9 +96,3 @@
             </div>
           <% end %>
         </div>
-      </div>
-    </div>
-  </div>
-</body>
-</html>
-

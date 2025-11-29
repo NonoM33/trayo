@@ -1,63 +1,108 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bienvenue - Trayo</title>
-  <%= stylesheet_link_tag "onboarding", "data-turbo-track": "reload" %>
-</head>
-<body class="onboarding-page">
-  <div class="onboarding-container">
-    <div class="complete-success">
-      <div class="icon">✓</div>
-      <h2>Votre compte a été créé !</h2>
-      <p>Bienvenue <%= @invitation.first_name %> ! Votre compte Trayo est maintenant actif.</p>
+<% @page_title = "Inscription terminée - Trayo" %>
+
+<div class="min-h-screen flex items-center justify-center py-12 px-4">
+  <div class="max-w-xl w-full">
+    
+    <div class="text-center mb-8">
+      <div class="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center glow-blue animate-pulse">
+        <i class="fa-solid fa-check text-5xl text-white"></i>
+      </div>
+      <h1 class="text-4xl font-bold text-white mb-4">Bienvenue chez Trayo !</h1>
+      <p class="text-xl text-neutral-400">Votre inscription est terminée</p>
+    </div>
+
+    <div class="glass rounded-2xl p-8 space-y-6">
       
-      <div class="login-info">
-        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #1e293b;">
-          Vos identifiants de connexion
-        </h3>
-        <div class="credentials">
-          <div style="margin-bottom: 16px;">
-            <strong>Email :</strong>
-            <code><%= @user.email %></code>
+      <div class="text-center p-6 rounded-xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20">
+        <p class="text-neutral-400 mb-2">Vos identifiants de connexion</p>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between p-3 rounded-lg bg-neutral-800/50">
+            <span class="text-neutral-400">Email</span>
+            <span class="font-mono text-white"><%= @user&.email || @invitation.email %></span>
           </div>
-          <div>
-            <strong>Mot de passe :</strong>
-            <code id="password"><%= @password %></code>
+          <div class="flex items-center justify-between p-3 rounded-lg bg-neutral-800/50">
+            <span class="text-neutral-400">Mot de passe</span>
+            <div class="flex items-center gap-2">
+              <code class="font-mono text-green-400 bg-green-500/10 px-3 py-1 rounded"><%= @password %></code>
+              <button onclick="navigator.clipboard.writeText('<%= @password %>')" class="p-2 rounded-lg hover:bg-neutral-700 transition-colors" title="Copier">
+                <i class="fa-solid fa-copy text-neutral-400"></i>
+              </button>
+            </div>
           </div>
         </div>
-        
-        <button onclick="copyPassword()" class="btn-secondary" style="margin-top: 20px;">
-          Copier le mot de passe
-        </button>
-        
-        <p style="margin-top: 24px; font-size: 14px; color: #64748b; line-height: 1.6;">
-          <strong>Important :</strong> Veuillez sauvegarder ces informations en sécurité. 
-          Vous recevrez également un email avec ces détails de connexion.
-        </p>
       </div>
-      
-      <div style="margin-top: 40px;">
-        <a href="https://trayo.fr/admin/login" class="btn-primary" style="display: inline-block; text-decoration: none;">
-          Me connecter maintenant
-        </a>
-      </div>
-      
-      <p style="margin-top: 40px; font-size: 14px; color: #64748b;">
-        Des questions ? Contactez-nous à contact@trayo.fr
-      </p>
-    </div>
-  </div>
-  
-  <script>
-    function copyPassword() {
-      const password = document.getElementById('password').textContent;
-      navigator.clipboard.writeText(password).then(function() {
-        alert('Mot de passe copié !');
-      });
-    }
-  </script>
-</body>
-</html>
 
+      <div class="flex items-start gap-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+        <i class="fa-solid fa-exclamation-triangle text-amber-400 mt-1"></i>
+        <div>
+          <p class="font-medium text-amber-400">Important</p>
+          <p class="text-sm text-neutral-400">Notez votre mot de passe maintenant ! Il ne sera plus affiché.</p>
+        </div>
+      </div>
+
+      <% if @selected_bots&.any? %>
+        <div>
+          <h3 class="font-bold text-white mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-robot text-cyan-400"></i>
+            Vos Bots
+          </h3>
+          <div class="space-y-2">
+            <% @selected_bots.each do |bot| %>
+              <div class="flex items-center justify-between p-3 rounded-lg bg-neutral-800/50">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    <i class="fa-solid fa-robot text-white text-xs"></i>
+                  </div>
+                  <span class="text-white"><%= bot.name %></span>
+                </div>
+                <span class="text-cyan-400 font-bold"><%= number_to_currency(bot.price, unit: "€", format: "%n%u") %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="pt-4 border-t border-neutral-800">
+        <h3 class="font-bold text-white mb-4">Prochaines étapes</h3>
+        <div class="space-y-3">
+          <div class="flex items-start gap-3">
+            <div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center shrink-0 mt-0.5">
+              <i class="fa-solid fa-check text-white text-xs"></i>
+            </div>
+            <div>
+              <p class="text-white font-medium">Compte créé</p>
+              <p class="text-sm text-neutral-500">Votre compte Trayo est actif</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center shrink-0 mt-0.5">
+              <span class="text-white text-xs font-bold">2</span>
+            </div>
+            <div>
+              <p class="text-white font-medium">Configuration du VPS</p>
+              <p class="text-sm text-neutral-500">Nous configurons votre serveur sous 24h</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-6 h-6 rounded-full bg-neutral-600 flex items-center justify-center shrink-0 mt-0.5">
+              <span class="text-white text-xs font-bold">3</span>
+            </div>
+            <div>
+              <p class="text-white font-medium">Activation des bots</p>
+              <p class="text-sm text-neutral-500">Vos robots seront lancés automatiquement</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%= link_to admin_login_path, class: "w-full btn-primary mt-6" do %>
+        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+        Accéder à mon espace
+      <% end %>
+    </div>
+
+    <p class="text-center text-neutral-500 text-sm mt-6">
+      Un email de confirmation a été envoyé à <span class="text-white"><%= @user&.email || @invitation.email %></span>
+    </p>
+  </div>
+</div>

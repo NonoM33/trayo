@@ -1,0 +1,104 @@
+<div class="px-6 py-4 bg-neutral-900/50 border-b border-neutral-800 flex items-center justify-between">
+  <div class="flex items-center gap-2">
+    <i class="fa-solid fa-crown text-purple-400"></i>
+    <span class="font-medium text-white">Packs & Services Premium</span>
+  </div>
+  <%= link_to new_product_admin_shop_management_index_path, class: "flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 transition-all" do %>
+    <i class="fa-solid fa-plus text-xs"></i>
+    Nouveau Pack
+  <% end %>
+</div>
+
+<% if @products.any? %>
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="bg-neutral-900/30 border-b border-neutral-800">
+          <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wide">Produit</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wide">Type</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wide">Prix</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wide">Statut</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wide">Ventes</th>
+          <th class="px-6 py-3 text-right text-xs font-semibold text-neutral-400 uppercase tracking-wide">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-neutral-800">
+        <% @products.each do |product| %>
+          <% 
+            sales_count = product.product_purchases.count rescue 0
+            revenue = product.product_purchases.sum(:price_paid) rescue 0
+          %>
+          <tr class="hover:bg-neutral-900/50 transition-colors">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white shadow-lg">
+                  <i class="fa-solid <%= product.icon || 'fa-crown' %>"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <p class="font-semibold text-white"><%= product.name %></p>
+                    <% if product.badge.present? %>
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-<%= product.badge_color || 'purple' %>-500/20 text-<%= product.badge_color || 'purple' %>-400">
+                        <%= product.badge %>
+                      </span>
+                    <% end %>
+                  </div>
+                  <p class="text-xs text-neutral-500 truncate max-w-xs"><%= truncate(product.description, length: 50) %></p>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <% if product.subscription? %>
+                <%= render 'admin/shared/status_badge', variant: 'info', label: 'Abonnement', icon: 'fa-repeat' %>
+              <% else %>
+                <%= render 'admin/shared/status_badge', variant: 'purple', label: 'Unique', icon: 'fa-check' %>
+              <% end %>
+            </td>
+            <td class="px-6 py-4">
+              <span class="text-xl font-bold text-white"><%= product.formatted_price %></span>
+            </td>
+            <td class="px-6 py-4">
+              <% if product.active? %>
+                <%= render 'admin/shared/status_badge', variant: 'success', label: 'Actif', pulse: true %>
+              <% else %>
+                <%= render 'admin/shared/status_badge', variant: 'neutral', label: 'Inactif' %>
+              <% end %>
+            </td>
+            <td class="px-6 py-4">
+              <span class="text-lg font-semibold text-white"><%= sales_count %></span>
+              <span class="text-xs text-neutral-500 ml-1">vente(s)</span>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center justify-end gap-1">
+                <%= link_to edit_product_admin_shop_management_path(product), class: "w-8 h-8 rounded-lg bg-neutral-800 border border-neutral-700 flex items-center justify-center text-neutral-400 hover:text-amber-400 hover:border-amber-500/50 transition-all", title: "Modifier" do %>
+                  <i class="fa-solid fa-pen text-xs"></i>
+                <% end %>
+                
+                <%= button_to toggle_product_admin_shop_management_path(product), method: :post, class: "w-8 h-8 rounded-lg border flex items-center justify-center transition-all cursor-pointer #{product.active? ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20' : 'bg-neutral-800 border-neutral-700 text-neutral-400 hover:text-green-400'}", title: product.active? ? 'Désactiver' : 'Activer' do %>
+                  <i class="fa-solid <%= product.active? ? 'fa-eye' : 'fa-eye-slash' %> text-xs"></i>
+                <% end %>
+                
+                <%= button_to destroy_product_admin_shop_management_path(product), method: :delete, data: { turbo_confirm: "Supprimer #{product.name} ?" }, class: "w-8 h-8 rounded-lg bg-neutral-800 border border-neutral-700 flex items-center justify-center text-neutral-400 hover:text-red-400 hover:border-red-500/50 transition-all cursor-pointer", title: "Supprimer" do %>
+                  <i class="fa-solid fa-trash text-xs"></i>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="text-center py-16 px-6">
+    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-purple-500/20 flex items-center justify-center">
+      <i class="fa-solid fa-crown text-3xl text-purple-400"></i>
+    </div>
+    <h3 class="text-lg font-semibold text-white mb-2">Aucun pack premium</h3>
+    <p class="text-neutral-400 mb-6">Créez des services et packs pour vos clients</p>
+    <%= link_to new_product_admin_shop_management_index_path, class: "inline-flex items-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-purple-500" do %>
+      <i class="fa-solid fa-plus"></i>
+      Créer un Pack
+    <% end %>
+  </div>
+<% end %>
+

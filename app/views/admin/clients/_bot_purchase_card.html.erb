@@ -1,0 +1,53 @@
+<%= turbo_frame_tag "bot_purchase_#{bot.id}" do %>
+  <div id="bot_purchase_<%= bot.id %>" class="rounded-xl bg-neutral-900 border border-neutral-800 p-5 hover:border-neutral-700 transition-colors">
+    <% trading_bot = bot.trading_bot %>
+    <div class="flex items-start justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br <%= bot.is_running ? 'from-emerald-500 to-green-600' : 'from-neutral-600 to-neutral-700' %> flex items-center justify-center">
+          <i class="fa-solid fa-robot text-white text-lg"></i>
+        </div>
+        <div>
+          <h4 class="font-semibold text-white"><%= trading_bot&.name || 'Bot #' + bot.id.to_s %></h4>
+          <p class="text-xs text-neutral-400">Magic: <%= bot.magic_number %></p>
+        </div>
+      </div>
+      
+      <!-- Contrôles de statut Bot -->
+      <div class="flex items-center gap-2">
+        <%= form_with url: admin_bot_purchase_path(bot), method: :patch, data: { turbo: true }, class: "flex items-center gap-2" do %>
+          <!-- Toggle Running -->
+          <button type="submit" name="bot_purchase[is_running]" value="<%= !bot.is_running %>" 
+                  class="relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-neutral-900 <%= bot.is_running ? 'bg-emerald-500' : 'bg-neutral-700' %>">
+            <span class="inline-block h-5 w-5 transform rounded-full bg-white shadow-lg transition-transform <%= bot.is_running ? 'translate-x-6' : 'translate-x-1' %>"></span>
+          </button>
+        <% end %>
+        
+        <!-- Dropdown Status -->
+        <%= form_with url: admin_bot_purchase_path(bot), method: :patch, data: { turbo: true } do %>
+          <select name="bot_purchase[status]" onchange="this.form.requestSubmit()" class="px-2 py-1 rounded-lg text-xs font-medium bg-neutral-800 border border-neutral-700 text-white cursor-pointer hover:border-neutral-600 focus:border-blue-500">
+            <option value="active" <%= 'selected' if bot.status == 'active' %>>✓ Actif</option>
+            <option value="inactive" <%= 'selected' if bot.status == 'inactive' %>>⏸ Inactif</option>
+          </select>
+        <% end %>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-3 gap-3 text-sm pt-3 border-t border-neutral-800">
+      <div>
+        <div class="text-neutral-500 text-xs mb-1">Profit Total</div>
+        <div class="font-semibold <%= bot.total_profit.to_f >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+          <%= number_to_currency(bot.total_profit || 0, unit: "€", format: "%n%u") %>
+        </div>
+      </div>
+      <div>
+        <div class="text-neutral-500 text-xs mb-1">Trades</div>
+        <div class="font-semibold text-white"><%= bot.trades_count || 0 %></div>
+      </div>
+      <div>
+        <div class="text-neutral-500 text-xs mb-1">Drawdown</div>
+        <div class="font-semibold text-amber-400"><%= number_to_currency(bot.current_drawdown || 0, unit: "€", format: "%n%u") %></div>
+      </div>
+    </div>
+  </div>
+<% end %>
+

@@ -1,0 +1,13 @@
+<thead class="sticky top-0 z-10 bg-neutral-900">
+  <tr class="*:py-3 *:text-left *:align-middle *:[box-shadow:inset_0_-1px_0_0_rgb(46_46_46)]">
+    <% (local_assigns[:columns] || []).each do |col| %>
+      <% 
+        align_class = col[:align] == 'right' ? 'text-right' : (col[:align] == 'center' ? 'text-center' : 'text-left')
+        width_class = col[:width] ? "w-#{col[:width]}" : ''
+      %>
+      <th scope="col" class="px-6 text-sm font-semibold text-neutral-100 <%= align_class %> <%= width_class %>">
+        <%= col[:label] %>
+      </th>
+    <% end %>
+  </tr>
+</thead>
