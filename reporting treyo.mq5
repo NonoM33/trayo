@@ -239,13 +239,11 @@ void SyncCompleteHistory()
    Print("Balance: ", balance, " | Equity: ", equity);
    Print("================================================");
    
-   // Get all historical data
    string all_trades_json = GetAllTradesJSON();
    string all_withdrawals_json = GetAllWithdrawalsJSON();
    string all_deposits_json = GetAllDepositsJSON();
    string active_experts_json = GetActiveExpertsJSON();
    
-   // Debug: Print what we found
    Print("=== SYNC DATA SUMMARY ===");
    Print("Trades JSON length: ", StringLen(all_trades_json));
    Print("Withdrawals JSON length: ", StringLen(all_withdrawals_json));
@@ -253,7 +251,6 @@ void SyncCompleteHistory()
    Print("Active Experts: ", active_experts_json);
    Print("=== END SYNC DATA SUMMARY ===");
    
-   // Build complete JSON payload
    string json = StringFormat(
       "{\"mt5_data\":{\"mt5_id\":\"%d\",\"mt5_api_token\":\"%s\",\"account_name\":\"%s\",\"client_email\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,\"margin\":%.2f,\"free_margin\":%.2f,\"trades\":%s,\"withdrawals\":%s,\"deposits\":%s,\"active_experts\":%s}}",
       account_number,
@@ -274,7 +271,9 @@ void SyncCompleteHistory()
    char result_data[];
    string result_headers;
    
-   StringToCharArray(json, post_data, 0, StringLen(json));
+   int json_len = StringLen(json);
+   ArrayResize(post_data, json_len);
+   StringToCharArray(json, post_data, 0, json_len, CP_UTF8);
    
    string headers = "Content-Type: application/json\r\n";
    headers += "X-API-Key: " + API_KEY + "\r\n";
@@ -515,10 +514,7 @@ string GetAllTradesJSON()
             
             if(count > 0) trades += ",";
             
-            string comment_safe = comment != "" ? comment : "No comment";
-            StringReplace(comment_safe, "\"", "'");
-            StringReplace(comment_safe, "\n", " ");
-            StringReplace(comment_safe, "\r", " ");
+            string comment_safe = SanitizeForJSON(comment != "" ? comment : "No comment");
             
             trades += StringFormat(
                "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"closed\"}",
@@ -526,13 +522,13 @@ string GetAllTradesJSON()
                symbol,
                type_str,
                volume,
-                        open_price,
-                        close_price,
-                        total_profit,
-                        total_commission,
-                        total_swap,
-                        open_time_iso,
-                        close_time_iso,
+               open_price,
+               close_price,
+               total_profit,
+               total_commission,
+               total_swap,
+               open_time_iso,
+               close_time_iso,
                magic_number,
                comment_safe
             );
@@ -817,10 +813,7 @@ string GetTradesJSON()
             
             if(count > 0) trades += ",";
             
-            string comment_safe = comment != "" ? comment : "No comment";
-            StringReplace(comment_safe, "\"", "'");
-            StringReplace(comment_safe, "\n", " ");
-            StringReplace(comment_safe, "\r", " ");
+            string comment_safe = SanitizeForJSON(comment != "" ? comment : "No comment");
             
             trades += StringFormat(
                "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"closed\"}",
@@ -828,13 +821,13 @@ string GetTradesJSON()
                symbol,
                type_str,
                volume,
-                        open_price,
-                        close_price,
-                        total_profit,
-                        total_commission,
-                        total_swap,
-                        open_time_iso,
-                        close_time_iso,
+               open_price,
+               close_price,
+               total_profit,
+               total_commission,
+               total_swap,
+               open_time_iso,
+               close_time_iso,
                magic_number,
                comment_safe
             );
@@ -1105,6 +1098,8 @@ string GetOpenPositionsJSON()
          current_time_iso += "Z";
          
          if(count > 0) positions += ",";
+         
+         string comment_safe = SanitizeForJSON(comment != "" ? comment : "");
          
          positions += StringFormat(
             "{\"trade_id\":\"%d\",\"symbol\":\"%s\",\"trade_type\":\"%s\",\"volume\":%.2f,\"open_price\":%.5f,\"close_price\":%.5f,\"profit\":%.2f,\"commission\":%.2f,\"swap\":%.2f,\"open_time\":\"%s\",\"close_time\":\"%s\",\"magic_number\":%d,\"comment\":\"%s\",\"status\":\"open\"}",
