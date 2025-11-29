@@ -245,7 +245,7 @@
           
           <%# Section Mise à jour - hauteur harmonisée %>
           <% if purchase.needs_update? %>
-            <div id="updates-section" class="border-t border-orange-500/30 p-5 bg-gradient-to-r from-orange-500/10 to-red-500/10 min-h-[88px] rounded-b-2xl">
+            <div id="updates-section" class="border-t border-orange-500/30 p-5 bg-gradient-to-r from-orange-500/10 to-red-500/10 min-h-[118px] flex items-center">
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 h-full">
                 <div class="flex items-center gap-4">
                
@@ -279,7 +279,7 @@
               </div>
             </div>
           <% elsif purchase.update_pass_active? %>
-            <div class="border-t border-emerald-500/30 p-5 bg-gradient-to-r from-emerald-500/10 to-green-500/10 min-h-[88px] rounded-b-2xl">
+            <div class="border-t border-emerald-500/30 p-5 bg-gradient-to-r from-emerald-500/10 to-green-500/10 min-h-[118px] flex items-center">
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 h-full">
                 <div class="flex items-center gap-4">
                   <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
@@ -305,8 +305,8 @@
               </div>
             </div>
           <% else %>
-            <div class="border-t border-green-500/20 p-5 bg-gradient-to-r from-green-500/10 to-emerald-500/10 min-h-[88px]">
-              <div class="flex items-center justify-between h-full">
+            <div class="border-t border-green-500/20 p-5 bg-gradient-to-r from-green-500/10 to-emerald-500/10 min-h-[118px] flex items-center">
+              <div class="flex items-center justify-between w-full">
                 <div class="flex items-center gap-4">
                   <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
                     <i class="fa-solid fa-check text-green-400 text-lg"></i>
