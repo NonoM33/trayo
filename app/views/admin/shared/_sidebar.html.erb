@@ -1,15 +1,4 @@
-<div class="flex h-full flex-col relative shrink-0" data-controller="sidebar" data-sidebar-storage-key-value="trayoSidebar" style="height: 100vh;">
-  <!-- Mobile Sidebar Overlay -->
-  <div class="absolute inset-0 z-50 md:hidden hidden" data-sidebar-target="mobileSidebar">
-    <!-- Backdrop -->
-    <div class="absolute inset-0 bg-black/50 transition-opacity duration-300" data-sidebar-target="mobileBackdrop" data-action="click->sidebar#closeMobile"></div>
-
-    <!-- Sidebar Panel -->
-    <div class="absolute inset-y-0 left-0 w-64 bg-neutral-50 dark:bg-neutral-900 shadow-xl border-r border-neutral-200 dark:border-neutral-800 transition-transform duration-300 ease-out" data-sidebar-target="mobilePanel">
-      <div data-sidebar-target="sharedContent"></div>
-    </div>
-  </div>
-
+<div class="hidden md:flex h-full flex-col relative shrink-0" data-controller="sidebar" data-sidebar-storage-key-value="trayoSidebar" style="height: 100vh;">
   <div class="relative z-0 flex h-full">
     <div class="relative flex h-full flex-row">
       <details class="w-13 open:w-64 group/sidebar relative z-20 h-full shrink-0 overflow-hidden border-r border-neutral-200 bg-neutral-50 max-md:hidden motion-safe:transition-all motion-safe:duration-300 dark:border-neutral-800 dark:bg-neutral-900" data-sidebar-target="desktopSidebar" style="height: 100vh;">
