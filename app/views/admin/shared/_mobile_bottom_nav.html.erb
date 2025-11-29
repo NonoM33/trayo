@@ -1,0 +1,232 @@
+<nav class="fixed bottom-0 left-0 right-0 z-[9999] md:hidden bg-neutral-900/95 backdrop-blur-xl border-t border-neutral-800 safe-area-bottom" data-controller="mobile-nav">
+  <div class="flex items-center justify-around h-16 px-2">
+    <% if current_user.is_admin? %>
+      <%= link_to admin_dashboard_path, class: "mobile-nav-item #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
+        <i class="fa-solid fa-chart-line text-lg"></i>
+        <span class="text-[10px] font-medium mt-0.5">Dashboard</span>
+      <% end %>
+      
+      <%= link_to admin_clients_path, class: "mobile-nav-item #{request.path.start_with?('/admin/clients') ? 'active' : ''}" do %>
+        <i class="fa-solid fa-users text-lg"></i>
+        <span class="text-[10px] font-medium mt-0.5">Clients</span>
+      <% end %>
+      
+      <%= link_to admin_shop_index_path, class: "mobile-nav-item-shop #{request.path.start_with?('/admin/shop') ? 'active' : ''}" do %>
+        <div class="relative">
+          <i class="fa-solid fa-store text-lg"></i>
+          <span class="absolute -top-1 -right-1.5 flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+        </div>
+        <span class="text-[10px] font-medium mt-0.5">Boutique</span>
+      <% end %>
+      
+      <%= link_to admin_trading_path, class: "mobile-nav-item #{request.path.start_with?('/admin/trading') || request.path.start_with?('/admin/trades') ? 'active' : ''}" do %>
+        <i class="fa-solid fa-chart-candlestick text-lg"></i>
+        <span class="text-[10px] font-medium mt-0.5">Trading</span>
+      <% end %>
+      
+      <button class="mobile-nav-item" data-action="click->mobile-nav#openMenu">
+        <i class="fa-solid fa-bars text-lg"></i>
+        <span class="text-[10px] font-medium mt-0.5">Plus</span>
+      </button>
+    <% else %>
+      <%= link_to admin_dashboard_path, class: "mobile-nav-item #{request.path == admin_dashboard_path ? 'active' : ''}" do %>
+        <i class="fa-solid fa-chart-line text-lg"></i>
+        <span class="text-[10px] font-medium mt-0.5">Dashboard</span>
+      <% end %>
+      
+      <%= link_to admin_shop_index_path, class: "mobile-nav-item-shop #{request.path.start_with?('/admin/shop') ? 'active' : ''}" do %>
+        <div class="relative">
+          <i class="fa-solid fa-shopping-cart text-lg"></i>
+          <span class="absolute -top-1 -right-1.5 flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+        </div>
+        <span class="text-[10px] font-medium mt-0.5">Boutique</span>
+      <% end %>
+      
+      <%= link_to admin_my_bots_path, class: "mobile-nav-item #{request.path.start_with?('/admin/my_bots') ? 'active' : ''}" do %>
+        <i class="fa-solid fa-robot text-lg"></i>
+        <span class="text-[10px] font-medium mt-0.5">Mes Bots</span>
+      <% end %>
+      
+      <%= link_to admin_my_trades_path, class: "mobile-nav-item #{request.path.start_with?('/admin/my_trades') ? 'active' : ''}" do %>
+        <i class="fa-solid fa-chart-line text-lg"></i>
+        <span class="text-[10px] font-medium mt-0.5">Trades</span>
+      <% end %>
+      
+      <button class="mobile-nav-item" data-action="click->mobile-nav#openMenu">
+        <i class="fa-solid fa-bars text-lg"></i>
+        <span class="text-[10px] font-medium mt-0.5">Plus</span>
+      </button>
+    <% end %>
+  </div>
+</nav>
+
+<div id="mobileDrawer" class="fixed inset-0 z-[10000] hidden" data-mobile-nav-target="drawer">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-action="click->mobile-nav#closeMenu"></div>
+  
+  <div class="absolute bottom-0 left-0 right-0 bg-neutral-900 rounded-t-3xl transform translate-y-full transition-transform duration-300 ease-out max-h-[85vh] overflow-hidden" data-mobile-nav-target="drawerPanel">
+    <div class="w-12 h-1.5 bg-neutral-600 rounded-full mx-auto mt-3"></div>
+    
+    <div class="px-4 py-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-white">Menu</h3>
+        <button class="p-2 rounded-full hover:bg-neutral-800 text-neutral-400" data-action="click->mobile-nav#closeMenu">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="flex items-center gap-3 p-3 rounded-xl bg-neutral-800/50 mb-4">
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+          <%= current_user.email[0].upcase %>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="text-white font-semibold truncate"><%= current_user.first_name || current_user.email.split('@').first %></div>
+          <div class="text-neutral-400 text-sm"><%= current_user.is_admin? ? 'Administrateur' : 'Client' %></div>
+        </div>
+        <%= link_to admin_shop_index_path(anchor: 'credits'), class: "flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-bold" do %>
+          <i class="fa-solid fa-wallet"></i>
+          <%= number_to_currency(current_user.total_credits, unit: "€", format: "%n%u", precision: 0) %>
+        <% end %>
+      </div>
+      
+      <div class="overflow-y-auto" style="max-height: calc(85vh - 180px);">
+        <% if current_user.is_admin? %>
+          <div class="grid grid-cols-3 gap-2 mb-4">
+            <%= link_to admin_bots_path, class: "mobile-menu-tile #{request.path.start_with?('/admin/bots') ? 'active' : ''}" do %>
+              <i class="fa-solid fa-robot text-xl mb-1"></i>
+              <span class="text-xs">Bots</span>
+            <% end %>
+            <%= link_to admin_vps_path, class: "mobile-menu-tile #{request.path.start_with?('/admin/vps') ? 'active' : ''}" do %>
+              <i class="fa-solid fa-server text-xl mb-1"></i>
+              <span class="text-xs">VPS</span>
+            <% end %>
+            <%= link_to admin_sms_campaigns_path, class: "mobile-menu-tile #{request.path.start_with?('/admin/sms_campaigns') ? 'active' : ''}" do %>
+              <i class="fa-solid fa-bullhorn text-xl mb-1"></i>
+              <span class="text-xs">Campagnes</span>
+            <% end %>
+            <%= link_to admin_finance_path, class: "mobile-menu-tile #{request.path.start_with?('/admin/finance') ? 'active' : ''}" do %>
+              <i class="fa-solid fa-wallet text-xl mb-1"></i>
+              <span class="text-xs">Finance</span>
+            <% end %>
+            <% unread_tickets = SupportTicket.unread.count rescue 0 %>
+            <%= link_to admin_support_path, class: "mobile-menu-tile relative #{request.path.start_with?('/admin/support') ? 'active' : ''}" do %>
+              <i class="fa-solid fa-headset text-xl mb-1"></i>
+              <span class="text-xs">Support</span>
+              <% if unread_tickets > 0 %>
+                <span class="absolute top-1 right-1 bg-red-500 text-white text-[9px] font-bold px-1 rounded-full"><%= unread_tickets %></span>
+              <% end %>
+            <% end %>
+            <%= link_to admin_settings_path, class: "mobile-menu-tile #{request.path.start_with?('/admin/settings') ? 'active' : ''}" do %>
+              <i class="fa-solid fa-cog text-xl mb-1"></i>
+              <span class="text-xs">Config</span>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="grid grid-cols-3 gap-2 mb-4">
+            <%= link_to admin_client_path(current_user), class: "mobile-menu-tile #{request.path == admin_client_path(current_user) ? 'active' : ''}" do %>
+              <i class="fa-solid fa-user text-xl mb-1"></i>
+              <span class="text-xs">Profil</span>
+            <% end %>
+            <%= link_to admin_vps_path, class: "mobile-menu-tile #{request.path.start_with?('/admin/vps') ? 'active' : ''}" do %>
+              <i class="fa-solid fa-server text-xl mb-1"></i>
+              <span class="text-xs">Mes VPS</span>
+            <% end %>
+            <%= link_to admin_bonus_deposits_path, class: "mobile-menu-tile #{request.path.start_with?('/admin/bonus') ? 'active' : ''}" do %>
+              <i class="fa-solid fa-gift text-xl mb-1"></i>
+              <span class="text-xs">Bonus</span>
+            <% end %>
+          </div>
+        <% end %>
+        
+        <%= link_to admin_logout_path, data: { turbo_method: :delete }, class: "flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-red-500/10 text-red-400 font-semibold hover:bg-red-500/20 transition-colors" do %>
+          <i class="fa-solid fa-sign-out-alt"></i>
+          <span>Déconnexion</span>
+        <% end %>
+      </div>
+    </div>
+    
+    <div class="h-8 safe-area-bottom"></div>
+  </div>
+</div>
+
+<style>
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 12px;
+    color: #9ca3af;
+    transition: all 0.2s ease;
+    min-width: 60px;
+  }
+  
+  .mobile-nav-item:active {
+    transform: scale(0.95);
+  }
+  
+  .mobile-nav-item.active {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+  }
+  
+  .mobile-nav-item-shop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 12px;
+    color: #10b981;
+    transition: all 0.2s ease;
+    min-width: 60px;
+  }
+  
+  .mobile-nav-item-shop:active {
+    transform: scale(0.95);
+  }
+  
+  .mobile-nav-item-shop.active {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.15);
+  }
+  
+  .mobile-menu-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 8px;
+    border-radius: 16px;
+    background: #262626;
+    color: #a1a1aa;
+    transition: all 0.2s ease;
+  }
+  
+  .mobile-menu-tile:active {
+    transform: scale(0.97);
+    background: #333;
+  }
+  
+  .mobile-menu-tile.active {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+  }
+  
+  @media (max-width: 767px) {
+    main.flex-1 {
+      padding-bottom: 80px !important;
+    }
+  }
+</style>
+
