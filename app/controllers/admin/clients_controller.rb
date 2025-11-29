@@ -259,6 +259,39 @@ module Admin
       end
     end
 
+    def send_sms
+      @client = User.find(params[:id])
+      
+      if @client.phone.blank?
+        redirect_to admin_client_path(@client), alert: "Pas de numéro de téléphone enregistré."
+        return
+      end
+
+      message = params[:message]
+      sms_type = params[:sms_type]
+
+      message = message.gsub('{prenom}', @client.first_name.to_s)
+                       .gsub('{nom}', @client.last_name.to_s)
+                       .gsub('{solde}', @client.mt5_accounts.sum(:balance).round(2).to_s)
+                       .gsub('{commission}', (CommissionBillingService.calculate_user_performance(@client)[:pending_commission] || 0).round(2).to_s)
+
+      begin
+        SmsService.send_sms(@client.phone, message)
+        
+        SmsCampaignLog.create(
+          user: @client,
+          sms_type: sms_type,
+          message: message,
+          sent_at: Time.current,
+          sent_by: current_user
+        ) rescue nil
+
+        redirect_to admin_client_path(@client), notice: "SMS envoyé avec succès à #{@client.phone}"
+      rescue => e
+        redirect_to admin_client_path(@client), alert: "Erreur lors de l'envoi: #{e.message}"
+      end
+    end
+
     def sms_preview
       @client = User.find(params[:id])
       result = CommissionReminderSender.new(@client).preview(kind: "manual")

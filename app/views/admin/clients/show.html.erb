@@ -227,6 +227,121 @@
     <% end %>
   </div>
 
+  <!-- Widget SMS Rapide -->
+  <div class="rounded-xl bg-gradient-to-r from-emerald-900/30 to-teal-900/20 border border-emerald-700/30 p-4" 
+       data-controller="slideover sms-widget"
+       data-client-firstname="<%= @client.first_name %>"
+       data-client-lastname="<%= @client.last_name %>"
+       data-client-balance="<%= @performance[:total_balance].round(2) %>"
+       data-client-commission="<%= @performance[:pending_commission].round(2) %>">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-comment-sms text-emerald-400 text-lg"></i>
+        </div>
+        <div>
+          <h3 class="font-semibold text-white">Envoyer un SMS</h3>
+          <p class="text-sm text-neutral-400"><%= @client.phone || "Pas de numéro" %></p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <div class="w-64">
+          <%= select_tag :sms_type,
+              options_for_select([
+                ["📢 Relance Commission", "relance_commission"],
+                ["💰 Rappel Paiement", "rappel_paiement"],
+                ["🎉 Promotion", "promotion"],
+                ["🤖 Activation Bot", "activation_bot"],
+                ["⚠️ Alerte Compte", "alerte_compte"],
+                ["📊 Performance", "performance"],
+                ["🔧 Maintenance", "maintenance"],
+                ["✨ Bienvenue", "bienvenue"],
+                ["📝 Personnalisé", "personnalise"]
+              ]),
+              include_blank: "Choisir un type...",
+              class: "w-full",
+              disabled: @client.phone.blank?,
+              data: {
+                controller: "select",
+                select_dropdown_input_value: false,
+                select_disable_typing_value: true,
+                action: "change->sms-widget#typeChanged",
+                sms_widget_target: "typeSelect"
+              } %>
+        </div>
+        
+        <button type="button" 
+                data-action="slideover#show:prevent"
+                data-sms-widget-target="sendButton"
+                disabled
+                class="px-4 py-2.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+          <i class="fa-solid fa-paper-plane"></i>
+          Envoyer
+        </button>
+      </div>
+    </div>
+
+    <!-- Slideover SMS -->
+    <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-white/10 outline-hidden">
+      <div class="inset-y-0 flex h-dvh w-full flex-col bg-neutral-900 shadow-lg outline-hidden sm:w-96 lg:w-[480px] text-neutral-100 shadow-neutral-950">
+        <button type="button" data-action="slideover#hide:prevent" class="absolute top-4 right-4 mt-1 rounded-full p-1.5 opacity-70 transition-opacity hover:cursor-pointer hover:bg-neutral-500/15 hover:opacity-100 focus:outline-hidden active:bg-neutral-500/25 md:top-5">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+            <line x1="18" x2="6" y1="6" y2="18"></line>
+            <line x1="6" x2="18" y1="6" y2="18"></line>
+          </svg>
+        </button>
+
+        <div class="flex items-center gap-3 border-b border-white/10 p-5 pr-12 md:p-6">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+            <i class="fa-solid fa-comment-sms text-white text-xl"></i>
+          </div>
+          <div>
+            <h4 class="font-semibold text-lg text-white">Envoyer SMS</h4>
+            <p class="text-sm text-neutral-400"><%= @client.phone %></p>
+          </div>
+        </div>
+
+        <%= form_with url: send_sms_admin_client_path(@client), method: :post, local: true, class: "flex flex-col flex-1 overflow-hidden" do %>
+          <div class="flex-1 overflow-y-auto p-5 md:p-6 space-y-5">
+            <div>
+              <label class="block text-sm font-medium text-neutral-300 mb-2">Type de message</label>
+              <div class="px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white" data-sms-widget-target="typeLabel">
+                Sélectionnez un type...
+              </div>
+              <input type="hidden" name="sms_type" data-sms-widget-target="typeInput">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-neutral-300 mb-2">Message</label>
+              <textarea name="message" rows="6" data-sms-widget-target="messageArea" data-action="input->sms-widget#messageChanged" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="Votre message..."></textarea>
+              <div class="flex justify-between mt-1">
+                <span class="text-xs text-neutral-500">Variables: {prenom}, {nom}, {solde}, {commission}</span>
+                <span class="text-xs text-neutral-400"><span data-sms-widget-target="charCount">0</span>/160 caractères</span>
+              </div>
+            </div>
+
+            <div class="rounded-lg bg-neutral-800/50 p-4">
+              <h5 class="text-sm font-medium text-neutral-300 mb-2">Aperçu</h5>
+              <p class="text-sm text-white" data-sms-widget-target="preview">
+                Le message apparaîtra ici...
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-3 border-t border-white/10 p-5 md:p-6">
+            <button type="button" data-action="slideover#hide:prevent" class="px-4 py-2.5 rounded-lg border border-neutral-700 text-neutral-300 hover:bg-neutral-800 transition-colors font-medium">
+              Annuler
+            </button>
+            <button type="submit" class="px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors">
+              <i class="fa-solid fa-paper-plane mr-2"></i>Envoyer le SMS
+            </button>
+          </div>
+        <% end %>
+      </div>
+    </dialog>
+  </div>
+
   <!-- Tabs Navigation -->
   <div data-controller="tabs" data-tabs-default-value="overview">
     <div class="flex items-center gap-1 p-1 rounded-xl bg-neutral-900 border border-neutral-800 overflow-x-auto">

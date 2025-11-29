@@ -54,6 +54,7 @@ Rails.application.routes.draw do
         post :regenerate_token
         post :reset_mt5
         post :send_commission_sms
+        post :send_sms
         get :sms_preview
         get :trades
         get :bots
@@ -76,6 +77,24 @@ Rails.application.routes.draw do
         post :charge
       end
     end
+    
+    resources :sms_campaigns do
+      member do
+        post :send_campaign
+      end
+      collection do
+        post :preview
+      end
+    end
+    
+    resources :banners do
+      member do
+        post :toggle
+      end
+    end
+    
+    resources :campaigns, only: [:index]
+    
     resources :mt5_accounts, only: [:update]
     resources :withdrawals, only: [:destroy]
     
@@ -125,12 +144,6 @@ Rails.application.routes.draw do
     resources :vps, path: 'vps' do
       member do
         post :update_status
-      end
-    end
-    
-    resources :campaigns do
-      member do
-        post :toggle_active
       end
     end
 

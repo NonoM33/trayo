@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_29_004343) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_29_010208) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -35,6 +35,46 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_004343) do
     t.string "original_filename"
     t.index ["is_active"], name: "index_backtests_on_is_active"
     t.index ["trading_bot_id"], name: "index_backtests_on_trading_bot_id"
+  end
+
+  create_table "banner_dismissals", force: :cascade do |t|
+    t.bigint "banner_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "dismissed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["banner_id", "user_id"], name: "index_banner_dismissals_on_banner_id_and_user_id", unique: true
+    t.index ["banner_id"], name: "index_banner_dismissals_on_banner_id"
+    t.index ["user_id"], name: "index_banner_dismissals_on_user_id"
+  end
+
+  create_table "banners", force: :cascade do |t|
+    t.string "title", null: false
+    t.text "content"
+    t.string "banner_type", default: "info"
+    t.string "icon"
+    t.string "background_color"
+    t.string "text_color"
+    t.string "button_text"
+    t.string "button_url"
+    t.string "target_audience", default: "all"
+    t.text "target_filters"
+    t.boolean "is_dismissible", default: true
+    t.boolean "is_active", default: true
+    t.datetime "starts_at"
+    t.datetime "ends_at"
+    t.integer "priority", default: 0
+    t.integer "views_count", default: 0
+    t.integer "clicks_count", default: 0
+    t.integer "dismissals_count", default: 0
+    t.bigint "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["banner_type"], name: "index_banners_on_banner_type"
+    t.index ["created_by_id"], name: "index_banners_on_created_by_id"
+    t.index ["is_active"], name: "index_banners_on_is_active"
+    t.index ["starts_at", "ends_at"], name: "index_banners_on_starts_at_and_ends_at"
+    t.index ["target_audience"], name: "index_banners_on_target_audience"
   end
 
   create_table "bonus_deposits", force: :cascade do |t|
@@ -331,6 +371,53 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_004343) do
     t.index ["user_id"], name: "index_payments_on_user_id"
   end
 
+  create_table "sms_campaign_logs", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "sent_by_id"
+    t.bigint "sms_campaign_id"
+    t.string "sms_type"
+    t.text "message"
+    t.string "phone_number"
+    t.string "status", default: "sent"
+    t.datetime "sent_at"
+    t.string "provider_message_id"
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sent_at"], name: "index_sms_campaign_logs_on_sent_at"
+    t.index ["sent_by_id"], name: "index_sms_campaign_logs_on_sent_by_id"
+    t.index ["sms_campaign_id"], name: "index_sms_campaign_logs_on_sms_campaign_id"
+    t.index ["sms_type"], name: "index_sms_campaign_logs_on_sms_type"
+    t.index ["status"], name: "index_sms_campaign_logs_on_status"
+    t.index ["user_id"], name: "index_sms_campaign_logs_on_user_id"
+  end
+
+  create_table "sms_campaigns", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "sms_type"
+    t.text "message_template"
+    t.string "status", default: "draft"
+    t.string "target_audience"
+    t.text "target_filters"
+    t.integer "recipients_count", default: 0
+    t.integer "sent_count", default: 0
+    t.integer "failed_count", default: 0
+    t.datetime "scheduled_at"
+    t.datetime "sent_at"
+    t.datetime "completed_at"
+    t.bigint "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "campaign_type", default: "sms"
+    t.string "email_subject"
+    t.text "email_body"
+    t.string "channels", default: "sms"
+    t.index ["campaign_type"], name: "index_sms_campaigns_on_campaign_type"
+    t.index ["created_by_id"], name: "index_sms_campaigns_on_created_by_id"
+    t.index ["scheduled_at"], name: "index_sms_campaigns_on_scheduled_at"
+    t.index ["status"], name: "index_sms_campaigns_on_status"
+  end
+
   create_table "subscriptions", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "stripe_subscription_id", null: false
@@ -507,6 +594,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_004343) do
   end
 
   add_foreign_key "backtests", "trading_bots"
+  add_foreign_key "banner_dismissals", "banners"
+  add_foreign_key "banner_dismissals", "users"
+  add_foreign_key "banners", "users", column: "created_by_id"
   add_foreign_key "bonus_deposits", "users"
   add_foreign_key "bonus_periods", "campaigns"
   add_foreign_key "bot_purchases", "invoices"
@@ -523,6 +613,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_004343) do
   add_foreign_key "invoices", "users"
   add_foreign_key "mt5_accounts", "users"
   add_foreign_key "payments", "users"
+  add_foreign_key "sms_campaign_logs", "sms_campaigns"
+  add_foreign_key "sms_campaign_logs", "users"
+  add_foreign_key "sms_campaign_logs", "users", column: "sent_by_id"
+  add_foreign_key "sms_campaigns", "users", column: "created_by_id"
   add_foreign_key "subscriptions", "users"
   add_foreign_key "support_tickets", "users"
   add_foreign_key "ticket_comments", "support_tickets"
