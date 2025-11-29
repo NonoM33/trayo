@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_29_000254) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_29_004343) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -109,6 +109,33 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_000254) do
     t.string "button_text", limit: 255
     t.string "button_url", limit: 255
     t.index ["is_active", "start_date", "end_date"], name: "index_campaigns_on_is_active_and_start_date_and_end_date"
+  end
+
+  create_table "commission_invoices", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "invoice_id"
+    t.string "reference", null: false
+    t.string "period_type"
+    t.date "period_start"
+    t.date "period_end"
+    t.decimal "total_profit", precision: 15, scale: 2, default: "0.0"
+    t.decimal "commission_rate", precision: 5, scale: 2
+    t.decimal "commission_amount", precision: 15, scale: 2, default: "0.0"
+    t.decimal "late_fee", precision: 15, scale: 2, default: "0.0"
+    t.decimal "total_amount", precision: 15, scale: 2, default: "0.0"
+    t.string "status", default: "pending"
+    t.string "stripe_payment_intent_id"
+    t.datetime "due_date"
+    t.datetime "paid_at"
+    t.datetime "reminder_sent_at"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["due_date"], name: "index_commission_invoices_on_due_date"
+    t.index ["invoice_id"], name: "index_commission_invoices_on_invoice_id"
+    t.index ["reference"], name: "index_commission_invoices_on_reference", unique: true
+    t.index ["status"], name: "index_commission_invoices_on_status"
+    t.index ["user_id"], name: "index_commission_invoices_on_user_id"
   end
 
   create_table "commission_reminders", force: :cascade do |t|
@@ -267,6 +294,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_000254) do
     t.string "broker_name"
     t.string "broker_server"
     t.string "broker_password"
+    t.decimal "watermark_at_last_billing", precision: 15, scale: 2
+    t.decimal "initial_balance_snapshot", precision: 15, scale: 2
     t.index ["is_admin_account"], name: "index_mt5_accounts_on_is_admin_account"
     t.index ["mt5_id"], name: "index_mt5_accounts_on_mt5_id", unique: true
     t.index ["user_id", "mt5_id"], name: "index_mt5_accounts_on_user_id_and_mt5_id", unique: true
@@ -427,6 +456,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_000254) do
     t.string "phone"
     t.boolean "init_mt5", default: false, null: false
     t.string "stripe_customer_id"
+    t.boolean "commission_billing_enabled", default: true
+    t.datetime "last_commission_billing_date"
+    t.decimal "last_watermark_snapshot", precision: 15, scale: 2
+    t.decimal "commission_balance_due", precision: 15, scale: 2, default: "0.0"
+    t.boolean "commission_payment_failed", default: false
+    t.datetime "commission_payment_failed_at"
+    t.boolean "bots_suspended_for_payment", default: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["init_mt5"], name: "index_users_on_init_mt5"
     t.index ["mt5_api_token"], name: "index_users_on_mt5_api_token", unique: true
@@ -476,6 +512,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_29_000254) do
   add_foreign_key "bot_purchases", "invoices"
   add_foreign_key "bot_purchases", "trading_bots"
   add_foreign_key "bot_purchases", "users"
+  add_foreign_key "commission_invoices", "invoices"
+  add_foreign_key "commission_invoices", "users"
   add_foreign_key "commission_reminders", "users"
   add_foreign_key "credits", "users"
   add_foreign_key "deposits", "mt5_accounts"

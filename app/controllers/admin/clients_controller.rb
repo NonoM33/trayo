@@ -34,7 +34,9 @@ module Admin
       @invoices_total_due = @invoices.sum(&:balance_due)
       @available_bot_purchases = @client.bot_purchases.includes(:trading_bot).where(invoice_id: nil)
       @available_vps = @client.vps.where(invoice_id: nil)
-    @recent_commission_reminders = @client.commission_reminders.recent.limit(5)
+      @recent_commission_reminders = @client.commission_reminders.recent.limit(5)
+      @performance = CommissionBillingService.calculate_user_performance(@client)
+      @pending_commission_invoices = @client.commission_invoices.unpaid
       @average_daily_gain = @client.average_daily_gain
       
       bot_purchases_count = @client.bot_purchases.count

@@ -71,6 +71,11 @@ Rails.application.routes.draw do
     resources :invoices, only: [:index, :show] do
       resources :payments, only: [:create], controller: "invoice_payments"
     end
+    resources :commission_invoices, only: [:create] do
+      member do
+        post :charge
+      end
+    end
     resources :mt5_accounts, only: [:update]
     resources :withdrawals, only: [:destroy]
     

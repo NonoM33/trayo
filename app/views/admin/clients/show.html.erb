@@ -1,6 +1,38 @@
 <% content_for :title, "Client - #{@client.full_name}" %>
 
 <div class="space-y-6">
+  <!-- Bannière Impayé Commission -->
+  <% if @client.commission_payment_failed? || @client.bots_suspended_for_payment? %>
+    <div class="rounded-xl bg-gradient-to-r from-red-900/80 to-red-800/60 border border-red-500/50 p-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-exclamation-triangle text-red-400 text-xl"></i>
+        </div>
+        <div>
+          <h3 class="font-semibold text-white">Paiement Commission Échoué</h3>
+          <p class="text-red-200 text-sm">
+            Montant dû: <strong><%= number_to_currency(@client.commission_balance_due, unit: "€", format: "%n%u") %></strong>
+            <% if @client.bots_suspended_for_payment? %>
+              — <span class="text-red-300">Bots suspendus</span>
+            <% end %>
+            <% hours = (Time.current - (@client.commission_payment_failed_at || Time.current)).to_i / 3600 %>
+            <% if hours >= 48 %>
+              — <span class="text-red-300">+120€ frais de remise en route</span>
+            <% end %>
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <% pending_invoice = @client.commission_invoices.unpaid.first %>
+        <% if pending_invoice %>
+          <%= link_to admin_invoice_path(pending_invoice.invoice), class: "px-4 py-2 rounded-lg bg-white text-red-600 font-semibold hover:bg-red-50 transition-colors" do %>
+            <i class="fa-solid fa-credit-card mr-2"></i>Régler maintenant
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
   <!-- Header -->
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
     <div class="flex items-center gap-4">
@@ -107,24 +139,56 @@
     </div>
   </div>
 
-  <!-- Stats Cards -->
+  <!-- Stats Cards - Performance -->
+  <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+    <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+      <div class="text-xs text-neutral-500 mb-1 uppercase tracking-wide">Solde Actuel</div>
+      <div class="text-xl font-bold <%= @performance[:total_balance] >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+        <%= number_to_currency(@performance[:total_balance], unit: "€", format: "%n%u") %>
+      </div>
+    </div>
+    
+    <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+      <div class="text-xs text-neutral-500 mb-1 uppercase tracking-wide">Solde Initial</div>
+      <div class="text-xl font-bold text-white">
+        <%= number_to_currency(@performance[:initial_balance], unit: "€", format: "%n%u") %>
+      </div>
+    </div>
+    
+    <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+      <div class="text-xs text-neutral-500 mb-1 uppercase tracking-wide">High Watermark</div>
+      <div class="text-xl font-bold text-cyan-400">
+        <%= number_to_currency(@performance[:high_watermark], unit: "€", format: "%n%u") %>
+      </div>
+    </div>
+    
+    <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+      <div class="text-xs text-neutral-500 mb-1 uppercase tracking-wide">Profit Total</div>
+      <div class="text-xl font-bold <%= @performance[:total_profit] >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+        <%= number_to_currency(@performance[:total_profit], unit: "€", format: "%n%u") %>
+        <span class="text-xs font-normal text-neutral-500">(<%= @performance[:total_profit_percent] %>%)</span>
+      </div>
+    </div>
+    
+    <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+      <div class="text-xs text-neutral-500 mb-1 uppercase tracking-wide">Perf. Journalière</div>
+      <div class="text-xl font-bold <%= @performance[:daily_average] >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+        <%= number_to_currency(@performance[:daily_average], unit: "€", format: "%n%u") %>/j
+      </div>
+      <div class="text-xs text-neutral-500"><%= @performance[:days_trading] %> jours</div>
+    </div>
+    
+    <div class="p-4 rounded-xl bg-gradient-to-br from-blue-900/50 to-purple-900/30 border border-blue-700/50">
+      <div class="text-xs text-blue-300 mb-1 uppercase tracking-wide">Commission Due</div>
+      <div class="text-xl font-bold text-blue-400">
+        <%= number_to_currency(@performance[:pending_commission], unit: "€", format: "%n%u") %>
+      </div>
+      <div class="text-xs text-neutral-400">Taux: <%= @performance[:commission_rate] %>%</div>
+    </div>
+  </div>
+
+  <!-- Quick Stats Row -->
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-    <% balance = @client.mt5_accounts.sum(:balance) %>
-    <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
-      <div class="text-sm text-neutral-400 mb-1">Solde Total</div>
-      <div class="text-2xl font-bold <%= balance >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
-        <%= number_to_currency(balance, unit: "€", format: "%n%u") %>
-      </div>
-    </div>
-    
-    <% total_profit = @client.bot_purchases.sum(:total_profit) %>
-    <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
-      <div class="text-sm text-neutral-400 mb-1">Profit Total</div>
-      <div class="text-2xl font-bold <%= total_profit >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
-        <%= number_to_currency(total_profit, unit: "€", format: "%n%u") %>
-      </div>
-    </div>
-    
     <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
       <div class="text-sm text-neutral-400 mb-1">Bots Actifs</div>
       <div class="text-2xl font-bold text-white">
@@ -133,11 +197,34 @@
     </div>
     
     <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
-      <div class="text-sm text-neutral-400 mb-1">Commission</div>
-      <div class="text-2xl font-bold text-blue-400">
-        <%= @client.commission_rate %>%
+      <div class="text-sm text-neutral-400 mb-1">Comptes MT5</div>
+      <div class="text-2xl font-bold text-white">
+        <%= @client.mt5_accounts.count %>
       </div>
     </div>
+    
+    <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+      <div class="text-sm text-neutral-400 mb-1">Trades Total</div>
+      <div class="text-2xl font-bold text-white">
+        <%= Trade.joins(:mt5_account).where(mt5_accounts: { user_id: @client.id }).count %>
+      </div>
+    </div>
+    
+    <% if @client.commission_balance_due.to_f > 0 %>
+      <div class="p-4 rounded-xl bg-red-900/30 border border-red-700/50">
+        <div class="text-sm text-red-300 mb-1">À Régler</div>
+        <div class="text-2xl font-bold text-red-400">
+          <%= number_to_currency(@client.commission_balance_due, unit: "€", format: "%n%u") %>
+        </div>
+      </div>
+    <% else %>
+      <div class="p-4 rounded-xl bg-emerald-900/30 border border-emerald-700/50">
+        <div class="text-sm text-emerald-300 mb-1">Statut Paiement</div>
+        <div class="text-xl font-bold text-emerald-400">
+          <i class="fa-solid fa-check-circle mr-1"></i> À jour
+        </div>
+      </div>
+    <% end %>
   </div>
 
   <!-- Tabs Navigation -->
@@ -157,6 +244,13 @@
       </button>
       <button type="button" data-tabs-target="tab" data-action="click->tabs#select" data-tab="invoices" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors">
         <i class="fa-solid fa-file-invoice mr-2"></i>Factures
+      </button>
+      <button type="button" data-tabs-target="tab" data-action="click->tabs#select" data-tab="commissions" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors">
+        <i class="fa-solid fa-percent mr-2"></i>Commissions
+        <% unpaid = @client.commission_invoices.unpaid.count %>
+        <% if unpaid > 0 %>
+          <span class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-red-500/20 text-red-400"><%= unpaid %></span>
+        <% end %>
       </button>
       <button type="button" data-tabs-target="tab" data-action="click->tabs#select" data-tab="subscriptions" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors">
         <i class="fa-solid fa-repeat mr-2"></i>Abonnements
@@ -686,6 +780,225 @@
           <p class="text-neutral-400">Aucune facture</p>
         </div>
       <% end %>
+    </div>
+
+    <!-- Tab: Commissions -->
+    <div data-tabs-target="panel" data-tab="commissions" class="mt-6 hidden space-y-6">
+      <!-- Résumé Performance -->
+      <div class="rounded-xl bg-gradient-to-r from-blue-900/30 to-purple-900/20 border border-blue-700/30 p-6">
+        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-chart-line text-blue-400"></i>
+          Performance & Commission
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div>
+            <div class="text-sm text-neutral-400">High Watermark</div>
+            <div class="text-xl font-bold text-cyan-400"><%= number_to_currency(@performance[:high_watermark], unit: "€", format: "%n%u") %></div>
+          </div>
+          <div>
+            <div class="text-sm text-neutral-400">Dernier Snapshot</div>
+            <div class="text-xl font-bold text-white"><%= number_to_currency(@client.last_watermark_snapshot || 0, unit: "€", format: "%n%u") %></div>
+          </div>
+          <div>
+            <div class="text-sm text-neutral-400">Commission en cours</div>
+            <div class="text-xl font-bold text-blue-400"><%= number_to_currency(@performance[:pending_commission], unit: "€", format: "%n%u") %></div>
+          </div>
+          <div>
+            <div class="text-sm text-neutral-400">Prochaine facturation</div>
+            <div class="text-xl font-bold text-white">
+              <% next_billing = Date.current.day < 14 ? Date.new(Date.current.year, Date.current.month, 14) : (Date.current.day < 28 ? Date.new(Date.current.year, Date.current.month, 28) : Date.new(Date.current.year, Date.current.month, 14) + 1.month) %>
+              <%= next_billing.strftime("%d/%m/%Y") %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historique des Commissions -->
+      <div class="rounded-xl bg-neutral-900 border border-neutral-800 overflow-hidden" data-controller="slideover">
+        <div class="p-4 border-b border-neutral-800 flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-white">Historique des Commissions</h3>
+          <% if current_user.is_admin? %>
+            <button type="button" data-action="slideover#show:prevent" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 transition-colors flex items-center gap-1.5">
+              <i class="fa-solid fa-plus"></i>Créer facture manuelle
+            </button>
+          <% end %>
+        </div>
+
+        <!-- Slideover Créer Facture Commission -->
+        <dialog data-slideover-target="dialog" data-action="mousedown->slideover#backdropClose" class="slideover slideover-right fixed inset-0 m-0 ml-auto h-dvh max-h-full border-l border-white/10 outline-hidden">
+          <div class="inset-y-0 flex h-dvh w-full flex-col bg-neutral-900 shadow-lg outline-hidden sm:w-96 lg:w-[480px] text-neutral-100 shadow-neutral-950">
+            <button type="button" data-action="slideover#hide:prevent" class="absolute top-4 right-4 mt-1 rounded-full p-1.5 opacity-70 transition-opacity hover:cursor-pointer hover:bg-neutral-500/15 hover:opacity-100 focus:outline-hidden active:bg-neutral-500/25 md:top-5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                <line x1="18" x2="6" y1="6" y2="18"></line>
+                <line x1="6" x2="18" y1="6" y2="18"></line>
+              </svg>
+            </button>
+
+            <div class="flex items-center gap-3 border-b border-white/10 p-5 pr-12 md:p-6">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <i class="fa-solid fa-percent text-white text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-lg text-white">Créer Facture Commission</h4>
+                <p class="text-sm text-neutral-400"><%= @client.full_name %></p>
+              </div>
+            </div>
+
+            <%= form_with url: admin_commission_invoices_path, method: :post, local: true, class: "flex flex-col flex-1 overflow-hidden" do |f| %>
+              <input type="hidden" name="user_id" value="<%= @client.id %>">
+              
+              <div class="flex-1 overflow-y-auto p-5 md:p-6 space-y-5">
+                <!-- Info Performance -->
+                <div class="rounded-lg bg-neutral-800 p-4 space-y-3">
+                  <div class="flex justify-between">
+                    <span class="text-neutral-400">High Watermark actuel</span>
+                    <span class="text-cyan-400 font-semibold"><%= number_to_currency(@performance[:high_watermark], unit: "€", format: "%n%u") %></span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-neutral-400">Solde actuel</span>
+                    <span class="text-white font-semibold"><%= number_to_currency(@performance[:total_balance], unit: "€", format: "%n%u") %></span>
+                  </div>
+                  <div class="flex justify-between border-t border-neutral-700 pt-3">
+                    <span class="text-neutral-400">Commission estimée (<%= @performance[:commission_rate] %>%)</span>
+                    <span class="text-blue-400 font-bold"><%= number_to_currency(@performance[:pending_commission], unit: "€", format: "%n%u") %></span>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Période Début</label>
+                    <input type="date" name="period_start" value="<%= Date.current.beginning_of_month.strftime('%Y-%m-%d') %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Période Fin</label>
+                    <input type="date" name="period_end" value="<%= Date.current.strftime('%Y-%m-%d') %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Profit réalisé sur la période</label>
+                  <div class="relative">
+                    <input type="number" step="0.01" name="total_profit" value="<%= (@performance[:total_balance] - (@client.last_watermark_snapshot || @performance[:initial_balance])).round(2) %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-10" placeholder="0.00">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400">€</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Taux de commission (%)</label>
+                  <input type="number" step="0.1" name="commission_rate" value="<%= @client.commission_rate %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="25.0">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Montant Commission</label>
+                  <div class="relative">
+                    <input type="number" step="0.01" name="commission_amount" value="<%= @performance[:pending_commission].round(2) %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-10 text-lg font-bold" placeholder="0.00">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400">€</span>
+                  </div>
+                  <p class="text-xs text-neutral-500 mt-1">Vous pouvez ajuster manuellement ce montant</p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Date d'échéance</label>
+                  <input type="date" name="due_date" value="<%= (Date.current + 1.day).strftime('%Y-%m-%d') %>" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-neutral-300 mb-2">Notes (optionnel)</label>
+                  <textarea name="notes" rows="2" class="w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Notes internes..."></textarea>
+                </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                  <input type="checkbox" name="send_notification" value="1" checked class="w-5 h-5 rounded border-neutral-600 bg-neutral-800 text-blue-500 focus:ring-blue-500">
+                  <label class="text-neutral-300">Envoyer notification SMS au client</label>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <input type="checkbox" name="update_watermark" value="1" checked class="w-5 h-5 rounded border-neutral-600 bg-neutral-800 text-blue-500 focus:ring-blue-500">
+                  <label class="text-neutral-300">Mettre à jour le High Watermark</label>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-end gap-3 border-t border-white/10 p-5 md:p-6">
+                <button type="button" data-action="slideover#hide:prevent" class="px-4 py-2.5 rounded-lg border border-neutral-700 text-neutral-300 hover:bg-neutral-800 transition-colors font-medium">
+                  Annuler
+                </button>
+                <button type="submit" class="px-5 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">
+                  <i class="fa-solid fa-file-invoice mr-2"></i>Créer la facture
+                </button>
+              </div>
+            <% end %>
+          </div>
+        </dialog>
+        
+        <% if @client.commission_invoices.any? %>
+          <div class="divide-y divide-neutral-800">
+            <% @client.commission_invoices.order(created_at: :desc).each do |ci| %>
+              <div class="p-4 hover:bg-neutral-800/50 transition-colors">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center <%= ci.paid? ? 'bg-emerald-500/20' : (ci.overdue? ? 'bg-red-500/20' : 'bg-amber-500/20') %>">
+                      <i class="fa-solid <%= ci.paid? ? 'fa-check text-emerald-400' : (ci.overdue? ? 'fa-exclamation text-red-400' : 'fa-clock text-amber-400') %>"></i>
+                    </div>
+                    <div>
+                      <div class="font-medium text-white"><%= ci.reference %></div>
+                      <div class="text-sm text-neutral-400">
+                        Période: <%= ci.period_start&.strftime("%d/%m") %> - <%= ci.period_end&.strftime("%d/%m/%Y") %>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-6">
+                    <div class="text-right">
+                      <div class="text-sm text-neutral-400">Profit</div>
+                      <div class="font-medium text-white"><%= number_to_currency(ci.total_profit, unit: "€", format: "%n%u") %></div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-sm text-neutral-400">Commission (<%= ci.commission_rate %>%)</div>
+                      <div class="font-bold text-blue-400"><%= number_to_currency(ci.commission_amount, unit: "€", format: "%n%u") %></div>
+                    </div>
+                    <% if ci.late_fee > 0 %>
+                      <div class="text-right">
+                        <div class="text-sm text-red-400">Frais</div>
+                        <div class="font-bold text-red-400">+<%= number_to_currency(ci.late_fee, unit: "€", format: "%n%u") %></div>
+                      </div>
+                    <% end %>
+                    <div class="text-right min-w-[100px]">
+                      <% case ci.status %>
+                      <% when 'paid' %>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400">Payée</span>
+                      <% when 'pending', 'reminder_sent' %>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-400">En attente</span>
+                      <% when 'failed' %>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-500/20 text-red-400">Échec</span>
+                      <% when 'overdue' %>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-500/20 text-red-400">Impayée</span>
+                      <% end %>
+                    </div>
+                    <% if ci.invoice.present? %>
+                      <%= link_to admin_invoice_path(ci.invoice), class: "p-2 rounded-lg hover:bg-neutral-700 text-neutral-400 hover:text-white transition-colors" do %>
+                        <i class="fa-solid fa-eye"></i>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </div>
+                <% if ci.paid_at.present? %>
+                  <div class="mt-2 text-xs text-neutral-500">
+                    <i class="fa-solid fa-check mr-1"></i>Payée le <%= ci.paid_at.strftime("%d/%m/%Y à %H:%M") %>
+                  </div>
+                <% elsif ci.due_date.present? %>
+                  <div class="mt-2 text-xs <%= ci.due_date < Date.current ? 'text-red-400' : 'text-neutral-500' %>">
+                    <i class="fa-solid fa-calendar mr-1"></i>Échéance: <%= ci.due_date.strftime("%d/%m/%Y") %>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="p-12 text-center">
+            <i class="fa-solid fa-percent text-4xl text-neutral-600 mb-4"></i>
+            <p class="text-neutral-400">Aucune facture de commission</p>
+          </div>
+        <% end %>
+      </div>
     </div>
 
     <!-- Tab: Subscriptions -->

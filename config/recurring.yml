@@ -24,3 +24,32 @@ production:
     queue: default
     schedule: at 9am every day
     priority: 2
+
+  commission_invoice_14:
+    class: CommissionInvoiceJob
+    queue: default
+    schedule: at 8am on the 14th
+    priority: 1
+
+  commission_invoice_28:
+    class: CommissionInvoiceJob
+    queue: default
+    schedule: at 8am on the 28th
+    priority: 1
+
+  commission_charge_15:
+    class: CommissionChargeJob
+    queue: default
+    schedule: at 10am on the 15th
+    priority: 1
+
+  commission_charge_29:
+    class: CommissionChargeJob
+    queue: default
+    schedule: at 10am on the 29th
+    priority: 1
+
+  commission_overdue_check:
+    command: "CommissionBillingService.check_overdue_invoices"
+    schedule: every 6 hours
+    priority: 3
