@@ -148,6 +148,42 @@ Rails.application.routes.draw do
       end
     end
     
+    resources :shop_management, only: [:index] do
+      collection do
+        get :export
+        post :import
+        # Products
+        get :new_product
+        post :create_product
+        # Credit Packs
+        get :new_credit_pack
+        post :create_credit_pack
+        # VPS Offers
+        get :new_vps_offer
+        post :create_vps_offer
+      end
+      member do
+        # Bots
+        post :toggle_bot
+        post :duplicate_bot
+        # Products
+        post :toggle_product
+        get :edit_product
+        patch :update_product
+        delete :destroy_product
+        # Credit Packs
+        post :toggle_credit_pack
+        get :edit_credit_pack
+        patch :update_credit_pack
+        delete :destroy_credit_pack
+        # VPS Offers
+        post :toggle_vps_offer
+        get :edit_vps_offer
+        patch :update_vps_offer
+        delete :destroy_vps_offer
+      end
+    end
+    
     get 'shop/product/:id', to: 'shop#show_product', as: :shop_product
     post 'shop/product/:id/purchase', to: 'shop#purchase_product', as: :purchase_shop_product
 
