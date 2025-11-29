@@ -50,6 +50,72 @@ module Admin
       redirect_to admin_shop_path(@bot), alert: "Erreur lors de l'achat: #{e.message}"
     end
 
+    def buy_credits
+      amount = params[:amount].to_i
+      bonus = params[:bonus].to_i
+      
+      valid_packs = { 500 => 5, 1000 => 6, 1500 => 7, 2000 => 8, 5000 => 10 }
+      
+      unless valid_packs[amount] == bonus
+        redirect_to admin_shop_index_path, alert: "Pack invalide"
+        return
+      end
+
+      bonus_amount = (amount * bonus / 100.0).round
+      total_credit = amount + bonus_amount
+
+      session = Stripe::Checkout::Session.create(
+        customer_email: current_user.email,
+        payment_method_types: ['card'],
+        line_items: [{
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: "Pack Crédits #{amount}€",
+              description: "#{total_credit}€ de crédits (dont #{bonus_amount}€ de bonus)"
+            },
+            unit_amount: amount * 100
+          },
+          quantity: 1
+        }],
+        mode: 'payment',
+        success_url: credits_success_admin_shop_index_url + "?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url: admin_shop_index_url + "?canceled=true",
+        metadata: {
+          user_id: current_user.id,
+          type: 'credit_pack',
+          amount: amount,
+          bonus: bonus,
+          total_credit: total_credit
+        }
+      )
+
+      redirect_to session.url, allow_other_host: true
+    rescue Stripe::StripeError => e
+      redirect_to admin_shop_index_path, alert: "Erreur Stripe: #{e.message}"
+    end
+
+    def credits_success
+      stripe_session = Stripe::Checkout::Session.retrieve(params[:session_id])
+      
+      if stripe_session.payment_status == 'paid' && stripe_session.metadata['type'] == 'credit_pack'
+        total_credit = stripe_session.metadata['total_credit'].to_d
+        amount = stripe_session.metadata['amount'].to_i
+        bonus = stripe_session.metadata['bonus'].to_i
+        
+        current_user.credits.create!(
+          amount: total_credit,
+          reason: "Pack #{amount}€ (+#{bonus}% bonus)"
+        )
+        
+        redirect_to admin_shop_index_path, notice: "🎉 #{total_credit}€ de crédits ajoutés à votre compte !"
+      else
+        redirect_to admin_shop_index_path, alert: "Le paiement n'a pas été complété"
+      end
+    rescue Stripe::StripeError => e
+      redirect_to admin_shop_index_path, alert: "Erreur: #{e.message}"
+    end
+
     def purchase_product
       @product = ShopProduct.find(params[:id])
       

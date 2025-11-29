@@ -47,6 +47,111 @@
     </div>
   <% end %>
 
+  <!-- Packs Crédits Commission -->
+  <section>
+    <div class="flex items-center justify-between mb-6 pb-4 border-b border-neutral-800">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+          <i class="fa-solid fa-wallet text-white"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-white">Crédits Commission</h2>
+          <p class="text-sm text-neutral-500">Avancez vos commissions et profitez de bonus exclusifs</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/20 border border-violet-500/30">
+        <i class="fa-solid fa-coins text-violet-400"></i>
+        <span class="text-sm font-semibold text-violet-300"><%= number_to_currency(current_user.total_credits, unit: "€", format: "%n%u") %> disponibles</span>
+      </div>
+    </div>
+
+    <!-- Avantages -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="flex items-center gap-3 p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <div class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-percent text-emerald-400"></i>
+        </div>
+        <div>
+          <div class="font-medium text-white">Jusqu'à 10% bonus</div>
+          <div class="text-xs text-neutral-500">Plus vous rechargez, plus vous gagnez</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-clock text-blue-400"></i>
+        </div>
+        <div>
+          <div class="font-medium text-white">Fini les relances</div>
+          <div class="text-xs text-neutral-500">Prélevé automatiquement sur votre solde</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <div class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-bolt text-amber-400"></i>
+        </div>
+        <div>
+          <div class="font-medium text-white">Tranquillité d'esprit</div>
+          <div class="text-xs text-neutral-500">Vos bots restent actifs sans interruption</div>
+        </div>
+      </div>
+    </div>
+
+    <% 
+      credit_packs = [
+        { amount: 500, bonus: 5 },
+        { amount: 1000, bonus: 6 },
+        { amount: 1500, bonus: 7 },
+        { amount: 2000, bonus: 8 },
+        { amount: 5000, bonus: 10 }
+      ]
+    %>
+    
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <% credit_packs.each_with_index do |pack, index| %>
+        <% 
+          bonus_amount = (pack[:amount] * pack[:bonus] / 100.0).round
+          total_credit = pack[:amount] + bonus_amount
+          is_popular = pack[:amount] == 1000
+          is_best = pack[:amount] == 5000
+        %>
+        <div class="relative group rounded-2xl p-5 transition-all hover:scale-[1.02] <%= is_best ? 'bg-gradient-to-br from-violet-950/60 to-purple-950/40 border-2 border-violet-500/50' : (is_popular ? 'bg-gradient-to-br from-amber-950/40 to-orange-950/20 border-2 border-amber-500/40' : 'bg-neutral-900 border border-neutral-800 hover:border-neutral-700') %>">
+          
+          <% if is_best %>
+            <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-violet-500 text-white shadow-lg">
+              Meilleur bonus
+            </span>
+          <% elsif is_popular %>
+            <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-amber-500 text-white shadow-lg">
+              Populaire
+            </span>
+          <% end %>
+
+          <div class="text-center mb-4 <%= is_best || is_popular ? 'mt-2' : '' %>">
+            <div class="text-3xl font-bold text-white mb-1"><%= pack[:amount] %>€</div>
+            <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold <%= is_best ? 'bg-violet-500/30 text-violet-300' : (is_popular ? 'bg-amber-500/30 text-amber-300' : 'bg-emerald-500/20 text-emerald-400') %>">
+              +<%= pack[:bonus] %>% bonus
+            </div>
+          </div>
+
+          <div class="text-center mb-4 py-3 rounded-xl <%= is_best ? 'bg-violet-500/10' : (is_popular ? 'bg-amber-500/10' : 'bg-neutral-800/50') %>">
+            <div class="text-xs text-neutral-400 mb-1">Vous recevez</div>
+            <div class="text-xl font-bold <%= is_best ? 'text-violet-400' : (is_popular ? 'text-amber-400' : 'text-emerald-400') %>"><%= total_credit %>€</div>
+            <div class="text-[10px] text-neutral-500">+<%= bonus_amount %>€ offerts</div>
+          </div>
+
+          <form action="<%= buy_credits_admin_shop_index_path %>" method="post" data-turbo="false">
+            <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+            <input type="hidden" name="amount" value="<%= pack[:amount] %>">
+            <input type="hidden" name="bonus" value="<%= pack[:bonus] %>">
+            <button type="submit" class="w-full py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer border-0 <%= is_best ? 'bg-violet-500 text-white hover:bg-violet-600' : (is_popular ? 'bg-amber-500 text-white hover:bg-amber-600' : 'bg-white text-neutral-900 hover:bg-neutral-200') %>">
+              Recharger
+            </button>
+          </form>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
   <!-- Packs & Services Premium -->
   <% if @products.any? %>
     <section>

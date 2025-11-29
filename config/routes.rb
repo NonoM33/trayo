@@ -134,6 +134,10 @@ Rails.application.routes.draw do
     end
     
     resources :shop, only: [:index, :show] do
+      collection do
+        post :buy_credits
+        get :credits_success
+      end
       member do
         post :purchase
       end
