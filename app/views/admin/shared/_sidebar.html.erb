@@ -36,7 +36,7 @@
               <%= link_to admin_vps_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "VPS" do %>
                 <i class="fa-solid fa-server"></i>
               <% end %>
-              <%= link_to admin_campaigns_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Campagnes" do %>
+              <%= link_to admin_sms_campaigns_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Campagnes" do %>
                 <i class="fa-solid fa-bullhorn"></i>
               <% end %>
               <%= link_to admin_finance_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Finance" do %>
@@ -59,8 +59,12 @@
               <%= link_to admin_client_path(current_user), class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Mon Profil" do %>
                 <i class="fa-solid fa-user"></i>
               <% end %>
-              <%= link_to admin_shop_index_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Boutique" do %>
+              <%= link_to admin_shop_index_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 hover:from-emerald-500/30 hover:to-teal-500/30 focus:outline-none focus-visible:from-emerald-500/30 focus-visible:to-teal-500/30 ring-1 ring-emerald-500/30", title: "Boutique" do %>
                 <i class="fa-solid fa-shopping-cart"></i>
+                <span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center">
+                  <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex h-3 w-3 rounded-full bg-emerald-500"></span>
+                </span>
               <% end %>
               <%= link_to admin_my_bots_path, class: "relative flex h-8 w-8.5 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:bg-neutral-100 disabled:opacity-50 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 focus-visible:dark:bg-neutral-800", title: "Mes Bots" do %>
                 <i class="fa-solid fa-robot"></i>
@@ -138,7 +142,7 @@
                   <% end %>
                   
                   <%# Campagnes %>
-                  <%= link_to admin_campaigns_path, class: "group w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors #{request.path.start_with?('/admin/campaigns') ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'}" do %>
+                  <%= link_to admin_sms_campaigns_path, class: "group w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors #{request.path.start_with?('/admin/sms_campaigns') ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'}" do %>
                     <i class="fa-solid fa-bullhorn w-5"></i>
                     <span>Campagnes</span>
                   <% end %>
