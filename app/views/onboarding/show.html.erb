@@ -1,6 +1,6 @@
 <% @page_title = "Rejoindre Trayo" %>
 
-<div class="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950">
+<div class="min-h-screen bg-neutral-950">
   <div class="mx-auto w-full max-w-4xl px-4 py-8 md:py-12">
     <%= form_with url: onboarding_next_step_path(code: @invitation.code), method: :post, local: true, id: "onboarding-form" do |f| %>
       <div data-controller="stepper"
@@ -31,11 +31,10 @@
         </div>
 
         <!-- Step Content -->
-        <div class="relative rounded-2xl border border-neutral-800 bg-neutral-900/80 backdrop-blur-xl p-6 md:p-8 shadow-2xl shadow-black/20 overflow-hidden">
-          <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
+        <div class="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 md:p-8">
           
           <!-- Step 1: Bienvenue -->
-          <div data-stepper-target="step" class="hidden relative">
+          <div data-stepper-target="step" class="hidden">
             <div class="text-center mb-8">
               <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25 mb-4">
                 <i class="fa-solid fa-rocket text-white text-2xl"></i>
@@ -84,7 +83,7 @@
           </div>
 
           <!-- Step 2: Avantages -->
-          <div data-stepper-target="step" class="hidden relative">
+          <div data-stepper-target="step" class="hidden">
             <div class="text-center mb-8">
               <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg shadow-purple-500/25 mb-4">
                 <i class="fa-solid fa-star text-white text-2xl"></i>
@@ -137,7 +136,7 @@
           </div>
 
           <!-- Step 3: Choix de l'offre -->
-          <div data-stepper-target="step" class="hidden relative" data-validate-offer="true">
+          <div data-stepper-target="step" class="hidden" data-validate-offer="true">
             <div class="text-center mb-8">
               <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/25 mb-4">
                 <i class="fa-solid fa-gem text-white text-2xl"></i>
@@ -198,96 +197,97 @@
             </div>
 
             <!-- Section Abonnements -->
-            <div id="section-subscription" class="space-y-4">
+            <div id="section-subscription" class="space-y-6">
               <div class="p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30">
-                <p class="text-sm text-emerald-300">
+                <p class="text-sm text-emerald-300 text-center">
                   <i class="fa-solid fa-rocket mr-2"></i>
                   <strong>Tout inclus</strong> — Bots + VPS + Mises à jour + Support prioritaire. Sans engagement.
                 </p>
               </div>
 
-              <div class="grid gap-4">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-6">
                 <!-- Starter -->
-                <label class="subscription-card relative flex flex-col p-5 rounded-xl cursor-pointer transition-all border-2 border-neutral-700 bg-neutral-800/50 hover:border-neutral-600" data-plan="starter">
+                <label class="subscription-card flex flex-col rounded-2xl cursor-pointer transition-all duration-200 border-2 border-neutral-700 bg-neutral-800/50 hover:border-neutral-500" data-plan="starter">
                   <input type="radio" name="subscription_plan" value="starter" data-price="99" class="sr-only subscription-radio">
-                  <div class="absolute top-4 right-4">
-                    <div class="subscription-check w-6 h-6 rounded-full border-2 border-neutral-600 flex items-center justify-center transition-all">
-                      <i class="fa-solid fa-check text-white text-xs opacity-0 transition-opacity"></i>
+                  
+                  <div class="p-6 flex flex-col h-full">
+                    <div class="text-center mb-auto">
+                      <h4 class="font-bold text-lg text-white mb-4">Starter</h4>
+                      <div class="flex items-baseline justify-center gap-1 mb-6">
+                        <span class="text-4xl font-black text-white">99€</span>
+                        <span class="text-neutral-500 text-sm">/mois</span>
+                      </div>
+                    </div>
+                    
+                    <ul class="space-y-3 text-sm mb-6 flex-1">
+                      <li class="text-neutral-400 text-center">Bot GBP/USD</li>
+                      <li class="text-neutral-400 text-center">VPS Dédié inclus</li>
+                      <li class="text-neutral-400 text-center">Support email</li>
+                      <li class="text-neutral-400 text-center">Mises à jour incluses</li>
+                    </ul>
+                    
+                    <div class="subscription-btn py-3 rounded-xl border-2 border-neutral-600 text-white font-semibold text-center transition-all hover:bg-neutral-700">
+                      Choisir
                     </div>
                   </div>
-                  <div class="flex items-center gap-3 mb-3">
-                    <span class="text-3xl">🥉</span>
-                    <div>
-                      <h4 class="font-bold text-lg text-white">Starter</h4>
-                      <p class="text-sm text-neutral-400">Pour débuter sereinement</p>
-                    </div>
-                  </div>
-                  <div class="flex items-baseline gap-1 mb-4">
-                    <span class="text-3xl font-black text-white">99€</span>
-                    <span class="text-neutral-400">/mois</span>
-                  </div>
-                  <ul class="space-y-2 text-sm">
-                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> Bot GBP/USD</li>
-                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> VPS Dédié inclus</li>
-                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> Support email</li>
-                  </ul>
                 </label>
 
                 <!-- Pro - Recommandé -->
-                <label class="subscription-card selected relative flex flex-col p-5 rounded-xl cursor-pointer transition-all border-2 border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/50" data-plan="pro">
+                <label class="subscription-card selected relative flex flex-col rounded-2xl cursor-pointer transition-all duration-200 border-2 border-emerald-500 bg-neutral-800 shadow-lg shadow-emerald-500/10" data-plan="pro">
                   <input type="radio" name="subscription_plan" value="pro" data-price="149.99" class="sr-only subscription-radio" checked>
-                  <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span class="px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-bold shadow-lg shadow-blue-500/30">⭐ POPULAIRE</span>
+                  
+                  <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                    <span class="px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold shadow-lg">Populaire</span>
                   </div>
-                  <div class="absolute top-4 right-4">
-                    <div class="subscription-check w-6 h-6 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center transition-all">
-                      <i class="fa-solid fa-check text-white text-xs transition-opacity"></i>
+                  
+                  <div class="p-6 pt-8 flex flex-col h-full">
+                    <div class="text-center mb-auto">
+                      <h4 class="font-bold text-lg text-white mb-4">Pro</h4>
+                      <div class="flex items-baseline justify-center gap-1 mb-6">
+                        <span class="text-4xl font-black text-white">149€</span>
+                        <span class="text-neutral-500 text-sm">/mois</span>
+                      </div>
+                    </div>
+                    
+                    <ul class="space-y-3 text-sm mb-6 flex-1">
+                      <li class="text-neutral-400 text-center">Bot GBP/USD</li>
+                      <li class="text-neutral-400 text-center">Bot Or (XAU/USD)</li>
+                      <li class="text-neutral-400 text-center">VPS Dédié inclus</li>
+                      <li class="text-neutral-400 text-center">Support prioritaire</li>
+                      <li class="text-neutral-400 text-center">Mises à jour incluses</li>
+                    </ul>
+                    
+                    <div class="subscription-btn py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold text-center transition-all">
+                      Choisir
                     </div>
                   </div>
-                  <div class="flex items-center gap-3 mb-3">
-                    <span class="text-3xl">🥈</span>
-                    <div>
-                      <h4 class="font-bold text-lg text-white">Pro</h4>
-                      <p class="text-sm text-blue-300">Le meilleur rapport qualité/prix</p>
-                    </div>
-                  </div>
-                  <div class="flex items-baseline gap-1 mb-4">
-                    <span class="text-3xl font-black text-white">149,99€</span>
-                    <span class="text-neutral-400">/mois</span>
-                  </div>
-                  <ul class="space-y-2 text-sm">
-                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> Bot GBP/USD</li>
-                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> Bot Or (XAU/USD)</li>
-                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> VPS Dédié inclus</li>
-                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> Support prioritaire</li>
-                  </ul>
                 </label>
 
                 <!-- Premium -->
-                <label class="subscription-card relative flex flex-col p-5 rounded-xl cursor-pointer transition-all border-2 border-neutral-700 bg-neutral-800/50 hover:border-neutral-600" data-plan="premium">
+                <label class="subscription-card flex flex-col rounded-2xl cursor-pointer transition-all duration-200 border-2 border-neutral-700 bg-neutral-800/50 hover:border-neutral-500" data-plan="premium">
                   <input type="radio" name="subscription_plan" value="premium" data-price="299.99" class="sr-only subscription-radio">
-                  <div class="absolute top-4 right-4">
-                    <div class="subscription-check w-6 h-6 rounded-full border-2 border-neutral-600 flex items-center justify-center transition-all">
-                      <i class="fa-solid fa-check text-white text-xs opacity-0 transition-opacity"></i>
+                  
+                  <div class="p-6 flex flex-col h-full">
+                    <div class="text-center mb-auto">
+                      <h4 class="font-bold text-lg text-white mb-4">Premium</h4>
+                      <div class="flex items-baseline justify-center gap-1 mb-6">
+                        <span class="text-4xl font-black text-white">299€</span>
+                        <span class="text-neutral-500 text-sm">/mois</span>
+                      </div>
+                    </div>
+                    
+                    <ul class="space-y-3 text-sm mb-6 flex-1">
+                      <li class="text-neutral-400 text-center font-medium">Tous les bots inclus</li>
+                      <li class="text-neutral-400 text-center">VPS Dédié inclus</li>
+                      <li class="text-neutral-400 text-center">Support VIP 24/7</li>
+                      <li class="text-neutral-400 text-center">Nouveaux bots en avant-première</li>
+                      <li class="text-neutral-400 text-center">Mises à jour incluses</li>
+                    </ul>
+                    
+                    <div class="subscription-btn py-3 rounded-xl border-2 border-neutral-600 text-white font-semibold text-center transition-all hover:bg-neutral-700">
+                      Choisir
                     </div>
                   </div>
-                  <div class="flex items-center gap-3 mb-3">
-                    <span class="text-3xl">🥇</span>
-                    <div>
-                      <h4 class="font-bold text-lg text-white">Premium</h4>
-                      <p class="text-sm text-neutral-400">Accès complet à tous les bots</p>
-                    </div>
-                  </div>
-                  <div class="flex items-baseline gap-1 mb-4">
-                    <span class="text-3xl font-black text-white">299,99€</span>
-                    <span class="text-neutral-400">/mois</span>
-                  </div>
-                  <ul class="space-y-2 text-sm">
-                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> <strong>Tous les bots inclus</strong></li>
-                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> VPS Dédié inclus</li>
-                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> Support VIP 24/7</li>
-                    <li class="flex items-center gap-2 text-neutral-300"><i class="fa-solid fa-check text-emerald-400"></i> Nouveaux bots en avant-première</li>
-                  </ul>
                 </label>
               </div>
             </div>
@@ -296,7 +296,7 @@
           </div>
 
           <!-- Step 4: Création de compte -->
-          <div data-stepper-target="step" class="hidden relative">
+          <div data-stepper-target="step" class="hidden">
             <div class="text-center mb-8">
               <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 shadow-lg shadow-blue-500/25 mb-4">
                 <i class="fa-solid fa-user-plus text-white text-2xl"></i>
@@ -329,7 +329,7 @@
           </div>
 
           <!-- Step 5: Broker -->
-          <div data-stepper-target="step" class="hidden relative">
+          <div data-stepper-target="step" class="hidden">
             <div class="text-center mb-8">
               <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/25 mb-4">
                 <i class="fa-solid fa-link text-white text-2xl"></i>
@@ -369,7 +369,7 @@
           </div>
 
           <!-- Step 6: Paiement -->
-          <div data-stepper-target="step" class="hidden relative">
+          <div data-stepper-target="step" class="hidden">
             <div class="text-center mb-8">
               <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25 mb-4">
                 <i class="fa-solid fa-credit-card text-white text-2xl"></i>
