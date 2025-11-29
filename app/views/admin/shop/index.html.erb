@@ -7,6 +7,26 @@
 %>
 
 <div class="space-y-8">
+  <% if current_user.is_admin? %>
+    <div class="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-amber-950/50 to-orange-950/30 border border-amber-500/30">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-shield-halved text-amber-400"></i>
+        </div>
+        <div>
+          <p class="font-semibold text-amber-200">Mode Administrateur</p>
+          <p class="text-xs text-amber-300/60">Vous pouvez gérer les articles depuis ici</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <%= link_to admin_bots_path, class: "flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 text-sm font-medium hover:bg-amber-500/30 transition-all" do %>
+          <i class="fa-solid fa-robot"></i>
+          Gérer les Bots
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
   <!-- Header -->
   <div class="flex items-center justify-between">
     <div>
@@ -243,7 +263,13 @@
             win_rate = bot.calculate_global_win_rate
             win_rate = win_rate > 0 ? win_rate : bot.win_rate
           %>
-          <div class="group rounded-2xl bg-gradient-to-br from-blue-950/40 to-indigo-950/20 border border-blue-500/20 p-6 transition-all hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/5">
+          <div class="group rounded-2xl bg-gradient-to-br from-blue-950/40 to-indigo-950/20 border border-blue-500/20 p-6 transition-all hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/5 relative">
+            
+            <% if current_user.is_admin? %>
+              <%= link_to edit_admin_bot_path(bot), class: "absolute top-3 right-3 w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 hover:bg-amber-500/30 transition-all opacity-0 group-hover:opacity-100", title: "Modifier ce bot" do %>
+                <i class="fa-solid fa-pen text-xs"></i>
+              <% end %>
+            <% end %>
             
             <!-- Header -->
             <div class="flex items-start justify-between mb-6">
