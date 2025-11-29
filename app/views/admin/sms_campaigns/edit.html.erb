@@ -1,0 +1,80 @@
+<% content_for :title, "Modifier Campagne SMS" %>
+
+<div class="space-y-6 max-w-3xl mx-auto">
+  <!-- Header -->
+  <div class="flex items-center gap-4">
+    <%= link_to admin_sms_campaigns_path, class: "p-2 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors" do %>
+      <i class="fa-solid fa-arrow-left"></i>
+    <% end %>
+    <div>
+      <h1 class="text-2xl font-bold text-white">Modifier la Campagne</h1>
+      <p class="text-neutral-400"><%= @campaign.name %></p>
+    </div>
+  </div>
+
+  <%= form_with model: [:admin, @campaign], local: true, class: "space-y-6" do |f| %>
+    <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-6 space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-neutral-300 mb-2">Nom de la campagne *</label>
+        <%= f.text_field :name, class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" %>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">Type de SMS</label>
+          <%= f.select :sms_type, 
+              options_for_select([
+                ["📢 Relance Commission", "relance_commission"],
+                ["💰 Rappel Paiement", "rappel_paiement"],
+                ["🎉 Promotion", "promotion"],
+                ["🤖 Activation Bot", "activation_bot"],
+                ["⚠️ Alerte Compte", "alerte_compte"],
+                ["📊 Performance", "performance"],
+                ["🔧 Maintenance", "maintenance"],
+                ["✨ Bienvenue", "bienvenue"],
+                ["📝 Personnalisé", "personnalise"]
+              ], @campaign.sms_type),
+              { include_blank: "Choisir un type..." },
+              class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" %>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-300 mb-2">Audience cible *</label>
+          <%= f.select :target_audience,
+              options_for_select([
+                ["Tous les clients", "all_clients"],
+                ["Clients actifs (bots running)", "active_clients"],
+                ["Clients inactifs", "inactive_clients"],
+                ["Clients avec solde > 0", "with_balance"],
+                ["Commissions impayées", "unpaid_commissions"],
+                ["Nouveaux clients (30 jours)", "new_clients"]
+              ], @campaign.target_audience),
+              { include_blank: "Choisir une audience..." },
+              class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" %>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-neutral-300 mb-2">Message *</label>
+        <%= f.text_area :message_template, rows: 5, class: "w-full px-4 py-2.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" %>
+        <p class="text-xs text-neutral-500 mt-2">
+          <strong>Variables disponibles:</strong> {prenom}, {nom}, {solde}, {commission}
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between">
+      <%= link_to admin_sms_campaign_path(@campaign), method: :delete, data: { confirm: "Supprimer cette campagne ?" }, class: "px-4 py-2.5 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600/30 transition-colors font-medium" do %>
+        <i class="fa-solid fa-trash mr-2"></i>Supprimer
+      <% end %>
+      
+      <div class="flex items-center gap-3">
+        <%= link_to admin_sms_campaigns_path, class: "px-4 py-2.5 rounded-lg border border-neutral-700 text-neutral-300 hover:bg-neutral-800 transition-colors font-medium" do %>
+          Annuler
+        <% end %>
+        <%= f.submit "Enregistrer", class: "px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors cursor-pointer" %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
