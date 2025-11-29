@@ -1248,16 +1248,16 @@
             <% end %>
           </div>
         <% else %>
-          <div class="p-12 text-center">
-            <i class="fa-solid fa-percent text-4xl text-neutral-600 mb-4"></i>
-            <p class="text-neutral-400">Aucune facture de commission</p>
-          </div>
-        <% end %>
+            <div class="p-12 text-center">
+              <i class="fa-solid fa-percent text-4xl text-neutral-600 mb-4"></i>
+              <p class="text-neutral-400">Aucune facture de commission</p>
+            </div>
+          <% end %>
+        </div>
       </div>
-    </div>
 
-    <!-- Tab: Subscriptions -->
-    <div data-tabs-target="panel" data-tab="subscriptions" class="mt-6 hidden space-y-6">
+      <!-- Section: Subscriptions -->
+      <div id="finances-section-subscriptions" class="finances-section hidden space-y-4">
       <% @client.subscriptions.order(created_at: :desc).each do |subscription| %>
         <div class="rounded-xl bg-neutral-900 border border-neutral-800 overflow-hidden">
           <div class="p-6">
@@ -1362,25 +1362,26 @@
       <% end %>
       
       <% if @client.subscriptions.empty? %>
-        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
-          <i class="fa-solid fa-repeat text-4xl text-neutral-600 mb-4"></i>
-          <p class="text-neutral-400">Aucun abonnement</p>
-        </div>
-      <% end %>
-    </div>
+          <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
+            <i class="fa-solid fa-repeat text-4xl text-neutral-600 mb-4"></i>
+            <p class="text-neutral-400">Aucun abonnement</p>
+          </div>
+        <% end %>
+      </div>
 
-    <!-- Tab: VPS -->
-    <div data-tabs-target="panel" data-tab="vps" class="mt-6 hidden space-y-6">
-      <% @client.vps.each do |vps| %>
-        <%= render partial: "admin/clients/vps_card", locals: { vps: vps } %>
-      <% end %>
-      
-      <% if @client.vps.empty? %>
-        <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
-          <i class="fa-solid fa-server text-4xl text-neutral-600 mb-4"></i>
-          <p class="text-neutral-400">Aucun VPS</p>
-        </div>
-      <% end %>
+      <!-- Section: VPS -->
+      <div id="finances-section-vps" class="finances-section hidden space-y-4">
+        <% @client.vps.each do |vps| %>
+          <%= render partial: "admin/clients/vps_card", locals: { vps: vps } %>
+        <% end %>
+        
+        <% if @client.vps.empty? %>
+          <div class="rounded-xl bg-neutral-900 border border-neutral-800 p-12 text-center">
+            <i class="fa-solid fa-server text-4xl text-neutral-600 mb-4"></i>
+            <p class="text-neutral-400">Aucun VPS</p>
+          </div>
+        <% end %>
+      </div>
     </div>
 
     <!-- Tab: SMS -->
